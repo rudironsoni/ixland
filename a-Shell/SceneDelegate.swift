@@ -136,7 +136,6 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     let maxSubmenuLevels = 15
     var buttonRegex: [Int:String] = [:]
     var noneTag = -1
-    var bufferedOutput: String? = nil
     var fontPicker = UIFontPickerViewController()
     var navigationType: WKNavigationType = .other
     var lastUsedPrompt = "$"
@@ -2451,7 +2450,6 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 }
             }
         }
-        bufferedOutput = ""
     }
     
     private func hideButton(tag: Int) -> Bool {
@@ -2478,7 +2476,6 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         // We still allow them to be aliased.
         // We can't call exit through ios_system because it creates a new session
         // Also, we want to call it as soon as possible in case something went wrong
-        bufferedOutput = nil
         let arguments = command.components(separatedBy: " ")
         let actualCommand = aliasedCommand(arguments[0])
         if (actualCommand == "exit") {
@@ -4863,14 +4860,6 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         guard (terminalView != nil) else { return }
         DispatchQueue.main.async {
             self.terminalView?.feed(text: string.replacingOccurrences(of:"\n", with: "\n\r")) // prints the string
-            // NSLog("string: \(string)")
-        }
-        if (showWebView) {
-            if (bufferedOutput == nil) {
-                bufferedOutput = "[buffered]" + string
-            } else {
-                bufferedOutput! += "[buffered]" + string
-            }
         }
     }
     
@@ -5942,12 +5931,6 @@ extension SceneDelegate: WKUIDelegate {
         if (webView.url?.host == "localhost") && (webView.url?.path == "/wasm.html") {
             NSLog("Back to the terminal. showWebView: \(showWebView)")
             // host=="localhost" && path == "/wasm.html" --> make the terminal active
-            NSLog("Sending backlogged output: \(bufferedOutput)")
-            // if (bufferedOutput != nil) {
-            //     terminalView?.feed(text: bufferedOutput!)
-            //     bufferedOutput = ""
-            // }
-            return
         }
         if (webView.title != nil) && (webView.title != "") {
             title = webView.title
