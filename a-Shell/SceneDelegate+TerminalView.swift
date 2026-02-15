@@ -58,8 +58,8 @@ extension SceneDelegate {
                 if suggestion.hasPrefix(command) {
                     var shortenedSugg = suggestion
                     shortenedSugg.removeFirst(command.count)
-                    if (!autocompleteSuggestions.contains(shortenedSugg)) && (!autocompleteSuggestions.contains(shortenedSugg + " ")){
-                        autocompleteSuggestions.append(shortenedSugg + " ")
+                    if (!autocompleteSuggestions.contains(shortenedSugg)) {
+                        autocompleteSuggestions.append(shortenedSugg)
                     }
                 }
             }
@@ -77,8 +77,9 @@ extension SceneDelegate {
                     if suggestion.hasPrefix(command) {
                         var shortenedSugg = suggestion
                         shortenedSugg.removeFirst(command.count)
-                        if (!autocompleteSuggestions.contains(shortenedSugg)) {
-                            autocompleteSuggestions.append(shortenedSugg)
+                        if (!autocompleteSuggestions.contains(shortenedSugg)) && (!autocompleteSuggestions.contains(shortenedSugg + " ")) {
+                            // add a space so we're ready with the arguments
+                            autocompleteSuggestions.append(shortenedSugg + " ")
                         }
                     }
                 }
@@ -87,8 +88,9 @@ extension SceneDelegate {
                     if suggestion.hasPrefix(command) {
                         var shortenedSugg = suggestion
                         shortenedSugg.removeFirst(command.count)
-                        if (!autocompleteSuggestions.contains(shortenedSugg)) {
-                            autocompleteSuggestions.append(shortenedSugg)
+                        if (!autocompleteSuggestions.contains(shortenedSugg)) && (!autocompleteSuggestions.contains(shortenedSugg + " ")) {
+                            // add a space so we're ready with the arguments
+                            autocompleteSuggestions.append(shortenedSugg + " ")
                         }
                     }
                 }
@@ -932,8 +934,8 @@ extension SceneDelegate {
                             historyPosition = history.count
                             terminalView?.moveToBeginningOfLine()
                             terminalView?.clearToEndOfLine()
-                            terminalView?.getTerminal().updateFullScreen()
-                            terminalView?.updateDisplay()
+                            terminalView?.feed(text: " ") // force redraw
+                            terminalView?.moveToBeginningOfLine()
                             commandBeforeCursor = ""
                             commandAfterCursor = ""
                         }
@@ -953,8 +955,8 @@ extension SceneDelegate {
                             commandHistoryPosition = commandHistory.count
                             terminalView?.moveToBeginningOfLine()
                             terminalView?.clearToEndOfLine()
-                            terminalView?.getTerminal().updateFullScreen()
-                            terminalView?.updateDisplay()
+                            terminalView?.feed(text: " ") // force redraw
+                            terminalView?.moveToBeginningOfLine()
                             commandBeforeCursor = ""
                             commandAfterCursor = ""
                         }

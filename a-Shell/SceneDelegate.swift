@@ -44,8 +44,7 @@ var resultStack: [Int32?] = []
 // Tips:
 @available(iOS 17, *)
 let myToolbarTip = toolbarTip()
-@available(iOS 17, *)
-let startInternalBrowserTip = startInternalBrowser()
+var internalBrowserStarted = false
 
 class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelegate, WKScriptMessageHandler, UIDocumentPickerDelegate, UIPopoverPresentationControllerDelegate, UIFontPickerViewControllerDelegate, UIDocumentInteractionControllerDelegate, UIGestureRecognizerDelegate, TerminalViewDelegate {
     var window: UIWindow?
@@ -146,6 +145,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     var errorCode:Int32 = 0
     var errorMessage: String = ""
     var extraBytes: Data? = nil
+    var tapPosition: CGPoint = .zero
     
     // Create a document picker for directories.
     private let documentPicker =
@@ -186,7 +186,8 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         if (deviceModel.hasPrefix("iPad")) {
             return 40
         } else {
-            return 35
+            // 45 OK, 40 makes the buttons too small.
+            return 45
         }
     }
     
@@ -541,6 +542,39 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         insertCommand(sender)
     }
     
+    private func sendArrow(direction: String) {
+        DispatchQueue.main.async { [self] in
+            switch (direction) {
+            case "up":
+                if terminalView!.getTerminal().applicationCursor {
+                    terminalView!.send(txt: escape + "OA")
+                } else {
+                    terminalView!.send(txt: escape + "[A")
+                }
+            case "down":
+                if terminalView!.getTerminal().applicationCursor {
+                    terminalView!.send(txt: escape + "OB")
+                } else {
+                    terminalView!.send(txt: escape + "[B")
+                }
+            case "left":
+                if terminalView!.getTerminal().applicationCursor {
+                    terminalView!.send(txt: escape + "OD")
+                } else {
+                    terminalView!.send(txt: escape + "[D")
+                }
+            case "right":
+                if terminalView!.getTerminal().applicationCursor {
+                    terminalView!.send(txt: escape + "OC")
+                } else {
+                    terminalView!.send(txt: escape + "[C")
+                }
+            default:
+                return
+            }
+        }
+    }
+    
     @objc private func systemAction(_ sender: UIBarButtonItem) {
         if let title = title(sender) {
             if (title == "paste") {
@@ -551,28 +585,39 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             if (terminalView != nil) && terminalView!.isFirstResponder {
                 switch (title) {
                 case "up":
-                    if terminalView!.getTerminal().applicationCursor {
-                        terminalView!.send(txt: escape + "OA")
-                    } else {
-                        terminalView!.send(txt: escape + "[A")
-                    }
+                    sendArrow(direction: title)
                 case "down":
-                    if terminalView!.getTerminal().applicationCursor {
-                        terminalView!.send(txt: escape + "OB")
-                    } else {
-                        terminalView!.send(txt: escape + "[B")
-                    }
+                    sendArrow(direction: title)
                 case "left":
-                    if terminalView!.getTerminal().applicationCursor {
-                        terminalView!.send(txt: escape + "OD")
-                    } else {
-                        terminalView!.send(txt: escape + "[D")
-                    }
+                    sendArrow(direction: title)
                 case "right":
-                    if terminalView!.getTerminal().applicationCursor {
-                        terminalView!.send(txt: escape + "OC")
+                    sendArrow(direction: title)
+                case "up.down":
+                    if (tapPosition.y > 0) {
+                        sendArrow(direction: "down")
                     } else {
-                        terminalView!.send(txt: escape + "[C")
+                        sendArrow(direction: "up")
+                    }
+                case "left.right":
+                    if (tapPosition.x > 0) {
+                        sendArrow(direction: "right")
+                    } else {
+                        sendArrow(direction: "left")
+                    }
+                case "up.down.left.right":
+                    NSLog("up.down.left.right: \(tapPosition.x) -- \(tapPosition.y)")
+                    if abs(tapPosition.x) > abs(tapPosition.y) {
+                        if (tapPosition.x > 0) {
+                            sendArrow(direction: "right")
+                        } else {
+                            sendArrow(direction: "left")
+                        }
+                    } else {
+                        if (tapPosition.y > 0) {
+                            sendArrow(direction: "down")
+                        } else {
+                            sendArrow(direction: "up")
+                        }
                     }
                 case "copy":
                     terminalView?.copy()
@@ -592,7 +637,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 case "selectAll":
                     terminalView?.selectAll()
                 case "showBrowser":
-                    activateBrowserAction(sender)
+                    activateBrowserAction()
                 default:
                     break
                 }
@@ -812,6 +857,9 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         // check issue with screen size and pico.
         // Scan the configuration file to generate the button groups:
         var configFile = Bundle.main.resourceURL?.appendingPathComponent("defaultToolbar.txt")
+        if (UIDevice.current.model.hasPrefix("iPad")) {
+            configFile = Bundle.main.resourceURL?.appendingPathComponent("defaultToolbar_iPad.txt")
+        }
         var showBrowserButtonFound = false // new feature, introduced with v2.0.0. Add it for older implamentations.
         if let documentsUrl = try? FileManager().url(for: .documentDirectory,
                                                      in: .userDomainMask,
@@ -1007,7 +1055,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                         // button to switch back to the internal web browser. Hidden until the browser is activated.
                         if (title(button!) == "showBrowser") {
                             showBrowserButtonFound = true
-                            button!.isHidden = true
+                            button!.isHidden = !internalBrowserStarted
                         }
                     }
                     activeButtonGroup.append(button!)
@@ -1021,7 +1069,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                         showBrowserButton.target = self
                         showBrowserButton.possibleTitles = ["", "showBrowser"]
                         if #available(iOS 16.0, *) {
-                            showBrowserButton.isHidden = true
+                            showBrowserButton.isHidden = !internalBrowserStarted
                         }
                         leftButtonGroup.append(showBrowserButton)
                     }
@@ -1051,12 +1099,14 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     
     func continuousButtonAction(_ button: UIBarButtonItem)  {
         let ms: UInt32 = 1000
-        if (title(button) == "up") || (title(button) == "down") {
+        if (title(button) == "up") || (title(button) == "down") || (title(button) == "up.down")
+            || (title(button) == "up.down.left.right" && abs(tapPosition.x) <= abs(tapPosition.y)){
             while (continuousButtonAction) {
                 systemAction(button)
                 usleep(250 * ms)
             }
-        } else if (title(button) == "left") || (title(button) == "right") {
+        } else if (title(button) == "left") || (title(button) == "right") || title(button) == "left.right"
+                    || (title(button) == "up.down.left.right" && abs(tapPosition.x) > abs(tapPosition.y)) {
             while (continuousButtonAction) {
                 systemAction(button)
                 usleep(100 * ms)
@@ -1064,18 +1114,78 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         }
     }
     
+    @objc func tapAction(_ sender: UITapGestureRecognizer) {
+        NSLog("tap action, sender.state: \(sender.state): \(tapPosition.x) -- \(tapPosition.y) bounds: \(sender.view!.frame.width) -- \(sender.view!.frame.height)")
+        tapPosition = sender.location(in: sender.view)
+        if (sender.view != nil) {
+            tapPosition.x /= sender.view!.frame.width
+            tapPosition.y /= sender.view!.frame.height
+            tapPosition.x -= 0.5
+            tapPosition.y -= 0.5
+        }
+        if (sender.state == .ended) {
+            if !useSystemToolbar {
+                for button in editorToolbar.items! {
+                    if let buttonView = button.value(forKey: "view") as? UIView {
+                        if (buttonView == sender.view) {
+                            systemAction(button)
+                            return
+                        }
+                    }
+                }
+            } else {
+                if let leftButtonGroups = terminalView?.inputAssistantItem.leadingBarButtonGroups {
+                    for leftButtonGroup in leftButtonGroups {
+                        for button in leftButtonGroup.barButtonItems {
+                            if let buttonView = button.value(forKey: "view") as? UIView {
+                                if (buttonView == sender.view) {
+                                    systemAction(button)
+                                    return
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if let rightButtonGroups = self.terminalView?.inputAssistantItem.trailingBarButtonGroups {
+                for rightButtonGroup in rightButtonGroups {
+                    for button in rightButtonGroup.barButtonItems {
+                        if let buttonView = button.value(forKey: "view") as? UIView {
+                            if (buttonView == sender.view) {
+                                systemAction(button)
+                                return
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     @objc func longPressAction(_ sender: UILongPressGestureRecognizer) {
         // If up-down-left-right buttons are currently being pressed, activate multi-action arrows (instead of hide keyboard)
+        
         if (sender.state == .ended) {
             continuousButtonAction = false
             return
+        }
+        NSLog("long press action, sender.state: \(sender.state): \(tapPosition.x) -- \(tapPosition.y) bounds: \(sender.view!.frame.width) -- \(sender.view!.frame.height)")
+        if (sender.state == .began) || (sender.state == .changed) {
+            tapPosition = sender.location(in: sender.view)
+            if (sender.view != nil) {
+                tapPosition.x /= sender.view!.frame.width
+                tapPosition.y /= sender.view!.frame.height
+                tapPosition.x -= 0.5
+                tapPosition.y -= 0.5
+            }
         }
         if (sender.state == .began) {
             // NSLog("sender of long press: \(sender)") // it's a button, now
             if !useSystemToolbar {
                 for button in editorToolbar.items! {
                     // long-press == repeat action only for arrows. For anything else, it's remove keyboard.
-                    if (title(button) == "up") || (title(button) == "down") || (title(button) == "left") || (title(button) == "right") {
+                    if (title(button) == "up") || (title(button) == "down") || (title(button) == "left") || (title(button) == "right")
+                        || title(button) == "up.down" || title(button) == "left.right" || title(button) == "up.down.left.right" {
                         if let buttonView = button.value(forKey: "view") as? UIView {
                             if (buttonView == sender.view) {
                                 continuousButtonAction = true
@@ -1174,11 +1284,10 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 toolbar.items?.append(contentsOf: rightButtonGroup)
             }
         }
-        // Add long-press gesture recognizer for the buttons:
-        // Long press gesture recognizer (for when the toolbar is pressed):
+        // Long press gesture recognizer for when the toolbar itself is pressed.
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(longPressAction(_:)))
         longPressGesture.minimumPressDuration = 1.0 // 1 second press
-        longPressGesture.allowableMovement = 15 // 15 points
+        longPressGesture.allowableMovement = 15 // 30 points
         longPressGesture.delegate = self
         toolbar.addGestureRecognizer(longPressGesture)
         return toolbar
@@ -2261,7 +2370,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         }
     }
 
-    @objc func activateBrowserAction(_ sender: UIBarButtonItem) {
+    @objc func activateBrowserAction() {
         if (wasmWebView?.url?.host == "localhost") && (wasmWebView?.url?.path == "/wasm.html") {
             wasmWebView?.goBack()
         }
@@ -2299,12 +2408,15 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         NSLog("setting showWebView to true")
         showWebView = true
         hideKeyboard() // hides the keyboard *and* causes SwiftUI to refresh
+        internalBrowserStarted = true
         // make "showBrowser" button now visible in the toolbar
         if #available(iOS 16.0, *) {
             if (!useSystemToolbar) {
                 for button in editorToolbar.items! {
                     if title(button) == "showBrowser" {
                         button.isHidden = false
+                        // Works with internalbrowser, but not with jupyter-notebook. WHY?
+                        NSLog("Making showBrowser button visible")
                         break
                     }
                 }
@@ -2333,6 +2445,9 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                             }
                         }
                     }
+                }
+                if (foundBrowser) {
+                    NSLog("We made showBrowser button visible")
                 }
             }
         }
@@ -2663,6 +2778,11 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                                     }
                                 }
                             }
+                        }
+                        if #available(iOS 26, *) {
+                            // fix for an iOS bug: the buttons can be pushed sideways
+                            self.terminalView?.inputAssistantItem.trailingBarButtonGroups[0].barButtonItems.append(UIBarButtonItem(title: "Hi", style: .plain, target: self, action: nil))
+                            self.terminalView?.inputAssistantItem.trailingBarButtonGroups[0].barButtonItems.removeLast()
                         }
                     } else {
                         self.editorToolbar.items?.forEach { button in
@@ -3810,26 +3930,17 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                     }
                 }
             }
-            
-            // Make sure we are informed when the keyboard status changes.
-            NotificationCenter.default
-                .publisher(for: UIWindow.didBecomeKeyNotification, object: window)
-                .merge(with: NotificationCenter.default
-                    .publisher(for: UIResponder.keyboardWillShowNotification))
-                .handleEvents(receiveOutput: { notification in
-                    NSLog("didBecomeKey: \(notification.name.rawValue): \(session.persistentIdentifier).")
-                })
-                // .sink { _ in self.webView?.focus() }
-                // .store(in: &cancellables)
-            NotificationCenter.default
-                .publisher(for: UIWindow.didResignKeyNotification, object: window)
-                .merge(with: NotificationCenter.default
-                    .publisher(for: UIResponder.keyboardWillHideNotification))
-                .handleEvents(receiveOutput: { notification in
-                    NSLog("didResignKey: \(notification.name.rawValue): \(session.persistentIdentifier).")
-                })
-                // .sink { _ in self.webView?.blur() }
-                // .store(in: &cancellables)
+            // iPads: re-activate long-press on arrow buttons when the toolbar appears:
+            if (useSystemToolbar) {
+                NotificationCenter.default.addObserver(
+                    forName: UIResponder.keyboardWillChangeFrameNotification,
+                    object: nil,
+                    queue: nil
+                ) { (notification) in
+                    NSLog("keyboardWillChangeFrame: \(notification.name.rawValue): \(session.persistentIdentifier).")
+                    self.activateLongPressForButtons()
+                }
+            }
         }
     }
     
@@ -4042,50 +4153,77 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     
     func activateLongPressForButtons() {
         // Give it slight delay so the button views are actually present
-        activateButtonsTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) {_ in
-            // NSLog("Launching the buttons timer")
+        // Note: for some reasons, this doesn't work on iPad with external keyboards the first time the window is activated
+        // (the gestures *are* added to the buttons, but the actions are not called when the user taps/long press)
+        // It works fine after the first redisplay of the window.
+        activateButtonsTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [self]_ in
+            NSLog("Launching the buttons timer. ")
             if (!useSystemToolbar) {
-                for button in self.editorToolbar.items! {
-                    if let buttonView = button.value(forKey: "view") as? UIView {
-                        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(self.longPressAction(_:)))
-                        longPressGesture.minimumPressDuration = 1.0 // 1 second press
-                        longPressGesture.allowableMovement = 15 // 15 points
-                        longPressGesture.delegate = self
-                        buttonView.addGestureRecognizer(longPressGesture)
-                        self.activateButtonsTimer.invalidate()
+                for button in editorToolbar.items! {
+                    if (title(button) == "up") || (title(button) == "down") || (title(button) == "left") || (title(button) == "right")
+                        || title(button) == "up.down" || title(button) == "left.right" || title(button) == "up.down.left.right" {
+                        if let buttonView = button.value(forKey: "view") as? UIView {
+                            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.tapAction(_:)))
+                            tapGesture.delegate = self
+                            buttonView.addGestureRecognizer(tapGesture)
+                            let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(self.longPressAction(_:)))
+                            longPressGesture.minimumPressDuration = 0.2 // 1 second press
+                            longPressGesture.allowableMovement = 30 // 15 points
+                            longPressGesture.delegate = self
+                            buttonView.addGestureRecognizer(longPressGesture)
+                            self.activateButtonsTimer.invalidate()
+                        }
                     }
                 }
             } else {
-                if let leftButtonGroups = self.terminalView?.inputAssistantItem.leadingBarButtonGroups {
+                if let leftButtonGroups = terminalView?.inputAssistantItem.leadingBarButtonGroups {
                     for leftButtonGroup in leftButtonGroups {
                         for button in leftButtonGroup.barButtonItems {
-                            if let buttonView = button.value(forKey: "view") as? UIView {
-                                let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(self.longPressAction(_:)))
-                                longPressGesture.minimumPressDuration = 1.0 // 1 second press
-                                longPressGesture.allowableMovement = 15 // 15 points
-                                longPressGesture.delegate = self
-                                buttonView.addGestureRecognizer(longPressGesture)
-                                self.activateButtonsTimer.invalidate()
+                            if (title(button) == "up") || (title(button) == "down") || (title(button) == "left") || (title(button) == "right")
+                                || title(button) == "up.down" || title(button) == "left.right" || title(button) == "up.down.left.right" {
+                                if let buttonView = button.value(forKey: "view") as? UIView {
+                                    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.tapAction(_:)))
+                                    tapGesture.delegate = self
+                                    buttonView.addGestureRecognizer(tapGesture)
+                                    let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(self.longPressAction(_:)))
+                                    longPressGesture.minimumPressDuration = 0.2 // 1 second press
+                                    longPressGesture.allowableMovement = 30 // 15 points
+                                    longPressGesture.delegate = self
+                                    buttonView.addGestureRecognizer(longPressGesture)
+                                    self.activateButtonsTimer.invalidate()
+                                }
                             }
                         }
                     }
                 }
-                if let rightButtonGroups = self.terminalView?.inputAssistantItem.trailingBarButtonGroups {
+                if let rightButtonGroups = terminalView?.inputAssistantItem.trailingBarButtonGroups {
                     for rightButtonGroup in rightButtonGroups {
                         for button in rightButtonGroup.barButtonItems {
-                            if let buttonView = button.value(forKey: "view") as? UIView {
-                                let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(self.longPressAction(_:)))
-                                longPressGesture.minimumPressDuration = 1.0 // 1 second press
-                                longPressGesture.allowableMovement = 15 // 15 points
-                                longPressGesture.delegate = self
-                                buttonView.addGestureRecognizer(longPressGesture)
-                                self.activateButtonsTimer.invalidate()
+                            if (title(button) == "up") || (title(button) == "down") || (title(button) == "left") || (title(button) == "right")
+                                || title(button) == "up.down" || title(button) == "left.right" || title(button) == "up.down.left.right" {
+                                if let buttonView = button.value(forKey: "view") as? UIView {
+                                    NSLog("activating long press for \(title(button)). view= \(buttonView)")
+                                    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.tapAction(_:)))
+                                    tapGesture.delegate = self
+                                    buttonView.addGestureRecognizer(tapGesture)
+                                    let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(self.longPressAction(_:)))
+                                    longPressGesture.minimumPressDuration = 0.2 // 1 second press
+                                    longPressGesture.allowableMovement = 30 // 15 points
+                                    longPressGesture.delegate = self
+                                    buttonView.addGestureRecognizer(longPressGesture)
+                                    self.activateButtonsTimer.invalidate()
+                                }
                             }
                         }
                     }
                 }
             }
-        }
+       }
+    }
+    
+    @available(iOS 26, *)
+    func preferredWindowingControlStyle(for windowScene: UIWindowScene) -> UIWindowScene.WindowingControlStyle {
+        return .minimal
     }
     
     func sceneDidBecomeActive(_ scene: UIScene) {
@@ -4729,9 +4867,9 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         }
         if (showWebView) {
             if (bufferedOutput == nil) {
-                bufferedOutput = string
+                bufferedOutput = "[buffered]" + string
             } else {
-                bufferedOutput! += string
+                bufferedOutput! += "[buffered]" + string
             }
         }
     }
@@ -5762,7 +5900,7 @@ extension SceneDelegate: WKUIDelegate {
           decidePolicyFor navigationAction: WKNavigationAction,
               preferences: WKWebpagePreferences,
               decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
-        NSLog("decidePolicyFor WKNavigationAction, navigationType= \(navigationAction.navigationType)")
+        // NSLog("decidePolicyFor WKNavigationAction, navigationType= \(navigationAction.navigationType)")
         navigationType = navigationAction.navigationType
         if #available(iOS 14.0, *) {
             preferences.allowsContentJavaScript = true // The default value is true, but let's make sure.
@@ -5800,11 +5938,11 @@ extension SceneDelegate: WKUIDelegate {
     }
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        NSLog("finished loading, title= \(webView.title ?? "unknown"), host= \(webView.url?.host) path=\(webView.url?.path ?? "unknown"), navigation= \(navigation)")
+        // NSLog("finished loading, title= \(webView.title ?? "unknown"), host= \(webView.url?.host) path=\(webView.url?.path ?? "unknown"), navigation= \(navigation)")
         if (webView.url?.host == "localhost") && (webView.url?.path == "/wasm.html") {
             NSLog("Back to the terminal. showWebView: \(showWebView)")
             // host=="localhost" && path == "/wasm.html" --> make the terminal active
-            // NSLog("Sending backlogged output: \(bufferedOutput)")
+            NSLog("Sending backlogged output: \(bufferedOutput)")
             // if (bufferedOutput != nil) {
             //     terminalView?.feed(text: bufferedOutput!)
             //     bufferedOutput = ""

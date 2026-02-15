@@ -294,6 +294,9 @@
 		22B114772817CEA400A5BF16 /* terminfo in Resources */ = {isa = PBXBuildFile; fileRef = 22B114762817CEA200A5BF16 /* terminfo */; };
 		22B257BA267691E4006C2B31 /* gestures.js in Resources */ = {isa = PBXBuildFile; fileRef = 22B257B9267691E2006C2B31 /* gestures.js */; };
 		22B257BB267691E4006C2B31 /* gestures.js in Resources */ = {isa = PBXBuildFile; fileRef = 22B257B9267691E2006C2B31 /* gestures.js */; };
+		22B3D35B2F421A6500AC45E5 /* defaultToolbar_iPad.txt in Resources */ = {isa = PBXBuildFile; fileRef = 22B3D35A2F421A6500AC45E5 /* defaultToolbar_iPad.txt */; };
+		22B3D35C2F421A6500AC45E5 /* defaultToolbar_iPad.txt in Resources */ = {isa = PBXBuildFile; fileRef = 22B3D35A2F421A6500AC45E5 /* defaultToolbar_iPad.txt */; };
+		22B3D35D2F421A6500AC45E5 /* defaultToolbar_iPad.txt in Resources */ = {isa = PBXBuildFile; fileRef = 22B3D35A2F421A6500AC45E5 /* defaultToolbar_iPad.txt */; };
 		22BA51D1258E478900923893 /* mandoc.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 22BA51D0258E476A00923893 /* mandoc.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		22BA51D5258E479300923893 /* mandoc.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 22BA51D0258E476A00923893 /* mandoc.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		22BD476923044D33007248EC /* vim in Resources */ = {isa = PBXBuildFile; fileRef = 22BD476823044D17007248EC /* vim */; };
@@ -2040,6 +2043,7 @@
 		22B1B83322CBC53700F7C452 /* a-Shell.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "a-Shell.entitlements"; sourceTree = "<group>"; };
 		22B257B9267691E2006C2B31 /* gestures.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = gestures.js; sourceTree = "<group>"; };
 		22B30BD6287389EF001E3ACF /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Intents.strings; sourceTree = "<group>"; };
+		22B3D35A2F421A6500AC45E5 /* defaultToolbar_iPad.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = defaultToolbar_iPad.txt; sourceTree = "<group>"; };
 		22BA51D0258E476A00923893 /* mandoc.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = mandoc.xcframework; path = xcfs/.build/artifacts/xcfs/mandoc/mandoc.xcframework; sourceTree = SOURCE_ROOT; };
 		22BD476823044D17007248EC /* vim */ = {isa = PBXFileReference; lastKnownFileType = folder; name = vim; path = Resources/vim; sourceTree = "<group>"; };
 		22BD97AF2A077D21005FA036 /* xdvipdfmxA.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = xdvipdfmxA.xcframework; path = xcfs/.build/artifacts/xcfs/xdvipdfmxA/xdvipdfmxA.xcframework; sourceTree = "<group>"; };
@@ -3028,6 +3032,7 @@
 				227B24832BE01ED3003A8031 /* localCertificateKey.pem */,
 				2213DCB72BDE7314008BD5F2 /* localCertificate.pfx */,
 				22E337EB2949F4CD00A8F76C /* defaultToolbar.txt */,
+				22B3D35A2F421A6500AC45E5 /* defaultToolbar_iPad.txt */,
 				22B114762817CEA200A5BF16 /* terminfo */,
 				227A433F29FD1FEF00548D77 /* Texlive 2023 */,
 				229EDE1328280C270084FE99 /* Texlive 2022 */,
@@ -4054,6 +4059,7 @@
 				224A90552ADD0999006DB9CC /* usr in Resources */,
 				224A90562ADD0999006DB9CC /* commandDictionary.plist in Resources */,
 				224A90572ADD0999006DB9CC /* defaultToolbar.txt in Resources */,
+				22B3D35B2F421A6500AC45E5 /* defaultToolbar_iPad.txt in Resources */,
 				224A90582ADD0999006DB9CC /* gestures.js in Resources */,
 				224A90592ADD0999006DB9CC /* bin in Resources */,
 				224A905A2ADD0999006DB9CC /* task in Resources */,
@@ -4091,6 +4097,7 @@
 				2231A522258923E200B5EDFD /* ImageMagick-7 in Resources */,
 				229F51152473BBCA0053AC03 /* commandDictionary.plist in Resources */,
 				22E337EC2949F4CF00A8F76C /* defaultToolbar.txt in Resources */,
+				22B3D35C2F421A6500AC45E5 /* defaultToolbar_iPad.txt in Resources */,
 				22B257BA267691E4006C2B31 /* gestures.js in Resources */,
 				22372B722448E85D0033FE07 /* usr in Resources */,
 				22E1B53A243DF64000EA8FBD /* require.js in Resources */,
@@ -4132,6 +4139,7 @@
 				229D25C22579369B004A78AC /* usr in Resources */,
 				229D25C32579369B004A78AC /* commandDictionary.plist in Resources */,
 				2253E950295B0D0A00EBE1F3 /* defaultToolbar.txt in Resources */,
+				22B3D35D2F421A6500AC45E5 /* defaultToolbar_iPad.txt in Resources */,
 				22B257BB267691E4006C2B31 /* gestures.js in Resources */,
 				229D25C42579369B004A78AC /* bin in Resources */,
 				229D248E257931E4004A78AC /* task in Resources */,

@@ -545,7 +545,10 @@ public func config(argc: Int32, argv: UnsafeMutablePointer<UnsafeMutablePointer<
             }
             continue
         case "-t", "--toolbar":
-            let configFile = Bundle.main.resourceURL?.appendingPathComponent("defaultToolbar.txt")
+            var configFile = Bundle.main.resourceURL?.appendingPathComponent("defaultToolbar.txt")
+            if (UIDevice.current.model.hasPrefix("iPad")) {
+                configFile = Bundle.main.resourceURL?.appendingPathComponent("defaultToolbar_iPad.txt")
+            }
             do {
                 let documentsUrl = try FileManager().url(for: .documentDirectory,
                                                          in: .userDomainMask,
@@ -1501,6 +1504,16 @@ public func openurl_main(argc: Int32, argv: UnsafeMutablePointer<UnsafeMutablePo
     guard let args = convertCArguments(argc: argc, argv: argv) else {
         fputs(usage, thread_stderr)
         return -1
+    }
+    
+    // if the internal browser was already started, internalbrowser makes it visible (same as the showBrowser button)
+    if (args[0] == "internalbrowser") && internalBrowserStarted && (argc == 1) {
+        if let delegate = currentDelegate {
+            DispatchQueue.main.async {
+                delegate.activateBrowserAction()
+            }
+            return 0
+        }
     }
     
     let genericCall = (args[0] == "openurl")
