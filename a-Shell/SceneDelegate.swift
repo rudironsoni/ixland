@@ -145,6 +145,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     var errorMessage: String = ""
     var extraBytes: Data? = nil
     var tapPosition: CGPoint = .zero
+    var sceneIsInForeground = false
     
     // Create a document picker for directories.
     private let documentPicker =
@@ -3928,7 +3929,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 }
             }
             // iPads: re-activate long-press on arrow buttons when the toolbar appears:
-            if (useSystemToolbar) {
+            if (useSystemToolbar && sceneIsInForeground) {
                 NotificationCenter.default.addObserver(
                     forName: UIResponder.keyboardWillChangeFrameNotification,
                     object: nil,
@@ -4287,6 +4288,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         // Called as the scene transitions from the background to the foreground.
         // Use this method to undo the changes made on entering the background.
         // Reload the webAssembly interpreter (this will also check if the local server is still running):
+        sceneIsInForeground = true
         if (!showWebView) {
             if (appVersion != "a-Shell-mini") {
                 wasmWebView?.load(URLRequest(url: URL(string: "https://localhost:8443/wasm.html")!))
@@ -4716,6 +4718,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
         NSLog("sceneDidEnterBackground: \(self.persistentIdentifier).")
+        sceneIsInForeground = false
         scene.session.stateRestorationActivity = NSUserActivity(activityType: "AsheKube.app.a-Shell.TermSession")
         if (currentDirectory == "") {
             currentDirectory = FileManager().currentDirectoryPath
@@ -4816,9 +4819,9 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         }
         // Get only the last 25000 characters of printedContent.
         // An iPad pro screen is 5000 characters, so this is 5 screens of content.
+        #if TODO
         // When window.printedContent is too large, this function does not return before the session is terminated.
         // Note: if this fails, check window.printedContent length at the start/end of a command, not after each print.
-        #if TODO
         webView!.evaluateJavaScript("window.printedContent",
                                     completionHandler: { (printedContent: Any?, error: Error?) in
                                         if let error = error {
@@ -4858,6 +4861,9 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     
     func outputToWebView(string: String) {
         guard (terminalView != nil) else { return }
+        if !self.terminalView!.getTerminal().isCurrentBufferAlternate {
+            windowPrintedContent += string
+        }
         DispatchQueue.main.async {
             self.terminalView?.feed(text: string.replacingOccurrences(of:"\n", with: "\n\r")) // prints the string
         }
@@ -5929,8 +5935,8 @@ extension SceneDelegate: WKUIDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         // NSLog("finished loading, title= \(webView.title ?? "unknown"), host= \(webView.url?.host) path=\(webView.url?.path ?? "unknown"), navigation= \(navigation)")
         if (webView.url?.host == "localhost") && (webView.url?.path == "/wasm.html") {
-            NSLog("Back to the terminal. showWebView: \(showWebView)")
             // host=="localhost" && path == "/wasm.html" --> make the terminal active
+            NSLog("Back to the terminal. showWebView: \(showWebView)")
         }
         if (webView.title != nil) && (webView.title != "") {
             title = webView.title
