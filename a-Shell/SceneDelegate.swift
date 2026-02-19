@@ -1443,13 +1443,20 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     
     func printPrompt() {
         guard terminalView != nil else { return }
-        lastUsedPrompt = parsePrompt()
-        DispatchQueue.main.async {
-            if (self.terminalView!.atTheEndOfTheLine()) {
-                self.terminalView!.feed(text: "\n\r")
+        if (self.currentCommand == "") {
+            lastUsedPrompt = parsePrompt()
+            DispatchQueue.main.async {
+                if (self.terminalView!.atTheEndOfTheLine()) {
+                    self.terminalView!.feed(text: "\n\r")
+                    self.windowPrintedContent += "\n\r"
+                }
+                self.terminalView!.feed(text: self.lastUsedPrompt)
+                self.terminalView!.setPromptEnd()
             }
-            self.terminalView!.feed(text: self.lastUsedPrompt)
-            self.terminalView!.setPromptEnd()
+        } else {
+            if let data = "\n".data(using: .utf8) {
+                stdin_file_input?.write(data)
+            }
         }
     }
     
@@ -3580,7 +3587,251 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     func scene(_ scene: UIScene, didUpdate userActivity: NSUserActivity) {
         NSLog("Scene, didUpdate: userActivity.activityType = \(userActivity.activityType)")
     }
+    
+    func restoreHistoryAndDirectories(scene: UIScene) {
+        if var userInfo = scene.session.stateRestorationActivity?.userInfo {
+            NSLog("Restoring history, previousDir, currentDir:")
+            if let historyData = userInfo["history"] {
+                history = historyData as! [String]
+            } else {
+                history = UserDefaults.standard.array(forKey: "history") as? [String] ?? []
+            }
+            historyPosition = history.count
+            directoriesUsed = UserDefaults.standard.dictionary(forKey: "directoriesUsed") as? [String:Int] ?? [:]
+            // NSLog("set history to \(history)")
+            // NSLog("set directoriesUsed to \(directoriesUsed)")
+            if let previousDirectoryData = userInfo["prev_wd"] {
+                if let previousDirectory = previousDirectoryData as? String {
+                    NSLog("got previousDirectory as \(previousDirectory)")
+                    if (FileManager().fileExists(atPath: previousDirectory) && FileManager().isReadableFile(atPath: previousDirectory)) {
+                        NSLog("set previousDirectory to \(previousDirectory)")
+                        // Call cd_main instead of executeCommand("cd dir") to avoid closing a prompt and history.
+                        ios_switchSession(self.persistentIdentifier?.toCString())
+                        ios_setContext(UnsafeMutableRawPointer(mutating: self.persistentIdentifier?.toCString()))
+                        changeDirectory(path: previousDirectory) // call cd_main and checks secured bookmarked URLs
+                    }
+                }
+            }
+            if let currentDirectoryData = userInfo["cwd"] {
+                if var currentDirectory = currentDirectoryData as? String {
+                    NSLog("got currentDirectory as \(currentDirectory)")
+                    if (!FileManager().fileExists(atPath: currentDirectory) || !FileManager().isReadableFile(atPath: currentDirectory)) {
+                        // The directory does not exist anymore (often home directory, changes after reinstall)
+                        do {
+                            currentDirectory = try FileManager().url(for: .documentDirectory,
+                                                                     in: .userDomainMask,
+                                                                     appropriateFor: nil,
+                                                                     create: true).path
+                            NSLog("reset currentDirectory to \(currentDirectory)")
+                        }
+                        catch {
+                            NSLog("Could not get currentDirectory from FileManager()")
+                        }
+                    }
+                    if (FileManager().fileExists(atPath: currentDirectory) && FileManager().isReadableFile(atPath: currentDirectory)) {
+                        NSLog("set currentDirectory to \(currentDirectory)")
+                        // Call cd_main instead of executeCommand("cd dir") to avoid closing a prompt and history.
+                        ios_switchSession(self.persistentIdentifier?.toCString())
+                        ios_setContext(UnsafeMutableRawPointer(mutating: self.persistentIdentifier?.toCString()))
+                        changeDirectory(path: currentDirectory) // call cd_main and checks secured bookmarked URLs
+                    }
+                }
+            }
+        }
+    }
+    
+    func restoreEnvironment(scene: UIScene) {
+        // We restore the environment variables to their previous values.
+        // Useful for virtual Python environments
+        // If the app was reinstalled, paths to files are not valid anymore, so we don't set them.
+        // We never touch system environment variables like HOME and APPDIR.
+        if var userInfo = scene.session.stateRestorationActivity?.userInfo {
+            var path = String(utf8String: getenv( "PATH"))
+            var pathChanged = false
+            if let environmentVariables = userInfo["environ"] as? [String] {
+                var virtualEnvironmentGone = false
+                for variable in environmentVariables {
+                    let components = variable.split(separator:"=", maxSplits: 1)
+                    if components.count <= 0 { continue }
+                    let name = String(components[0])
+                    var value = ""
+                    if (components.count >= 2) {
+                        value = String(components[1])
+                    }
+                    if name == "HOME" { continue }
+                    if name == "APPDIR" { continue }
+                    // Don't override PATH, MANPATH, PERL5LIB, TZ...
+                    // PATH itself will be dealt with separately
+                    if (value.hasPrefix("/") && (value.contains(":"))) { continue }
+                    // Don't override PERL_MB_OPT, PERL_MM_OPT, TERMINFO either:
+                    if name == "PERL_MB_OPT" { continue }
+                    if name == "PERL_MM_OPT" { continue }
+                    if name == "TZ" { continue }
+                    if name == "TERMINFO" { continue }
+                    // Don't override APPVERSION and others:
+                    if name == "APPNAME" { continue }
+                    if name == "APPVERSION" { continue }
+                    if name == "APPBUILDNUMBER" { continue }
+                    // Do not restore SSH_AUTH_SOCK, since ssh-agent is not running anymore.
+                    if name == "SSH_AUTH_SOCK" {
+                        // Do not remove the old socket, as ssh-agent could still be running.
+                        // unlink(value); // close the old socket
+                        continue
+                    }
+                    if (name == "TERM") && (value == "dumb") { continue }
+                    // Env vars that are files:
+                    if (value.hasPrefix("/") && (!value.contains(":"))) {
+                        // This variable might be a file or directory. Check it exists first:
+                        if (!FileManager().fileExists(atPath: value)) {
+                            // NSLog("Skipping \(name) = \(value) (not here)")
+                            if (name == "VIRTUAL_ENV") {
+                                // We had a virtual environment set, but pointing to a directory that no longer exists
+                                // Since _OLD_VIRTUAL_PATH is usually before VIRTUAL_ENV in the list of variables,
+                                // it has already been set by now. We set this boolean to erase it.
+                                virtualEnvironmentGone = true
+                            }
+                            continue
+                        }
+                    }
+                    // NSLog("setenv \(components[0]) \(components[1])")
+                    // These are user-defined environment variables, we keep them:
+                    setenv(name, value, 1)
+                }
+                // The virtual environment is not in the right place anymore, get the PATH variable back to the correct value
+                if (virtualEnvironmentGone) {
+                    unsetenv("_OLD_VIRTUAL_PATH")
+                    unsetenv("_OLD_VIRTUAL_PS1")
+                }
+            }
+            // Change in the default value for this variable:
+            if let compileOptionsC = getenv("CCC_OVERRIDE_OPTIONS") {
+                if let compileOptions = String(utf8String: compileOptionsC) {
+                    if (compileOptions.isEqual("#^--target") || compileOptions.isEqual("#^--target=wasm32-wasi")) {
+                        setenv("CCC_OVERRIDE_OPTIONS", "#^--target=wasm32-wasip1 ^-fwasm-exceptions +-lunwind", 1)
+                    }
+                }
+            }
+            // Only restore the parts of PATH that are not the main path (before and after),
+            // and make sure that each directory exists.
+            if let beforePath = userInfo["beforePath"] as? String {
+                let components = beforePath.components(separatedBy: ":")
+                var prefix:String = ""
+                for dir in components {
+                    if (dir.count == 0) { continue } // empty string, can happen.
+                    if (prefix.contains(dir + ":")) { continue } // Don't add a directory more than once.
+                    if (FileManager().fileExists(atPath: dir)) {
+                        prefix = prefix + dir + ":"
+                    }
+                }
+                if (prefix.count > 0) {
+                    if (path == nil) {
+                        path = prefix
+                    } else {
+                        path = prefix + path!
+                    }
+                    pathChanged = true
+                }
+            }
+            if let afterPath = userInfo["afterPath"] as? String {
+                let components = afterPath.components(separatedBy: ":")
+                var suffix:String = ""
+                for dir in components {
+                    // Don't add a string more than once:
+                    if (dir.count == 0) { continue } // empty string, can happen.
+                    if (suffix.isEqual(":" + dir)) { continue }
+                    if (suffix.contains(":" + dir + ":")) { continue }
+                    if (path != nil) {
+                        if (path!.contains(dir + ":")) { continue } // Don't add a string that is already in path
+                    }
+                    if (FileManager().fileExists(atPath: dir)) {
+                        suffix = suffix + ":" + dir
+                    }
+                }
+                if (suffix.count > 0) {
+                    if (path == nil) {
+                        path = suffix
+                    } else {
+                        if (!path!.hasSuffix(":") && !suffix.hasPrefix(":")) {
+                            path = path! + ":" + suffix
+                        } else {
+                            if (path!.hasSuffix(":") && suffix.hasPrefix(":")) {
+                                path!.removeLast()
+                            }
+                            path = path! + suffix
+                        }
+                    }
+                    pathChanged = true
+                }
+            }
+            if (pathChanged) {
+                setenv("PATH", path, 1)
+            }
+        }
+    }
 
+    func restartPreviousCommand(scene: UIScene) {
+        if var userInfo = scene.session.stateRestorationActivity?.userInfo {
+            // restart the current command if one was running before
+            let currentCommandData = userInfo["currentCommand"]
+            if let storedCommand = currentCommandData as? String {
+                if (storedCommand.count > 0) {
+                    // We only restart vim commands (and dash). Other commands are just creating issues, unless we could save their status.
+                    // Safety check: is the vim session file still there?
+                    // I could have been removed by the system, or by the user.
+                    // TODO: also check that files are still available / no
+                    if (storedCommand.hasPrefix("vim -S ")) {
+                        // We counter it by restoring TERM before starting Vim:
+                        if let storedTermC = getenv("TERM") {
+                            if let storedTerm = String(utf8String: storedTermC) {
+                                if storedTerm == "dumb" {
+                                    setenv("TERM", "xterm", 1)
+                                }
+                            }
+                        }
+                        NSLog("Restarting session with \(storedCommand)")
+                        var sessionFile = storedCommand
+                        sessionFile.removeFirst("vim -S ".count)
+                        if (sessionFile.hasPrefix("~")) {
+                            sessionFile.removeFirst("~".count)
+                            let documentsUrl = try! FileManager().url(for: .documentDirectory,
+                                                                      in: .userDomainMask,
+                                                                      appropriateFor: nil,
+                                                                      create: true)
+                            let homeUrl = documentsUrl.deletingLastPathComponent()
+                            sessionFile = homeUrl.path + sessionFile
+                        }
+                        if (FileManager().fileExists(atPath: sessionFile)) {
+                            if (UserDefaults.standard.bool(forKey: "restart_vim")) {
+                                /* We only restart vim commands, and only if the user asks for it.
+                                 Everything else is creating problems.
+                                 Basically, we can only restart commands if we can save their status. */
+                                // The preference is set to false by default, to avoid beginners trapped in Vim
+                                NSLog("sceneDidBecomeActive, Restoring command: \(storedCommand)")
+                                self.currentCommand = storedCommand
+                                commandQueue.async {
+                                    self.executeCommand(command: storedCommand)
+                                }
+                            }
+                        } else {
+                            NSLog("Could not find session file at \(sessionFile)")
+                        }
+                    } else if (storedCommand.hasPrefix("dash ")) || (storedCommand == "dash") {
+                        if (UserDefaults.standard.bool(forKey: "restart_vim")) {
+                            /* We only restart vim and dash commands, and only if the user asks for it.
+                             Everything else is creating problems.
+                             Basically, we can only restart commands if we can save their status. */
+                            NSLog("sceneDidBecomeActive, Restoring command: \(storedCommand)")
+                            self.currentCommand = storedCommand
+                            commandQueue.async {
+                                self.executeCommand(command: storedCommand)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
@@ -3690,7 +3941,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             wasmWebView?.navigationDelegate = self
             wasmWebView?.uiDelegate = self;
             wasmWebView?.isAccessibilityElement = false
-            // End separate WkWebView
+            // End WkWebView setting
             // Restore colors and settings from preference (if set):
             if let size = UserDefaults.standard.value(forKey: "fontSize") as? Float {
                 terminalFontSize = size
@@ -3765,6 +4016,26 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                             NSLog("Could not load initialization file \(configFileName): \(error.localizedDescription)")
                         }
                     }
+                }
+            }
+            // restore window content, using commandQueue so it happens after the .profile has been loaded:
+            // also move the environment variables code here (separate function?)
+            if UserDefaults.standard.bool(forKey: "keep_content") {
+                // commandQueue so that it is executed after the .profile loading,
+                // DispatchQueue.main because SwiftTerm can crash if it receives data outside the main queue.
+                // Note: if the .profile prints something, we can see that something printed twice (once by the
+                // .profile, once as part of the saved terminal content).
+                commandQueue.async {
+                    if let terminalData = scene.session.stateRestorationActivity?.userInfo?["terminal"] as? String {
+                        // print("terminalData:\n\(terminalData)\n--------")
+                        DispatchQueue.main.async {
+                            self.terminalView?.getTerminal().feed(text: terminalData.replacingOccurrences(of: "\n", with: "\r\n"))
+                            self.terminalView!.setPromptEnd()
+                            self.windowPrintedContent = terminalData
+                        }
+                    }
+                    self.restoreHistoryAndDirectories(scene: scene)
+                    self.restoreEnvironment(scene: scene)
                 }
             }
             // initialize command list for autocomplete (*after* loading the .profile):
@@ -3929,7 +4200,8 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 }
             }
             // iPads: re-activate long-press on arrow buttons when the toolbar appears:
-            if (useSystemToolbar && sceneIsInForeground) {
+            sceneIsInForeground = true
+            if (useSystemToolbar) {
                 NotificationCenter.default.addObserver(
                     forName: UIResponder.keyboardWillChangeFrameNotification,
                     object: nil,
@@ -3938,6 +4210,11 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                     NSLog("keyboardWillChangeFrame: \(notification.name.rawValue): \(session.persistentIdentifier).")
                     self.activateLongPressForButtons()
                 }
+            }
+            if UserDefaults.standard.bool(forKey: "keep_content") {
+                // if the window was not created with an intent, and we want to restore content,
+                // we relaunch the previous command (only dash and vim)
+                restartPreviousCommand(scene: scene)
             }
         }
     }
@@ -4050,14 +4327,6 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                     UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil)
                 } else {
                     // Not an iPad, so no requestSceneSessionActivation().
-                    #if TODO
-                    let openFileCommand = "window.commandRunning = 'vim'; window.interactiveCommandRunning = true; "
-                    NSLog("About to execute \(openFileCommand), webview: \(self.webView)")
-                    self.webView?.evaluateJavaScript(openFileCommand) { (result, error) in
-                        // if let error = error { print(error) }
-                        // if let result = result { print(result) }
-                    }
-                    #endif
                     commandQueue.async {
                         self.executeCommand(command: "vim " + (fileURL.path.removingPercentEncoding!.replacingOccurrences(of: " ", with: "\\ ")))
                     }
@@ -4154,69 +4423,71 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         // Note: for some reasons, this doesn't work on iPad with external keyboards the first time the window is activated
         // (the gestures *are* added to the buttons, but the actions are not called when the user taps/long press)
         // It works fine after the first redisplay of the window.
-        activateButtonsTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [self]_ in
-            NSLog("Launching the buttons timer. ")
-            if (!useSystemToolbar) {
-                for button in editorToolbar.items! {
-                    if (title(button) == "up") || (title(button) == "down") || (title(button) == "left") || (title(button) == "right")
-                        || title(button) == "up.down" || title(button) == "left.right" || title(button) == "up.down.left.right" {
-                        if let buttonView = button.value(forKey: "view") as? UIView {
-                            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.tapAction(_:)))
-                            tapGesture.delegate = self
-                            buttonView.addGestureRecognizer(tapGesture)
-                            let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(self.longPressAction(_:)))
-                            longPressGesture.minimumPressDuration = 0.2 // 1 second press
-                            longPressGesture.allowableMovement = 30 // 15 points
-                            longPressGesture.delegate = self
-                            buttonView.addGestureRecognizer(longPressGesture)
-                            self.activateButtonsTimer.invalidate()
+        if (sceneIsInForeground) {
+            activateButtonsTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [self]_ in
+                NSLog("Launching the buttons timer. ")
+                if (!useSystemToolbar) {
+                    for button in editorToolbar.items! {
+                        if (title(button) == "up") || (title(button) == "down") || (title(button) == "left") || (title(button) == "right")
+                            || title(button) == "up.down" || title(button) == "left.right" || title(button) == "up.down.left.right" {
+                            if let buttonView = button.value(forKey: "view") as? UIView {
+                                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.tapAction(_:)))
+                                tapGesture.delegate = self
+                                buttonView.addGestureRecognizer(tapGesture)
+                                let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(self.longPressAction(_:)))
+                                longPressGesture.minimumPressDuration = 0.2 // 1 second press
+                                longPressGesture.allowableMovement = 30 // 15 points
+                                longPressGesture.delegate = self
+                                buttonView.addGestureRecognizer(longPressGesture)
+                                self.activateButtonsTimer.invalidate()
+                            }
                         }
                     }
-                }
-            } else {
-                if let leftButtonGroups = terminalView?.inputAssistantItem.leadingBarButtonGroups {
-                    for leftButtonGroup in leftButtonGroups {
-                        for button in leftButtonGroup.barButtonItems {
-                            if (title(button) == "up") || (title(button) == "down") || (title(button) == "left") || (title(button) == "right")
-                                || title(button) == "up.down" || title(button) == "left.right" || title(button) == "up.down.left.right" {
-                                if let buttonView = button.value(forKey: "view") as? UIView {
-                                    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.tapAction(_:)))
-                                    tapGesture.delegate = self
-                                    buttonView.addGestureRecognizer(tapGesture)
-                                    let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(self.longPressAction(_:)))
-                                    longPressGesture.minimumPressDuration = 0.2 // 1 second press
-                                    longPressGesture.allowableMovement = 30 // 15 points
-                                    longPressGesture.delegate = self
-                                    buttonView.addGestureRecognizer(longPressGesture)
-                                    self.activateButtonsTimer.invalidate()
+                } else {
+                    if let leftButtonGroups = terminalView?.inputAssistantItem.leadingBarButtonGroups {
+                        for leftButtonGroup in leftButtonGroups {
+                            for button in leftButtonGroup.barButtonItems {
+                                if (title(button) == "up") || (title(button) == "down") || (title(button) == "left") || (title(button) == "right")
+                                    || title(button) == "up.down" || title(button) == "left.right" || title(button) == "up.down.left.right" {
+                                    if let buttonView = button.value(forKey: "view") as? UIView {
+                                        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.tapAction(_:)))
+                                        tapGesture.delegate = self
+                                        buttonView.addGestureRecognizer(tapGesture)
+                                        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(self.longPressAction(_:)))
+                                        longPressGesture.minimumPressDuration = 0.2 // 1 second press
+                                        longPressGesture.allowableMovement = 30 // 15 points
+                                        longPressGesture.delegate = self
+                                        buttonView.addGestureRecognizer(longPressGesture)
+                                        self.activateButtonsTimer.invalidate()
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                if let rightButtonGroups = terminalView?.inputAssistantItem.trailingBarButtonGroups {
-                    for rightButtonGroup in rightButtonGroups {
-                        for button in rightButtonGroup.barButtonItems {
-                            if (title(button) == "up") || (title(button) == "down") || (title(button) == "left") || (title(button) == "right")
-                                || title(button) == "up.down" || title(button) == "left.right" || title(button) == "up.down.left.right" {
-                                if let buttonView = button.value(forKey: "view") as? UIView {
-                                    NSLog("activating long press for \(title(button)). view= \(buttonView)")
-                                    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.tapAction(_:)))
-                                    tapGesture.delegate = self
-                                    buttonView.addGestureRecognizer(tapGesture)
-                                    let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(self.longPressAction(_:)))
-                                    longPressGesture.minimumPressDuration = 0.2 // 1 second press
-                                    longPressGesture.allowableMovement = 30 // 15 points
-                                    longPressGesture.delegate = self
-                                    buttonView.addGestureRecognizer(longPressGesture)
-                                    self.activateButtonsTimer.invalidate()
+                    if let rightButtonGroups = terminalView?.inputAssistantItem.trailingBarButtonGroups {
+                        for rightButtonGroup in rightButtonGroups {
+                            for button in rightButtonGroup.barButtonItems {
+                                if (title(button) == "up") || (title(button) == "down") || (title(button) == "left") || (title(button) == "right")
+                                    || title(button) == "up.down" || title(button) == "left.right" || title(button) == "up.down.left.right" {
+                                    if let buttonView = button.value(forKey: "view") as? UIView {
+                                        NSLog("activating long press for \(title(button)). view= \(buttonView)")
+                                        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.tapAction(_:)))
+                                        tapGesture.delegate = self
+                                        buttonView.addGestureRecognizer(tapGesture)
+                                        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(self.longPressAction(_:)))
+                                        longPressGesture.minimumPressDuration = 0.2 // 1 second press
+                                        longPressGesture.allowableMovement = 30 // 15 points
+                                        longPressGesture.delegate = self
+                                        buttonView.addGestureRecognizer(longPressGesture)
+                                        self.activateButtonsTimer.invalidate()
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-       }
+        }
     }
     
     @available(iOS 26, *)
@@ -4267,8 +4538,11 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 if !termView.isFirstResponder {
                     _ = termView.becomeFirstResponder()
                     // Making sure the prompt is printed after the .profile is executed
-                    commandQueue.async {
-                        self.printPrompt()
+                    NSLog("printing prompt, command: \(currentCommand)")
+                    if (currentCommand == "") {
+                        commandQueue.async {
+                            self.printPrompt()
+                        }
                     }
                 }
             }
@@ -4363,183 +4637,18 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         }
         // If a command is already running, we don't restore directories, etc: they probably are still valid
         if (currentCommand != "") { return }
+        #if TOREMOVE
         // If the user doesn't want us to restore content, we also don't restore directories and history:
         if UserDefaults.standard.bool(forKey: "keep_content") {
-            NSLog("Restoring history, previousDir, currentDir:")
-            if let historyData = userInfo["history"] {
-                history = historyData as! [String]
-            } else {
-                history = UserDefaults.standard.array(forKey: "history") as? [String] ?? []
-            }
-            historyPosition = history.count
-            directoriesUsed = UserDefaults.standard.dictionary(forKey: "directoriesUsed") as? [String:Int] ?? [:]
-            // NSLog("set history to \(history)")
-            // NSLog("set directoriesUsed to \(directoriesUsed)")
-            if let previousDirectoryData = userInfo["prev_wd"] {
-                if let previousDirectory = previousDirectoryData as? String {
-                    NSLog("got previousDirectory as \(previousDirectory)")
-                    if (FileManager().fileExists(atPath: previousDirectory) && FileManager().isReadableFile(atPath: previousDirectory)) {
-                        NSLog("set previousDirectory to \(previousDirectory)")
-                        // Call cd_main instead of executeCommand("cd dir") to avoid closing a prompt and history.
-                        ios_switchSession(self.persistentIdentifier?.toCString())
-                        ios_setContext(UnsafeMutableRawPointer(mutating: self.persistentIdentifier?.toCString()))
-                        changeDirectory(path: previousDirectory) // call cd_main and checks secured bookmarked URLs
-                    }
-                }
-            }
-            if let currentDirectoryData = userInfo["cwd"] {
-                if var currentDirectory = currentDirectoryData as? String {
-                    NSLog("got currentDirectory as \(currentDirectory)")
-                    if (!FileManager().fileExists(atPath: currentDirectory) || !FileManager().isReadableFile(atPath: currentDirectory)) {
-                        // The directory does not exist anymore (often home directory, changes after reinstall)
-                        do {
-                            currentDirectory = try FileManager().url(for: .documentDirectory,
-                                                                     in: .userDomainMask,
-                                                                     appropriateFor: nil,
-                                                                     create: true).path
-                            NSLog("reset currentDirectory to \(currentDirectory)")
-                        }
-                        catch {
-                            NSLog("Could not get currentDirectory from FileManager()")
-                        }
-                    }
-                    if (FileManager().fileExists(atPath: currentDirectory) && FileManager().isReadableFile(atPath: currentDirectory)) {
-                        NSLog("set currentDirectory to \(currentDirectory)")
-                        // Call cd_main instead of executeCommand("cd dir") to avoid closing a prompt and history.
-                        ios_switchSession(self.persistentIdentifier?.toCString())
-                        ios_setContext(UnsafeMutableRawPointer(mutating: self.persistentIdentifier?.toCString()))
-                        changeDirectory(path: currentDirectory) // call cd_main and checks secured bookmarked URLs
-                    }
-                }
-            }
-            // We restore the environment variables to their previous values.
-            // Useful for virtual Python environments
-            // If the app was reinstalled, paths to files are not valid anymore, so we don't set them.
-            // We never touch system environment variables like HOME and APPDIR.
-            var path = String(utf8String: getenv( "PATH"))
-            var pathChanged = false
-            if let environmentVariables = userInfo["environ"] as? [String] {
-                var virtualEnvironmentGone = false
-                for variable in environmentVariables {
-                    let components = variable.split(separator:"=", maxSplits: 1)
-                    if components.count <= 0 { continue }
-                    let name = String(components[0])
-                    var value = ""
-                    if (components.count >= 2) {
-                        value = String(components[1])
-                    }
-                    if name == "HOME" { continue }
-                    if name == "APPDIR" { continue }
-                    // Don't override PATH, MANPATH, PERL5LIB, TZ...
-                    // PATH itself will be dealt with separately
-                    if (value.hasPrefix("/") && (value.contains(":"))) { continue }
-                    // Don't override PERL_MB_OPT, PERL_MM_OPT, TERMINFO either:
-                    if name == "PERL_MB_OPT" { continue }
-                    if name == "PERL_MM_OPT" { continue }
-                    if name == "TZ" { continue }
-                    if name == "TERMINFO" { continue }
-                    // Don't override APPVERSION and others:
-                    if name == "APPNAME" { continue }
-                    if name == "APPVERSION" { continue }
-                    if name == "APPBUILDNUMBER" { continue }
-                    // Do not restore SSH_AUTH_SOCK, since ssh-agent is not running anymore.
-                    if name == "SSH_AUTH_SOCK" {
-                        // Do not remove the old socket, as ssh-agent could still be running.
-                        // unlink(value); // close the old socket
-                        continue
-                    }
-                    if (name == "TERM") && (value == "dumb") { continue }
-                    // Env vars that are files:
-                    if (value.hasPrefix("/") && (!value.contains(":"))) {
-                        // This variable might be a file or directory. Check it exists first:
-                        if (!FileManager().fileExists(atPath: value)) {
-                            // NSLog("Skipping \(name) = \(value) (not here)")
-                            if (name == "VIRTUAL_ENV") {
-                                // We had a virtual environment set, but pointing to a directory that no longer exists
-                                // Since _OLD_VIRTUAL_PATH is usually before VIRTUAL_ENV in the list of variables,
-                                // it has already been set by now. We set this boolean to erase it.
-                                virtualEnvironmentGone = true
-                            }
-                            continue
-                        }
-                    }
-                    // NSLog("setenv \(components[0]) \(components[1])")
-                    // These are user-defined environment variables, we keep them:
-                    setenv(name, value, 1)
-                }
-                // The virtual environment is not in the right place anymore, get the PATH variable back to the correct value
-                if (virtualEnvironmentGone) {
-                    unsetenv("_OLD_VIRTUAL_PATH")
-                    unsetenv("_OLD_VIRTUAL_PS1")
-                }
-            }
-            // Change in the default value for this variable:
-            if let compileOptionsC = getenv("CCC_OVERRIDE_OPTIONS") {
-                if let compileOptions = String(utf8String: compileOptionsC) {
-                    if (compileOptions.isEqual("#^--target") || compileOptions.isEqual("#^--target=wasm32-wasi")) {
-                        setenv("CCC_OVERRIDE_OPTIONS", "#^--target=wasm32-wasip1 ^-fwasm-exceptions +-lunwind", 1)
-                    }
-                }
-            }
-            // Only restore the parts of PATH that are not the main path (before and after),
-            // and make sure that each directory exists.
-            if let beforePath = userInfo["beforePath"] as? String {
-                let components = beforePath.components(separatedBy: ":")
-                var prefix:String = ""
-                for dir in components {
-                    if (dir.count == 0) { continue } // empty string, can happen.
-                    if (prefix.contains(dir + ":")) { continue } // Don't add a directory more than once.
-                    if (FileManager().fileExists(atPath: dir)) {
-                        prefix = prefix + dir + ":"
-                    }
-                }
-                if (prefix.count > 0) {
-                    if (path == nil) {
-                        path = prefix
-                    } else {
-                        path = prefix + path!
-                    }
-                    pathChanged = true
-                }
-            }
-            if let afterPath = userInfo["afterPath"] as? String {
-                let components = afterPath.components(separatedBy: ":")
-                var suffix:String = ""
-                for dir in components {
-                    // Don't add a string more than once:
-                    if (dir.count == 0) { continue } // empty string, can happen.
-                    if (suffix.isEqual(":" + dir)) { continue }
-                    if (suffix.contains(":" + dir + ":")) { continue }
-                    if (path != nil) {
-                        if (path!.contains(dir + ":")) { continue } // Don't add a string that is already in path
-                    }
-                    if (FileManager().fileExists(atPath: dir)) {
-                        suffix = suffix + ":" + dir
-                    }
-                }
-                if (suffix.count > 0) {
-                    if (path == nil) {
-                        path = suffix
-                    } else {
-                        if (!path!.hasSuffix(":") && !suffix.hasPrefix(":")) {
-                            path = path! + ":" + suffix
-                        } else {
-                            if (path!.hasSuffix(":") && suffix.hasPrefix(":")) {
-                                path!.removeLast()
-                            }
-                            path = path! + suffix
-                        }
-                    }
-                    pathChanged = true
-                }
-            }
-            if (pathChanged) {
-                setenv("PATH", path, 1)
-            }
+            restoreHistoryAndDirectories(scene: scene)
+            restoreEnvironment(scene: scene)
         }
+        #endif
+        #if TOREMOVE
         // Should we restore window content?
         if UserDefaults.standard.bool(forKey: "keep_content") {
             if var terminalData = userInfo["terminal"] as? String {
+                #if TODO
                 // print("printedContent we received = \(terminalData) End")
                 if (terminalData.contains(";Thanks for flying Vim")) {
                     // Rest of a Vim session; skip everything until next prompt.
@@ -4552,6 +4661,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                         terminalData = String(terminalData.suffix(from: index))
                     }
                 }
+                #endif
                 // print("printedContent restored = \(terminalData.count) End")
                 // print("printedContent restored = \(terminalData) End")
                 #if TODO
@@ -4609,76 +4719,9 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             }
             #endif
         }
-        // restart the current command if one was running before
-        let currentCommandData = userInfo["currentCommand"]
-        if let storedCommand = currentCommandData as? String {
-            if (storedCommand.count > 0) {
-                // We only restart vim commands (and dash). Other commands are just creating issues, unless we could save their status.
-                // Safety check: is the vim session file still there?
-                // I could have been removed by the system, or by the user.
-                // TODO: also check that files are still available / no
-                if (storedCommand.hasPrefix("vim -S ")) {
-                    // We counter it by restoring TERM before starting Vim:
-                    if let storedTermC = getenv("TERM") {
-                        if let storedTerm = String(utf8String: storedTermC) {
-                            if storedTerm == "dumb" {
-                                setenv("TERM", "xterm", 1)
-                            }
-                        }
-                    }
-                    NSLog("Restarting session with \(storedCommand)")
-                    var sessionFile = storedCommand
-                    sessionFile.removeFirst("vim -S ".count)
-                    if (sessionFile.hasPrefix("~")) {
-                        sessionFile.removeFirst("~".count)
-                        let documentsUrl = try! FileManager().url(for: .documentDirectory,
-                                                                     in: .userDomainMask,
-                                                                     appropriateFor: nil,
-                                                                     create: true)
-                        let homeUrl = documentsUrl.deletingLastPathComponent()
-                        sessionFile = homeUrl.path + sessionFile
-                    }
-                    if (FileManager().fileExists(atPath: sessionFile)) {
-                        if (UserDefaults.standard.bool(forKey: "restart_vim")) {
-                            /* We only restart vim commands, and only if the user asks for it.
-                             Everything else is creating problems.
-                             Basically, we can only restart commands if we can save their status. */
-                            // The preference is set to false by default, to avoid beginners trapped in Vim
-                            NSLog("sceneWillEnterForeground, Restoring command: \(storedCommand)")
-                            let commandSent = storedCommand.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"").replacingOccurrences(of: "'", with: "\\'").replacingOccurrences(of: "\n", with: "\\n")
-                            let restoreCommand = "window.webkit.messageHandlers.aShell.postMessage('shell:' + '\(commandSent)');\nwindow.commandRunning = '\(commandSent)';\n"
-                            currentCommand = commandSent
-                            NSLog("Calling command: \(restoreCommand)")
-                            #if TODO
-                            self.webView?.evaluateJavaScript(restoreCommand) { (result, error) in
-                                // if let error = error { print(error) }
-                                // if let result = result { print(result) }
-                            }
-                            #endif
-                        }
-                    } else {
-                        NSLog("Could not find session file at \(sessionFile)")
-                    }
-                } else if (storedCommand.hasPrefix("dash ")) || (storedCommand == "dash") {
-                    if (UserDefaults.standard.bool(forKey: "restart_vim")) {
-                        /* We only restart vim and dash commands, and only if the user asks for it.
-                         Everything else is creating problems.
-                         Basically, we can only restart commands if we can save their status. */
-                        NSLog("sceneWillEnterForeground, Restoring command: \(storedCommand)")
-                        let commandSent = storedCommand.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"").replacingOccurrences(of: "'", with: "\\'").replacingOccurrences(of: "\n", with: "\\n")
-                        let restoreCommand = "window.webkit.messageHandlers.aShell.postMessage('shell:' + '\(commandSent)');\nwindow.commandRunning = '\(commandSent)';\n"
-                        currentCommand = commandSent
-                        NSLog("Calling command: \(restoreCommand)")
-                        #if TODO
-                        self.webView?.evaluateJavaScript(restoreCommand) { (result, error) in
-                            // if let error = error { print(error) }
-                            // if let result = result { print(result) }
-                        }
-                        #endif
-                    }
-                }
-            }
-        }
+        #endif
+        #if TOREMOVE
+        restartPreviousCommand(scene: scene)
         if #available(iOS 16.0, *) {
             // TODO: probably remove this line since it didn't work, and size enforcement is now at a deeper level.
             if (UIDevice.current.model.hasPrefix("iPad")) {
@@ -4696,6 +4739,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 #endif
             }
         }
+        #endif
         // Re-enable video tracks when application enters foreground:
         // https://stackoverflow.com/questions/64055966/ios-14-play-audio-from-video-in-background/64753248#64753248
         // But only if picture-in-picture has not started
@@ -4817,8 +4861,12 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 }
             }
         }
-        // Get only the last 25000 characters of printedContent.
-        // An iPad pro screen is 5000 characters, so this is 5 screens of content.
+        // Get only the last 50000 characters of printedContent.
+        // An iPad pro screen is 5000 characters, so this is 10 screens of content.
+        if (windowPrintedContent != nil) {
+            scene.session.stateRestorationActivity?.userInfo!["terminal"] = windowPrintedContent
+            // print("saved terminalData:\n\(windowPrintedContent)\n--------")
+        }
         #if TODO
         // When window.printedContent is too large, this function does not return before the session is terminated.
         // Note: if this fails, check window.printedContent length at the start/end of a command, not after each print.
@@ -4861,8 +4909,22 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     
     func outputToWebView(string: String) {
         guard (terminalView != nil) else { return }
+        // Only store what happens in the main buffer, not the alternate buffer
         if !self.terminalView!.getTerminal().isCurrentBufferAlternate {
-            windowPrintedContent += string
+            var shortString = string
+            for controlCharacters in [escape + "[?47h", escape + "[?1047h", escape + "[?1049h"] {
+                // if the string contains the switch to alternate buffer, only store characters up to that.
+                if let alternateScreenRange = shortString.range(of: controlCharacters) {
+                    shortString.removeSubrange(alternateScreenRange.lowerBound..<shortString.endIndex)
+                    break // ? (unlikely that a string contains two of them, but do I want to risk it?)
+                }
+            }
+            windowPrintedContent += shortString
+            let characterCount = windowPrintedContent.count
+            if (characterCount > 50000) {
+                windowPrintedContent.removeFirst(characterCount - 50000)
+            }
+            // print("terminalData:\n\(windowPrintedContent)\n----------")
         }
         DispatchQueue.main.async {
             self.terminalView?.feed(text: string.replacingOccurrences(of:"\n", with: "\n\r")) // prints the string

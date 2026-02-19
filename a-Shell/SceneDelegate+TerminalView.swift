@@ -38,7 +38,7 @@ extension SceneDelegate {
         autocompleteSuggestions = []
         autocompletePosition = 0
         autocompleteOptions = false
-        if (currentCommand != "") {
+        if (currentCommand != "") && (!currentCommand.hasPrefix("dash")) && (!currentCommand.hasPrefix("sh")) {
             // a command is running, suggestions are only from command history
             for suggestion in commandHistory {
                 if suggestion.hasPrefix(command) {
@@ -1150,7 +1150,6 @@ extension SceneDelegate {
             case "\u{0017}": // control W: delete (backward) until the next space
                 fallthrough
             case escape + "\u{0017}": // control W: delete (backward) until the next space
-                NSLog("control W received")
                 if (autocompleteRunning) {
                     stopAutocomplete()
                 }
@@ -1171,7 +1170,6 @@ extension SceneDelegate {
                     }
                 }
             case "\u{000C}":  // control L: clear screen
-                NSLog("control L received")
                 clearScreen()
                 printPrompt()
             case carriageReturn:
@@ -1189,12 +1187,14 @@ extension SceneDelegate {
                     commandBeforeCursor = ""
                     commandAfterCursor = ""
                     executeCommand(command: commandLine)
+                    windowPrintedContent += lastUsedPrompt + commandLine + "\n\r"
                     terminalView?.feed(text: "\n\r")
                 } else {
                     let commandLine = (commandBeforeCursor + commandAfterCursor).trimmingCharacters(in: .whitespaces)
                     commandBeforeCursor = ""
                     commandAfterCursor = ""
                     terminalView?.feed(text: "\n\r")
+                    windowPrintedContent += commandLine + "\n\r"
                     guard let data = (commandLine + "\n").data(using: .utf8) else { return }
                     guard stdin_file_input != nil else { return }
                     // store command in local command history, reset if it's different:
