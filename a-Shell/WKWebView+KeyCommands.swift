@@ -14,13 +14,6 @@ let escape = "\u{001B}"
 
 extension WKWebView {
     
-    @objc private func escapeAction(_ sender: UIBarButtonItem) {
-        evaluateJavaScript("window.term_.io.onVTKeystroke(\"" + escape + "\");") { (result, error) in
-            // if let error = error { print(error) }
-            // if let result = result { print(result) }
-        }
-    }
-    
     @objc private func newWindow(_ sender: UIBarButtonItem) {
         if (UIDevice.current.model.hasPrefix("iPad")) {
             UIApplication.shared.requestSceneSessionActivation(nil, userActivity: nil, options: nil)
@@ -159,76 +152,16 @@ extension WKWebView {
             UIKeyCommand(input: "x", modifierFlags:.command, action: #selector(cutText), discoverabilityTitle: "Cut"),
             UIKeyCommand(input: "+", modifierFlags:.command, action: #selector(increaseTextSize), discoverabilityTitle: "Bigger text"),
             UIKeyCommand(input: "-", modifierFlags:.command, action: #selector(decreaseTextSize), discoverabilityTitle: "Smaller text"),
-            // Still required with external keyboards as of May 26, 2020: control-C maps to control-C
-            UIKeyCommand(input: "c", modifierFlags:.control, action: #selector(insertC)),
             // back/forward one page keys for internal browser:
             UIKeyCommand(input: "[", modifierFlags: [.command, .shift], action: #selector(gobackkeyAction), discoverabilityTitle: "Previous page"),
             UIKeyCommand(input: "]", modifierFlags: [.command, .shift], action: #selector(goforwardkeyAction), discoverabilityTitle: "Next page")
         ]
-        let dKey = UIKeyCommand(input: "d", modifierFlags:.control, action: #selector(insertD))
-        if #available(iOS 15.0, *) {
-            dKey.wantsPriorityOverSystemBehavior = true
-        }
-        basicKeyCommands.append(dKey)
         let aKey = UIKeyCommand(input: "a", modifierFlags:.command, action: #selector(selectAll_), discoverabilityTitle: "Select all")
         if #available(iOS 15.0, *) {
             aKey.wantsPriorityOverSystemBehavior = true
         }
         basicKeyCommands.append(aKey)
         /* Caps Lock remapped to escape: */
-        if (url?.path == Bundle.main.resourcePath! + "/hterm.html") {
-            if (UserDefaults.standard.bool(forKey: "escape_preference")) {
-                // If we remapped caps-lock to escape, we need to disable caps-lock, at least with certain keyboards.
-                // This loop remaps all lowercase characters without a modifier to themselves, thus disabling caps-lock
-                // It doesn't work for characters produced with alt-key, though.
-                for key in 0x061...0x2AF { // all lowercase unicode letters
-                    let K = Unicode.Scalar(key)!
-                    if CharacterSet.lowercaseLetters.contains(Unicode.Scalar(key)!) {
-                        // no discoverabilityTitle
-                        let key = UIKeyCommand(input: "\(K)", modifierFlags: [],  action: #selector(insertKey))
-                        if #available(iOS 15.0, *) {
-                            key.wantsPriorityOverSystemBehavior = true
-                        }
-                        basicKeyCommands.append(key)
-                    }
-                }
-                // This one remaps capslock to escape, no discoverabilityTitle
-                let capsLockKey = UIKeyCommand(input: "", modifierFlags:.alphaShift,  action: #selector(escapeAction))
-                if #available(iOS 15.0, *) {
-                    capsLockKey.wantsPriorityOverSystemBehavior = true
-                }
-                basicKeyCommands.append(capsLockKey)
-            } else if #available(iOS 15.0, *) {
-                if let keyboardLanguage = self.textInputMode?.primaryLanguage {
-                    // Is the keyboard language one of the multi-input languages? Chinese, Japanese, Korean and Hindi-Transliteration
-                    if (!keyboardLanguage.hasPrefix("hi") && !keyboardLanguage.hasPrefix("zh") && !keyboardLanguage.hasPrefix("ja")) {
-                        // auto-repeat for external keyboard keys. Activate wantsPriorityOverSystemBehavior for the last key pressed.
-                        if (lastKey != nil) && (-lastKeyTime.timeIntervalSinceNow < 1) {
-                            // NSLog("auto-repeat for \(lastKey!)")
-                            if ((lastKey! >= "a") && (lastKey! <= "z")) {
-                                let key = UIKeyCommand(input: "\(lastKey!)", modifierFlags: [],  action: #selector(insertKey))
-                                key.wantsPriorityOverSystemBehavior = true
-                                basicKeyCommands.append(key)
-                            } else if ((lastKey! >= "A") && (lastKey! <= "Z")) {
-                                let K = lastKey!.lowercased()
-                                let keyS = UIKeyCommand(input: "\(K)", modifierFlags: .shift,  action: #selector(insertKey))
-                                keyS.wantsPriorityOverSystemBehavior = true
-                                basicKeyCommands.append(keyS)
-                            }
-                        }
-                    }
-                    if keyboardLanguage.hasPrefix("en") {
-                        // For the english keyboard, we can set auto-repeat for numbers too:
-                        for key in 0x030...0x039 { // all 10 numbers
-                            let K = Unicode.Scalar(key)!
-                            let key = UIKeyCommand(input: "\(K)", modifierFlags: [],  action: #selector(insertKey))
-                            key.wantsPriorityOverSystemBehavior = true
-                            basicKeyCommands.append(key)
-                        }
-                    }
-                }
-            }
-        }
         return basicKeyCommands
     }
 
@@ -241,12 +174,7 @@ extension WKWebView {
     }
 
     @objc func selectAll_(_ sender: UIKeyCommand) {
-        var commandString = "";
-        if (url?.path == Bundle.main.resourcePath! + "/hterm.html") {
-            commandString = "window.term_.scrollPort_.selectAll();"
-        } else {
-            commandString = "editor.selectAll();"
-        }
+        let commandString = "editor.selectAll();"
         evaluateJavaScript(commandString) { (result, error) in
             if let error = error { 
                 print("Error in executing \(commandString): \(error)")
@@ -254,52 +182,5 @@ extension WKWebView {
             if let result = result { print(result) }
         }
     }
-
-    @objc func insertC(_ sender: UIKeyCommand) {
-        // Make sure we send control-C from external KB:
-        guard (sender.input != nil) else { return }
-        var string = sender.input!
-        if (sender.modifierFlags.contains(.control)) {
-            string = "\u{003}"
-        }
-        let commandString = "window.term_.io.onVTKeystroke(\'\(string)');"
-        evaluateJavaScript(commandString) { (result, error) in
-            // if let error = error { print(error) }
-            // if let result = result { print(result) }
-        }
-    }
-    @objc func insertD(_ sender: UIKeyCommand) {
-        // Make sure we send control-D from external KB:
-        guard (sender.input != nil) else { return }
-        var string = sender.input!
-        if (sender.modifierFlags.contains(.control)) {
-            string = "\u{004}"
-        }
-        let commandString = "window.term_.io.onVTKeystroke(\'\(string)');"
-        evaluateJavaScript(commandString) { (result, error) in
-            // if let error = error { print(error) }
-            // if let result = result { print(result) }
-        }
-    }
-
-    
-    @objc func insertKey(_ sender: UIKeyCommand) {
-        guard (sender.input != nil) else { return }
-        // Not modifierFlags, attributes, state
-        if #available(iOS 15.0, *) {
-            lastKey = sender.input!.last
-            lastKeyTime = .now
-        }
-        var input = sender.input
-        if sender.modifierFlags.contains(.shift) {
-            input = input?.uppercased()
-        }
-        let commandString = "window.term_.io.onVTKeystroke(\'\(input!)');"
-        evaluateJavaScript(commandString) { (result, error) in
-            // if let error = error { print(error) }
-            // if let result = result { print(result) }
-        }
-    }
-
     
 }

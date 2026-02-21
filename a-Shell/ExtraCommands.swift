@@ -2032,24 +2032,6 @@ public func rehash(argc: Int32, argv: UnsafeMutablePointer<UnsafeMutablePointer<
         }
     }
     commandsArray.sort() // make sure it's in alphabetical order
-    #if TODO
-    var javascriptCommand = "commandList = ["
-    for command in commandsArray {
-        javascriptCommand += "\"" + command + "\", "
-    }
-    javascriptCommand += "];"
-    DispatchQueue.main.async {
-        if let delegate = currentDelegate {
-            delegate.resignFirstResponder()
-            delegate.webView?.evaluateJavaScript(javascriptCommand) { (result, error) in
-                if let error = error {
-                    NSLog("Error in creating command list, line = \(javascriptCommand) error = \(error)")
-                }
-                // if let result = result as? Int32 {  }
-            }
-        }
-    }
-    #endif
     return 0
 }
 
