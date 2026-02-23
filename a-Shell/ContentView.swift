@@ -108,7 +108,6 @@ public var showKeyboardAtStartup = true
 // Make this a user-defined setup, with "ignoreSafeArea" the default.
 public var viewBehavior: ViewBehavior = .ignoreSafeArea
 public var latestNotification: String = ""
-public var slideOverWindow = false
 public var extendBy: CGFloat = 0
 public var showWebView = false
 
@@ -147,11 +146,6 @@ struct ContentView: View {
             } else {
                 latestNotification = ""
             }
-            if (x > 0) {
-                slideOverWindow = true
-            } else {
-                slideOverWindow = false
-            }
             return height
         }
     
@@ -164,134 +158,131 @@ struct ContentView: View {
     //        - on iPhone SE, vertical -> horizontal -> vertical = terminal view is shifted 10 points up, behind the status bar.
     //           Could maybe be fixed with safeAreaPadding() but that is iOS 17 only.
     var body: some View {
-        GeometryReader {geometry in
-            Group {
-                if (showWebView && localShowWebView) {
-                    // NavigationView is deprecated, but the replacement only works for iOS 16 and above.
-                    // I'm trying to keep a-Shell active for iOS 14 and above.
-                    NavigationView {
-                        webview
-                            .toolbar {
-                                ToolbarItem(placement: .navigationBarLeading) {
-                                    Button(action: {
-                                        NSLog("goBackAction()")
-                                        if (webview.webView.canGoBack) {
-                                            if let backPage = webview.webView.backForwardList.item(at: -1) {
-                                                if backPage.url.host != "localhost" || backPage.url.path != "/wasm.html" {
-                                                    webview.webView.goBack()
-                                                }
+        Group {
+            if (showWebView && localShowWebView) {
+                // NavigationView is deprecated, but the replacement only works for iOS 16 and above.
+                // I'm trying to keep a-Shell active for iOS 14 and above.
+                NavigationView {
+                    webview
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarLeading) {
+                                Button(action: {
+                                    NSLog("goBackAction()")
+                                    if (webview.webView.canGoBack) {
+                                        if let backPage = webview.webView.backForwardList.item(at: -1) {
+                                            if backPage.url.host != "localhost" || backPage.url.path != "/wasm.html" {
+                                                webview.webView.goBack()
                                             }
                                         }
-                                    }, label: {
-                                        Image(systemName: "arrow.backward")
-                                    })
-                                }
-                                ToolbarItem(placement: .navigationBarLeading) {
-                                    Button(action: {
-                                        NSLog("terminal clicked")
-                                        localShowWebView = false
-                                        showWebView = false
-                                        showKeyboardAtStartup = true
-                                        _ = terminalview.view.becomeFirstResponder()
-                                        if (appVersion != "a-Shell-mini") {
-                                            webview.webView.load(URLRequest(url: URL(string: "https://localhost:8443/wasm.html")!))
-                                        } else {
-                                            NSLog("Loding wasm.html from 8334")
-                                            webview.webView.load(URLRequest(url: URL(string: "https://localhost:8334/wasm.html")!))
-                                        }
-                                    }, label: {
-                                        Image(systemName: webview.terminalIconName) // apple.terminal or pc depending on the version
-                                    })
-                                }
-                                ToolbarItem(placement: .principal) {
-                                    // TODO: it would be great if this could show the title of the web page,
-                                    // but I don't know how to do that.
-                                    Text("a-Shell navigator")
-                                }
-                                ToolbarItem(placement: .navigationBarTrailing) {
-                                    Button(action: {
-                                        NSLog("reload action")
-                                        webview.webView.reload()
-                                    }, label: {
-                                        Image(systemName: "arrow.clockwise.circle")
-                                    })
-                                }
-                                ToolbarItem(placement: .navigationBarTrailing) {
-                                    Button(action: {
-                                        NSLog("goForward action()")
-                                        if (webview.webView.canGoForward) {
-                                            if let backPage = webview.webView.backForwardList.item(at: 1) {
-                                                if backPage.url.host != "localhost" || backPage.url.path != "/wasm.html" {
-                                                    webview.webView.goForward()
-                                                }
+                                    }
+                                }, label: {
+                                    Image(systemName: "arrow.backward")
+                                })
+                            }
+                            ToolbarItem(placement: .navigationBarLeading) {
+                                Button(action: {
+                                    NSLog("terminal clicked")
+                                    localShowWebView = false
+                                    showWebView = false
+                                    showKeyboardAtStartup = true
+                                    _ = terminalview.view.becomeFirstResponder()
+                                    if (appVersion != "a-Shell-mini") {
+                                        webview.webView.load(URLRequest(url: URL(string: "https://localhost:8443/wasm.html")!))
+                                    } else {
+                                        NSLog("Loding wasm.html from 8334")
+                                        webview.webView.load(URLRequest(url: URL(string: "https://localhost:8334/wasm.html")!))
+                                    }
+                                }, label: {
+                                    Image(systemName: webview.terminalIconName) // apple.terminal or pc depending on the version
+                                })
+                            }
+                            ToolbarItem(placement: .principal) {
+                                // TODO: it would be great if this could show the title of the web page,
+                                // but I don't know how to do that.
+                                Text("a-Shell navigator")
+                            }
+                            ToolbarItem(placement: .navigationBarTrailing) {
+                                Button(action: {
+                                    NSLog("reload action")
+                                    webview.webView.reload()
+                                }, label: {
+                                    Image(systemName: "arrow.clockwise.circle")
+                                })
+                            }
+                            ToolbarItem(placement: .navigationBarTrailing) {
+                                Button(action: {
+                                    NSLog("goForward action()")
+                                    if (webview.webView.canGoForward) {
+                                        if let backPage = webview.webView.backForwardList.item(at: 1) {
+                                            if backPage.url.host != "localhost" || backPage.url.path != "/wasm.html" {
+                                                webview.webView.goForward()
                                             }
                                         }
-                                    }, label: {
-                                        Image(systemName: "arrow.forward")
-                                    })
-                                }
-                            }.navigationBarTitleDisplayMode(.inline)
-                    }.navigationViewStyle(.stack) // so the navigation view is full screen on an iPad
-                } else {
-                    terminalview
+                                    }
+                                }, label: {
+                                    Image(systemName: "arrow.forward")
+                                })
+                            }
+                        }.navigationBarTitleDisplayMode(.inline)
+                }.navigationViewStyle(.stack) // so the navigation view is full screen on an iPad
+            } else {
+                terminalview
+            }
+        }
+        // terminalview
+        .onReceive(keyboardChangePublisher) {
+            if (showWebView) {
+                localShowWebView = true
+            }
+            keyboardHeight = $0
+            if !showKeyboardAtStartup || ((latestNotification == "UIKeyboardWillHideNotification")) {
+                NSLog("setting keyboardHeight to 0 from \(keyboardHeight)")
+                keyboardHeight = 0
+            }
+            frameWidth = terminalview.view.frame.width
+            if (UIDevice.current.model.hasPrefix("iPhone")) {
+                if (frameWidth > UIScreen.main.bounds.width) {
+                    frameWidth = UIScreen.main.bounds.width
                 }
             }
-            // terminalview
-                .onReceive(keyboardChangePublisher) {
-                    if (showWebView) {
-                        localShowWebView = true
-                    }
-                    keyboardHeight = $0
-                    if !showKeyboardAtStartup || ((latestNotification == "UIKeyboardWillHideNotification") && !useSystemToolbar) {
-                        keyboardHeight = 0
-                    }
-                    frameHeight = geometry.size.height
-                    frameWidth = terminalview.view.frame.width
-                    if (UIDevice.current.model.hasPrefix("iPhone")) {
-                        if (frameWidth > UIScreen.main.bounds.width) {
-                            frameWidth = UIScreen.main.bounds.width
-                        }
-                    } else {
-                        if (frameWidth > geometry.size.width) {
-                            frameWidth = geometry.size.width
-                        }
-                    }
-                    if (!useSystemToolbar) {
-                        // iPhones (only)
-                        NSLog("Scene: \(UIScreen.main.bounds) terminal frame: \(terminalview.view.frame) geometry size: \(geometry.size) keyboardHeight: \(keyboardHeight)")
-                            // geometry.size.height is wildly all over the place on iPhones
-                            frameHeight = UIScreen.main.bounds.height - keyboardHeight
-                        if showToolbar && (UIScreen.main.bounds.height > UIScreen.main.bounds.width) {
-                            // terminalview.view.inputAccessoryView!.bounds says the toolbar has a height of 35, but it's too much
-                            // keyboard height takes into account the toolbar height in landscape mode, not in portrait
-                            // It's probably a bug that will be fixed at some point
-                            frameHeight -= 30
-                        }
-                        NSLog("After computations, frameHeight: \(frameHeight)")
-                    }  else {
-                        // UIScreen.main.bounds.height > geometry.size.height + keyboardHeight + 80)
-                        NSLog("keyboardHeight: \(keyboardHeight) geometry: \(geometry.size.height) Screen: \(UIScreen.main.bounds.height) ")
-                        if (useSystemToolbar && (keyboardHeight > 0) && (keyboardHeight < 75) && slideOverWindow) {
-                            NSLog("floating window issue detected")
-                        }
-                        // Summary: if I go external KB -> internal KB -> external KB, then the toolbar hides the last likes of text.
-                        // at the end we get keyboardHeight = 55, geometry = 963, screen height = 1366
-                        // If I counter this with padding, then the terminal disappears.
-                    }
+            if (!useSystemToolbar) {
+                // iPhones (only)
+                NSLog("Scene: \(UIScreen.main.bounds) terminal frame: \(terminalview.view.frame) keyboardHeight: \(keyboardHeight)")
+                // geometry.size.height is wildly all over the place on iPhones
+                frameHeight = UIScreen.main.bounds.height - keyboardHeight
+                if showToolbar && (UIScreen.main.bounds.height > UIScreen.main.bounds.width) {
+                    // terminalview.view.inputAccessoryView!.bounds says the toolbar has a height of 35, but it's too much
+                    // keyboard height takes into account the toolbar height in landscape mode, not in portrait
+                    // It's probably a bug that will be fixed at some point
+                    frameHeight -= 30
                 }
-                // iPhones
-                .if((viewBehavior == .original || viewBehavior == .ignoreSafeArea) && !useSystemToolbar) {
-                    $0.frame(height: frameHeight).position(x: frameWidth / 2, y: frameHeight / 2)
+                NSLog("After computations, frameHeight: \(frameHeight)")
+            }  else {
+                // UIScreen.main.bounds.height > geometry.size.height + keyboardHeight + 80)
+                NSLog("keyboardHeight: \(keyboardHeight) frame: \(terminalview.view.frame.height) Screen: \(UIScreen.main.bounds.height) ")
+                if (useSystemToolbar && (keyboardHeight > 0) && (keyboardHeight < 75)) {
+                    NSLog("floating window issue detected (height)")
                 }
-                // floating windows on iPads (only tested in the simumator)
-                .if (useSystemToolbar && (keyboardHeight > 0) && (keyboardHeight < 75) && slideOverWindow) {
-                    // With a floating window and an external keyboard, we need to push the bottom of the terminal view a little
-                    // But this causes full screen windows to disappear.
-                    $0.padding(.bottom, 20)
-                }
-                .if(((viewBehavior == .ignoreSafeArea || viewBehavior == .fullScreen)) && useSystemToolbar) {
-                    $0.ignoresSafeArea(.container, edges: .bottom)
-                }
+                // Summary: if I go external KB -> internal KB -> external KB, then the toolbar hides the last likes of text.
+                // at the end we get keyboardHeight = 55, geometry = 963, screen height = 1366
+                // If I counter this with padding, then the terminal disappears.
+            }
+        }
+        // iPhones
+        .if(!useSystemToolbar) {
+            $0.frame(height: frameHeight).position(x: frameWidth / 2, y: frameHeight / 2)
+        }
+        // .if ((viewBehavior == .original || viewBehavior == .ignoreSafeArea) && useSystemToolbar && (keyboardHeight > 0) && (keyboardHeight < 75)) {
+            //     $0.padding(.bottom, 20)
+        // }
+        // floating windows on iPads (causes full screen windows to disappear!)
+        // .if (useSystemToolbar && (keyboardHeight > 0) && (keyboardHeight < 75) ) {
+        //     // With a floating window and an external keyboard, we need to push the bottom of the terminal view a little
+        //     // But this causes full screen windows to disappear.
+        //     $0.padding(.bottom, 20)
+        // }
+        .if(((viewBehavior == .ignoreSafeArea || viewBehavior == .fullScreen)) && useSystemToolbar) {
+            $0.ignoresSafeArea(.container, edges: .bottom)
         }
     }
 }

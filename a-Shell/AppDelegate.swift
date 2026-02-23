@@ -574,36 +574,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             replaceCommand("r", "renamemark", true) // rename bookmark
         }
         let toolbarColor = UserDefaults.standard.string(forKey: "toolbar_color")
-        if (toolbarColor == "system") {
-            for scene in UIApplication.shared.connectedScenes {
-                if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
-                    delegate.overrideUserInterfaceStyle(style: .unspecified)
-                }
-            }
-        } else if (toolbarColor == "dark") {
-            for scene in UIApplication.shared.connectedScenes {
-                if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
-                    delegate.overrideUserInterfaceStyle(style: .dark)
-                }
-            }
-        } else if (toolbarColor == "light") {
-            for scene in UIApplication.shared.connectedScenes {
-                if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
-                    delegate.overrideUserInterfaceStyle(style: .light)
-                }
-            }
-        } else if (toolbarColor == "screen") {
-            if let ColorFgBg = getenv("COLORFGBG") {
-                if (String(utf8String: ColorFgBg) == "15;0") {
-                    for scene in UIApplication.shared.connectedScenes {
-                        if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
-                            delegate.overrideUserInterfaceStyle(style: .dark)
-                        }
+        DispatchQueue.main.async {
+            if (toolbarColor == "system") {
+                for scene in UIApplication.shared.connectedScenes {
+                    if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
+                        delegate.overrideUserInterfaceStyle(style: .unspecified)
                     }
-                } else {
-                    for scene in UIApplication.shared.connectedScenes {
-                        if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
-                            delegate.overrideUserInterfaceStyle(style: .light)
+                }
+            } else if (toolbarColor == "dark") {
+                for scene in UIApplication.shared.connectedScenes {
+                    if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
+                        delegate.overrideUserInterfaceStyle(style: .dark)
+                    }
+                }
+            } else if (toolbarColor == "light") {
+                for scene in UIApplication.shared.connectedScenes {
+                    if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
+                        delegate.overrideUserInterfaceStyle(style: .light)
+                    }
+                }
+            } else if (toolbarColor == "screen") {
+                if let ColorFgBg = getenv("COLORFGBG") {
+                    if (String(utf8String: ColorFgBg) == "15;0") {
+                        for scene in UIApplication.shared.connectedScenes {
+                            if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
+                                delegate.overrideUserInterfaceStyle(style: .dark)
+                            }
+                        }
+                    } else {
+                        for scene in UIApplication.shared.connectedScenes {
+                            if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
+                                delegate.overrideUserInterfaceStyle(style: .light)
+                            }
                         }
                     }
                 }
@@ -616,9 +618,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             // Send the value to all the SceneDelegate connected to this application
             toolbarShouldBeShown = false
             // Remove the toolbar on all connected scenes (usually none since the app is in the background):
-            for scene in UIApplication.shared.connectedScenes {
-                if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
-                    delegate.hideToolbar()
+            DispatchQueue.main.async {
+                for scene in UIApplication.shared.connectedScenes {
+                    if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
+                        delegate.hideToolbar()
+                    }
                 }
             }
         } else if (!toolbarShouldBeShown && toolbarSettings) {
@@ -627,9 +631,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             // Send the value to all the SceneDelegate connected to this application
             toolbarShouldBeShown = true
             // Remove the toolbar on all connected scenes (usually none since the app is in the background):
-            for scene in UIApplication.shared.connectedScenes {
-                if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
-                    delegate.showEditorToolbar()
+            DispatchQueue.main.async {
+                for scene in UIApplication.shared.connectedScenes {
+                    if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
+                        delegate.showEditorToolbar()
+                    }
                 }
             }
         }

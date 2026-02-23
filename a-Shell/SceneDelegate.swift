@@ -3053,7 +3053,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     }
     
     func restoreHistoryAndDirectories(scene: UIScene) {
-        if var userInfo = scene.session.stateRestorationActivity?.userInfo {
+        if let userInfo = scene.session.stateRestorationActivity?.userInfo {
             NSLog("Restoring history, previousDir, currentDir:")
             if let historyData = userInfo["history"] {
                 history = historyData as! [String]
@@ -3109,7 +3109,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         // Useful for virtual Python environments
         // If the app was reinstalled, paths to files are not valid anymore, so we don't set them.
         // We never touch system environment variables like HOME and APPDIR.
-        if var userInfo = scene.session.stateRestorationActivity?.userInfo {
+        if let userInfo = scene.session.stateRestorationActivity?.userInfo {
             var path = String(utf8String: getenv( "PATH"))
             var pathChanged = false
             if let environmentVariables = userInfo["environ"] as? [String] {
@@ -3234,7 +3234,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     }
 
     func restartPreviousCommand(scene: UIScene) {
-        if var userInfo = scene.session.stateRestorationActivity?.userInfo {
+        if let userInfo = scene.session.stateRestorationActivity?.userInfo {
             // restart the current command if one was running before
             let currentCommandData = userInfo["currentCommand"]
             if let storedCommand = currentCommandData as? String {
@@ -3949,7 +3949,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                                 if (title(button) == "up") || (title(button) == "down") || (title(button) == "left") || (title(button) == "right")
                                     || title(button) == "up.down" || title(button) == "left.right" || title(button) == "up.down.left.right" {
                                     if let buttonView = button.value(forKey: "view") as? UIView {
-                                        NSLog("activating long press for \(title(button)). view= \(buttonView)")
+                                        // NSLog("activating long press for \(title(button)). view= \(buttonView)")
                                         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.tapAction(_:)))
                                         tapGesture.delegate = self
                                         buttonView.addGestureRecognizer(tapGesture)
@@ -4396,8 +4396,10 @@ extension SceneDelegate: WKUIDelegate {
     }
     
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let cred = URLCredential(trust: challenge.protectionSpace.serverTrust!)
-        completionHandler(.useCredential, cred)
+        commandQueue.async {
+            let cred = URLCredential(trust: challenge.protectionSpace.serverTrust!)
+            completionHandler(.useCredential, cred)
+        }
     }
     
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo,
