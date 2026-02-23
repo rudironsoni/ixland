@@ -240,13 +240,11 @@ struct ContentView: View {
                 keyboardHeight = 0
             }
             frameWidth = terminalview.view.frame.width
-            if (UIDevice.current.model.hasPrefix("iPhone")) {
+            if (!useSystemToolbar) {
+                // iPhones (only)
                 if (frameWidth > UIScreen.main.bounds.width) {
                     frameWidth = UIScreen.main.bounds.width
                 }
-            }
-            if (!useSystemToolbar) {
-                // iPhones (only)
                 NSLog("Scene: \(UIScreen.main.bounds) terminal frame: \(terminalview.view.frame) keyboardHeight: \(keyboardHeight)")
                 // geometry.size.height is wildly all over the place on iPhones
                 frameHeight = UIScreen.main.bounds.height - keyboardHeight
@@ -258,6 +256,7 @@ struct ContentView: View {
                 }
                 NSLog("After computations, frameHeight: \(frameHeight)")
             }  else {
+                // iPads:
                 // UIScreen.main.bounds.height > geometry.size.height + keyboardHeight + 80)
                 NSLog("keyboardHeight: \(keyboardHeight) frame: \(terminalview.view.frame.height) Screen: \(UIScreen.main.bounds.height) ")
                 if (useSystemToolbar && (keyboardHeight > 0) && (keyboardHeight < 75)) {
