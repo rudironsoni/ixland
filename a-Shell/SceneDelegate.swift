@@ -1955,7 +1955,26 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         let cursorShape = terminalCursorShape ?? factoryCursorShape
         let fontLigature = terminalFontLigature ?? factoryFontLigature
         // Force writing all config to term. Used when we changed many parameters.
-        var command = "window.term_.setForegroundColor('" + foregroundColor.toHexString() + "'); window.term_.setBackgroundColor('" + backgroundColor.toHexString() + "'); window.term_.setCursorColor('" + cursorColor.toHexString() + "'); window.fontSize = \(fontSize); window.term_.setFontSize(\(fontSize)); window.term_.setFontFamily('\(fontName)'); window.term_.setCursorShape('\(cursorShape)'); window.term_.scrollPort_.screen_.style.fontVariantLigatures = '\(fontLigature)';"
+        terminalView?.backgroundColor = backgroundColor
+        terminalView?.tintColor = foregroundColor
+        terminalView?.getTerminal().foregroundColor = (foregroundColor.toSwiftTermColor())
+        terminalView?.caretColor = cursorColor
+        terminalView?.getTerminal().cursorColor = (cursorColor.toSwiftTermColor())
+        terminalView?.selectedTextBackgroundColor = cursorColor.makeTransparent()
+        if let terminalFont = UIFont(name: fontName, size: CGFloat(fontSize)) {
+            terminalView?.font = terminalFont
+            basicCharWidth = NSAttributedString(string: "m", attributes: [.font: terminalFont]).size().width
+        }
+        switch (cursorShape.lowercased()) {
+        case "block":
+            self.terminalView?.getTerminal().setCursorStyle(.blinkBlock)
+        case "bar":
+            self.terminalView?.getTerminal().setCursorStyle(.blinkBar)
+        case "underline":
+            self.terminalView?.getTerminal().setCursorStyle(.blinkUnderline)
+        default:
+            self.terminalView?.getTerminal().setCursorStyle(.blinkUnderline)
+        }
     }
     
     func configWindow(fontSize: Float?, fontName: String?, backgroundColor: UIColor?, foregroundColor: UIColor?, cursorColor: UIColor?, cursorShape: String?, fontLigature: String?) {
@@ -5269,34 +5288,6 @@ extension SceneDelegate: WKUIDelegate {
             preferences.allowsContentJavaScript = true // The default value is true, but let's make sure.
         }
         // NSLog("webView.url?.path: \(webView.url?.path)")
-        if (webView.url?.path == Bundle.main.resourcePath! + "/hterm.html") {
-            // save window content before moving:
-            webView.evaluateJavaScript("window.printedContent",
-                                       completionHandler: { (printedContent: Any?, error: Error?) in
-                if let error = error {
-                    // NSLog("Error in capturing terminal content: \(error.localizedDescription)")
-                    // print(error)
-                }
-                // NSLog("captured printedContent: \(printedContent)")
-                if var printedContent = printedContent as? String {
-                    if (printedContent.contains(";Thanks for flying Vim")) {
-                        // Rest of a Vim session; skip everything until next prompt.
-                        let components = printedContent.components(separatedBy: ";Thanks for flying Vim")
-                        printedContent = String(components.last ?? "")
-                    }
-                    // Also skip to first prompt:
-                    if (printedContent.contains("$ ")) {
-                        if let index = printedContent.firstIndex(of: "$") {
-                            printedContent = String(printedContent.suffix(from: index))
-                        }
-                    }
-                    self.windowPrintedContent = printedContent
-                    // print("Saved windowPrintedContent:")
-                    // print("\(self.windowPrintedContent)")
-                    // print("End windowPrintedContent:")
-                }
-            })
-        }
         decisionHandler(.allow, preferences)
     }
     

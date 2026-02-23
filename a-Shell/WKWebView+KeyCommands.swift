@@ -20,45 +20,6 @@ extension WKWebView {
         }
     }
 
-    @objc private func nextWindow(_ sender: UIBarButtonItem) {
-        // This doesn't work for the time being.
-        // It's probably connected to the issue with Stage Manager.
-        // Could not find documentation on how to activate the next scene with the keyboard.
-        if (UIDevice.current.model.hasPrefix("iPad")) {
-            var activateNextWindow = false
-            let options = UIScene.ActivationRequestOptions()
-            for scene in UIApplication.shared.connectedScenes {
-                if let delegate = scene.delegate as? SceneDelegate {
-                    if (activateNextWindow) {
-                        DispatchQueue.main.async {
-                            NSLog("Activating WebView, Scene ID: \(scene.session.persistentIdentifier)")
-                            UIApplication.shared.requestSceneSessionActivation(scene.session, userActivity: nil, options: options)
-                            // activates the scene, but gives focus back to previous window.
-                        }
-                        return
-                    }
-                    if delegate.terminalView == self {
-                        NSLog("Active WebView, Scene ID: \(scene.session.persistentIdentifier)")
-                        activateNextWindow = true
-                        options.requestingScene = scene
-                    } else {
-                        NSLog("Not-active TerminalView, Scene ID: \(scene.session.persistentIdentifier)")
-                    }
-                }
-            }
-            // If we arrived here, the last window was active: activate the first one:
-            if let scene = UIApplication.shared.connectedScenes.first {
-                if let delegate = scene.delegate as? SceneDelegate {
-                    DispatchQueue.main.async {
-                        // self.keyboardDisplayRequiresUserAction = true
-                        NSLog("Activating first WebView, Scene ID: \(scene.session.persistentIdentifier)")
-                        UIApplication.shared.requestSceneSessionActivation(scene.session, userActivity: nil, options: nil)
-                    }
-                }
-            }
-        }
-    }
-
     @objc private func closeWindow(_ sender: UIBarButtonItem) {
         for scene in UIApplication.shared.connectedScenes {
             if let delegate = scene.delegate as? SceneDelegate {
@@ -67,26 +28,6 @@ extension WKWebView {
                     return
                 }
             }
-        }
-    }
-
-    @objc private func clearScreen(_ sender: UIBarButtonItem) {
-        // clear entire display: ^[[2J
-        // position cursor on top line: ^[[1;1H
-        // print current command again.
-        let javascriptCommand = #"""
-        window.term_.io.print('\#(escape)[2J\#(escape)[1;1H');
-        window.printPrompt();
-        window.term_.io.print(window.term_.io.currentCommand);
-        var endOfCommand = window.term_.io.currentCommand.slice(window.currentCommandCursorPosition, window.term_.io.currentCommand.length);
-        var wcwidth = lib.wc.strWidth(endOfCommand);
-        for (var i = 0; i < wcwidth; i++) {
-            window.term_.io.print('\b');
-        }
-        """#
-        evaluateJavaScript(javascriptCommand) { (result, error) in
-            // if let error = error { print(error) }
-            // if let result = result { print(result) }
         }
     }
 
@@ -139,17 +80,13 @@ extension WKWebView {
         // In case we need keyboard personalization for specific languages
         // var language = textInputMode?.primaryLanguage ?? "en-US"
         var basicKeyCommands = [
-            // 16/6/2021: hterm_all deals with the keyboard arrow keys.
             // UIKeyCommand(input: UIKeyCommand.inputUpArrow, modifierFlags: [], action: #selector(upAction)),
             // UIKeyCommand(input: UIKeyCommand.inputDownArrow, modifierFlags: [], action: #selector(downAction)),
             // UIKeyCommand(input: UIKeyCommand.inputLeftArrow, modifierFlags: [], action: #selector(leftAction)),
             // UIKeyCommand(input: UIKeyCommand.inputRightArrow, modifierFlags: [], action: #selector(rightAction)),
             // "discoverabilityTitle:)' was deprecated in iOS 13.0" but it's quite convenient
-            UIKeyCommand(input: "k", modifierFlags:.command, action: #selector(clearScreen), discoverabilityTitle: "Clear screen"),
             UIKeyCommand(input: "n", modifierFlags:.command, action: #selector(newWindow), discoverabilityTitle: "New window"),
-            // UIKeyCommand(input: "t", modifierFlags:.command, action: #selector(nextWindow), discoverabilityTitle: "Next window"),
             UIKeyCommand(input: "w", modifierFlags:.command, action: #selector(closeWindow), discoverabilityTitle: "Close window"),
-            UIKeyCommand(input: "x", modifierFlags:.command, action: #selector(cutText), discoverabilityTitle: "Cut"),
             UIKeyCommand(input: "+", modifierFlags:.command, action: #selector(increaseTextSize), discoverabilityTitle: "Bigger text"),
             UIKeyCommand(input: "-", modifierFlags:.command, action: #selector(decreaseTextSize), discoverabilityTitle: "Smaller text"),
             // back/forward one page keys for internal browser:
@@ -163,14 +100,6 @@ extension WKWebView {
         basicKeyCommands.append(aKey)
         /* Caps Lock remapped to escape: */
         return basicKeyCommands
-    }
-
-    @objc func cutText(_ sender: UIKeyCommand) {
-        let commandString = "window.term_.onCut('null');"
-        evaluateJavaScript(commandString) { (result, error) in
-            // if let error = error { print(error) }
-            // if let result = result { print(result) }
-        }
     }
 
     @objc func selectAll_(_ sender: UIKeyCommand) {

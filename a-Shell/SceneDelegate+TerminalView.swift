@@ -35,6 +35,7 @@ extension SceneDelegate {
     }
     
     func fillAutocompleteSuggestions(command: String) {
+        var mainCommand = command
         autocompleteSuggestions = []
         autocompletePosition = 0
         autocompleteOptions = false
@@ -63,20 +64,54 @@ extension SceneDelegate {
                     }
                 }
             }
-            // TODO: if there is a pipe (|) in the command, split on the last one, then redo this.
-
             // Are we autocompleting a command or something else?
             // TODO: this creates problems for "\ " and quoted spaces. We just need first and last components.
-            var commandParts = command.components(separatedBy: " ")
+            let commandParts = command.components(separatedBy: " ")
             NSLog("commandParts: \(commandParts)")
-            if (commandParts.count == 1) {
+            mainCommand = commandParts[0]
+            var autocompleteCommands = false
+            if (commandParts.count <= 1) || (commandParts.last!.contains("|")) {
+                autocompleteCommands = true
+                mainCommand = commandParts.last!
+                if let alternateScreenRange = mainCommand.range(of: "|") { // case with ls|grep
+                    mainCommand.removeSubrange(command.startIndex..<alternateScreenRange.upperBound)
+                }
+            } else {
+                // case with "ls | grep"
+                let beforeCurrentElement = commandParts[commandParts.count - 2]
+                if (beforeCurrentElement.hasSuffix("|")) {
+                    autocompleteCommands = true
+                    mainCommand = commandParts.last!
+                } else if (beforeCurrentElement.contains("|")) {
+                    mainCommand = beforeCurrentElement
+                    if let alternateScreenRange = mainCommand.range(of: "|") { // case with ls|grep
+                        mainCommand.removeSubrange(mainCommand.startIndex..<alternateScreenRange.upperBound)
+                    }
+                } else {
+                    var previousPart = ""
+                    for part in commandParts.reversed() {
+                        if (part.hasSuffix("|")) {
+                            mainCommand = previousPart
+                            break
+                        } else if (part.contains("|")) {
+                            mainCommand = part
+                            if let alternateScreenRange = mainCommand.range(of: "|") { // case with ls|grep
+                                mainCommand.removeSubrange(mainCommand.startIndex..<alternateScreenRange.upperBound)
+                                break
+                            }
+                        }
+                        previousPart = part
+                    }
+                }
+            }
+            if autocompleteCommands {
                 // Autocompleting a command:
                 // The aliases go first:
                 let aliasArray = aliasesAsArray() as! [String]?
                 for suggestion in aliasArray! { // alphabetical order
-                    if suggestion.hasPrefix(command) {
+                    if suggestion.hasPrefix(mainCommand) {
                         var shortenedSugg = suggestion
-                        shortenedSugg.removeFirst(command.count)
+                        shortenedSugg.removeFirst(mainCommand.count)
                         if (!autocompleteSuggestions.contains(shortenedSugg)) && (!autocompleteSuggestions.contains(shortenedSugg + " ")) {
                             // add a space so we're ready with the arguments
                             autocompleteSuggestions.append(shortenedSugg + " ")
@@ -85,9 +120,9 @@ extension SceneDelegate {
                 }
                 // Followed by the actual commands:
                 for suggestion in commandsArray { // alphabetical order
-                    if suggestion.hasPrefix(command) {
+                    if suggestion.hasPrefix(mainCommand) {
                         var shortenedSugg = suggestion
-                        shortenedSugg.removeFirst(command.count)
+                        shortenedSugg.removeFirst(mainCommand.count)
                         if (!autocompleteSuggestions.contains(shortenedSugg)) && (!autocompleteSuggestions.contains(shortenedSugg + " ")) {
                             // add a space so we're ready with the arguments
                             autocompleteSuggestions.append(shortenedSugg + " ")
@@ -96,12 +131,43 @@ extension SceneDelegate {
                 }
             } else {
                 // We have already entered a command:
-                let futureCommand = aliasedCommand(commandParts.first)
+                let futureCommand = aliasedCommand(mainCommand)
                 let commandOperatesOn = operatesOn(futureCommand)
                 let optionList = getoptString(futureCommand)
                 let lastElement = commandParts.last
                 var directoryForListing = lastElement
-                if (lastElement?.first == "-") {
+                if (futureCommand == "z") {
+                    // Autocomplete by matching directories using regexps
+                    // so "z a/b[tab]" will autocomplete to "cd auto/blocking"
+                    // or create a list of all previously used directories that match a/b
+                    var keys: [String]
+                    NSLog("regexp, before: \(directoryForListing)")
+                    if let directoryForListing = directoryForListing?.replacingOccurrences(of: ".", with: "\\.").replacingOccurrences(of: "/", with: ".*/.*") {
+                        NSLog("regexp, after: \(directoryForListing)")
+                        do {
+                            let regex = try NSRegularExpression(pattern: directoryForListing, options: [])
+                            // select keys from dictionary that match argument. Using partial match.
+                            let result = directoriesUsed.filter( { regex.matches(in: $0.key, range: NSRange($0.key.startIndex..<$0.key.endIndex, in: $0.key)).count > 0 } )
+                            if (result.count == 0) {
+                                // No matches in history. Search local directory, same regexp.
+                                let filePaths = try FileManager().contentsOfDirectory(atPath: FileManager().currentDirectoryPath)
+                                var result = filePaths.filter( { regex.matches(in: $0, range: NSRange($0.startIndex..<$0.endIndex, in: $0)).count > 0 } )
+                                if (result.count > 1) {
+                                    let localDirCompact = String(cString: ios_getBookmarkedVersion(FileManager().currentDirectoryPath.utf8CString)) + "/"
+                                    result = result.sorted(by: { current, next in rankDirectory(dir: current, base: localDirCompact) > rankDirectory(dir: next, base: localDirCompact)})
+                                }
+                            }
+                            keys = result.keys.sorted()
+                            keys = keys.sorted(by: { current, next in rankDirectory(dir: current, base: nil) > rankDirectory(dir: next, base: nil)})
+                            for key in keys {
+                                autocompleteSuggestions.append(key.replacingOccurrences(of: " ", with: "\\ "))
+                            }
+                            return
+                        } catch {
+                            NSLog("Error getting Z files from directory: \(directoryForListing): \(error.localizedDescription)")
+                        }
+                    }
+                } else if (lastElement?.first == "-") {
                     // options, like "-l"
                     if (optionList != nil) {
                         for i in 0..<optionList!.count {
@@ -848,6 +914,13 @@ extension SceneDelegate {
                         autocompleteSuggestions[i] = shortenedSugg
                     }
                     NSLog("suggestions: \(autocompleteSuggestions)")
+                    if (commandBeforeCursor.hasPrefix("z ")) {
+                        commandBeforeCursor = "cd "
+                        terminalView?.moveToBeginningOfLine()
+                        terminalView?.saveCursorPosition()
+                        terminalView?.clearToEndOfLine()
+                        terminalView?.feed(text: commandBeforeCursor)
+                    }
                     commandBeforeCursor += commonPrefix
                     terminalView?.feed(text: commonPrefix)
                     if (autocompleteSuggestions.count > 1) {

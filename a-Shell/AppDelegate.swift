@@ -178,8 +178,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UserDefaults.standard.register(defaults: ["bashmarks" : false])
         UserDefaults.standard.register(defaults: ["escape_preference" : false])
         UserDefaults.standard.register(defaults: ["show_toolbar" : true])
-        // Use the system toolbar is the default for iPad M1 and above, but not for the other models:
-        UserDefaults.standard.register(defaults: ["system_toolbar" : isM1iPad(modelName: UIDevice.current.modelName)])
         // What color should the keyboard and system toolbar be? (screen: same mode as the screen itself)
         UserDefaults.standard.register(defaults: ["toolbar_color" : "screen"])
         UserDefaults.standard.register(defaults: ["screen_space" : "default"])
@@ -188,7 +186,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         toolbarShouldBeShown = UserDefaults.standard.bool(forKey: "show_toolbar")
         // system toolbar only applies on iPads:
         if (UIDevice.current.model.hasPrefix("iPad")) {
-            useSystemToolbar = UserDefaults.standard.bool(forKey: "system_toolbar")
+            useSystemToolbar = true
         } else {
             useSystemToolbar = false
         }
@@ -636,39 +634,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         toolbarShouldBeShown = toolbarSettings
-        // Ability to switch to the iPadOS-style system toolbar. Only available on iPads
-        if (UIDevice.current.model.hasPrefix("iPad")) {
-            let systemToolbarSettings = UserDefaults.standard.bool(forKey: "system_toolbar")
-            if (useSystemToolbar && !systemToolbarSettings) {
-                NSLog("Received call to switch to system toolbar through preferences")
-                // User has just requested we hide the system toolbar
-                // Send the value to all the SceneDelegate connected to this application
-                useSystemToolbar = false
-                for scene in UIApplication.shared.connectedScenes {
-                    if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
-                        if (toolbarShouldBeShown) {
-                            delegate.showEditorToolbar()
-                        } else {
-                            delegate.hideToolbar()
-                        }
-                    }
-                }
-            } else if (!useSystemToolbar && systemToolbarSettings) {
-                NSLog("Received call to switch to regular toolbar through preferences")
-                // User has just requested we show the toolbar
-                // Send the value to all the SceneDelegate connected to this application
-                useSystemToolbar = true
-                for scene in UIApplication.shared.connectedScenes {
-                    if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
-                        if (toolbarShouldBeShown) {
-                            delegate.showEditorToolbar()
-                        } else {
-                            delegate.hideToolbar()
-                        }
-                    }
-                }
-            }
-        }
         // How much of screen space should we use?
         let screenSpacePref = UserDefaults.standard.string(forKey: "screen_space")
         if (screenSpacePref == "safe") {

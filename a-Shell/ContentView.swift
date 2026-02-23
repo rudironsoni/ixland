@@ -100,7 +100,7 @@ struct Webview : UIViewRepresentable {
 
 
 public var toolbarShouldBeShown = true
-public var useSystemToolbar = false
+public var useSystemToolbar = UIDevice.current.model.hasPrefix("iPad")
 public var showToolbar = true
 public var showKeyboardAtStartup = true
 // .fullScreen is too much for floating KB + toolbar, ignoreSafeArea seems to work,
@@ -242,7 +242,7 @@ struct ContentView: View {
                         localShowWebView = true
                     }
                     keyboardHeight = $0
-                    if !showKeyboardAtStartup || (latestNotification == "UIKeyboardWillHideNotification") {
+                    if !showKeyboardAtStartup || ((latestNotification == "UIKeyboardWillHideNotification") && !useSystemToolbar) {
                         keyboardHeight = 0
                     }
                     frameHeight = geometry.size.height
@@ -257,44 +257,36 @@ struct ContentView: View {
                         }
                     }
                     if (!useSystemToolbar) {
-                        // iPhones (mostly) and iPads with not-system toolbars
+                        // iPhones (only)
                         NSLog("Scene: \(UIScreen.main.bounds) terminal frame: \(terminalview.view.frame) geometry size: \(geometry.size) keyboardHeight: \(keyboardHeight)")
-                        if (UIDevice.current.model.hasPrefix("iPhone")) {
                             // geometry.size.height is wildly all over the place on iPhones
                             frameHeight = UIScreen.main.bounds.height - keyboardHeight
-                        } else { // iPads
-                            if (UIScreen.main.bounds.height < geometry.size.height + keyboardHeight + 80) {
-                                if (!slideOverWindow) { // Full screen / split windows
-                                    frameHeight = UIScreen.main.bounds.height - keyboardHeight - 30
-                                } else { // slide-over windows
-                                    frameHeight = UIScreen.main.bounds.height - keyboardHeight - 50
-                                }
-                            } else {
-                                // Floating window. Most of the time, geometry.size is correct (minus the toolbar)
-                                // Erratic behaviour on the simulator, no visible difference in the data. I give up.
-                                if (keyboardHeight != 0) {
-                                    frameHeight = geometry.size.height - 30
-                                } else {
-                                    frameHeight = geometry.size.height
-                                }
-                            }
-                        }
-                        if showToolbar && UIDevice.current.model.hasPrefix("iPhone") && (UIScreen.main.bounds.height > UIScreen.main.bounds.width) {
+                        if showToolbar && (UIScreen.main.bounds.height > UIScreen.main.bounds.width) {
                             // terminalview.view.inputAccessoryView!.bounds says the toolbar has a height of 35, but it's too much
                             // keyboard height takes into account the toolbar height in landscape mode, not in portrait
                             // It's probably a bug that will be fixed at some point
                             frameHeight -= 30
                         }
                         NSLog("After computations, frameHeight: \(frameHeight)")
+                    }  else {
+                        // UIScreen.main.bounds.height > geometry.size.height + keyboardHeight + 80)
+                        NSLog("keyboardHeight: \(keyboardHeight) geometry: \(geometry.size.height) Screen: \(UIScreen.main.bounds.height) ")
+                        if (useSystemToolbar && (keyboardHeight > 0) && (keyboardHeight < 75) && slideOverWindow) {
+                            NSLog("floating window issue detected")
+                        }
+                        // Summary: if I go external KB -> internal KB -> external KB, then the toolbar hides the last likes of text.
+                        // at the end we get keyboardHeight = 55, geometry = 963, screen height = 1366
+                        // If I counter this with padding, then the terminal disappears.
                     }
                 }
-                // iPhones / iPads without useSystemToolbar
+                // iPhones
                 .if((viewBehavior == .original || viewBehavior == .ignoreSafeArea) && !useSystemToolbar) {
                     $0.frame(height: frameHeight).position(x: frameWidth / 2, y: frameHeight / 2)
                 }
                 // floating windows on iPads (only tested in the simumator)
-                .if (useSystemToolbar && (keyboardHeight < 75) && (UIScreen.main.bounds.height > geometry.size.height + keyboardHeight + 80)) {
+                .if (useSystemToolbar && (keyboardHeight > 0) && (keyboardHeight < 75) && slideOverWindow) {
                     // With a floating window and an external keyboard, we need to push the bottom of the terminal view a little
+                    // But this causes full screen windows to disappear.
                     $0.padding(.bottom, 20)
                 }
                 .if(((viewBehavior == .ignoreSafeArea || viewBehavior == .fullScreen)) && useSystemToolbar) {
