@@ -26,7 +26,7 @@ var localServerApp = Router()
 
 func startLocalWebServer() {
     localServerApp.get("/*") { request, response, next in
-        // NSLog("Kitura request received: \(request.matchedPath)")
+        NSLog("Kitura request received: \(request.matchedPath)")
         // Load ~/Library/node_modules first if it exists:
         // This also loads ~/Library/wasm.html and ~/Library/require.js if the user really wants to.
         let libraryURL = try! FileManager().url(for: .libraryDirectory,
@@ -36,7 +36,7 @@ func startLocalWebServer() {
         let localFilePath = libraryURL.path + request.matchedPath
         let rootFilePath = Bundle.main.resourcePath! + request.matchedPath
         var fileName: String? = nil
-        // NSLog("file requested: \(urlPath). Trying \(localFilePath)  and \(rootFilePath)")
+        NSLog("file requested: \(request.matchedPath). Trying \(localFilePath)  and \(rootFilePath)")
         if (FileManager().fileExists(atPath: localFilePath) && !URL(fileURLWithPath: localFilePath).isDirectory) {
             fileName = localFilePath
         } else if (FileManager().fileExists(atPath: rootFilePath) && !URL(fileURLWithPath: rootFilePath).isDirectory) {
@@ -55,15 +55,16 @@ func startLocalWebServer() {
             response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
             response.headers["Cross-Origin-Resource-Policy"] =  "same-origin"
             do {
-                // NSLog("Kitura file found: \(filePath)")
+                NSLog("Kitura file found: \(filePath)")
                 try response.send(fileName: filePath)
             }
             catch {
+                NSLog("Kitura failure: \(filePath)")
                 response.statusCode = .forbidden
                 response.send("Loading \(filePath) failed")
             }
         } else {
-            // NSLog("Kitura file not found: \(request.matchedPath)")
+            NSLog("Kitura file not found: \(request.matchedPath)")
             response.statusCode = .notFound
             response.send("")
         }

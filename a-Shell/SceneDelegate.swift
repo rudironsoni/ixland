@@ -213,7 +213,6 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 sendCarriageReturn = true
             }
             // If it's termView at the front, just print the string
-            // Otherwise, use webView?.evaluateJavaScript()
             if (title == deleteBackward) {
                 self.terminalView?.deleteBackward()
             } else {
@@ -3327,6 +3326,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             terminalView = contentView?.terminalview.view
             terminalView?.terminalDelegate = self
             terminalView?.isAccessibilityElement = true
+            terminalView?.translatesAutoresizingMaskIntoConstraints = false
             // Is the app opened from a Shortcut?
             var startedFromShortcut = false
             for userActivity in connectionOptions.userActivities {
@@ -5244,8 +5244,8 @@ extension SceneDelegate: WKUIDelegate {
         decidePolicyFor navigationResponse: WKNavigationResponse,
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         // NSLog("decidePolicyFor WKNavigationResponse: \(navigationResponse)")
-        // NSLog("decidePolicyFor, url requested: \((navigationResponse.response as? HTTPURLResponse)?.url)")
-        // NSLog("decidePolicyFor, webView.url?.path: \(webView.url?.path)")
+        NSLog("decidePolicyFor, url requested: \((navigationResponse.response as? HTTPURLResponse)?.url)")
+        NSLog("decidePolicyFor, webView.url?.path: \(webView.url?.path)")
         guard let statusCode
                 = (navigationResponse.response as? HTTPURLResponse)?.statusCode else {
             // NSLog("decidePolicyFor: no http status code to act on")
@@ -5254,6 +5254,7 @@ extension SceneDelegate: WKUIDelegate {
             return
         }
         if statusCode >= 400 {
+            NSLog("decidePolicyFor: status code: \(statusCode)")
             if let requestedUrl = (navigationResponse.response as? HTTPURLResponse)?.url {
                 if (!requestedUrl.isFileURL
                     && requestedUrl.host == "127.0.0.1"
@@ -5289,12 +5290,12 @@ extension SceneDelegate: WKUIDelegate {
         if #available(iOS 14.0, *) {
             preferences.allowsContentJavaScript = true // The default value is true, but let's make sure.
         }
-        // NSLog("webView.url?.path: \(webView.url?.path)")
+        NSLog("decidePolicyFor webView.url?.path: \(webView.url?.path)")
         decisionHandler(.allow, preferences)
     }
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        // NSLog("finished loading, title= \(webView.title ?? "unknown"), host= \(webView.url?.host) path=\(webView.url?.path ?? "unknown"), navigation= \(navigation)")
+        NSLog("finished loading, title= \(webView.title ?? "unknown"), host= \(webView.url?.host) path=\(webView.url?.path ?? "unknown"), navigation= \(navigation)")
         if (webView.url?.host == "localhost") && (webView.url?.path == "/wasm.html") {
             // host=="localhost" && path == "/wasm.html" --> make the terminal active
             NSLog("Back to the terminal. showWebView: \(showWebView)")
