@@ -67,7 +67,7 @@ extension SceneDelegate {
             // Are we autocompleting a command or something else?
             // TODO: this creates problems for "\ " and quoted spaces. We just need first and last components.
             let commandParts = command.components(separatedBy: " ")
-            NSLog("commandParts: \(commandParts)")
+            // NSLog("commandParts: \(commandParts)")
             mainCommand = commandParts[0]
             var autocompleteCommands = false
             if (commandParts.count <= 1) || (commandParts.last!.contains("|")) {
@@ -335,7 +335,7 @@ extension SceneDelegate {
                                 if filePath.hasPrefix(".") {
                                     continue
                                 }
-                                NSLog("Checking \(filePath) against \"\(matchingPath)\": \(filePath.hasPrefix(matchingPath))")
+                                // NSLog("Checking \(filePath) against \"\(matchingPath)\": \(filePath.hasPrefix(matchingPath))")
                                 if (matchingPath == "") {
                                     filePath = prefix + filePath
                                     filePath = filePath.replacingOccurrences(of: " ", with: "\\ ")
@@ -346,7 +346,7 @@ extension SceneDelegate {
                                     var shortenedSugg = filePath
                                     shortenedSugg.removeFirst(matchingPath.count)
                                     shortenedSugg = shortenedSugg.replacingOccurrences(of: " ", with: "\\ ")
-                                    NSLog("Adding \"\(shortenedSugg)\"")
+                                    // NSLog("Adding \"\(shortenedSugg)\"")
                                     if (!autocompleteSuggestions.contains(shortenedSugg)) {
                                         autocompleteSuggestions.append(shortenedSugg)
                                     }
@@ -781,7 +781,7 @@ extension SceneDelegate {
                 }
                 return
             }
-            NSLog("received string: \"\(string)\"")
+            // NSLog("received string: \"\(string)\"")
             // remove the copy-paste-select menu if it is visible:
             if UIMenuController.shared.isMenuVisible {
                 UIMenuController.shared.hideMenu()
@@ -873,7 +873,7 @@ extension SceneDelegate {
                     }
                 }
             case tabulation: // autocomplete
-                NSLog("received tab. Autocomplete running: \(autocompleteRunning)")
+                // NSLog("received tab. Autocomplete running: \(autocompleteRunning)")
                 if (autocompleteRunning) {
                     if (autocompleteOptions) {
                         // insert the option, keep running autocomplete:
@@ -887,7 +887,7 @@ extension SceneDelegate {
                         if (autocompleteSuggestions[autocompletePosition].hasSuffix("/")) {
                             // single suggestion, is a directory: fill again but don't force
                             fillAutocompleteSuggestions(command: commandBeforeCursor)
-                            NSLog("suggestions: \(autocompleteSuggestions)")
+                            // NSLog("suggestions: \(autocompleteSuggestions)")
                             if (autocompleteSuggestions.count > 0) {
                                 terminalView?.saveCursorPosition()
                                 printAutocompleteString(suggestion: autocompleteSuggestions[autocompletePosition])
