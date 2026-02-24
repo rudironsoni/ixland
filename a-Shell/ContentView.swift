@@ -111,6 +111,7 @@ public var latestNotification: String = ""
 public var slideOverWindow = false
 public var extendBy: CGFloat = 0
 public var showWebView = false
+public var terminalViewHeight = 80
 
 struct ContentView: View {
     @State private var keyboardHeight: CGFloat = 0
@@ -234,6 +235,9 @@ struct ContentView: View {
                     }.navigationViewStyle(.stack) // so the navigation view is full screen on an iPad
                 } else {
                     terminalview
+                        // .onChange(of: terminalViewHeight) { newValue in
+                        //     NSLog("Change detected of: \(newValue)")
+                        // }
                 }
             }
             // terminalview
@@ -266,9 +270,9 @@ struct ContentView: View {
                 }  else {
                     // iPads:
                     // UIScreen.main.bounds.height > geometry.size.height + keyboardHeight + 80)
-                    NSLog("keyboardHeight: \(keyboardHeight) geometry: \(geometry.size.height) Screen: \(UIScreen.main.bounds.height) ")
+                    NSLog("keyboardHeight: \(keyboardHeight) slideOverWindow: \(slideOverWindow) geometry: \(geometry.size.height) Screen: \(UIScreen.main.bounds.height) ")
                     if (useSystemToolbar && (keyboardHeight > 0) && (keyboardHeight < 75) && slideOverWindow) {
-                        NSLog("floating window issue detected")
+                        NSLog("floating window issue detected with height")
                     }
                     // Summary: if I go external KB -> internal KB -> external KB, then the toolbar hides the last likes of text.
                     // at the end we get keyboardHeight = 55, geometry = 963, screen height = 1366
@@ -278,6 +282,9 @@ struct ContentView: View {
             // iPhones
             .if(!useSystemToolbar) {
                 $0.frame(height: frameHeight).position(x: frameWidth / 2, y: frameHeight / 2)
+            }
+            .if((viewBehavior == .ignoreSafeArea || viewBehavior == .original) && useSystemToolbar) {
+                $0.frame(maxHeight: UIScreen.main.bounds.height - 73) // This works for full screen, not slideover
             }
             // floating windows on iPads (only tested in the simumator)
             // .if (useSystemToolbar && (keyboardHeight > 0) && (keyboardHeight < 75) && slideOverWindow) {
