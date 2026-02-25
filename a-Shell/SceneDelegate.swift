@@ -1082,12 +1082,10 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         // NSLog("rightButtonGroup: \(rightButtonGroup)")
         DispatchQueue.main.async {
             if (useSystemToolbar) {
-                showToolbar = false
                 self.terminalView?.inputAccessoryView = self.emptyToolbar
                 self.terminalView?.inputAssistantItem.leadingBarButtonGroups = self.leftButtonGroups
                 self.terminalView?.inputAssistantItem.trailingBarButtonGroups = self.rightButtonGroups
             } else {
-                showToolbar = true
                 self.terminalView?.inputAssistantItem.leadingBarButtonGroups = []
                 self.terminalView?.inputAssistantItem.trailingBarButtonGroups = []
                 self.terminalView?.inputAccessoryView = self.editorToolbar
@@ -1955,6 +1953,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         let fontLigature = terminalFontLigature ?? factoryFontLigature
         // Force writing all config to term. Used when we changed many parameters.
         terminalView?.backgroundColor = backgroundColor
+        terminalView?.getTerminal().backgroundColor = (backgroundColor.toSwiftTermColor())
         terminalView?.tintColor = foregroundColor
         terminalView?.getTerminal().foregroundColor = (foregroundColor.toSwiftTermColor())
         terminalView?.caretColor = cursorColor
@@ -1991,6 +1990,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             if (backgroundColor != nil) {
                 self.terminalBackgroundColor = backgroundColor
                 self.terminalView?.backgroundColor = self.terminalBackgroundColor
+                self.terminalView?.getTerminal().backgroundColor = (backgroundColor!.toSwiftTermColor())
             }
             if (foregroundColor != nil) {
                 self.terminalForegroundColor = foregroundColor
@@ -3350,12 +3350,10 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             } else {
                 generateToolbarButtons()
                 if (useSystemToolbar) {
-                    showToolbar = false
                     self.terminalView!.inputAccessoryView = self.emptyToolbar
                     self.terminalView?.inputAssistantItem.leadingBarButtonGroups = self.leftButtonGroups
                     self.terminalView?.inputAssistantItem.trailingBarButtonGroups = self.rightButtonGroups
                 } else {
-                    showToolbar = true
                     self.terminalView!.inputAccessoryView = self.editorToolbar
                 }
                 if #available(iOS 17, *) {
@@ -4067,12 +4065,10 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         } else {
             generateToolbarButtons()
             if (useSystemToolbar) {
-                showToolbar = false
                 self.terminalView!.inputAccessoryView = self.emptyToolbar
                 self.terminalView?.inputAssistantItem.leadingBarButtonGroups = self.leftButtonGroups
                 self.terminalView?.inputAssistantItem.trailingBarButtonGroups = self.rightButtonGroups
             } else {
-                showToolbar = true
                 self.terminalView!.inputAccessoryView = self.editorToolbar
             }
             if #available(iOS 17, *) {

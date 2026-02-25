@@ -108,7 +108,6 @@ public var showKeyboardAtStartup = true
 // Make this a user-defined setup, with "ignoreSafeArea" the default.
 public var viewBehavior: ViewBehavior = .ignoreSafeArea
 public var latestNotification: String = ""
-public var slideOverWindow = false
 public var extendBy: CGFloat = 0
 public var showWebView = false
 public var terminalViewHeight = 80
@@ -147,11 +146,6 @@ struct ContentView: View {
                 latestNotification = "UIKeyboardWillHideNotification"
             } else {
                 latestNotification = ""
-            }
-            if (x > 0) {
-                slideOverWindow = true
-            } else {
-                slideOverWindow = false
             }
             return height
         }
@@ -269,11 +263,23 @@ struct ContentView: View {
                     NSLog("After computations, frameHeight: \(frameHeight)")
                 }  else {
                     // iPads:
-                    // UIScreen.main.bounds.height > geometry.size.height + keyboardHeight + 80)
-                    NSLog("keyboardHeight: \(keyboardHeight) slideOverWindow: \(slideOverWindow) geometry: \(geometry.size.height) Screen: \(UIScreen.main.bounds.height) ")
-                    if (useSystemToolbar && (keyboardHeight > 0) && (keyboardHeight < 75) && slideOverWindow) {
-                        NSLog("floating window issue detected with height")
+                    // geometry.size.height is not reliable (and neither is maxY, since maxY = minY + height)
+                    let globalFrame = geometry.frame(in: .global)
+                    if (keyboardHeight < 40) {
+                        // iPad 16, slideOver window. minY == 20, keyboardHeight == 35
+                        frameHeight = UIScreen.main.bounds.height - 73 - globalFrame.minY
+                    } else if (keyboardHeight < 60) {
+                        // iPad 16, full window. minY == 20, keyboardHeight == 55
+                        frameHeight = UIScreen.main.bounds.height - 73
+                    } else if (keyboardHeight < 90) {
+                        // iOS 26 with external keyboard (I see 66, 69, 71, 76...)
+                        // minY == 32
+                        frameHeight = geometry.size.height - 16
+                    } else {
+                        frameHeight = geometry.size.height  // or UIScreen.main.bounds.height?
                     }
+                    // frameHeight = UIScreen.main.bounds.height - keyboardHeight - globalFrame.minY // NO!
+                    NSLog("keyboardHeight: \(keyboardHeight) geometry height: \(geometry.size.height) min: \(globalFrame.minY)  computed: \(frameHeight) Screen: \(UIScreen.main.bounds.height) ")
                     // Summary: if I go external KB -> internal KB -> external KB, then the toolbar hides the last likes of text.
                     // at the end we get keyboardHeight = 55, geometry = 963, screen height = 1366
                     // If I counter this with padding, then the terminal disappears.
@@ -283,15 +289,9 @@ struct ContentView: View {
             .if(!useSystemToolbar) {
                 $0.frame(height: frameHeight).position(x: frameWidth / 2, y: frameHeight / 2)
             }
-            .if((viewBehavior == .ignoreSafeArea || viewBehavior == .original) && useSystemToolbar) {
-                $0.frame(maxHeight: UIScreen.main.bounds.height - 73) // This works for full screen, not slideover
+            .if((viewBehavior == .ignoreSafeArea || viewBehavior == .original) && useSystemToolbar && showToolbar) {
+                $0.frame(maxHeight: frameHeight)
             }
-            // floating windows on iPads (only tested in the simumator)
-            // .if (useSystemToolbar && (keyboardHeight > 0) && (keyboardHeight < 75) && slideOverWindow) {
-            // With a floating window and an external keyboard, we need to push the bottom of the terminal view a little
-            // But this causes full screen windows to disappear.
-            //     $0.padding(.bottom, 20)
-            // }
             .if(((viewBehavior == .ignoreSafeArea || viewBehavior == .fullScreen)) && useSystemToolbar) {
                 $0.ignoresSafeArea(.container, edges: .bottom)
             }
