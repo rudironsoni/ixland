@@ -117,6 +117,7 @@ struct ContentView: View {
     @State private var lastKeyboardHeight: CGFloat = 0
     @State private var frameHeight: CGFloat = 0
     @State private var frameWidth: CGFloat = 0
+    @State private var dynamicIsland: CGFloat = 0
     @State private var localShowWebView: Bool = true
 
     let terminalview = Termview()
@@ -169,7 +170,6 @@ struct ContentView: View {
                             .toolbar {
                                 ToolbarItem(placement: .navigationBarLeading) {
                                     Button(action: {
-                                        NSLog("goBackAction()")
                                         if (webview.webView.canGoBack) {
                                             if let backPage = webview.webView.backForwardList.item(at: -1) {
                                                 if backPage.url.host != "localhost" || backPage.url.path != "/wasm.html" {
@@ -183,7 +183,6 @@ struct ContentView: View {
                                 }
                                 ToolbarItem(placement: .navigationBarLeading) {
                                     Button(action: {
-                                        NSLog("terminal clicked")
                                         localShowWebView = false
                                         showWebView = false
                                         showKeyboardAtStartup = true
@@ -205,7 +204,6 @@ struct ContentView: View {
                                 }
                                 ToolbarItem(placement: .navigationBarTrailing) {
                                     Button(action: {
-                                        NSLog("reload action")
                                         webview.webView.reload()
                                     }, label: {
                                         Image(systemName: "arrow.clockwise.circle")
@@ -213,7 +211,6 @@ struct ContentView: View {
                                 }
                                 ToolbarItem(placement: .navigationBarTrailing) {
                                     Button(action: {
-                                        NSLog("goForward action()")
                                         if (webview.webView.canGoForward) {
                                             if let backPage = webview.webView.backForwardList.item(at: 1) {
                                                 if backPage.url.host != "localhost" || backPage.url.path != "/wasm.html" {
@@ -229,9 +226,6 @@ struct ContentView: View {
                     }.navigationViewStyle(.stack) // so the navigation view is full screen on an iPad
                 } else {
                     terminalview
-                        // .onChange(of: terminalViewHeight) { newValue in
-                        //     NSLog("Change detected of: \(newValue)")
-                        // }
                 }
             }
             // terminalview
@@ -245,22 +239,39 @@ struct ContentView: View {
                     keyboardHeight = 0
                 }
                 frameHeight = geometry.size.height
-                frameWidth = terminalview.view.frame.width
+                frameWidth = geometry.size.width
                 if (!useSystemToolbar) {
                     // iPhones (only)
                     if (frameWidth > UIScreen.main.bounds.width) {
                         frameWidth = UIScreen.main.bounds.width
                     }
-                    NSLog("Scene: \(UIScreen.main.bounds) terminal frame: \(terminalview.view.frame) geometry size: \(geometry.size) keyboardHeight: \(keyboardHeight)")
-                    // geometry.size.height is wildly all over the place on iPhones
+                    let globalFrame = geometry.frame(in: .global)
+                    if (globalFrame.minY > 45) {
+                        // There is a dynamic island at the top, we need to move the terminal window up a bit.
+                        // iPhones with DI: minY = 59 on iPhone 15, 62 on iPhone 17
+                        // iPhones without DI: minY = 20 on iPhone 8 and iPhone SE
+                        dynamicIsland = 13
+                    }
+                    NSLog("Scene: \(UIScreen.main.bounds) terminal frame: \(terminalview.view.frame) geometry size: \(geometry.size) keyboardHeight: \(keyboardHeight) minY= \(globalFrame.minY)")
+                    // geometry.size.height is wildly all over the place on iPhones.
+                    // Sometimes it's a better estimate than keyboardHeight + toolbarHeight, but
+                    // it doesn't change when we show and remove the emoji keyboard.
+                    // Not for future self: do **not** use geometry.size.height for anything. I tried, it fails.
                     frameHeight = UIScreen.main.bounds.height - keyboardHeight
                     if showToolbar && (UIScreen.main.bounds.height > UIScreen.main.bounds.width) {
-                        // terminalview.view.inputAccessoryView!.bounds says the toolbar has a height of 35, but it's too much
+                        NSLog("toolbar height: \(terminalview.view.inputAccessoryView!.bounds.height)")
+                        let toolbarHeight = terminalview.view.inputAccessoryView!.bounds.height
                         // keyboard height takes into account the toolbar height in landscape mode, not in portrait
-                        // It's probably a bug that will be fixed at some point
-                        frameHeight -= 30
+                        // It's probably a bug that will be fixed at some poin
+                        if (UIScreen.main.bounds.height < 700) {
+                            // The toolbar height is a bit too much on iPhone SE and iPhone 8 (h = 667)
+                            // This could be merged with the dynamic island test (?)
+                            frameHeight -= 20
+                        } else {
+                            // On the simulator, this is still not enough for some phones. What can I do at that point?
+                            frameHeight -= toolbarHeight
+                        }
                     }
-                    NSLog("After computations, frameHeight: \(frameHeight)")
                 }  else {
                     // iPads:
                     // geometry.size.height is not reliable (and neither is maxY, since maxY = minY + height)
@@ -276,18 +287,15 @@ struct ContentView: View {
                         // minY == 32
                         frameHeight = geometry.size.height - 16
                     } else {
-                        frameHeight = geometry.size.height  // or UIScreen.main.bounds.height?
+                        frameHeight = geometry.size.height
                     }
-                    // frameHeight = UIScreen.main.bounds.height - keyboardHeight - globalFrame.minY // NO!
-                    NSLog("keyboardHeight: \(keyboardHeight) geometry height: \(geometry.size.height) min: \(globalFrame.minY)  computed: \(frameHeight) Screen: \(UIScreen.main.bounds.height) ")
-                    // Summary: if I go external KB -> internal KB -> external KB, then the toolbar hides the last likes of text.
-                    // at the end we get keyboardHeight = 55, geometry = 963, screen height = 1366
-                    // If I counter this with padding, then the terminal disappears.
+                    // NSLog("keyboardHeight: \(keyboardHeight) geometry height: \(geometry.size.height) min: \(globalFrame.minY)  computed: \(frameHeight) Screen: \(UIScreen.main.bounds.height) ")
                 }
+                NSLog("results: frameHeight: \(frameHeight)")
             }
             // iPhones
             .if(!useSystemToolbar) {
-                $0.frame(height: frameHeight).position(x: frameWidth / 2, y: frameHeight / 2)
+                $0.frame(height: frameHeight).position(x: frameWidth / 2, y: frameHeight / 2 - dynamicIsland)
             }
             .if((viewBehavior == .ignoreSafeArea || viewBehavior == .original) && useSystemToolbar && showToolbar) {
                 $0.frame(maxHeight: frameHeight)

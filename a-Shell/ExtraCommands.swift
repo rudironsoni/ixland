@@ -131,8 +131,6 @@ a-Shell can do most of the things you can do in a terminal, locally on your iPho
 - Files created by Shortcuts are in ~shortcuts/
 - a-Shell executes the ~/Documents/.profile and ~/Documents/.bashrc files for each new window
 
-- Single-finger swipes move the cursor or scroll, two-finger swipes send keyboard input (up, down, escape, tab). "man gestures" for more.
-
 - Edit files with vim and pico.
 - Transfer files with curl, tar, scp and sftp.
 - Clone repositories and do version control with lg2 (similar to git)

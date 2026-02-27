@@ -4236,7 +4236,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         terminalView?.isAccessibilityElement = value
     }
     
-    func outputToWebView(string: String) {
+    func outputToTerminalView(string: String) {
         guard (terminalView != nil) else { return }
         // Only store what happens in the main buffer, not the alternate buffer
         if !self.terminalView!.getTerminal().isCurrentBufferAlternate {
@@ -4292,7 +4292,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         }
         if let string = String(data: data, encoding: .utf8) {
             // NSLog("UTF8 string: \(string)")
-            outputToWebView(string: string)
+            outputToTerminalView(string: string)
             if (string.contains(endOfTransmission)) {
                 // NSLog("Received ^D, stopping writing")
                 stdout_active = false
@@ -4307,7 +4307,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             for i in 0...max-1 {
                 if let string = String(data: data.prefix(max - i), encoding: .utf8) {
                     conversionFound = true
-                    outputToWebView(string: string)
+                    outputToTerminalView(string: string)
                     if (string.contains(endOfTransmission)) {
                         stdout_active = false
                     } else {
@@ -4323,7 +4323,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 for encoding in [String.Encoding.isoLatin1, .isoLatin2, .iso2022JP, .japaneseEUC, .macOSRoman, .shiftJIS, .windowsCP1250, .nonLossyASCII, .ascii] {
                     if let string = String(data: data, encoding: encoding) {
                         conversionFound = true
-                        outputToWebView(string: string)
+                        outputToTerminalView(string: string)
                         if (string.contains(endOfTransmission)) {
                             stdout_active = false
                         }
@@ -4343,7 +4343,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                         stdout_active = false
                     }
                 }
-                outputToWebView(string: outputString)
+                outputToTerminalView(string: outputString)
             }
         }
     }
