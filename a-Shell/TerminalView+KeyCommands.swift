@@ -9,7 +9,9 @@
 import Foundation
 import UIKit
 import SwiftTerm
-import ios_system
+
+// Currently, external keyboard shortcuts are not working, see https://github.com/migueldeicaza/SwiftTerm/issues/483
+// We keep the code in place for now, since it compiles and doesn't break anything.
 
 extension TerminalView {
     
@@ -19,17 +21,17 @@ extension TerminalView {
         }
     }
 
-    @objc private func closeWindow(_ sender: UIBarButtonItem) {
+    @objc private func clearScreen(_ sender: UIBarButtonItem) {
         for scene in UIApplication.shared.connectedScenes {
             if let delegate = scene.delegate as? SceneDelegate {
                 if delegate.terminalView == self {
-                    delegate.closeWindow()
+                    delegate.clearScreen()
                     return
                 }
             }
         }
     }
-
+    
     @objc private func increaseTextSize(_ sender: UIBarButtonItem) {
         NSLog("Increase event received")
         for scene in UIApplication.shared.connectedScenes {
@@ -57,18 +59,18 @@ extension TerminalView {
     }
 
 
-    override open var keyCommands: [UIKeyCommand]? {
+    open override var keyCommands: [UIKeyCommand]? {
         // In case we need keyboard personalization for specific languages
         // var language = textInputMode?.primaryLanguage ?? "en-US"
-        var basicKeyCommands = [
+        // command-W is now a system-based command, like command-backquote
+        let basicKeyCommands = [
             // "discoverabilityTitle:)' was deprecated in iOS 13.0" but it's quite convenient
+            UIKeyCommand(input: "k", modifierFlags:.command, action: #selector(clearScreen), discoverabilityTitle: "Clear screen"),
             UIKeyCommand(input: "n", modifierFlags:.command, action: #selector(newWindow), discoverabilityTitle: "New window"),
-            UIKeyCommand(input: "w", modifierFlags:.command, action: #selector(closeWindow), discoverabilityTitle: "Close window"),
             UIKeyCommand(input: "+", modifierFlags:.command, action: #selector(increaseTextSize), discoverabilityTitle: "Bigger text"),
             UIKeyCommand(input: "-", modifierFlags:.command, action: #selector(decreaseTextSize), discoverabilityTitle: "Smaller text"),
             // back/forward one page keys for internal browser:
         ]
-        /* Caps Lock remapped to escape: */
         return basicKeyCommands
-    }    
+    }
 }

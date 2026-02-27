@@ -9,14 +9,6 @@ import SwiftTerm // for the terminal window
 import ios_system
 import TipKit // for helpful tips
 
-var autocompleteRunning = false
-var autocompleteSuggestions: [String] = []
-var autocompletePosition = 0
-var autocompleteOptions = false
-// variables for user interaction with SwiftTerm:
-var commandBeforeCursor = ""
-var commandAfterCursor = ""
-
 extension SceneDelegate {
     
     func longestCommonPrefix(_ strs: [String]) -> String {

@@ -145,6 +145,14 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     var extraBytes: Data? = nil
     var tapPosition: CGPoint = .zero
     var sceneIsInForeground = false
+    // command entering and autocomplete (have to be scene-specific, can't be stored in an extension):
+    var autocompleteRunning = false
+    var autocompleteSuggestions: [String] = []
+    var autocompletePosition = 0
+    var autocompleteOptions = false
+    // variables for user interaction with SwiftTerm:
+    var commandBeforeCursor = ""
+    var commandAfterCursor = ""
     
     // Create a document picker for directories.
     private let documentPicker =
@@ -1442,6 +1450,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         if (self.currentCommand == "") {
             lastUsedPrompt = parsePrompt()
             DispatchQueue.main.async {
+                // TODO: remove this. Probably caused by the marginMode issue?
                 if (self.terminalView!.atTheEndOfTheLine()) {
                     self.terminalView!.feed(text: "\n\r")
                     self.windowPrintedContent += "\n\r"
@@ -1470,7 +1479,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         fputs(string, thread_stderr)
     }
     
-    func closeWindow() {
+    @objc func closeWindow() {
         // Only close if all running functions are terminated:
         NSLog("Closing window: \(currentCommand)")
         if (currentCommand != "") {
@@ -1486,7 +1495,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         }
     }
     
-    func clearScreen() {
+    @objc func clearScreen() {
         // clear entire display: ^[[2J
         // position cursor on top line: ^[[1;1H
         terminalView?.feed(text: self.escape + "[2J")

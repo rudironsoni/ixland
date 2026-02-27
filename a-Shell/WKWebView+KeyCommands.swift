@@ -1,5 +1,5 @@
 //
-//  ViewController+KeyCommands.swift
+//  WkWebView+KeyCommands.swift
 //  a-Shell
 //
 //  Created by Nicolas Holzschuch on 26/08/2019.
