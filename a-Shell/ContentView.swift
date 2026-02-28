@@ -88,6 +88,7 @@ struct Webview : UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: WebViewType, context: Context) {
+        NSLog("updateUIView: url= \(uiView.url)")
         if (uiView.url != nil) { return } // Already loaded the page
         uiView.isOpaque = false
         if (appVersion != "a-Shell-mini") {
@@ -190,7 +191,7 @@ struct ContentView: View {
                                         if (appVersion != "a-Shell-mini") {
                                             webview.webView.load(URLRequest(url: URL(string: "https://localhost:8443/wasm.html")!))
                                         } else {
-                                            NSLog("Loding wasm.html from 8334")
+                                            NSLog("Loding wasm.html from 8334 (button)")
                                             webview.webView.load(URLRequest(url: URL(string: "https://localhost:8334/wasm.html")!))
                                         }
                                     }, label: {
@@ -231,7 +232,14 @@ struct ContentView: View {
             // terminalview
             .onReceive(keyboardChangePublisher) {
                 if (showWebView) {
-                    localShowWebView = true
+                    if let localUrl = webview.webView.url {
+                        // Change this if moving to separate WkWebView for WASM works
+                        if (localUrl.host == "localhost") && (localUrl.path == "/wasm.html") {
+                            localShowWebView = false
+                        } else {
+                            localShowWebView = true
+                        }
+                    }
                 }
                 keyboardHeight = $0
                 if !showKeyboardAtStartup || ((latestNotification == "UIKeyboardWillHideNotification") && !useSystemToolbar) {

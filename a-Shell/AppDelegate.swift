@@ -36,7 +36,7 @@ func startLocalWebServer() {
         let localFilePath = libraryURL.path + request.matchedPath
         let rootFilePath = Bundle.main.resourcePath! + request.matchedPath
         var fileName: String? = nil
-        // NSLog("file requested: \(request.matchedPath). Trying \(localFilePath)  and \(rootFilePath)")
+        // NSLog("Kitura file requested: \(request.matchedPath). Trying \(localFilePath)  and \(rootFilePath)")
         if (FileManager().fileExists(atPath: localFilePath) && !URL(fileURLWithPath: localFilePath).isDirectory) {
             fileName = localFilePath
         } else if (FileManager().fileExists(atPath: rootFilePath) && !URL(fileURLWithPath: rootFilePath).isDirectory) {

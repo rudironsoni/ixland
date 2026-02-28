@@ -98,7 +98,6 @@ extension WKWebView {
             aKey.wantsPriorityOverSystemBehavior = true
         }
         basicKeyCommands.append(aKey)
-        /* Caps Lock remapped to escape: */
         return basicKeyCommands
     }
 

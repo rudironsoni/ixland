@@ -24,9 +24,6 @@ let factoryFontSize = Float(13)
 let factoryFontName = "Menlo"
 let factoryCursorShape = "UNDERLINE"
 let factoryFontLigature = "contextual" // normal has a bug, so contextual by default
-var stdinString: String = ""
-var lastKey: Character?
-var lastKeyTime: Date = Date(timeIntervalSinceNow: 0)
 var directoriesUsed: [String:Int] = [:]
 
 // Experimental: execute JS & webAssembly commands in reverse order, so they can be piped.
@@ -39,8 +36,6 @@ struct javascriptCommand {
     var originalCommand: String = ""
 }
 
-var commandsStack: [javascriptCommand?] = []
-var resultStack: [Int32?] = []
 // Tips:
 @available(iOS 17, *)
 let myToolbarTip = toolbarTip()
@@ -51,6 +46,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     var screen: UIScreen?
     var windowScene: UIWindowScene?
     var terminalView: TerminalView?
+    var webView: WKWebView? // webView for browsing
     var wasmWebView: WKWebView? // webView for executing wasm
     var contentView: ContentView?
     // history of commands used:
@@ -153,6 +149,11 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     // variables for user interaction with SwiftTerm:
     var commandBeforeCursor = ""
     var commandAfterCursor = ""
+    // variables for WebAssembly execution
+    var stdinString: String = ""
+    var commandsStack: [javascriptCommand?] = []
+    var resultStack: [Int32?] = []
+
     
     // Create a document picker for directories.
     private let documentPicker =
@@ -1495,7 +1496,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         }
     }
     
-    @objc func clearScreen() {
+    func clearScreen() {
         // clear entire display: ^[[2J
         // position cursor on top line: ^[[1;1H
         terminalView?.feed(text: self.escape + "[2J")
@@ -1632,7 +1633,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 // See https://discord.com/channels/935519150305050644/935519150305050647/1431680783122174205
                 self.webAssemblyTimer = Timer.scheduledTimer(withTimeInterval: 0.6, repeats: true) { _ in
                     self.wasmWebView?.evaluateJavaScript("commandIsRunning;") { (result, error) in
-                        // if let error = error { print(error) }
+                        if let error = error { print(error) }
                         if let result = result as? Bool {
                             if (!result) {
                                 self.endWebAssemblyCommand(error: 0, message: "")
@@ -1643,8 +1644,8 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 self.thread_stdin_copy = command!.thread_stdin_copy
                 self.thread_stdout_copy = command!.thread_stdout_copy
                 self.thread_stderr_copy = command!.thread_stderr_copy
-                stdinString = "" // reinitialize stdin
-                NSLog("Executing \(command!.originalCommand) in executeWebAssComm, position= \(commandsStack.count)")
+                self.stdinString = "" // reinitialize stdin
+                NSLog("Executing \(command!.originalCommand) in executeWebAssComm, position= \(self.commandsStack.count)")
                 self.wasmWebView?.evaluateJavaScript(command!.jsCommand)
                     // javascriptGroup.leave() // This is now triggered by a prompt() call
             }
@@ -2686,7 +2687,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                         }
                     }
                 }
-                resultStack.removeAll()
+                self.resultStack.removeAll()
                 self.pid = ios_fork()
                 DispatchQueue.main.async {
                     UIApplication.shared.isIdleTimerDisabled = true
@@ -3343,7 +3344,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             terminalView = contentView?.terminalview.view
             terminalView?.terminalDelegate = self
             terminalView?.isAccessibilityElement = true
-            terminalView?.translatesAutoresizingMaskIntoConstraints = false
+            terminalView?.optionAsMetaKey = false
             // Is the app opened from a Shortcut?
             var startedFromShortcut = false
             for userActivity in connectionOptions.userActivities {
@@ -4054,7 +4055,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             if (appVersion != "a-Shell-mini") {
                 wasmWebView?.load(URLRequest(url: URL(string: "https://localhost:8443/wasm.html")!))
             } else {
-                NSLog("Loding wasm.html from 8334")
+                NSLog("Loding wasm.html from 8334 (sceneWillEnterForeground)")
                 wasmWebView?.load(URLRequest(url: URL(string: "https://localhost:8334/wasm.html")!))
             }
         } else {

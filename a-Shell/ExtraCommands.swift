@@ -2075,7 +2075,9 @@ public func repeatCommand(argc: Int32, argv: UnsafeMutablePointer<UnsafeMutableP
 
 public func executeCommandAndWait(command: String) {
     NSLog("executeCommandAndWait: \(command)")
-    resultStack.removeAll()
+    if let delegate = currentDelegate {
+        delegate.resultStack.removeAll()
+    }
     let pid = ios_fork()
     _ = ios_system(command)
     fflush(thread_stdout)
