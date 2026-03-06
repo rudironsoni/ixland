@@ -570,6 +570,7 @@ extension SceneDelegate {
             terminalView!.setPromptEnd()
         }
         if var string = String (bytes: data, encoding: .utf8) {
+            print("string: \(string)")
             if (controlOn) {
                 // a) switch control off
                 controlOn = false
@@ -642,18 +643,6 @@ extension SceneDelegate {
                     }
                 }
             }
-            // terminal sending button event:
-            var cursorTracking = false
-            var cursorTrackingRow = 0
-            var cursorTrackingColumn = 0
-            if (string.hasPrefix(escape + "[M")) {
-                var tracking = string
-                tracking.removeFirst((escape + "[M").count)
-                cursorTracking = true
-                cursorTrackingRow = Int(tracking.last?.asciiValue ?? 32) - 32
-                cursorTrackingColumn = Int(tracking[tracking.index(tracking.startIndex, offsetBy: 1)].asciiValue ?? 32) - 32
-                // NSLog("tracking: \(button?.asciiValue) \((x.asciiValue)! - 32) \((y?.asciiValue)! - 32)")
-            }
             if (currentCommand != "") {
                 // If there is an interactive command running, we send the data to its stdin thread
                 // active pager (interactive command): gets all the input sent through TTY:
@@ -681,6 +670,7 @@ extension SceneDelegate {
                 // from here on, we can assume ios_activePager() == 0
                 // If there is a webAssembly command running:
                 if (javascriptRunning && (thread_stdin_copy != nil)) {
+                    // Q: how many commands are using interactive input, besides nnn?
                     wasmWebView?.evaluateJavaScript("inputString += '\(string.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"").replacingOccurrences(of: "'", with: "\\'").replacingOccurrences(of: "\n", with: "\\n").replacingOccurrences(of: "\r", with: "\\n"))'; commandIsRunning;") { (result, error) in
                         // if let error = error { print(error) }
                         if let result = result as? Bool {
@@ -689,9 +679,12 @@ extension SceneDelegate {
                             }
                         }
                     }
+                    // purely interactive Wasm command:
+                    if (interactiveCommandRunning || terminalView!.getTerminal().isCurrentBufferAlternate) {
+                        return
+                    }
                     stdinString += string
                     NSLog("input sent to WebAssembly: \(string)")
-                    return
                 }
                 if (!javascriptRunning && executeWebAssemblyCommandsRunning) {
                     // There seems to be cases where the webassembly command did not terminate properly.
@@ -717,7 +710,7 @@ extension SceneDelegate {
                     }
                 }
                 // interactive command: send the data directly
-                if interactiveCommandRunning && !helpRunningInIpython {
+                if (interactiveCommandRunning || terminalView!.getTerminal().isCurrentBufferAlternate) && !helpRunningInIpython {
                     ios_switchSession(self.persistentIdentifier?.toCString())
                     ios_setContext(UnsafeMutableRawPointer(mutating: self.persistentIdentifier?.toCString()));
                     ios_setStreams(self.stdin_file, self.stdout_file, self.stdout_file)
@@ -731,6 +724,18 @@ extension SceneDelegate {
                     return
                 }
             }
+            // terminal sending button event (if not handled by the command):
+            var cursorTracking = false
+            var cursorTrackingRow = 0
+            var cursorTrackingColumn = 0
+            if (string.hasPrefix(escape + "[M")) {
+                var tracking = string
+                tracking.removeFirst((escape + "[M").count)
+                cursorTracking = true
+                cursorTrackingRow = Int(tracking.last?.asciiValue ?? 32) - 32
+                cursorTrackingColumn = Int(tracking[tracking.index(tracking.startIndex, offsetBy: 1)].asciiValue ?? 32) - 32
+                NSLog("tracking: \(cursorTrackingRow) \(cursorTrackingColumn)")
+            }
             // TODO: don't send data if pipe already closed (^D followed by another key)
             // (store a variable that says the pipe has been closed)
             // NSLog("Writing (not interactive) \(command) to stdin")
@@ -742,12 +747,13 @@ extension SceneDelegate {
                 }
                 if let distance = terminalView?.setCursorPosition(x: cursorTrackingColumn - 1, y: cursorTrackingRow - 1) {
                     let command = commandBeforeCursor + commandAfterCursor
-                    if (distance <= 0) {
+                    if (distance <= 0) || command.count == 0 {
                         // beginning of line
                         commandBeforeCursor = ""
                         commandAfterCursor = command
+                        terminalView?.moveToBeginningOfLine()
                     } else {
-                        NSLog("command: \(command) distance: \(distance)")
+                        NSLog("tracking, command: \(command) distance: \(distance)")
                         var length = 0
                         commandBeforeCursor = ""
                         for c in command {
@@ -1345,4 +1351,111 @@ extension SceneDelegate {
     func rangeChanged(source: SwiftTerm.TerminalView, startY: Int, endY: Int) {
         //
     }
+    
+    @objc
+    func zoomGestureHandler (_ gestureRecognizer:  UIPinchGestureRecognizer) {
+        if gestureRecognizer.state == .began {
+            zoomGestureInitialSize = terminalFontSize ?? factoryFontSize
+            if (terminalFontSize == nil) {
+                terminalFontSize = factoryFontSize
+            }
+        }
+        if gestureRecognizer.state == .began || gestureRecognizer.state == .changed {
+            terminalFontSize = zoomGestureInitialSize * Float(1 + (gestureRecognizer.scale - 1) / 5)
+            NSLog("scaling gesture: scale= \(gestureRecognizer.scale) fontsize= \(terminalFontSize!)")
+            if let terminalFont = UIFont(name: terminalFontName ?? factoryFontName, size: CGFloat(terminalFontSize!)) {
+                terminalView?.font = terminalFont
+                basicCharWidth = NSAttributedString(string: "m", attributes: [.font: self.terminalView?.font]).size().width
+                terminalView?.getTerminal().updateFullScreen()
+                terminalView?.updateDisplay()
+            }
+        }
+    }
+
+    @objc
+    // handling two-fingers swipe. One-fingers swipe are handled by the system
+    // (and select text in Vim, scroll elsewhere)
+    func scrollGestureHandler (_ gestureRecognizer:  UIPanGestureRecognizer) {
+        if (gestureRecognizer.state == .ended) || (gestureRecognizer.state == .cancelled) {
+            return
+        }
+        guard gestureRecognizer.view != nil else { return }
+        let piece = gestureRecognizer.view!
+        // Get the changes in the X and Y directions relative to
+        // the superview's coordinate space.
+        let translation = gestureRecognizer.translation(in: piece.superview)
+        let velocity = gestureRecognizer.velocity(in: piece.superview)
+        NSLog("scrolling translation detected: \(translation) velocity: \(velocity)")
+        if (gestureRecognizer.state == .began) {
+            scrollGestureOrigin = .zero
+        }
+        var scrollDisplacement: CGPoint = translation
+        scrollDisplacement.x -= scrollGestureOrigin.x
+        scrollDisplacement.y -= scrollGestureOrigin.y
+        // --> Number of arrows to send must be proportional to distance.
+        var verticalDisplacement = CGFloat(terminalFontSize ?? factoryFontSize)
+        let horizontalDisplacement = basicCharWidth
+        let vimRunning = currentCommand.hasPrefix("vim ") || currentCommand == "vim"
+        let lessRunning = currentCommand.hasPrefix("less ")
+        || currentCommand.contains("|less") || currentCommand.contains("| less")
+        || currentCommand.hasPrefix("man ") || currentCommand.hasPrefix("perldoc ")
+        if (lessRunning) {
+            // only vertical displacement, and reversed
+            if (scrollDisplacement.y > 0) {
+                let steps = floor(scrollDisplacement.y / verticalDisplacement)
+                for _ in 0..<Int(steps) {
+                    sendArrow(direction: "up")
+                }
+                scrollGestureOrigin.y += steps * verticalDisplacement
+                scrollGestureOrigin.x = translation.x
+            } else {
+                let steps = floor(-scrollDisplacement.y / verticalDisplacement)
+                for _ in 0..<Int(steps) {
+                    sendArrow(direction: "down")
+                }
+                scrollGestureOrigin.y -= steps * verticalDisplacement
+                scrollGestureOrigin.x = translation.x
+            }
+            return
+        }
+        if (!vimRunning) {
+            verticalDisplacement *= 2
+        }
+        NSLog("total translation detected: \(scrollDisplacement.x/horizontalDisplacement) \(scrollDisplacement.y/verticalDisplacement)")
+        if abs(scrollDisplacement.x) > abs(scrollDisplacement.y) {
+            // lateral gesture
+            if (scrollDisplacement.x > 0) {
+                let steps = floor(scrollDisplacement.x / horizontalDisplacement)
+                for _ in 0..<Int(steps) {
+                    sendArrow(direction: "right")
+                }
+                scrollGestureOrigin.x += steps * horizontalDisplacement
+                scrollGestureOrigin.y = translation.y
+            } else {
+                let steps = floor(-scrollDisplacement.x / horizontalDisplacement)
+                for _ in 0..<Int(steps) {
+                    sendArrow(direction: "left")
+                }
+                scrollGestureOrigin.x -= steps * horizontalDisplacement
+                scrollGestureOrigin.y = translation.y            }
+        } else {
+            // vertical gesture
+            if (scrollDisplacement.y > 0) {
+                let steps = floor(scrollDisplacement.y / verticalDisplacement)
+                for _ in 0..<Int(steps) {
+                    sendArrow(direction: "down")
+                }
+                scrollGestureOrigin.y += steps * verticalDisplacement
+                scrollGestureOrigin.x = translation.x
+            } else {
+                let steps = floor(-scrollDisplacement.y / verticalDisplacement)
+                for _ in 0..<Int(steps) {
+                    sendArrow(direction: "up")
+                }
+                scrollGestureOrigin.y -= steps * verticalDisplacement
+                scrollGestureOrigin.x = translation.x
+            }
+        }
+    }
+
 }

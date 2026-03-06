@@ -36,6 +36,26 @@ struct javascriptCommand {
     var originalCommand: String = ""
 }
 
+// Since WebAssembly uses a const SharedArrayBuffer, there can be only one WebAssembly interpreter.
+// So everything WebAssembly-related is global variables, not members of SceneDelegate
+// TODO: we *might* be able to workaround this if we generate a different HTML/JS file for
+// each Scene.
+var wasmWebView: WKWebView? // single webView for executing wasm
+// variables for WebAssembly execution
+var stdinString: String = ""
+var commandsStack: [javascriptCommand?] = []
+var resultStack: [Int32?] = []
+var javascriptRunning = false // We can't execute JS while we are already executing JS.
+var executeWebAssemblyCommandsRunning = false // We can't execute JS while we are already executing JS.
+// copies of thread_std*, used when executing webAssembly
+var thread_stdin_copy: UnsafeMutablePointer<FILE>? = nil
+var thread_stdout_copy: UnsafeMutablePointer<FILE>? = nil
+var thread_stderr_copy: UnsafeMutablePointer<FILE>? = nil
+// for when a webAssembly command returns:
+var currentDispatchGroup: DispatchGroup? = nil
+var errorCode:Int32 = 0
+var errorMessage: String = ""
+
 // Tips:
 @available(iOS 17, *)
 let myToolbarTip = toolbarTip()
@@ -47,7 +67,6 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     var windowScene: UIWindowScene?
     var terminalView: TerminalView?
     var webView: WKWebView? // webView for browsing
-    var wasmWebView: WKWebView? // webView for executing wasm
     var contentView: ContentView?
     // history of commands used:
     var history: [String] = []
@@ -68,21 +87,15 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     var stdout_file: UnsafeMutablePointer<FILE>? = nil
     var tty_file: UnsafeMutablePointer<FILE>? = nil
     var tty_file_input: FileHandle? = nil
-    // copies of thread_std*, used when inside a sub-thread, for example executing webAssembly
-    var thread_stdin_copy: UnsafeMutablePointer<FILE>? = nil
-    var thread_stdout_copy: UnsafeMutablePointer<FILE>? = nil
-    var thread_stderr_copy: UnsafeMutablePointer<FILE>? = nil
-    // var keyboardTimer: Timer!
     var timer = Timer()               // timer for scheduled execution of commands
     var webAssemblyTimer = Timer()    // timer for pinging the webassembly interpreter
-    var activateButtonsTimer = Timer()// timer for the long-press gesture for buttons
+    var activateButtonsTimer = Timer()// timer for activating the long-press gesture for buttons
+    var continuousButtonTimer = Timer() // timer for the long-press gesture itself.
     var scheduledCommand = ""         // the command that is scheduled to run
     var scheduleInterval: Float = 0.0       // the interval for execution
     var lastExecution: Date = .distantPast  // the last time the command was executed
     var nextExecution: Date = .distantFuture  // the next time the command is scheduled to be executed
     private let commandQueue = DispatchQueue(label: "executeCommand", qos: .utility) // low priority, for executing commands
-    var javascriptRunning = false // We can't execute JS while we are already executing JS.
-    var executeWebAssemblyCommandsRunning = false // We can't execute JS while we are already executing JS.
     // Buttons and toolbars:
     var controlOn = false;
     // control codes:
@@ -134,12 +147,13 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     var fontPicker = UIFontPickerViewController()
     var navigationType: WKNavigationType = .other
     var lastUsedPrompt = "$"
-    // for when a webAssembly command returns:
-    var currentDispatchGroup: DispatchGroup? = nil
-    var errorCode:Int32 = 0
-    var errorMessage: String = ""
     var extraBytes: Data? = nil
+    // tap on multi-arrow buttons
     var tapPosition: CGPoint = .zero
+    // initial font size for zoom action
+    var zoomGestureInitialSize: Float = factoryFontSize
+    // initial position for pan action
+    var scrollGestureOrigin: CGPoint = .zero
     var sceneIsInForeground = false
     // command entering and autocomplete (have to be scene-specific, can't be stored in an extension):
     var autocompleteRunning = false
@@ -149,11 +163,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     // variables for user interaction with SwiftTerm:
     var commandBeforeCursor = ""
     var commandAfterCursor = ""
-    // variables for WebAssembly execution
-    var stdinString: String = ""
-    var commandsStack: [javascriptCommand?] = []
-    var resultStack: [Int32?] = []
-
+    // gesturereco
     
     // Create a document picker for directories.
     private let documentPicker =
@@ -175,18 +185,17 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     }
     
     var fontSize: CGFloat {
-        let deviceModel = UIDevice.current.model
-        if (deviceModel.hasPrefix("iPad")) {
-            let minFontSize: CGFloat = screenWidth / 55
-            // print("Screen width = \(screenWidth), fontSize = \(minFontSize)")
-            if (minFontSize > 16) { return 16.0 }
-            else { return minFontSize }
+        // font size for the labels on buttons.
+        // iPads with external keyboard: not used
+        // iPads with onscreen keyboard: used
+        // iPhones: used
+        // toolbar height is always 45
+        if (UIDevice.current.model.hasPrefix("iPad")) {
+            return 19
         } else {
-            let minFontSize: CGFloat = screenWidth / 23
-            // print("Screen width = \(screenWidth), fontSize = \(minFontSize)")
-            if (minFontSize > 15) { return 15.0 }
-            else { return minFontSize }
+            return 21
         }
+        // This can now be made a configurable option
     }
     
     var toolbarHeight: CGFloat {
@@ -217,18 +226,51 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     @objc private func insertString(_ sender: UIBarButtonItem) {
         if var title = title(sender) {
             var sendCarriageReturn = false
-            if (title.hasSuffix("\\n")) {
-                title.removeLast("\\n".count)
+            if (title.hasSuffix("\n")) {
+                title.removeLast("\n".count)
                 sendCarriageReturn = true
             }
             // If it's termView at the front, just print the string
-            if (title == deleteBackward) {
-                self.terminalView?.deleteBackward()
-            } else {
-                NSLog("insertString: \(title)")
-                self.terminalView?.send(txt: title)
-                if (sendCarriageReturn) {
-                    self.terminalView?.send(txt: "\r\n")
+            if (terminalView != nil) && terminalView!.isFirstResponder {
+                DispatchQueue.main.async {
+                    if (title == self.deleteBackward) {
+                        self.terminalView?.deleteBackward()
+                    } else {
+                        NSLog("insertString: \(title)")
+                        self.terminalView?.send(txt: title)
+                        if (sendCarriageReturn) {
+                            self.terminalView?.send(txt: "\r\n")
+                        }
+                    }
+                }
+            } else if (webView?.url != nil) {
+                if (title == "\u{001B}") { // escape
+                    webView?.evaluateJavaScript("var event = new KeyboardEvent('keydown', {which:27, keyCode:27, key:'Esc', code:'Esc', bubbles:true});document.activeElement.dispatchEvent(event);") { (result, error) in
+                        // if let error = error { print(error) }
+                        // if let result = result { print(result) }
+                    }
+                } else if (title == "\u{007F}") { // delete
+                    webView?.evaluateJavaScript("var event = new KeyboardEvent('keydown', {which:8, keyCode:8, key:'Delete', code:'Delete', bubbles:true});document.activeElement.dispatchEvent(event);") { (result, error) in
+                        // if let error = error { print(error) }
+                        // if let result = result { print(result) }
+                    }
+                } else {
+                    // editor.insert() work with ACE-editor, but not with others
+                    // Still not working: control
+                    // This works with CodeMirror and ACE:
+                    // document.execCommand("insertText", false, "This is a test");
+                    DispatchQueue.main.async {
+                        self.webView?.evaluateJavaScript("document.execCommand(\"insertText\", false, \"" + title.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\n", with: "\\n").replacingOccurrences(of: "\r", with: "\\r") + "\");") { (result, error) in
+                            // if let error = error { print(error) }
+                            // if let result = result { print(result) }
+                        }
+                        if (sendCarriageReturn) {
+                            self.webView?.evaluateJavaScript("document.execCommand(\"insertText\", false, \"" + "\\r" + "\");") { (result, error) in
+                                // if let error = error { print(error) }
+                                // if let result = result { print(result) }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -391,7 +433,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             ios_setStreams(stdin_file, stdout_file, stdout_file)
             let pid = ios_fork()
             resultStack.removeAll()
-            ios_system(command)
+            ios_system(command.decomposedStringWithCanonicalMapping)
             ios_waitpid(pid)
             ios_releaseThreadId(pid)
             // Send info to the stdout handler that the command has finished:
@@ -549,7 +591,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         insertCommand(sender)
     }
     
-    private func sendArrow(direction: String) {
+    func sendArrow(direction: String) {
         DispatchQueue.main.async { [self] in
             switch (direction) {
             case "up":
@@ -584,12 +626,10 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     
     @objc private func systemAction(_ sender: UIBarButtonItem) {
         if let title = title(sender) {
-            if (title == "paste") {
-                terminalView?.paste(sender)
-                return
-            }
             if (terminalView != nil) && terminalView!.isFirstResponder {
                 switch (title) {
+                case "paste":
+                    terminalView?.paste(sender)
                 case "up":
                     sendArrow(direction: title)
                 case "down":
@@ -652,31 +692,57 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             
             // If we're displaying a web page, the toolbar buttons still need to work:
             var commandString: String? = nil
-            if !((wasmWebView?.url?.host == "localhost") && (wasmWebView?.url?.path == "/wasm.html")) {
+            if (webView?.url != nil) {
                 // Standard HTML window, send keyboard event:
                 switch (title) {
                 case "up":
                     commandString = "var event = new KeyboardEvent('keydown', {which:38, keyCode:38, key:'Up', code:'Up', bubbles:true});document.activeElement.dispatchEvent(event);"
-                    break
                 case "down":
                     commandString = "var event = new KeyboardEvent('keydown', {which:40, keyCode:40, key:'Down', code:'Down', bubbles:true});document.activeElement.dispatchEvent(event);"
-                    break
                 case "left":
                     commandString = "var event = new KeyboardEvent('keydown', {which:37, keyCode:37, key:'Left', code:'Left', bubbles:true});document.activeElement.dispatchEvent(event);"
-                    break
                 case "right":
                     commandString = "var event = new KeyboardEvent('keydown', {which:39, keyCode:39, key:'Right', code:'Right', bubbles:true});document.activeElement.dispatchEvent(event);"
-                    break
+                case "up.down":
+                    if (tapPosition.y > 0) {
+                        commandString = "var event = new KeyboardEvent('keydown', {which:40, keyCode:40, key:'Down', code:'Down', bubbles:true});document.activeElement.dispatchEvent(event);"
+                    } else {
+                        commandString = "var event = new KeyboardEvent('keydown', {which:38, keyCode:38, key:'Up', code:'Up', bubbles:true});document.activeElement.dispatchEvent(event);"
+                    }
+                case "left.right":
+                    if (tapPosition.x > 0) {
+                        commandString = "var event = new KeyboardEvent('keydown', {which:39, keyCode:39, key:'Right', code:'Right', bubbles:true});document.activeElement.dispatchEvent(event);"
+                    } else {
+                        commandString = "var event = new KeyboardEvent('keydown', {which:37, keyCode:37, key:'Left', code:'Left', bubbles:true});document.activeElement.dispatchEvent(event);"
+                    }
+                case "up.down.left.right":
+                    NSLog("up.down.left.right: \(tapPosition.x) -- \(tapPosition.y)")
+                    if abs(tapPosition.x) > abs(tapPosition.y) {
+                        if (tapPosition.x > 0) {
+                            commandString = "var event = new KeyboardEvent('keydown', {which:39, keyCode:39, key:'Right', code:'Right', bubbles:true});document.activeElement.dispatchEvent(event);"
+                        } else {
+                            commandString = "var event = new KeyboardEvent('keydown', {which:37, keyCode:37, key:'Left', code:'Left', bubbles:true});document.activeElement.dispatchEvent(event);"
+                        }
+                    } else {
+                        if (tapPosition.y > 0) {
+                            commandString = "var event = new KeyboardEvent('keydown', {which:40, keyCode:40, key:'Down', code:'Down', bubbles:true});document.activeElement.dispatchEvent(event);"
+                        } else {
+                            commandString = "var event = new KeyboardEvent('keydown', {which:38, keyCode:38, key:'Up', code:'Up', bubbles:true});document.activeElement.dispatchEvent(event);"
+                        }
+                    }
                     // These are more specific to ACE-editor:
+                case "paste":
+                    if let pastedString = UIPasteboard.general.string {
+                        // NSLog("Sending text to paste: \(pastedString)")
+                        webView?.paste(pastedString)
+                    }
                 case "copy":
                     commandString = "editor.commands.exec('copy');"
-                    break
                 case "cut":
                     commandString = "editor.commands.exec('copy');editor.onCut();"
                     break
                 case "selectAll":
                     commandString = "editor.selectAll();"
-                    break
                 case "control":
                     controlOn = !controlOn;
                     if #available(iOS 15.0, *) {
@@ -689,14 +755,13 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                         UIImage(systemName: "chevron.up.square")!.withConfiguration(configuration)
                     }
                     commandString = controlOn ? "window.controlOn = true;" : "window.controlOn = false;"
-                    break
                 default:
                     break
                 }
                 
             }
             if (commandString != nil) {
-                wasmWebView?.evaluateJavaScript(commandString!) { (result, error) in
+                webView?.evaluateJavaScript(commandString!) { (result, error) in
                     // if let error = error { print(error) }
                     // if let result = result { print(result) }
                 }
@@ -854,9 +919,12 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         DispatchQueue.main.async {
             showToolbar = false
             self.terminalView!.inputAccessoryView = self.emptyToolbar
+            self.webView!.addInputAccessoryView(toolbar: self.emptyToolbar)
             if (useSystemToolbar) {
                 self.terminalView!.inputAssistantItem.leadingBarButtonGroups = []
                 self.terminalView!.inputAssistantItem.trailingBarButtonGroups = []
+                self.webView!.inputAssistantItem.leadingBarButtonGroups = []
+                self.webView!.inputAssistantItem.trailingBarButtonGroups = []
             }
         }
     }
@@ -1092,30 +1160,33 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         DispatchQueue.main.async {
             if (useSystemToolbar) {
                 self.terminalView?.inputAccessoryView = self.emptyToolbar
+                self.webView?.addInputAccessoryView(toolbar: self.emptyToolbar)
                 self.terminalView?.inputAssistantItem.leadingBarButtonGroups = self.leftButtonGroups
                 self.terminalView?.inputAssistantItem.trailingBarButtonGroups = self.rightButtonGroups
+                self.webView?.inputAssistantItem.leadingBarButtonGroups = self.leftButtonGroups
+                self.webView?.inputAssistantItem.trailingBarButtonGroups = self.rightButtonGroups
             } else {
                 self.terminalView?.inputAssistantItem.leadingBarButtonGroups = []
                 self.terminalView?.inputAssistantItem.trailingBarButtonGroups = []
+                self.webView?.inputAssistantItem.leadingBarButtonGroups = []
+                self.webView?.inputAssistantItem.trailingBarButtonGroups = []
                 self.terminalView?.inputAccessoryView = self.editorToolbar
+                self.webView?.addInputAccessoryView(toolbar: self.editorToolbar)
             }
         }
     }
     
     func continuousButtonAction(_ button: UIBarButtonItem)  {
-        let ms: UInt32 = 1000
         if (title(button) == "up") || (title(button) == "down") || (title(button) == "up.down")
             || (title(button) == "up.down.left.right" && abs(tapPosition.x) <= abs(tapPosition.y)){
-            while (continuousButtonAction) {
-                systemAction(button)
-                usleep(250 * ms)
-            }
+            continuousButtonTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true, block: {_ in
+                self.systemAction(button)
+            })
         } else if (title(button) == "left") || (title(button) == "right") || title(button) == "left.right"
                     || (title(button) == "up.down.left.right" && abs(tapPosition.x) > abs(tapPosition.y)) {
-            while (continuousButtonAction) {
-                systemAction(button)
-                usleep(100 * ms)
-            }
+            continuousButtonTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: {_ in
+                self.systemAction(button)
+            })
         }
     }
     
@@ -1171,7 +1242,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         // If up-down-left-right buttons are currently being pressed, activate multi-action arrows (instead of hide keyboard)
         
         if (sender.state == .ended) {
-            continuousButtonAction = false
+            continuousButtonTimer.invalidate()
             return
         }
         NSLog("long press action, sender.state: \(sender.state): \(tapPosition.x) -- \(tapPosition.y) bounds: \(sender.view!.frame.width) -- \(sender.view!.frame.height)")
@@ -1189,19 +1260,10 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             if !useSystemToolbar {
                 for button in editorToolbar.items! {
                     // long-press == repeat action only for arrows. For anything else, it's remove keyboard.
-                    if (title(button) == "up") || (title(button) == "down") || (title(button) == "left") || (title(button) == "right")
-                        || title(button) == "up.down" || title(button) == "left.right" || title(button) == "up.down.left.right" {
-                        if let buttonView = button.value(forKey: "view") as? UIView {
-                            if (buttonView == sender.view) {
-                                continuousButtonAction = true
-                                commandQueue.async {
-                                    // this function contains a sleep() call.
-                                    // We need to prevent the entire program from sleeping,
-                                    // so we run it in a queue.
-                                    self.continuousButtonAction(button)
-                                }
-                                return
-                            }
+                    if let buttonView = button.value(forKey: "view") as? UIView {
+                        if (buttonView == sender.view) {
+                            continuousButtonAction(button)
+                            return
                         }
                     }
                 }
@@ -1211,13 +1273,19 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                         for button in leftButtonGroup.barButtonItems {
                             if let buttonView = button.value(forKey: "view") as? UIView {
                                 if (buttonView == sender.view) {
-                                    continuousButtonAction = true
-                                    commandQueue.async {
-                                        // this function contains a sleep() call.
-                                        // We need to prevent the entire program from sleeping,
-                                        // so we run it in a queue.
-                                        self.continuousButtonAction(button)
-                                    }
+                                    continuousButtonAction(button)
+                                    return
+                                }
+                            }
+                        }
+                    }
+                }
+                if let rightButtonGroups = self.terminalView?.inputAssistantItem.trailingBarButtonGroups {
+                    for rightButtonGroup in rightButtonGroups {
+                        for button in rightButtonGroup.barButtonItems {
+                            if let buttonView = button.value(forKey: "view") as? UIView {
+                                if (buttonView == sender.view) {
+                                    continuousButtonAction(button)
                                     return
                                 }
                             }
@@ -1225,26 +1293,8 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                     }
                 }
             }
-            if let rightButtonGroups = self.terminalView?.inputAssistantItem.trailingBarButtonGroups {
-                for rightButtonGroup in rightButtonGroups {
-                    for button in rightButtonGroup.barButtonItems {
-                        if let buttonView = button.value(forKey: "view") as? UIView {
-                            if (buttonView == sender.view) {
-                                continuousButtonAction = true
-                                commandQueue.async {
-                                    // this function contains a sleep() call.
-                                    // We need to prevent the entire program from sleeping,
-                                    // so we run it in a queue.
-                                    self.continuousButtonAction(button)
-                                }
-                                return
-                            }
-                        }
-                    }
-                }
-            }
         }
-        if (continuousButtonAction) {
+        if (continuousButtonTimer.isValid) {
             return
         }
         // Not on any arrow button, must be a hidekeyboard event:
@@ -1279,7 +1329,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 // liquid glass makes the buttons larger, we can't have a middle space on small screens
                 // NSLog("leftButtonGroup: \(leftButtonGroup)")
                 // NSLog("rightButtonGroup: \(rightButtonGroup)")
-                if (screenWidth > 550) || (leftButtonGroup.count + rightButtonGroup.count < 8) {
+                if (screenWidth > 550) || (leftButtonGroup.count + rightButtonGroup.count < 7) {
                     toolbar.items?.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil))
                 }
             } else {
@@ -1451,11 +1501,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         if (self.currentCommand == "") {
             lastUsedPrompt = parsePrompt()
             DispatchQueue.main.async {
-                // TODO: remove this. Probably caused by the marginMode issue?
-                if (self.terminalView!.atTheEndOfTheLine()) {
-                    self.terminalView!.feed(text: "\n\r")
-                    self.windowPrintedContent += "\n\r"
-                }
+                self.terminalView!.ensureCaretIsVisible()
                 self.terminalView!.feed(text: self.lastUsedPrompt)
                 self.terminalView!.setPromptEnd()
             }
@@ -1609,9 +1655,9 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
     func executeWebAssemblyCommands() {
         // since we're multi-threaded, we could be executing this while executeWebAssembly() is still running. So we wait.
         var wasmEndedWithError = false;
-        // NSLog("Starting executeWebAssemblyCommands, commands: \(commandsStack.count) results: \(resultStack.count) = \(resultStack)")
+        NSLog("Starting executeWebAssemblyCommands, commands: \(commandsStack.count) results: \(resultStack.count) = \(resultStack) executeWebAssemblyCommandsRunning= \(executeWebAssemblyCommandsRunning)")
         if (commandsStack.isEmpty) {
-            // NSLog("executeWebAssemblyCommands: empty stack")
+            NSLog("executeWebAssemblyCommands: empty stack")
             return
         }
         if (executeWebAssemblyCommandsRunning) {
@@ -1632,8 +1678,12 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 // Check the webassembly interpreter regularly (required in iOS 18 and above, a good idea nevertheless)
                 // See https://discord.com/channels/935519150305050644/935519150305050647/1431680783122174205
                 self.webAssemblyTimer = Timer.scheduledTimer(withTimeInterval: 0.6, repeats: true) { _ in
-                    self.wasmWebView?.evaluateJavaScript("commandIsRunning;") { (result, error) in
-                        if let error = error { print(error) }
+                    wasmWebView?.evaluateJavaScript("commandIsRunning;") { (result, error) in
+                        if let error = error {
+                            print(error)
+                            wasmEndedWithError = true
+                            self.endWebAssemblyCommand(error: -1, message: "The WebAssembly interpreter has crashed (often because two windows start at the same time). You'll need to close windows and restart the app.")
+                        }
                         if let result = result as? Bool {
                             if (!result) {
                                 self.endWebAssemblyCommand(error: 0, message: "")
@@ -1641,12 +1691,12 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                         }
                     }
                 }
-                self.thread_stdin_copy = command!.thread_stdin_copy
-                self.thread_stdout_copy = command!.thread_stdout_copy
-                self.thread_stderr_copy = command!.thread_stderr_copy
-                self.stdinString = "" // reinitialize stdin
-                NSLog("Executing \(command!.originalCommand) in executeWebAssComm, position= \(self.commandsStack.count)")
-                self.wasmWebView?.evaluateJavaScript(command!.jsCommand)
+                thread_stdin_copy = command!.thread_stdin_copy
+                thread_stdout_copy = command!.thread_stdout_copy
+                thread_stderr_copy = command!.thread_stderr_copy
+                stdinString = "" // reinitialize stdin
+                NSLog("Executing \(command!.originalCommand) in executeWebAssComm, position= \(commandsStack.count)")
+                wasmWebView?.evaluateJavaScript(command!.jsCommand)
                     // javascriptGroup.leave() // This is now triggered by a prompt() call
             }
             // force synchronization:
@@ -1655,12 +1705,12 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             if (errorMessage.count > 0) {
                 wasmEndedWithError = true
                 // webAssembly compile error:
-                if (self.thread_stderr_copy != nil) {
+                if (thread_stderr_copy != nil) {
                     NSLog("Wasm error: \(errorMessage)")
-                    fputs(errorMessage + "\n", self.thread_stderr_copy);
+                    fputs(errorMessage + "\n", thread_stderr_copy);
                 }
             }
-            self.javascriptRunning = false
+            javascriptRunning = false
 
             if (thread_stdin_copy == nil) {
                 // Strangely, the letters typed after ^D do not appear on screen. We force two carriage return to get the prompt visible:
@@ -1678,7 +1728,8 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         if (wasmEndedWithError) {
             DispatchQueue.main.async {
                 NSLog("reloaded wasmWebView after an error")
-                self.wasmWebView?.reload()
+                // Note: reload is not enough, I need to clear the JS state.
+                wasmWebView?.reloadFromOrigin()
             }
         }
     }
@@ -1700,7 +1751,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         if (command == "--reset") {
             DispatchQueue.main.async {
                 NSLog("reloading wasmWebView (on purpose)")
-                self.wasmWebView?.reload()
+                wasmWebView?.reloadFromOrigin()
             }
             return
         }
@@ -1783,46 +1834,46 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                         if (!silent) {
                             if let result = result {
                                 if let string = result as? String {
-                                    fputs(string, self.thread_stdout_copy)
-                                    fputs("\n", self.thread_stdout_copy)
+                                    fputs(string, thread_stdout_copy)
+                                    fputs("\n", thread_stdout_copy)
                                 }  else if let number = result as? Int32 {
-                                    fputs("\(number)", self.thread_stdout_copy)
-                                    fputs("\n", self.thread_stdout_copy)
+                                    fputs("\(number)", thread_stdout_copy)
+                                    fputs("\n", thread_stdout_copy)
                                 } else if let number = result as? Float {
-                                    fputs("\(number)", self.thread_stdout_copy)
-                                    fputs("\n", self.thread_stdout_copy)
+                                    fputs("\(number)", thread_stdout_copy)
+                                    fputs("\n", thread_stdout_copy)
                                 } else {
-                                    fputs("\(result)", self.thread_stdout_copy)
-                                    fputs("\n", self.thread_stdout_copy)
+                                    fputs("\(result)", thread_stdout_copy)
+                                    fputs("\n", thread_stdout_copy)
                                 }
-                                fflush(self.thread_stdout_copy)
-                                fflush(self.thread_stderr_copy)
+                                fflush(thread_stdout_copy)
+                                fflush(thread_stderr_copy)
                             }
                         }
-                        self.javascriptRunning = false
+                        javascriptRunning = false
                     }
                     catch {
                         // Extract information about *where* the error is, etc.
                         NSLog("Error in JSC: \(error)")
                         let userInfo = (error as NSError).userInfo
-                        fputs("jsc: Error ", self.thread_stderr_copy)
+                        fputs("jsc: Error ", thread_stderr_copy)
                         // WKJavaScriptExceptionSourceURL is wasm.html, of course.
-                        fputs("in file " + command + " ", self.thread_stderr_copy)
+                        fputs("in file " + command + " ", thread_stderr_copy)
                         if let line = userInfo["WKJavaScriptExceptionLineNumber"] as? Int32 {
-                            fputs("at line \(line)", self.thread_stderr_copy)
+                            fputs("at line \(line)", thread_stderr_copy)
                         }
                         if let column = userInfo["WKJavaScriptExceptionColumnNumber"] as? Int32 {
-                            fputs(", column \(column): ", self.thread_stderr_copy)
+                            fputs(", column \(column): ", thread_stderr_copy)
                         } else {
-                            fputs(": ", self.thread_stderr_copy)
+                            fputs(": ", thread_stderr_copy)
                         }
                         if let message = userInfo["WKJavaScriptExceptionMessage"] as? String {
-                            fputs(message + "\n", self.thread_stderr_copy)
+                            fputs(message + "\n", thread_stderr_copy)
                         } else if let message = userInfo["NSLocalizedDescription"] as? String {
-                            fputs(message + "\n", self.thread_stderr_copy)
+                            fputs(message + "\n", thread_stderr_copy)
                         }
-                        fflush(self.thread_stderr_copy)
-                        self.javascriptRunning = false
+                        fflush(thread_stderr_copy)
+                        javascriptRunning = false
                     }
                 }
             } else {
@@ -1833,44 +1884,44 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                             // Extract information about *where* the error is, etc.
                             NSLog("Error in JSC: \(error)")
                             let userInfo = (error as NSError).userInfo
-                            fputs("jsc: Error ", self.thread_stderr_copy)
+                            fputs("jsc: Error ", thread_stderr_copy)
                             // WKJavaScriptExceptionSourceURL is wasm.html, of course.
-                            fputs("in file " + command + " ", self.thread_stderr_copy)
+                            fputs("in file " + command + " ", thread_stderr_copy)
                             if let line = userInfo["WKJavaScriptExceptionLineNumber"] as? Int32 {
-                                fputs("at line \(line)", self.thread_stderr_copy)
+                                fputs("at line \(line)", thread_stderr_copy)
                             }
                             if let column = userInfo["WKJavaScriptExceptionColumnNumber"] as? Int32 {
-                                fputs(", column \(column): ", self.thread_stderr_copy)
+                                fputs(", column \(column): ", thread_stderr_copy)
                             } else {
-                                fputs(": ", self.thread_stderr_copy)
+                                fputs(": ", thread_stderr_copy)
                             }
                             if let message = userInfo["WKJavaScriptExceptionMessage"] as? String {
-                                fputs(message + "\n", self.thread_stderr_copy)
+                                fputs(message + "\n", thread_stderr_copy)
                             } else if let message = userInfo["NSLocalizedDescription"] as? String {
-                                fputs(message + "\n", self.thread_stderr_copy)
+                                fputs(message + "\n", thread_stderr_copy)
                             }
-                            fflush(self.thread_stderr_copy)
+                            fflush(thread_stderr_copy)
                         }
                         if (!silent) {
                             if let result = result {
                                 if let string = result as? String {
-                                    fputs(string, self.thread_stdout_copy)
-                                    fputs("\n", self.thread_stdout_copy)
+                                    fputs(string, thread_stdout_copy)
+                                    fputs("\n", thread_stdout_copy)
                                 }  else if let number = result as? Int32 {
-                                    fputs("\(number)", self.thread_stdout_copy)
-                                    fputs("\n", self.thread_stdout_copy)
+                                    fputs("\(number)", thread_stdout_copy)
+                                    fputs("\n", thread_stdout_copy)
                                 } else if let number = result as? Float {
-                                    fputs("\(number)", self.thread_stdout_copy)
-                                    fputs("\n", self.thread_stdout_copy)
+                                    fputs("\(number)", thread_stdout_copy)
+                                    fputs("\n", thread_stdout_copy)
                                 } else {
-                                    fputs("\(result)", self.thread_stdout_copy)
-                                    fputs("\n", self.thread_stdout_copy)
+                                    fputs("\(result)", thread_stdout_copy)
+                                    fputs("\n", thread_stdout_copy)
                                 }
-                                fflush(self.thread_stdout_copy)
-                                fflush(self.thread_stderr_copy)
+                                fflush(thread_stdout_copy)
+                                fflush(thread_stderr_copy)
                             }
                         }
-                        self.javascriptRunning = false
+                        javascriptRunning = false
                     }
                 }
             }
@@ -2333,7 +2384,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                             self.nextExecution += TimeInterval(interval)
                         }
                         let pid = ios_fork()
-                        _ = ios_system(command)
+                        _ = ios_system(command.decomposedStringWithCanonicalMapping)
                         ios_waitpid(pid)
                         fflush(thread_stdout)
                         let closeTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) {_ in
@@ -2370,75 +2421,27 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         }
     }
     
-    // Even if Caps-Lock is activated, send lower case letters.
-    @objc func insertKey(_ sender: UIKeyCommand) {
-        NSLog("Entered insertKey: \(sender.input)")
-        guard (sender.input != nil) else { return }
-        terminalView?.send(txt: sender.input!)
-    }
-    
-    
-    @objc func goBackAction(_ sender: UIBarButtonItem) {
-        guard self.wasmWebView != nil else { return }
-        if self.wasmWebView!.canGoBack {
-            let position = -1
-            if let backPageItem = self.wasmWebView!.backForwardList.item(at: position) {
-                self.wasmWebView!.go(to: backPageItem)
-            }
-        }
-    }
-    
-    @objc func goForwardAction(_ sender: UIBarButtonItem) {
-        guard self.wasmWebView != nil else { return }
-        if self.wasmWebView!.canGoForward {
-            let position = 1
-            if let forwardPageItem = self.wasmWebView!.backForwardList.item(at: position) {
-                self.wasmWebView!.go(to: forwardPageItem)
-            }
-        }
-    }
-
     @objc func activateBrowserAction() {
-        if (wasmWebView?.url?.host == "localhost") && (wasmWebView?.url?.path == "/wasm.html") {
-            wasmWebView?.goBack()
-        }
         showWebView = true
         // http URLs reload automatically, but file URLs must be reloaded explicitly:
-        if (wasmWebView?.url?.scheme == "file") {
-            if let url = wasmWebView?.url {
-                wasmWebView?.goBack()
+        if (webView?.url?.scheme == "file") {
+            if let url = webView?.url {
+                webView?.goBack()
                 let directoryURL = url.deletingLastPathComponent()
-                wasmWebView?.loadFileURL(url, allowingReadAccessTo: directoryURL)
+                webView?.loadFileURL(url, allowingReadAccessTo: directoryURL)
             }
         }
         hideKeyboard() // hides the keyboard *and* causes SwiftUI to refresh
     }
     
-    var backButton: UIBarButtonItem {
-        let configuration = UIImage.SymbolConfiguration(pointSize: fontSize, weight: .bold)
-        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left")!.withConfiguration(configuration), style: .plain, target: self, action: #selector(goBackAction(_:)))
-        backButton.tintColor = .systemBlue
-        return backButton
-    }
-
-    var forwardButton: UIBarButtonItem {
-        let configuration = UIImage.SymbolConfiguration(pointSize: fontSize, weight: .bold)
-        let forwardButton = UIBarButtonItem(image: UIImage(systemName: "chevron.right")!.withConfiguration(configuration), style: .plain, target: self, action: #selector(goForwardAction(_:)))
-        forwardButton.tintColor = .systemBlue
-        return forwardButton
-    }
-
     func openURLInWindow(url: URL) {
         // load URL on current window.
-        if (wasmWebView?.url?.host == "localhost") && (wasmWebView?.url?.path == "/wasm.html") {
-            wasmWebView?.goBack()
-        }
         if (url.scheme == "file") {
             // Create a directory URL:
             let directoryURL = url.deletingLastPathComponent()
-            wasmWebView?.loadFileURL(url, allowingReadAccessTo: directoryURL)
+            webView?.loadFileURL(url, allowingReadAccessTo: directoryURL)
         } else {
-            wasmWebView?.load(URLRequest(url: url))
+            webView?.load(URLRequest(url: url))
         }
         NSLog("setting showWebView to true")
         showWebView = true
@@ -2652,48 +2655,53 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                     }
                 }
                 self.currentCommand = command
-                DispatchQueue.main.async {
-                    
-                    if #available(iOS 16.0, *) {
-                        // Show buttons depending on commands:
-                        // Hide all buttons with tag == noneTag, show all buttons that match.
-                        if (useSystemToolbar) {
-                            self.terminalView?.inputAssistantItem.leadingBarButtonGroups.forEach { leftButtonGroup in
-                                if let representativeItem = leftButtonGroup.representativeItem {
-                                    representativeItem.isHidden = self.hideButton(tag: representativeItem.tag)
+                if (showToolbar) {
+                    DispatchQueue.main.async {
+                        if #available(iOS 16.0, *) {
+                            // Show buttons depending on commands:
+                            // Hide all buttons with tag == noneTag, show all buttons that match.
+                            if (useSystemToolbar) {
+                                self.terminalView?.inputAssistantItem.leadingBarButtonGroups.forEach { leftButtonGroup in
+                                    if let representativeItem = leftButtonGroup.representativeItem {
+                                        representativeItem.isHidden = self.hideButton(tag: representativeItem.tag)
+                                    }
+                                    leftButtonGroup.barButtonItems.forEach { button in
+                                        if (self.title(button) != "showBrowser") {
+                                            button.isHidden = self.hideButton(tag: button.tag)
+                                        }
+                                    }
                                 }
-                                leftButtonGroup.barButtonItems.forEach { button in
+                                self.terminalView?.inputAssistantItem.trailingBarButtonGroups.forEach { rightButtonGroup in
+                                    if let representativeItem = rightButtonGroup.representativeItem {
+                                        representativeItem.isHidden = self.hideButton(tag: representativeItem.tag)
+                                    }
+                                    rightButtonGroup.barButtonItems.forEach { button in
+                                        if (self.title(button) != "showBrowser") {
+                                            button.isHidden = self.hideButton(tag: button.tag)
+                                        }
+                                    }
+                                }
+                            } else {
+                                self.editorToolbar.items?.forEach { button in
                                     if (self.title(button) != "showBrowser") {
                                         button.isHidden = self.hideButton(tag: button.tag)
                                     }
-                                }
-                            }
-                            self.terminalView?.inputAssistantItem.trailingBarButtonGroups.forEach { rightButtonGroup in
-                                if let representativeItem = rightButtonGroup.representativeItem {
-                                    representativeItem.isHidden = self.hideButton(tag: representativeItem.tag)
-                                }
-                                rightButtonGroup.barButtonItems.forEach { button in
-                                    if (self.title(button) != "showBrowser") {
-                                        button.isHidden = self.hideButton(tag: button.tag)
-                                    }
-                                }
-                            }
-                        } else {
-                            self.editorToolbar.items?.forEach { button in
-                                if (self.title(button) != "showBrowser") {
-                                    button.isHidden = self.hideButton(tag: button.tag)
                                 }
                             }
                         }
                     }
                 }
-                self.resultStack.removeAll()
+                resultStack.removeAll()
                 self.pid = ios_fork()
                 DispatchQueue.main.async {
                     UIApplication.shared.isIdleTimerDisabled = true
                 }
                 self.interactiveCommandRunning = false // if it's interactive, ios_system will set it to true
-                ios_system(self.currentCommand)
+                // decompose file names (and commands) using a decomposed (NFD) UTF8 form,
+                // the keyboard uses NFC with non-English systems.
+                // See: https://github.com/holzschu/a-shell/issues/995
+                // And: https://developer.apple.com/forums/thread/817449
+                ios_system(self.currentCommand.decomposedStringWithCanonicalMapping)
                 NSLog("Returned from ios_system")
                 // for long running commands, ios_waitpid eats up to 68% CPU.
                 // but for short-running commands, we need it to be reactive.
@@ -2768,57 +2776,59 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 self.resetDirectoryAfterCommandTerminates = ""
             }
             // re-hide buttons after leaving command:
-            DispatchQueue.main.async {
-                if #available(iOS 16.0, *) {
-                    if (useSystemToolbar) {
-                        // Show buttons after command is done:
-                        self.terminalView?.inputAssistantItem.leadingBarButtonGroups.forEach { leftButtonGroup in
-                            if let representativeItem = leftButtonGroup.representativeItem {
-                                if (representativeItem.tag != 0) {
-                                    representativeItem.isHidden = !(representativeItem.tag == self.noneTag)
+            if (showToolbar) {
+                DispatchQueue.main.async {
+                    if #available(iOS 16.0, *) {
+                        if (useSystemToolbar) {
+                            // Show buttons after command is done:
+                            self.terminalView?.inputAssistantItem.leadingBarButtonGroups.forEach { leftButtonGroup in
+                                if let representativeItem = leftButtonGroup.representativeItem {
+                                    if (representativeItem.tag != 0) {
+                                        representativeItem.isHidden = !(representativeItem.tag == self.noneTag)
+                                    }
+                                }
+                                leftButtonGroup.barButtonItems.forEach { button in
+                                    if (button.tag != 0) {
+                                        if (self.title(button) != "showBrowser") {
+                                            button.isHidden = !(button.tag == self.noneTag)
+                                        }
+                                    }
                                 }
                             }
-                            leftButtonGroup.barButtonItems.forEach { button in
+                            self.terminalView?.inputAssistantItem.trailingBarButtonGroups.forEach { rightButtonGroup in
+                                if let representativeItem = rightButtonGroup.representativeItem {
+                                    if (representativeItem.tag != 0) {
+                                        representativeItem.isHidden = !(representativeItem.tag == self.noneTag)
+                                    }
+                                }
+                                rightButtonGroup.barButtonItems.forEach { button in
+                                    if (button.tag != 0) {
+                                        if (self.title(button) != "showBrowser") {
+                                            button.isHidden = !(button.tag == self.noneTag)
+                                        }
+                                    }
+                                }
+                            }
+                            if #available(iOS 26, *) {
+                                // fix for an iOS bug: the buttons can be pushed sideways
+                                self.terminalView?.inputAssistantItem.trailingBarButtonGroups[0].barButtonItems.append(UIBarButtonItem(title: "Hi", style: .plain, target: self, action: nil))
+                                self.terminalView?.inputAssistantItem.trailingBarButtonGroups[0].barButtonItems.removeLast()
+                            }
+                        } else {
+                            self.editorToolbar.items?.forEach { button in
                                 if (button.tag != 0) {
                                     if (self.title(button) != "showBrowser") {
                                         button.isHidden = !(button.tag == self.noneTag)
                                     }
                                 }
                             }
-                        }
-                        self.terminalView?.inputAssistantItem.trailingBarButtonGroups.forEach { rightButtonGroup in
-                            if let representativeItem = rightButtonGroup.representativeItem {
-                                if (representativeItem.tag != 0) {
-                                    representativeItem.isHidden = !(representativeItem.tag == self.noneTag)
-                                }
+                            if #available(iOS 26, *) {
+                                // fix for an iOS 26 bug: the buttons won't reappear unless I force a redraw of the toolbar.
+                                self.editorToolbar.items?.append(UIBarButtonItem(title: "Hi", style: .plain, target: self, action: nil))
+                                self.editorToolbar.items?.removeLast()
+                                // re-activate long-press gesture for buttons (iOS 26 only?):
+                                self.activateLongPressForButtons(repeats: false)
                             }
-                            rightButtonGroup.barButtonItems.forEach { button in
-                                if (button.tag != 0) {
-                                    if (self.title(button) != "showBrowser") {
-                                        button.isHidden = !(button.tag == self.noneTag)
-                                    }
-                                }
-                            }
-                        }
-                        if #available(iOS 26, *) {
-                            // fix for an iOS bug: the buttons can be pushed sideways
-                            self.terminalView?.inputAssistantItem.trailingBarButtonGroups[0].barButtonItems.append(UIBarButtonItem(title: "Hi", style: .plain, target: self, action: nil))
-                            self.terminalView?.inputAssistantItem.trailingBarButtonGroups[0].barButtonItems.removeLast()
-                        }
-                    } else {
-                        self.editorToolbar.items?.forEach { button in
-                            if (button.tag != 0) {
-                                if (self.title(button) != "showBrowser") {
-                                    button.isHidden = !(button.tag == self.noneTag)
-                                }
-                            }
-                        }
-                        if #available(iOS 26, *) {
-                            // fix for an iOS 26 bug: the buttons won't reappear unless I force a redraw of the toolbar.
-                            self.editorToolbar.items?.append(UIBarButtonItem(title: "Hi", style: .plain, target: self, action: nil))
-                            self.editorToolbar.items?.removeLast()
-                            // re-activate long-press gesture for buttons (iOS 26 only?):
-                            self.activateLongPressForButtons()
                         }
                     }
                 }
@@ -2892,18 +2902,18 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             var string = cmd
             string.removeFirst("print:".count)
             if (thread_stdout_copy != nil) {
-                fputs(string, self.thread_stdout_copy)
+                fputs(string, thread_stdout_copy)
             }
         } else if (cmd.hasPrefix("print_error:")) {
             // print result of JS file:
             var string = cmd
             string.removeFirst("print_error:".count)
             if (thread_stderr_copy != nil) {
-                fputs(string, self.thread_stderr_copy)
+                fputs(string, thread_stderr_copy)
             }
         } else if (cmd.hasPrefix("reload:")) {
             // Reload the web page:
-            self.wasmWebView?.reload()
+            wasmWebView?.reloadFromOrigin()
         } else if (cmd.hasPrefix("setHomeDir:")) {
             let documentsUrl = try! FileManager().url(for: .documentDirectory,
                                                       in: .userDomainMask,
@@ -3357,14 +3367,18 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             if (!toolbarShouldBeShown) {
                 showToolbar = false
                 self.terminalView!.inputAccessoryView = self.emptyToolbar
+                self.webView?.addInputAccessoryView(toolbar: self.emptyToolbar)
             } else {
                 generateToolbarButtons()
                 if (useSystemToolbar) {
                     self.terminalView!.inputAccessoryView = self.emptyToolbar
                     self.terminalView?.inputAssistantItem.leadingBarButtonGroups = self.leftButtonGroups
                     self.terminalView?.inputAssistantItem.trailingBarButtonGroups = self.rightButtonGroups
+                    self.webView?.inputAssistantItem.leadingBarButtonGroups = self.leftButtonGroups
+                    self.webView?.inputAssistantItem.trailingBarButtonGroups = self.rightButtonGroups
                 } else {
                     self.terminalView!.inputAccessoryView = self.editorToolbar
+                    self.webView?.addInputAccessoryView(toolbar: self.editorToolbar)
                 }
                 if #available(iOS 17, *) {
                     // Do not show the toolbar tip if the app has been started from a Shortcut:
@@ -3416,18 +3430,44 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                     }
                 }
             }
-            // The same WkWebView is used for webAssembly and internalbrowser:
-            wasmWebView = contentView?.webview.webView
-            if #available(iOS 16.4, *) {    
-                wasmWebView?.isInspectable = true
+            // The WkWebView used for browsing:
+            webView = contentView?.webview.webView
+            // add a contentController that is specific to each webview
+            webView?.configuration.userContentController = WKUserContentController()
+            webView?.configuration.userContentController.add(self, name: "aShell")
+            webView?.navigationDelegate = self
+            webView?.uiDelegate = self;
+            webView?.isAccessibilityElement = true
+            if #available(iOS 16.0, *) {
+                webView?.isFindInteractionEnabled = true
             }
-            wasmWebView?.isOpaque = false
-            wasmWebView?.configuration.userContentController = WKUserContentController()
-            wasmWebView?.configuration.userContentController.add(self, name: "aShell")
-            wasmWebView?.navigationDelegate = self
-            wasmWebView?.uiDelegate = self;
-            wasmWebView?.isAccessibilityElement = false
-            // End WkWebView setting
+            // The WkWebView used for webAssembly (setup only once, shared between scenes):
+            if (wasmWebView == nil) {
+                let config = WKWebViewConfiguration()
+                config.preferences.javaScriptCanOpenWindowsAutomatically = true
+                config.preferences.setValue(true as Bool, forKey: "allowFileAccessFromFileURLs")
+                config.setValue(true as Bool, forKey: "allowUniversalAccessFromFileURLs")
+                wasmWebView = WKWebView(frame: .zero, configuration: config)
+                if #available(iOS 16.4, *) {
+                    wasmWebView?.isInspectable = true
+                }
+                wasmWebView?.isOpaque = false
+                wasmWebView?.configuration.userContentController = WKUserContentController()
+                wasmWebView?.configuration.userContentController.add(self, name: "aShell")
+                wasmWebView?.navigationDelegate = self
+                wasmWebView?.uiDelegate = self;
+                wasmWebView?.isAccessibilityElement = false
+                // Known issue: two windows starting simultaneously: no WebAssembly working.
+                // It's fine if they start one after the other (but only if there's a single wasmWebView)
+                // Issue already present in version 1.17.5.
+                if (appVersion != "a-Shell-mini") {
+                    wasmWebView?.load(URLRequest(url: URL(string: "https://localhost:8443/wasm.html")!))
+                } else {
+                    NSLog("Loding wasm.html from 8334 (sceneWillEnterForeground)")
+                    wasmWebView?.load(URLRequest(url: URL(string: "https://localhost:8334/wasm.html")!))
+                }
+            }
+            // End WkWebView settings
             // Restore colors and settings from global preference (if set):
             if let size = UserDefaults.standard.value(forKey: "fontSize") as? Float {
                 terminalFontSize = size
@@ -3490,7 +3530,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                                 if (trimmedCommand.count == 0) { continue } // skip white lines
                                 if (trimmedCommand.hasPrefix("#")) { continue } // skip comments
                                 // reset the LC_CTYPE (some commands (luatex) can change it):
-                                setenv("LC_CTYPE", "UTF-8", 1);
+                                setenv(" CTYPE", "UTF-8", 1);
                                 setlocale(LC_CTYPE, "UTF-8");
                                 executeCommandAndWait(command: trimmedCommand)
                                 NSLog("Done executing command from .profile: \(command)")
@@ -3690,14 +3730,14 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             }
             // iPads: re-activate long-press on arrow buttons when the toolbar appears:
             sceneIsInForeground = true
-            if (useSystemToolbar) {
+            if (useSystemToolbar && showToolbar) {
                 NotificationCenter.default.addObserver(
                     forName: UIResponder.keyboardWillChangeFrameNotification,
                     object: nil,
                     queue: nil
                 ) { (notification) in
                     NSLog("keyboardWillChangeFrame: \(notification.name.rawValue): \(session.persistentIdentifier).")
-                    self.activateLongPressForButtons()
+                    self.activateLongPressForButtons(repeats: false)
                 }
             }
             if UserDefaults.standard.bool(forKey: "keep_content") {
@@ -3913,13 +3953,14 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         }
     }
     
-    func activateLongPressForButtons() {
+    func activateLongPressForButtons(repeats: Bool) {
         // Give it slight delay so the button views are actually present
         // Note: for some reasons, this doesn't work on iPad with external keyboards the first time the window is activated
         // (the gestures *are* added to the buttons, but the actions are not called when the user taps/long press)
         // It works fine after the first redisplay of the window.
         if (sceneIsInForeground) {
-            activateButtonsTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [self]_ in
+            // repeats: true because sometimes 0.5 s is not enough.
+            activateButtonsTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: repeats) { [self]_ in
                 NSLog("Launching the buttons timer. ")
                 if (!useSystemToolbar) {
                     for button in editorToolbar.items! {
@@ -4036,7 +4077,13 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             }
         }
         // Delay the long-press-gesture a little so that the buttons have a view:
-        activateLongPressForButtons()
+        activateLongPressForButtons(repeats: true)
+        // zoom gesture interferes with scroll gesture. Disabled for now.
+        // let zoomGesture = UIPinchGestureRecognizer(target: self, action: #selector(zoomGestureHandler))
+        // terminalView?.addGestureRecognizer(zoomGesture)
+        let scrollGesture = UIPanGestureRecognizer(target: self, action: #selector(scrollGestureHandler))
+        scrollGesture.minimumNumberOfTouches = 2
+        terminalView?.addGestureRecognizer(scrollGesture)
         activateVoiceOver(value: UIAccessibility.isVoiceOverRunning)
     }
     
@@ -4051,15 +4098,8 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         // Use this method to undo the changes made on entering the background.
         // Reload the webAssembly interpreter (this will also check if the local server is still running):
         sceneIsInForeground = true
-        if (!showWebView) {
-            if (appVersion != "a-Shell-mini") {
-                wasmWebView?.load(URLRequest(url: URL(string: "https://localhost:8443/wasm.html")!))
-            } else {
-                NSLog("Loding wasm.html from 8334 (sceneWillEnterForeground)")
-                wasmWebView?.load(URLRequest(url: URL(string: "https://localhost:8334/wasm.html")!))
-            }
-        } else {
-            wasmWebView?.reload()
+        if (showWebView) {
+            webView?.reloadFromOrigin()
         }
         // Was this window created with a purpose?
         let userActivity = scene.userActivity
@@ -4072,14 +4112,18 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         if (!toolbarShouldBeShown) {
             showToolbar = false
             self.terminalView!.inputAccessoryView = self.emptyToolbar
+            self.webView!.addInputAccessoryView(toolbar: self.emptyToolbar)
         } else {
             generateToolbarButtons()
             if (useSystemToolbar) {
                 self.terminalView!.inputAccessoryView = self.emptyToolbar
                 self.terminalView?.inputAssistantItem.leadingBarButtonGroups = self.leftButtonGroups
                 self.terminalView?.inputAssistantItem.trailingBarButtonGroups = self.rightButtonGroups
+                self.webView?.inputAssistantItem.leadingBarButtonGroups = self.leftButtonGroups
+                self.webView?.inputAssistantItem.trailingBarButtonGroups = self.rightButtonGroups
             } else {
                 self.terminalView!.inputAccessoryView = self.editorToolbar
+                self.webView?.addInputAccessoryView(toolbar: self.editorToolbar)
             }
             if #available(iOS 17, *) {
                 NSLog("myToolbarTip status: \(myToolbarTip.status)")
@@ -4276,7 +4320,6 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         guard (data.count > 0) else {
             return
         }
-        guard (terminalView != nil) else { return }
         if var string = String(data: data, encoding: String.Encoding.utf8) {
             // Remove all trailing \n\r (but keep those inside the string)
             if (string.contains(endOfTransmission)) {
@@ -4286,7 +4329,26 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
             while (string.hasSuffix("\n") || string.hasSuffix("\r")) {
                 string.removeLast("\n".count)
             }
-            terminalView?.send(txt: string)
+            if (terminalView != nil) && terminalView!.isFirstResponder {
+                DispatchQueue.main.async {
+                    self.terminalView?.send(txt: string)
+                }
+            } else if (webView?.url != nil) {
+                // WebView:
+                // Sanitize the output string to it can be sent to javascript:
+                let parsedString = string.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"").replacingOccurrences(of: "\r", with: "\\r").replacingOccurrences(of: "\n", with: "\\n\\r")
+                DispatchQueue.main.async {
+                    // This works with CodeMirror and ACE:
+                    // document.execCommand("insertText", false, "This is a test");
+                    self.webView?.evaluateJavaScript("document.execCommand(\"insertText\", false, \"" + parsedString + "\");") { (result, error) in
+                        if let error = error {
+                            NSLog("Error in onStdoutButton; offending line = \(parsedString), error = \(error)")
+                            // print(error)
+                        }
+                        // if let result = result { print(result) }
+                    }
+                }
+            }
         }
     }
     
@@ -4462,9 +4524,11 @@ extension SceneDelegate: WKUIDelegate {
         guard let fd = Int32(input) else {
             return nil
         }
+        NSLog("fileDescriptor: input \(input) fd= \(fd)")
         if (fd == 0) {
             if (thread_stdin_copy != nil) {
                 let f = fileno(thread_stdin_copy)
+                NSLog("fileDescriptor: f= \(f)")
                 if (f >= 0) {
                     return f
                 } else {
@@ -4477,6 +4541,7 @@ extension SceneDelegate: WKUIDelegate {
         if (fd == 1) {
             if (thread_stdout_copy != nil) {
                 let f = fileno(thread_stdout_copy)
+                NSLog("fileDescriptor: f= \(f) thread_stdout_copy= \(thread_stdout_copy)")
                 if (f >= 0) {
                     return f
                 } else {
@@ -4534,9 +4599,9 @@ extension SceneDelegate: WKUIDelegate {
             } else if (arguments[1] == "close") {
                 var returnValue:Int32 = -1
                 if let fd = fileDescriptor(input: arguments[2]) {
-                    if (((thread_stdin_copy != nil) && (fd == fileno(self.thread_stdin_copy))) ||
-                        ((thread_stdout_copy != nil) && (fd == fileno(self.thread_stdout_copy))) ||
-                        ((thread_stderr_copy != nil) && (fd == fileno(self.thread_stderr_copy)))) {
+                    if (((thread_stdin_copy != nil) && (fd == fileno(thread_stdin_copy))) ||
+                        ((thread_stdout_copy != nil) && (fd == fileno(thread_stdout_copy))) ||
+                        ((thread_stderr_copy != nil) && (fd == fileno(thread_stderr_copy)))) {
                         // don't close stdin/stdout/stderr
                         returnValue = 0
                     } else {
@@ -4899,9 +4964,9 @@ extension SceneDelegate: WKUIDelegate {
             } else if (arguments[1] == "system") {
                 // NSLog("launching command: \(arguments[2])")
                 // NSLog("Launch: \(self.thread_stdin_copy)  \(self.thread_stdout_copy) \(self.thread_stderr_copy)")
-                thread_stdin = self.thread_stdin_copy
-                thread_stdout = self.thread_stdout_copy
-                thread_stderr = self.thread_stderr_copy
+                thread_stdin = thread_stdin_copy
+                thread_stdout = thread_stdout_copy
+                thread_stderr = thread_stderr_copy
                 if let editor_env = ios_getenv("EDITOR") {
                     let editor = String(cString: editor_env)
                     if (arguments[2].hasPrefix(editor + " ")) {
@@ -4924,7 +4989,7 @@ extension SceneDelegate: WKUIDelegate {
                     }
                 }
                 let pid = ios_fork()
-                var result = ios_system(arguments[2])
+                var result = ios_system(arguments[2].decomposedStringWithCanonicalMapping)
                 ios_waitpid(pid)
                 ios_releaseThreadId(pid)
                 if (result == 0) {
@@ -5180,11 +5245,11 @@ extension SceneDelegate: WKUIDelegate {
                 return
             } else if (arguments[1] == "system") {
                 // NSLog("Launch: \(self.thread_stdin_copy)  \(self.thread_stdin_copy) \(self.thread_stdin_copy)")
-                thread_stdin = self.thread_stdin_copy
-                thread_stdout = self.thread_stdout_copy
-                thread_stderr = self.thread_stderr_copy
+                thread_stdin = thread_stdin_copy
+                thread_stdout = thread_stdout_copy
+                thread_stderr = thread_stderr_copy
                 let pid = ios_fork()
-                var result = ios_system(arguments[2])
+                var result = ios_system(arguments[2].decomposedStringWithCanonicalMapping)
                 ios_waitpid(pid)
                 ios_releaseThreadId(pid)
                 if (result == 0) {
@@ -5271,18 +5336,14 @@ extension SceneDelegate: WKUIDelegate {
             // NSLog("decidePolicyFor: status code: \(statusCode)")
             if let requestedUrl = (navigationResponse.response as? HTTPURLResponse)?.url {
                 if (!requestedUrl.isFileURL
-                    && requestedUrl.host == "127.0.0.1"
+                    && (requestedUrl.host == "127.0.0.1" || requestedUrl.host == "localhost")
                     && requestedUrl.path == "/wasm.html") {
                     NSLog("failed to load wasm.html, restarting the server")
                     // if statusCode != 200..299 restart the server.
                     decisionHandler(.cancel)
                     startLocalWebServer()
-                    // and reload the web page on all wasmWebView for all open scenes.
-                    for scene in UIApplication.shared.connectedScenes {
-                        if let delegate: SceneDelegate = scene.delegate as? SceneDelegate {
-                            delegate.wasmWebView?.reload()
-                        }
-                    }
+                    // and reload the wasmWebView:
+                    wasmWebView?.reloadFromOrigin()
                     return
                 }
             }
@@ -5309,7 +5370,7 @@ extension SceneDelegate: WKUIDelegate {
     }
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        // NSLog("finished loading, title= \(webView.title ?? "unknown"), host= \(webView.url?.host) path=\(webView.url?.path ?? "unknown"), navigation= \(navigation)")
+        NSLog("finished loading, title= \(webView.title ?? "unknown"), host= \(webView.url?.host) path=\(webView.url?.path ?? "unknown"), navigation= \(navigation)")
         if (webView.url?.host == "localhost") && (webView.url?.path == "/wasm.html") {
             // host=="localhost" && path == "/wasm.html" --> make the terminal active
             // NSLog("Back to the terminal. showWebView: \(showWebView)")

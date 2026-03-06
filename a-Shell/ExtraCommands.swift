@@ -80,7 +80,11 @@ public func isForeground(argc: Int32, argv: UnsafeMutablePointer<UnsafeMutablePo
 public func wasm(argc: Int32, argv: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?) -> Int32 {
     if (runningInExtension) {
         fputs("JIT webAssembly is not available \"In Extension\". Try \"wasm3\".\n", thread_stderr)
-        finishedPreparingWebAssemblyCommand();
+        finishedPreparingWebAssemblyCommand()
+        return -1
+    } else if !webAssemblyStarted {
+        fputs("The WebAssembly interpreter is still loading up. Please wait.\n", thread_stderr)
+        finishedPreparingWebAssemblyCommand()
         return -1
     } else {
         let args = convertCArguments(argc: argc, argv: argv)
@@ -127,9 +131,11 @@ a-Shell can do most of the things you can do in a terminal, locally on your iPho
 - newWindow: open a new window
 - exit: close the current window
 
-- All your files, including configuration files (.bashrc, .profile, .ssh...) are in ~/Documents/
+- All your files, including configuration files (.bashrc, .profile, .ssh/...) are in ~/Documents/
 - Files created by Shortcuts are in ~shortcuts/
 - a-Shell executes the ~/Documents/.profile and ~/Documents/.bashrc files for each new window
+
+- single-finger swipe scrolls the terminal and selects text, two-fingers swipe sends arrows.
 
 - Edit files with vim and pico.
 - Transfer files with curl, tar, scp and sftp.
@@ -2075,11 +2081,9 @@ public func repeatCommand(argc: Int32, argv: UnsafeMutablePointer<UnsafeMutableP
 
 public func executeCommandAndWait(command: String) {
     NSLog("executeCommandAndWait: \(command)")
-    if let delegate = currentDelegate {
-        delegate.resultStack.removeAll()
-    }
+    resultStack.removeAll()
     let pid = ios_fork()
-    _ = ios_system(command)
+    _ = ios_system(command.decomposedStringWithCanonicalMapping)
     fflush(thread_stdout)
     ios_waitpid(pid)
     ios_releaseThreadId(pid)

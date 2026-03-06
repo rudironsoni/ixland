@@ -65,7 +65,6 @@ struct Webview : UIViewRepresentable {
         config.setValue(true as Bool, forKey: "allowUniversalAccessFromFileURLs")
         // Does not change anything either way (??? !!!)
         config.preferences.setValue(true as Bool, forKey: "shouldAllowUserInstalledFonts")
-        config.selectionGranularity = .character; // Could be .dynamic
         // let preferences = WKWebpagePreferences()
         // preferences.allowsContentJavaScript = true
         webView = .init(frame: .zero, configuration: config)
@@ -91,11 +90,6 @@ struct Webview : UIViewRepresentable {
         NSLog("updateUIView: url= \(uiView.url)")
         if (uiView.url != nil) { return } // Already loaded the page
         uiView.isOpaque = false
-        if (appVersion != "a-Shell-mini") {
-            uiView.load(URLRequest(url: URL(string: "https://localhost:8443/wasm.html")!))
-        } else {
-            uiView.load(URLRequest(url: URL(string: "https://localhost:8334/wasm.html")!))
-        }
     }
 }
 
@@ -172,11 +166,13 @@ struct ContentView: View {
                                 ToolbarItem(placement: .navigationBarLeading) {
                                     Button(action: {
                                         if (webview.webView.canGoBack) {
-                                            if let backPage = webview.webView.backForwardList.item(at: -1) {
-                                                if backPage.url.host != "localhost" || backPage.url.path != "/wasm.html" {
-                                                    webview.webView.goBack()
-                                                }
-                                            }
+                                            webview.webView.goBack()
+                                        } else {
+                                            // At the end of web page history, go back to the terminal (as before)
+                                            localShowWebView = false
+                                            showWebView = false
+                                            showKeyboardAtStartup = true
+                                            _ = terminalview.view.becomeFirstResponder()
                                         }
                                     }, label: {
                                         Image(systemName: "arrow.backward")
@@ -188,12 +184,6 @@ struct ContentView: View {
                                         showWebView = false
                                         showKeyboardAtStartup = true
                                         _ = terminalview.view.becomeFirstResponder()
-                                        if (appVersion != "a-Shell-mini") {
-                                            webview.webView.load(URLRequest(url: URL(string: "https://localhost:8443/wasm.html")!))
-                                        } else {
-                                            NSLog("Loding wasm.html from 8334 (button)")
-                                            webview.webView.load(URLRequest(url: URL(string: "https://localhost:8334/wasm.html")!))
-                                        }
                                     }, label: {
                                         Image(systemName: webview.terminalIconName) // apple.terminal or pc depending on the version
                                     })
@@ -213,11 +203,7 @@ struct ContentView: View {
                                 ToolbarItem(placement: .navigationBarTrailing) {
                                     Button(action: {
                                         if (webview.webView.canGoForward) {
-                                            if let backPage = webview.webView.backForwardList.item(at: 1) {
-                                                if backPage.url.host != "localhost" || backPage.url.path != "/wasm.html" {
-                                                    webview.webView.goForward()
-                                                }
-                                            }
+                                            webview.webView.goForward()
                                         }
                                     }, label: {
                                         Image(systemName: "arrow.forward")
@@ -232,13 +218,10 @@ struct ContentView: View {
             // terminalview
             .onReceive(keyboardChangePublisher) {
                 if (showWebView) {
-                    if let localUrl = webview.webView.url {
-                        // Change this if moving to separate WkWebView for WASM works
-                        if (localUrl.host == "localhost") && (localUrl.path == "/wasm.html") {
-                            localShowWebView = false
-                        } else {
-                            localShowWebView = true
-                        }
+                    if webview.webView.url == nil {
+                        localShowWebView = false
+                    } else {
+                        localShowWebView = true
                     }
                 }
                 keyboardHeight = $0
@@ -266,17 +249,18 @@ struct ContentView: View {
                     // it doesn't change when we show and remove the emoji keyboard.
                     // Not for future self: do **not** use geometry.size.height for anything. I tried, it fails.
                     frameHeight = UIScreen.main.bounds.height - keyboardHeight
-                    if showToolbar && (UIScreen.main.bounds.height > UIScreen.main.bounds.width) {
-                        NSLog("toolbar height: \(terminalview.view.inputAccessoryView!.bounds.height)")
-                        let toolbarHeight = terminalview.view.inputAccessoryView!.bounds.height
+                    if (UIScreen.main.bounds.height > UIScreen.main.bounds.width) {
                         // keyboard height takes into account the toolbar height in landscape mode, not in portrait
                         // It's probably a bug that will be fixed at some poin
                         if (UIScreen.main.bounds.height < 700) {
                             // The toolbar height is a bit too much on iPhone SE and iPhone 8 (h = 667)
                             // This could be merged with the dynamic island test (?)
+                            // Apparently we need the -20 even when there's no toolbar on iPhone SE
+                            // It doesn't make sense
                             frameHeight -= 20
-                        } else {
-                            // On the simulator, this is still not enough for some phones. What can I do at that point?
+                        } else if showToolbar  {
+                            NSLog("toolbar height: \(terminalview.view.inputAccessoryView!.bounds.height)")
+                            let toolbarHeight = terminalview.view.inputAccessoryView!.bounds.height
                             frameHeight -= toolbarHeight
                         }
                     }

@@ -23,10 +23,12 @@ let localServerQueue = DispatchQueue(label: "localWebServer", qos: .userInteract
 var appDependentPath: String = "" // part of the path that depends on the App location (home, appdir)
 let __known_browsers = ["internalbrowser", "googlechrome", "firefox", "safari", "yandexbrowser", "brave", "opera"]
 var localServerApp = Router()
+var webAssemblyStarted = false
 
 func startLocalWebServer() {
+    // Last file loaded: /node_modules/@wasmer/wasmfs/lib/index.cjs.js
     localServerApp.get("/*") { request, response, next in
-        // NSLog("Kitura request received: \(request.matchedPath)")
+        NSLog("Kitura request received: \(request.matchedPath)")
         // Load ~/Library/node_modules first if it exists:
         // This also loads ~/Library/wasm.html and ~/Library/require.js if the user really wants to.
         let libraryURL = try! FileManager().url(for: .libraryDirectory,
@@ -37,6 +39,9 @@ func startLocalWebServer() {
         let rootFilePath = Bundle.main.resourcePath! + request.matchedPath
         var fileName: String? = nil
         // NSLog("Kitura file requested: \(request.matchedPath). Trying \(localFilePath)  and \(rootFilePath)")
+        if (request.matchedPath == "/wasm.html") {
+            webAssemblyStarted = true
+        }
         if (FileManager().fileExists(atPath: localFilePath) && !URL(fileURLWithPath: localFilePath).isDirectory) {
             fileName = localFilePath
         } else if (FileManager().fileExists(atPath: rootFilePath) && !URL(fileURLWithPath: rootFilePath).isDirectory) {
