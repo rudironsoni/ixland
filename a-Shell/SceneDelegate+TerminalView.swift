@@ -668,8 +668,9 @@ extension SceneDelegate {
                     return
                 }
                 // from here on, we can assume ios_activePager() == 0
-                // If there is a webAssembly command running:
-                if (javascriptRunning && (thread_stdin_copy != nil)) {
+                // If there is an interactive webAssembly command running:
+                if (interactiveCommandRunning || terminalView!.getTerminal().isCurrentBufferAlternate)
+                    && (javascriptRunning && (thread_stdin_copy != nil)) {
                     // Q: how many commands are using interactive input, besides nnn?
                     wasmWebView?.evaluateJavaScript("inputString += '\(string.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"").replacingOccurrences(of: "'", with: "\\'").replacingOccurrences(of: "\n", with: "\\n").replacingOccurrences(of: "\r", with: "\\n"))'; commandIsRunning;") { (result, error) in
                         // if let error = error { print(error) }
@@ -679,12 +680,7 @@ extension SceneDelegate {
                             }
                         }
                     }
-                    // purely interactive Wasm command:
-                    if (interactiveCommandRunning || terminalView!.getTerminal().isCurrentBufferAlternate) {
-                        return
-                    }
-                    stdinString += string
-                    NSLog("input sent to WebAssembly: \(string)")
+                    return
                 }
                 if (!javascriptRunning && executeWebAssemblyCommandsRunning) {
                     // There seems to be cases where the webassembly command did not terminate properly.
@@ -1266,6 +1262,20 @@ extension SceneDelegate {
                     commandAfterCursor = ""
                     terminalView?.feed(text: "\n\r")
                     windowPrintedContent += commandLine + "\n\r"
+                    // webAssembly commands:
+                    stdinString = commandLine + "\n"
+                    NSLog("webAssembly: \(stdinString)")
+                    if (javascriptRunning && (thread_stdin_copy != nil)) {
+                        // non-interactive WebAssembly commands:
+                        wasmWebView?.evaluateJavaScript("inputString += '\(stdinString.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"").replacingOccurrences(of: "'", with: "\\'").replacingOccurrences(of: "\n", with: "\\n").replacingOccurrences(of: "\r", with: "\\n"))'; commandIsRunning;") { (result, error) in
+                            // if let error = error { print(error) }
+                            if let result = result as? Bool {
+                                if (!result) {
+                                    self.endWebAssemblyCommand(error: 0, message: "")
+                                }
+                            }
+                        }
+                    }
                     guard let data = (commandLine + "\n").data(using: .utf8) else { return }
                     guard stdin_file_input != nil else { return }
                     // store command in local command history, reset if it's different:

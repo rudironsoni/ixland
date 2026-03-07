@@ -2027,7 +2027,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         switch (cursorShape.lowercased()) {
         case "block":
             self.terminalView?.getTerminal().setCursorStyle(.blinkBlock)
-        case "bar":
+        case "beam":
             self.terminalView?.getTerminal().setCursorStyle(.blinkBar)
         case "underline":
             self.terminalView?.getTerminal().setCursorStyle(.blinkUnderline)
@@ -2069,7 +2069,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
                 switch (cursorShape!.lowercased()) {
                 case "block":
                     self.terminalView?.getTerminal().setCursorStyle(.blinkBlock)
-                case "bar":
+                case "beam":
                     self.terminalView?.getTerminal().setCursorStyle(.blinkBar)
                 case "underline":
                     self.terminalView?.getTerminal().setCursorStyle(.blinkUnderline)
@@ -4056,7 +4056,7 @@ class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelega
         switch (cursorShape.lowercased()) {
         case "block":
             terminalView?.getTerminal().setCursorStyle(.blinkBlock)
-        case "bar":
+        case "beam":
             terminalView?.getTerminal().setCursorStyle(.blinkBar)
         case "underline":
             terminalView?.getTerminal().setCursorStyle(.blinkUnderline)

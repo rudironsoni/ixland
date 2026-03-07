@@ -513,8 +513,8 @@ public func config(argc: Int32, argv: UnsafeMutablePointer<UnsafeMutablePointer<
             } else if name == "factory" {
                 terminalCursorShape = factoryCursorShape
             } else {
-                name = name.uppercased()
-                if (name == "BEAM") || (name == "UNDERLINE") || (name == "BLOCK") {
+                name = name.lowercased()
+                if (name == "beam") || (name == "underline") || (name == "block") {
                     terminalCursorShape = name
                 } else {
                     fputs("Did not understand cursor shape: \(name) (possible names are beam, block and underline)\n", thread_stderr)

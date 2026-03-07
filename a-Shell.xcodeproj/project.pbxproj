@@ -11,6 +11,9 @@
 		22068CC62F51C11A004307F7 /* TerminalView+KeyCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22068CC52F51BFCE004307F7 /* TerminalView+KeyCommands.swift */; };
 		22068CC72F51CE47004307F7 /* TerminalView+KeyCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22068CC52F51BFCE004307F7 /* TerminalView+KeyCommands.swift */; };
 		22068CC82F51CE47004307F7 /* TerminalView+KeyCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22068CC52F51BFCE004307F7 /* TerminalView+KeyCommands.swift */; };
+		22068CC92F548FAB004307F7 /* WkWebViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2208ACC822D24703003985D6 /* WkWebViewExtension.swift */; };
+		22068CCA2F548FAB004307F7 /* WkWebViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2208ACC822D24703003985D6 /* WkWebViewExtension.swift */; };
+		22068CCB2F548FAB004307F7 /* WkWebViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2208ACC822D24703003985D6 /* WkWebViewExtension.swift */; };
 		2208ACBF22CCE57E003985D6 /* String+C.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2208ACBE22CCE57E003985D6 /* String+C.swift */; };
 		2208ACC522D2026E003985D6 /* UIDevice+Name.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2208ACC422D2026E003985D6 /* UIDevice+Name.swift */; };
 		220C524D26D637540062F673 /* unrar.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 220C524C26D637500062F673 /* unrar.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -229,8 +232,6 @@
 		22984EF222C93DBC00069497 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22984EF122C93DBC00069497 /* ContentView.swift */; };
 		22984EF722C93DBF00069497 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 22984EF622C93DBF00069497 /* Preview Assets.xcassets */; };
 		22984EFA22C93DBF00069497 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 22984EF822C93DBF00069497 /* LaunchScreen.storyboard */; };
-		229BAF4222E8A73A00C2269B /* hterm.html in Resources */ = {isa = PBXBuildFile; fileRef = 224D10BA22CB247900A234EE /* hterm.html */; };
-		229BAF4322E8A73A00C2269B /* hterm_all.js in Resources */ = {isa = PBXBuildFile; fileRef = 22984F0122C9F78800069497 /* hterm_all.js */; };
 		229D2477257931E4004A78AC /* ExtraCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22D23117231940B2005B0C12 /* ExtraCommands.swift */; };
 		229D2478257931E4004A78AC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22984EED22C93DBC00069497 /* AppDelegate.swift */; };
 		229D2479257931E4004A78AC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22984EEF22C93DBC00069497 /* SceneDelegate.swift */; };
@@ -286,7 +287,6 @@
 		22B0CA662E75DDDD00FDF6FE /* Python-zmq.backend.cffi._cffi.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 22B0CA642E75DCC100FDF6FE /* Python-zmq.backend.cffi._cffi.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		22B0CA672E75DDDD00FDF6FE /* PythonAzmq.backend.cffi._cffi.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 22B0CA652E75DCD300FDF6FE /* PythonAzmq.backend.cffi._cffi.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		22B114772817CEA400A5BF16 /* terminfo in Resources */ = {isa = PBXBuildFile; fileRef = 22B114762817CEA200A5BF16 /* terminfo */; };
-		22B257BA267691E4006C2B31 /* gestures.js in Resources */ = {isa = PBXBuildFile; fileRef = 22B257B9267691E2006C2B31 /* gestures.js */; };
 		22B3D35B2F421A6500AC45E5 /* defaultToolbar_iPad.txt in Resources */ = {isa = PBXBuildFile; fileRef = 22B3D35A2F421A6500AC45E5 /* defaultToolbar_iPad.txt */; };
 		22B3D35C2F421A6500AC45E5 /* defaultToolbar_iPad.txt in Resources */ = {isa = PBXBuildFile; fileRef = 22B3D35A2F421A6500AC45E5 /* defaultToolbar_iPad.txt */; };
 		22B3D35D2F421A6500AC45E5 /* defaultToolbar_iPad.txt in Resources */ = {isa = PBXBuildFile; fileRef = 22B3D35A2F421A6500AC45E5 /* defaultToolbar_iPad.txt */; };
@@ -947,8 +947,6 @@
 		22E9F585255846A600673D11 /* lua_ios.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 22E9F583255846A500673D11 /* lua_ios.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		22E9F5A2255846F400673D11 /* vim.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 22E9F5A0255846F300673D11 /* vim.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		22E9F5A72558470600673D11 /* bc_ios.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 22E9F5A52558470600673D11 /* bc_ios.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		22EA905B266696A800CC9B88 /* wasm.js in Resources */ = {isa = PBXBuildFile; fileRef = 22EA905A266696A700CC9B88 /* wasm.js */; };
-		22EA905F266698ED00CC9B88 /* script.js in Resources */ = {isa = PBXBuildFile; fileRef = 22EA905D266698DD00CC9B88 /* script.js */; };
 		22F75D41265FA3970056AFD2 /* xxd.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 22F75D40265FA3500056AFD2 /* xxd.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		22F75D42265FA3A30056AFD2 /* xxd.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 22F75D40265FA3500056AFD2 /* xxd.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		22F8457F266FDB7C00A0BF11 /* lg2.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2234FB14266F765A00702AD1 /* lg2.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -4090,18 +4088,13 @@
 				229F51152473BBCA0053AC03 /* commandDictionary.plist in Resources */,
 				22E337EC2949F4CF00A8F76C /* defaultToolbar.txt in Resources */,
 				22B3D35C2F421A6500AC45E5 /* defaultToolbar_iPad.txt in Resources */,
-				22B257BA267691E4006C2B31 /* gestures.js in Resources */,
 				22372B722448E85D0033FE07 /* usr in Resources */,
 				22E1B53A243DF64000EA8FBD /* require.js in Resources */,
 				22484B062434F11F00D6BDDA /* node_modules in Resources */,
 				227722EB239D1FA00020037E /* task in Resources */,
 				22BF6243231589EC00FEA585 /* Settings.bundle in Resources */,
-				229BAF4222E8A73A00C2269B /* hterm.html in Resources */,
 				223FC3CB2611F9C400CDC89F /* wasm.html in Resources */,
-				229BAF4322E8A73A00C2269B /* hterm_all.js in Resources */,
-				22EA905B266696A800CC9B88 /* wasm.js in Resources */,
 				220F36522BC458C900842FEE /* PrivacyInfo.xcprivacy in Resources */,
-				22EA905F266698ED00CC9B88 /* script.js in Resources */,
 				22BF623E23157F2400FEA585 /* cacert.pem in Resources */,
 				22DF4FEF26E25AEF00E5A0F5 /* texmf.cnf in Resources */,
 				226012EF231D239500AEB059 /* texCommandsDictionary.plist in Resources */,
@@ -4210,6 +4203,7 @@
 				6BD953702BFFCC6400C2508F /* ExecuteCommandIntentHandler.swift in Sources */,
 				224A904A2ADD0999006DB9CC /* URL+isDirectory.swift in Sources */,
 				224A904B2ADD0999006DB9CC /* listTeXscripts.swift in Sources */,
+				22068CCB2F548FAB004307F7 /* WkWebViewExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4236,6 +4230,7 @@
 				22984EF222C93DBC00069497 /* ContentView.swift in Sources */,
 				6BD9536E2BFFCC6400C2508F /* ExecuteCommandIntentHandler.swift in Sources */,
 				22C4A02D22E09D9D00E0FAD2 /* URL+isDirectory.swift in Sources */,
+				22068CC92F548FAB004307F7 /* WkWebViewExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4262,6 +4257,7 @@
 				6BD9536F2BFFCC6400C2508F /* ExecuteCommandIntentHandler.swift in Sources */,
 				229D2484257931E4004A78AC /* URL+isDirectory.swift in Sources */,
 				22675A15271C24B200459BEF /* listTeXscripts.swift in Sources */,
+				22068CCA2F548FAB004307F7 /* WkWebViewExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4478,7 +4474,7 @@
 				CODE_SIGN_ENTITLEMENTS = "a-Shell/a-Shell.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 440;
+				CURRENT_PROJECT_VERSION = 533;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_ASSET_PATHS = "a-Shell/Preview\\ Content";
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
@@ -4499,7 +4495,7 @@
 					"$(SDKROOT)/usr/lib/swift",
 					"$(PROJECT_DIR)/Frameworks",
 				);
-				MARKETING_VERSION = 1.15.9;
+				MARKETING_VERSION = 2.0.0;
 				OTHER_LDFLAGS = (
 					"-L",
 					Frameworks/,
@@ -4529,7 +4525,7 @@
 				CODE_SIGN_ENTITLEMENTS = "a-Shell/a-Shell.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 440;
+				CURRENT_PROJECT_VERSION = 533;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_ASSET_PATHS = "a-Shell/Preview\\ Content";
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
@@ -4550,7 +4546,7 @@
 					"$(SDKROOT)/usr/lib/swift",
 					"$(PROJECT_DIR)/Frameworks",
 				);
-				MARKETING_VERSION = 1.15.9;
+				MARKETING_VERSION = 2.0.0;
 				OTHER_LDFLAGS = (
 					"-L",
 					Frameworks/,
@@ -4703,7 +4699,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "a-Shell/a-Shell.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 531;
+				CURRENT_PROJECT_VERSION = 535;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_ASSET_PATHS = "a-Shell/Preview\\ Content";
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
@@ -4754,7 +4750,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "a-Shell/a-Shell.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 531;
+				CURRENT_PROJECT_VERSION = 535;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_ASSET_PATHS = "a-Shell/Preview\\ Content";
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
@@ -4804,7 +4800,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "a-Shell/a-Shell.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 531;
+				CURRENT_PROJECT_VERSION = 535;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_ASSET_PATHS = "a-Shell/Preview\\ Content";
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
@@ -4859,7 +4855,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "a-Shell/a-Shell.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 531;
+				CURRENT_PROJECT_VERSION = 535;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_ASSET_PATHS = "a-Shell/Preview\\ Content";
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
