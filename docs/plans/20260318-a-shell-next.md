@@ -1,18 +1,9 @@
 # a-Shell-next: Modernization Plan
 
-## Context
+## Project Structure Initiative
 
-This plan outlines the evolution of a-Shell from its current state to a more robust, maintainable, and extensible Unix-like environment for iOS. The core insight is to treat **ios_system** as the platform contract, **a-Shell** as the host app, and build a proper **package forge** that produces native iOS packages targeting the ios_system contract.
-
-### Approach: Termux-Inspired Package Building (ashell-core)
-
-Following the model of [termux-packages](https://github.com/termux/termux-packages), the forge uses:
-- **Bash build scripts** (`build.sh`) instead of YAML configs
-- **Git diff patches** (`patches/*.patch`) for upstream modifications
-- **Standard build lifecycle** (`ashell_step_*` functions)
-- **iOS-specific additions**: XCFramework generation, plist metadata, code signing
-
-**Naming convention**: `ASHELL` prefix for environment variables, `ashell_` prefix for functions.
+### Objective
+Create a comprehensive beads-based project management structure with milestones, epics, and detailed tasks that enable future coding agents to work with zero context. Each artifact must be self-contained with full implementation guidance, code snippets, copy-paste examples, and agent-specific instructions.
 
 ### Package Manager: `apt` (Debian-style)
 
@@ -32,12 +23,13 @@ Packages are organized in two categories:
 **1. root-packages/ - Core Distribution Packages**
 Located in `ashell-packages/root-packages/` - these are the building blocks of the a-Shell distribution. They must exist for the core system to function.
 
-Examples:
-- `apt/` - The package manager itself (built from Debian source with patches)
+Examples (per user direction):
+- `apt/` - The package manager (built from Debian 2.8.1 with iOS patches)
 - `dpkg/` - Debian package management system
+- `coreutils/` - Essential file/text/shell utilities
 - `libz/` - zlib compression library
 - `libssl/` - OpenSSL library
-- `coreutils/` - Essential file/text/shell utilities
+- `python/` - Python runtime (BeeWare Python-Apple-support)
 
 **2. packages/ - Optional User Packages**
 Located in `ashell-packages/packages/` - these are optional packages users can install later.
@@ -73,21 +65,472 @@ ashell-packages/
 └── .build/                        # Build outputs (.gitignore)
 ```
 
+### Four-Part Enhancement Plan
+
+#### 1. Enhanced Issue Descriptions
+
+Update all 35+ existing issues to include:
+
+**Code Snippets Section:**
+```markdown
+## Code Snippets
+
+### Function Signature Pattern
+```bash
+# From ashell-packages/ashell_package.sh (if exists)
+ashell_step_<name>() {
+    # Inputs: $1 = arg1, $2 = arg2
+    # Returns: 0 on success, 1 on failure
+    # Side effects: Creates/modifies files
+}
+```
+
+### Reference Implementation
+```bash
+# Exact code from existing working implementation
+# If none exists, provide starter template:
+ashell_step_extract_package() {
+    local url="$1"
+    local sha256="$2"
+    local dest_dir="$3"
+
+    # Download
+    if ! curl -fsSL "$url" -o "$dest_dir/download.tmp"; then
+        ashell_log_error "Download failed: $url"
+        return 1
+    fi
+
+    # Verify SHA256
+    if [[ "$(shasum -a 256 "$dest_dir/download.tmp" | cut -d' ' -f1)" != "$sha256" ]]; then
+        ashell_log_error "SHA256 mismatch"
+        return 1
+    fi
+
+    # Extract
+    tar -xzf "$dest_dir/download.tmp" -C "$dest_dir"
+    rm "$dest_dir/download.tmp"
+}
+```
+
+### Error Handling Pattern
+```bash
+# Check return codes
+if ! some_command; then
+    ashell_log_error "Command failed: $func_name"
+    return 1
+fi
+
+# Cleanup on error
+trap 'rm -rf "$temp_dir"' EXIT
+```
+```
+
+**Exact File Paths Section:**
+```markdown
+## Exact File Paths
+
+### Files to Create
+- `/home/rrj/src/github/rudironsoni/a-shell-next/ashell-packages/ashell_package.sh` - Main library
+- `/home/rrj/src/github/rudironsoni/a-shell-next/ashell-packages/config/ios-toolchain.cmake` - CMake toolchain
+
+### Files to Modify (if exists)
+- `/home/rrj/src/github/rudironsoni/a-shell-next/ashell-packages/build.sh` - Add command dispatch
+  - Line 45: Add 'package' case to switch statement
+  - Line 78: Update help text
+
+### Directory Structure to Create
+```
+ashell-packages/
+├── ashell_package.sh
+├── build.sh
+├── config/
+│   └── ios-toolchain.cmake
+└── .build/
+    └── {package}/
+```
+```
+
+**Copy-Paste Commands Section:**
+```markdown
+## Copy-Paste Commands
+
+### Setup
+```bash
+cd /home/rrj/src/github/rudironsoni/a-shell-next/ashell-packages
+mkdir -p config .build
+```
+
+### Testing
+```bash
+# Syntax check
+bash -n ashell_package.sh
+
+# Test specific function
+source ashell_package.sh
+ashell_step_extract_package "https://example.com/file.tar.gz" "abc123..." "/tmp/test"
+
+# Full build test
+./build.sh hello
+```
+
+### Verification
+```bash
+# Check output exists
+ls -la .build/hello/*.xcframework
+
+# Validate plist
+cat .build/hello/commands.plist | plutil -lint -
+```
+```
+
+#### 2. Task Specification Template
+
+Create `.beads/TASK_SPECIFICATION.md`:
+
+```markdown
+# Task Specification Template
+
+Every task MUST include these sections with this level of detail:
+
+## Title Format
+{Milestone}-I{Number}: {Action verb} {what} {for whom/what}
+
+Example: M2-I1: Create ashell_package.sh build system library
+
+## Required Sections
+
+### Goal (1 sentence)
+What to accomplish. Must be testable.
+
+### Success Criteria (checklist)
+- [ ] Specific, measurable outcomes
+- [ ] Each item has verification method
+- [ ] No subjective criteria
+
+### Context (2-3 paragraphs)
+- Why this matters
+- What depends on it
+- Technical background
+- iOS-specific constraints
+
+### Dependencies
+- **Blocked by:** Exact issue IDs
+- **Blocks:** Exact issue IDs
+- **Related:** Reference issues
+
+### Code Snippets
+Working code examples:
+- Function signatures
+- Implementation patterns
+- Error handling
+- Integration points
+
+### Exact File Paths
+Absolute paths from repo root:
+- Files to create
+- Files to modify (with line numbers if applicable)
+- Directories to create
+
+### Copy-Paste Commands
+Exact commands for:
+- Setup
+- Implementation
+- Testing
+- Verification
+
+### Decision Records
+| Decision | Rationale | Alternatives Rejected |
+|----------|-----------|----------------------|
+| Choice | Why | Why not other |
+
+### Do's and Don'ts
+Specific guidelines based on past experience:
+- DO: Specific action
+- DON'T: Specific pitfall
+
+### When to Stop
+Explicit conditions:
+- Complete when: X, Y, Z
+- Escalate if: A, B, C
+- Ask for help when: D, E, F
+
+### Verification Steps
+Numbered, specific, copy-pasteable:
+1. Run: exact command
+2. Expect: exact output
+3. Check: specific condition
+
+### Agent Notes (NEW)
+Special instructions for AI agents:
+- Read these files first
+- Use these patterns
+- Check these invariants
+- Common mistakes to avoid
+```
+
+#### 3. Reference Implementations
+
+Create `.beads/reference/` with working examples:
+
+**reference/step-functions.sh**
+```bash
+#!/bin/bash
+# Reference implementation of all ashell_step_* functions
+# Copy and modify for actual implementation
+
+ashell_step_extract_package() {
+    local url="$1"
+    local sha256="$2"
+    local dest_dir="$3"
+
+    ashell_log_info "Downloading from $url"
+
+    mkdir -p "$dest_dir"
+    local tmp_file="$dest_dir/.download.tmp"
+
+    # Download with retry
+    local retries=3
+    while ((retries-- > 0)); do
+        if curl -fsSL --connect-timeout 30 "$url" -o "$tmp_file" 2>/dev/null; then
+            break
+        fi
+        ashell_log_warn "Download failed, retrying... ($retries left)"
+        sleep 2
+    done
+
+    if [[ ! -f "$tmp_file" ]]; then
+        ashell_log_error "Download failed after all retries"
+        return 1
+    fi
+
+    # Verify SHA256
+    if command -v shasum >/dev/null 2>&1; then
+        local computed_hash=$(shasum -a 256 "$tmp_file" | cut -d' ' -f1)
+    else
+        local computed_hash=$(sha256sum "$tmp_file" | cut -d' ' -f1)
+    fi
+
+    if [[ "$computed_hash" != "$sha256" ]]; then
+        ashell_log_error "SHA256 mismatch!"
+        ashell_log_error "  Expected: $sha256"
+        ashell_log_error "  Computed: $computed_hash"
+        rm -f "$tmp_file"
+        return 1
+    fi
+
+    # Extract based on extension
+    case "$url" in
+        *.tar.gz|*.tgz)
+            tar -xzf "$tmp_file" -C "$dest_dir" --strip-components=1
+            ;;
+        *.tar.bz2|*.tbz2)
+            tar -xjf "$tmp_file" -C "$dest_dir" --strip-components=1
+            ;;
+        *.tar.xz)
+            tar -xJf "$tmp_file" -C "$dest_dir" --strip-components=1
+            ;;
+        *.zip)
+            unzip -q "$tmp_file" -d "$dest_dir"
+            ;;
+        *)
+            ashell_log_error "Unknown archive format: $url"
+            return 1
+            ;;
+    esac
+
+    rm -f "$tmp_file"
+    ashell_log_success "Extracted to $dest_dir"
+    return 0
+}
+```
+
+**reference/package-template/build.sh**
+```bash
+#!/bin/bash
+# Template for new packages - copy and customize
+
+ASHELL_PKG_NAME="{{PACKAGE_NAME}}"
+ASHELL_PKG_VERSION="{{VERSION}}"
+ASHELL_PKG_SRCURL="{{SOURCE_URL}}"
+ASHELL_PKG_SHA256="{{SHA256}}"
+ASHELL_PKG_DEPENDS="{{DEPENDENCIES}}"
+ASHELL_PKG_BUILD_DEPENDS="{{BUILD_DEPS}}"
+ASHELL_PKG_COMMANDS=("{{cmd}}:{{entry_point}}::{{type}}")
+
+# Optional: Override default steps
+ashell_step_pre_configure() {
+    # Add custom logic before configure
+    :  # noop placeholder
+}
+
+# Load build system
+source "${ASHELL_PKG_BUILDER_DIR}/../ashell_package.sh"
+```
+
+#### 4. Agent Notes Section
+
+Add to every issue:
+
+```markdown
+## 🤖 Agent Notes
+
+### If You're an AI Agent Starting This Task:
+
+**READ FIRST:**
+1. Read the entire issue description
+2. Read any "reference/" files mentioned
+3. Look at existing similar implementations in the codebase
+4. Check if tests exist that define expected behavior
+
+**BEFORE CODING:**
+1. Verify you can run existing code (if any)
+2. Understand the ASHELL_ conventions
+3. Check for similar patterns in existing files
+
+**COMMON MISTAKES TO AVOID:**
+- Don't hardcode paths - use $ASHELL_PREFIX
+- Don't assume macOS/Xcode - use lazy loading
+- Don't skip error handling - every command can fail
+- Don't use global stdout - use ios_stdout() in C/Swift
+
+**WHEN STUCK:**
+1. Check existing working implementations in ashell-packages/
+2. Look at ios_system/ for API patterns
+3. Review docs/api/ios_system_contract.md
+4. If still stuck, document what you tried and why it failed
+
+**VERIFICATION CHECKLIST:**
+Before claiming done:
+- [ ] Code follows existing style conventions
+- [ ] Error handling is comprehensive
+- [ ] All success criteria are checked
+- [ ] Verification steps all pass
+- [ ] No TODOs or placeholder comments remain
+```
+
+### Execution Plan
+
+1. **Create reference implementations** first (provides code to reference)
+2. **Create task specification template** (defines the format)
+3. **Update existing issues** using the template (enhance descriptions)
+4. **Add agent notes** to all issues (AI-specific guidance)
+
+### Files to Create
+- `.beads/TASK_SPECIFICATION.md` - The template standard
+- `.beads/reference/step-functions.sh` - Working bash examples
+- `.beads/reference/package-template/build.sh` - Package template
+- `.beads/reference/swift-command.swift` - Swift command template
+- `.beads/AGENT_GUIDE.md` - AI agent onboarding guide
+
+### Three-Tier Hierarchy
+
+Since beads doesn't have native milestones, we use labels:
+- **Milestones** (type=epic, label=milestone): M0-M6 - High-level phases
+- **Epics** (type=epic, label=epic): Functional areas within milestones
+- **Tasks** (type=task): Individual work items
+
+**Package Manager:** `apt` (built from Debian source in root-packages/apt/)
+
+**Package Locations:**
+- `ashell-packages/root-packages/` - Core distro packages (apt, dpkg, libz, etc.)
+- `ashell-packages/packages/` - Optional user packages (nvim, vim, python, etc.)
+
+**Milestone M0: Contract & Documentation Foundation**
+- Epic: Documentation
+  - Task: ios_system contract document
+  - Task: Porting guide
+  - Task: Package manifest schema
+  - Task: Test strategy
+
+**Milestone M1: Platform Hardening**
+- Epic: ios_system Core
+  - Task: Trace hooks
+  - Task: Environment standardization
+  - Task: Runtime registration API
+  - Task: Thread-safety hardening
+
+**Milestone M2: Forge Alpha (CRITICAL)**
+- Epic: Build System
+  - Task: ashell_package.sh library
+  - Task: build.sh orchestration
+  - Task: CI pipeline
+- Epic: Toolchain
+  - Task: iOS cross-compilation
+  - Task: XCFramework generation
+- Epic: Root Packages
+  - Task: apt (from Debian source with patches)
+  - Task: dpkg
+  - Task: libz, libssl (dependencies)
+- Epic: Reference Package
+  - Task: hello package
+  - Task: libarchive extraction
+  - Task: plist generation
+
+**Milestone M3: Core Shell Beta**
+- Epic: Command Hardening
+  - Task: Tier A commands
+  - Task: Conformance tests
+  - Task: File-safety tests
+  - Task: Session validation
+
+**Milestone M4: Interactive UX**
+- Epic: System Info
+  - Task: Library APIs
+- Epic: LineEditor
+  - Task: Integration
+  - Task: History/completion
+
+**Milestone M5: Heavy Packages**
+- Epic: Python
+  - Task: Python runtime
+  - Task: Wheel forge
+  - Task: Curated packages
+- Epic: SSH
+  - Task: SSH tools package
+- Epic: Optional Packages
+  - Task: nvim (Neovim)
+  - Task: vim
+  - Task: git
+
+**Milestone M6: Release Candidate**
+- Epic: Validation
+  - Task: Benchmarks
+  - Task: Crash rate
+  - Task: Documentation
+
+---
+
+# a-Shell-next: Modernization Plan
+
+## Context
+
+This plan outlines the evolution of a-Shell from its current state to a more robust, maintainable, and extensible Unix-like environment for iOS. The core insight is to treat **ios_system** as the platform contract, **a-Shell** as the host app, and build a proper **package forge** that produces native iOS packages targeting the ios_system contract.
+
+### Approach: Termux-Inspired Package Building (ashell-packages)
+
+Following the model of [termux-packages](https://github.com/termux/termux-packages), the forge uses:
+- **Bash build scripts** (`build.sh`) instead of YAML configs
+- **Git diff patches** (`patches/*.patch`) for upstream modifications
+- **Standard build lifecycle** (`ashell_step_*` functions)
+- **iOS-specific additions**: XCFramework generation, plist metadata, code signing
+
+**Naming convention**: `ASHELL` prefix for environment variables, `ashell_` prefix for functions.
+
 ### Current State
 - **ios_system**: Already provides `ios_system()` as a drop-in replacement for `system()`, command dictionaries (plist-based registration), thread-local I/O (`thread_stdin`, `thread_stdout`), `ios_popen`, `replaceCommand`, `addCommandList`, and various ported Unix commands
-- **a-Shell**: Host app with multi-window support, terminal UI, session management, bookmarks, Shortcuts integration
+- **a-Shell**: Host app with multi-window support, terminal UI, `pkg` command for WASM-based packages, session management, bookmarks, Shortcuts integration
 - **libarchive**: Already integrated in ios_system for archive operations
-- **Package system**: `apt` command (Debian-style) for native package management, replacing legacy WASM-focused approach
+- **Package system**: Currently WASM-focused with `pkg install`
 
 ### Target Architecture
 Three distinct layers (Termux-inspired naming):
 1. **ashell-system** (was ios_system): The Unix system layer - syscall replacements (`fork`→`ashell_fork`), thread-local I/O, process simulation. Drop-in replacement for Linux system calls.
 2. **ashell-app** (was a-Shell): The iOS app - terminal UI (SwiftTerm), session management, package UI
-3. **ashell-core**: Core command implementations (file, text, shell commands)
-4. **ashell-packages**: Package forge - build system for native iOS packages with root-packages/ and packages/
+3. **ashell-packages**: Package forge - build system for native iOS packages
 
 **Supporting modules:**
 - **ashell-shared**: Shared constants, utilities, headers used by all modules
+- **ashell-core**: Core command implementations (file, text, shell commands)
 
 ### Process Spawning Architecture: Pluggable Backends
 
@@ -219,15 +662,37 @@ The current ios_system uses a **header-based macro replacement** system:
 
 ---
 
-## Phase 1: Package Forge (HIGHEST PRIORITY)
+## Phase 1: Package Forge (HIGHEST PRIORITY) - REVISED POST-VALIDATION
 
 ### Goals
-Build a native package system that produces ios_system-targeted XCFrameworks. This is the most pressing need.
+Build a build system that produces ios_system-targeted XCFrameworks. **Packages are PRE-BUNDLED in the app, not downloaded.**
 
-### Decisions
-- **Backward Compatibility**: Native-first with WASM fallback. WASM continues to work but is not the focus.
-- **Package Format**: Keep XCFrameworks + plist - evolve the existing approach rather than replacing it.
+### Decisions (Post 4-Subagent Roast)
+- **Primary**: Pre-bundled XCFrameworks (native performance, App Store compliant)
+- **Secondary**: WebAssembly fallback (downloadable, App Store treats as "content")
+- **Package Format**: XCFrameworks + plist for bundled packages
 - **Filesystem Model**: Termux-style PREFIX layout (not FHS-compliant)
+
+### Critical Constraints (From Research)
+
+**What We CANNOT Do:**
+1. ❌ Download native XCFrameworks at runtime (violates App Store 2.5.2)
+2. ❌ Use real apt/dpkg (requires fork/exec)
+3. ❌ Install compiled Python extensions via pip
+4. ❌ Use libarchive with Swift (no bindings exist)
+
+**What We CAN Do:**
+1. ✅ Build XCFrameworks offline, bundle in app
+2. ✅ Use familiar `apt` command name (but simpler implementation)
+3. ✅ Download WebAssembly commands (proven by original a-Shell)
+4. ✅ Pre-bundle Python + scientific stack
+
+### Deliverables
+- [ ] Package recipe format specification (Termux-style build.sh)
+- [ ] Build toolchain for cross-compiling Unix tools to iOS XCFrameworks
+- [ ] Package manifest that generates plist entries for command registration
+- [ ] Archive extraction for WASM packages (libcompression + custom tar, NOT libarchive)
+- [ ] CI pipeline for automated package builds (GitHub Actions with macOS runners)
 
 ### Termux-Inspired Filesystem Model
 
@@ -264,8 +729,23 @@ Following Termux's approach for Android constraints:
 - [ ] CI pipeline for automated package builds
 
 ### Dependencies
-- **libarchive** (already in tree at `ios_system/libarchive/`) - Archive extraction
+- **libcompression** (Apple native) - Gzip/bzip2 decompression
+- **ZIPFoundation** - ZIP archive handling (Swift library)
+- **Custom Swift tar** - Tar archive extraction (implement in ashell-core)
 - **swift-crypto** - Package checksums and signatures (host/tooling layer)
+
+### Archive Handling Strategy (Per User Direction)
+
+Use Apple's native frameworks instead of libarchive:
+
+| Format | Library | Implementation |
+|--------|---------|----------------|
+| .zip | ZIPFoundation | Swift Package |
+| .tar.gz | libcompression + custom tar | Apple native + Swift |
+| .tar.bz2 | libcompression + custom tar | Apple native + Swift |
+| .tar.xz | liblzma (if available) + custom tar | System library |
+
+Rationale: libarchive has no Swift bindings. Using Apple's native libcompression avoids C bridging complexity.
 
 ### Package Recipe Format (Termux-Style)
 Inspired by [termux-packages](https://github.com/termux/termux-packages), use bash build scripts + git diff patches.
@@ -955,65 +1435,141 @@ Improve a-Shell as the best host app for ios_system.
 | Python C extensions | Drop-in replacement goal - pre-compiled wheels or XCFrameworks |
 | Release strategy | Incremental releases (minor version bumps per phase) |
 
-### Python C Extension Strategy (Detailed)
+---
 
-**Goal**: Users can `pip install numpy` and it works normally, but architected for iOS constraints.
+## 4-Subagent Validation Report: Reality Check
 
-**Core Principle**: Resolution and activation are separate operations.
+Based on deep research by 4 parallel subagents (Swift libraries, App Store compliance, Termux build system, Python/C extensions):
 
-**Resolution** (what pip does):
-- Find package, solve dependencies
-- Pick compatible iOS wheel (PEP 730 tags: `ios_12_0_arm64_iphoneos`)
-- Unpack metadata and pure-Python files
+### Critical Findings
 
-**Activation** (iOS-specific):
-- Convert `.so` extension modules to framework form
-- Place actual binary in app bundle's `Frameworks/` folder
-- Replace original `.so` location with `.fwork` placeholder
-- `AppleFrameworkLoader` resolves `.fwork` → actual binary
+| Aspect | Original Plan | Reality | Verdict |
+|--------|---------------|---------|---------|
+| **apt package manager** | Build from Debian source | Requires fork/exec, violates App Store 2.5.2 | ❌ NOT REALISTIC |
+| **Downloaded frameworks** | XCFrameworks via apt | Code signing prevents dlopen of downloaded code | ❌ BLOCKED |
+| **pip install numpy** | Standard pip workflow | No iOS wheels on PyPI, C extensions can't be downloaded | ❌ PIPE DREAM |
+| **Termux approach** | Copy their build system | Termux uses `pkg`, not apt; Android ≠ iOS | ⚠️ MISUNDERSTOOD |
+| **SwiftTerm** | Terminal emulator | Production-ready, actively maintained (v1.12.0) | ✅ VIABLE |
+| **WebAssembly** | Fallback option | Original a-Shell's proven approach, App Store compliant | ✅ RECOMMENDED |
 
-**Architecture**:
-```
-One shared Python runtime (Python-Apple-support)
-One shared binary-extension registry (Frameworks/)
-Many Python environments (site-packages, venvs)
-.fwork markers in environments → shared frameworks
-```
+### What Actually Works on iOS
 
-**Wheel Pipeline**:
-1. Build iOS wheels off-device using cibuildwheel
-2. Post-process wheels: convert extensions to frameworks
-3. Publish to a-Shell-compatible wheel index
-4. At install: resolve → stage → activate → verify import
+**From research into existing apps:**
 
-**App Store Safety**:
-- Binary extensions come from reviewed, signed catalog
-- Pure-Python can install dynamically
-- If wheel not in catalog: fail clearly "no compatible iOS wheel"
+| App | Approach | App Store? |
+|-----|----------|------------|
+| **a-Shell (original)** | Pre-bundled + WASM downloads | ✅ Yes |
+| **iSH** | x86 emulation + Alpine Linux | ✅ Yes |
+| **Carnets** | Bundled Python + limited pip | ✅ Yes |
+| **Pyto** | Pre-compiled frameworks only | ✅ Yes |
+| **Cydia** | Native APT | ❌ Jailbreak only |
 
-**Key Dependencies**:
-- **Python-Apple-support**: Runtime base, cross-build tooling
-- **cibuildwheel**: Build iOS wheels in CI
-- **AppleFrameworkLoader**: Official CPython iOS loader
+**Key insight**: No app on the App Store downloads native ARM binaries. WASM and emulation are the only viable paths for extensibility.
+
+### Revised Strategy (Post-Roast)
+
+**MUST abandon:**
+1. Native apt package manager
+2. Downloaded XCFrameworks
+3. "pip install numpy" for users
+
+**SHOULD pursue:**
+1. **Curated pre-bundled packages** (native performance)
+2. **WebAssembly command system** (downloadable, App Store compliant)
+3. **Honest Python support** (pre-bundled scientific stack, pure Python pip only)
 
 ---
 
-## Decisions Made (All Questions Answered)
+### Python C Extension Strategy (USER DECISION: Custom iOS Wheels)
 
-| Question | Decision |
-|----------|----------|
-| WASM backward compatibility | Native-first with WASM fallback |
-| Phase 1 priority | Package Forge (most pressing) |
-| Package format | Keep XCFrameworks + plist registration |
-| Synthetic filesystems | Library API approach (not file-based) |
-| First forge package | hello command (reference implementation) |
-| Python C extensions | Standard iOS wheels + framework activation + .fwork markers |
-| Release strategy | Incremental releases (minor version bumps per phase) |
-| Command registration source | Package manifest (authoring) → plist (runtime) |
-| Command registration runtime | Keep plist, add runtime registration API for dynamic cases |
-| Alternative formats | No YAML - not needed |
-| Testing strategy | Behavior-based gates per phase, not just coverage |
-| Timeline | Milestone-based (M0-M6), not calendar-based |
+**USER DIRECTION**: Use BeeWare Python-Apple-support and deliver C extensions through custom wheels prebuilt for iOS. We provide the compatibility layer.
+
+**Architecture:**
+
+```
+Tier 1: Python Runtime (BeeWare)
+├── Python-Apple-support framework
+├── AppleFrameworkLoader for C extensions
+└── Pre-configured environment
+
+Tier 2: Prebuilt iOS Wheels (delivered via apt)
+├── numpy-1.26.0-ios_13_0_arm64.whl
+├── pandas-2.0.0-ios_13_0_arm64.whl
+├── matplotlib-3.7.0-ios_13_0_arm64.whl
+└── Custom wheel index for a-Shell
+
+Tier 3: Pure Python (standard pip)
+└── pip install requests # Works normally
+```
+
+**Technical Implementation:**
+
+1. **Base Runtime**: BeeWare Python-Apple-support (Python 3.10-3.14)
+   - Repo: https://github.com/beeware/Python-Apple-support
+   - Provides iOS-compatible CPython with PEP 730 support
+   - Framework-based distribution (not custom embedding)
+
+2. **Wheel Building**: Custom build pipeline
+   - Use Mobile Forge for creating iOS wheels
+   - Cross-compile in CI (GitHub Actions with macOS runners)
+   - Platform tag: `ios_13_0_arm64` (custom, not PyPI standard)
+
+3. **Wheel Installation**: apt-based delivery
+   - `apt install python-numpy` downloads prebuilt wheel
+   - Extract to `~/Library/ashell/lib/python3.12/site-packages/`
+   - Frameworks placed in app bundle's `Frameworks/` folder
+
+4. **Compatibility Layer**: ashell-system provides
+   - `ios_fork()` → pthread simulation (returns error for real fork)
+   - `ios_execve()` → in-process command execution
+   - Thread-local I/O for proper output capture
+
+**Key Dependencies:**
+- **Python-Apple-support**: Runtime base (actively maintained)
+- **Mobile Forge**: Build iOS wheels in CI
+- **AppleFrameworkLoader**: Official CPython iOS loader
+- **ashell-system**: POSIX compatibility layer
+
+**Reference:**
+- PEP 730 (iOS support): https://peps.python.org/pep-0730/
+- Mobile Forge: https://github.com/beeware/mobile-forge
+
+---
+
+## Decisions Made (Post Validation + User Direction)
+
+| Question | Original Decision | Validated Decision | User Direction |
+|----------|-------------------|-------------------|----------------|
+| Package manager | `apt` (Debian-style) | Curated `apt` | **USE APT WITH PATCHES** - Build from Debian 2.8.1 |
+| Package delivery | Downloaded XCFrameworks | Pre-bundled only | **DEBIAN-LIKE LINUX FOR iOS** - Custom delivery via apt |
+| Python C extensions | pip install numpy | Pre-bundled only | **CUSTOM iOS WHEELS** - We build and deliver via apt |
+| Archive handling | libarchive | libarchive has no Swift bindings | **USE APPLE'S LIBCOMPRESSION** + custom tar |
+| Build system | Termux-style | ✅ Reuse patterns | **BUILD DEBIAN-LIKE LINUX FOR iOS** |
+
+### User Direction Summary
+
+1. **APT Package Manager**: Use `apt` command name, build from Debian upstream with iOS patches to handle fork/exec limitations through ashell-system
+
+2. **Python C Extensions**: Use BeeWare Python-Apple-support, deliver C extensions as custom iOS wheels through our apt repository
+
+3. **Build System**: Create "Debian-like Linux for iOS" - use Termux patterns but for iOS Mach-O binaries
+
+4. **Archive Handling**: Use Apple's libcompression instead of libarchive (no Swift bindings exist)
+| Synthetic filesystems | Library API | ✅ Correct | Avoids /proc simulation issues |
+| First forge package | hello command | ✅ Correct | Good reference implementation |
+| WASM fallback | Secondary | Primary for downloadable commands | Original a-Shell's proven approach |
+| Release strategy | Incremental | ✅ Correct | Milestone-based still valid |
+| Timeline | M0-M6 milestones | ✅ Correct | Calendar-agnostic phases still valid |
+
+### Critical Pivots Based on Research
+
+1. **apt → Curated Package Manager**: We're keeping the familiar `apt` command name, but implementing a simpler curated package manager that only installs pre-approved, pre-bundled packages. No dependency resolution, no GPG, no dpkg.
+
+2. **Native Downloads → WebAssembly**: User-downloadable commands must be WebAssembly (WASM), not native. This is the only App Store-compliant approach proven by a-Shell and iSH.
+
+3. **pip install numpy → Bundled Only**: Users cannot install compiled Python extensions. We pre-bundle numpy, pandas, etc. Pure Python packages work via pip.
+
+4. **Termux-style → iOS-Adapted**: We borrow Termux's build script structure but NOT their package manager complexity. iOS constraints are stricter than Android.
 
 ---
 
@@ -2035,3 +2591,172 @@ import ios_system
 - [ ] Package extraction < 1s per 10MB
 - [ ] Tab switching < 100ms
 - [ ] Memory usage per session < 50MB baseline
+
+---
+
+## Appendix C: 4-Subagent Validation - Key Technical Findings
+
+### Research Methodology
+Four parallel subagents were dispatched to validate the plan:
+1. **Swift Libraries & Apple Docs** - Researched current library status, App Store guidelines
+2. **App Store Compliance & APT** - Analyzed fork/exec requirements, Section 2.5.2
+3. **Termux Build System** - Deep dive into actual Termux implementation
+4. **Python/C Extensions** - Researched BeeWare, Mobile Forge, pip feasibility
+
+### Critical Technical Blockers Identified
+
+#### Blocker 1: App Store Guideline 2.5.2
+> "Apps may not download, install, or execute code which introduces or changes features or functionality"
+
+**Impact:** Native XCFramework downloads are **prohibited**. Only WebAssembly (treated as "content") is allowed.
+
+**Evidence:**
+- Original a-Shell downloads WASM, not native code
+- iSH uses x86 emulation (native code never enters the system)
+- No terminal emulator on App Store downloads ARM binaries
+
+#### Blocker 2: iOS fork/exec Restrictions
+- `fork()` returns -1 with `errno = ENOSYS` (not implemented)
+- `posix_spawn()` also blocked
+- iOS apps are single-process by design
+
+**Impact:** APT fundamentally requires subprocesses for dpkg, maintainer scripts. Cannot be ported.
+
+#### Blocker 3: Code Signing Requirements
+- iOS kernel enforces code signature verification
+- Downloaded frameworks fail `dlopen()` with `EPERM`
+- Even for developers: ad-hoc signed code has restrictions
+
+**Impact:** Cannot load downloaded native code regardless of App Store policy.
+
+#### Blocker 4: Python C Extensions
+- PyPI has **no iOS platform tags**
+- cibuildwheel does **not support iOS** (and likely never will)
+- Mobile Forge exists but has limited package support
+- `pip install numpy` requires pre-built iOS wheel that doesn't exist
+
+**Impact:** Users cannot install compiled Python extensions. Must be pre-bundled.
+
+### What Termux Actually Does (Misconception Clarified)
+
+**Myth:** Termux uses apt and dpkg on Android.
+
+**Reality:**
+- Termux has **14 patches** to APT (0000-cmake-fix.patch through 0013-wtf.patch)
+- They maintain **26 NDK patches** to make Android more Linux-compatible
+- Termux provides **compatibility libraries** (libandroid-glob, libandroid-posix-semaphore)
+- Termux uses a **custom `pkg` tool** for basic operations (not apt directly)
+
+**Why this doesn't translate to iOS:**
+- Android allows most syscalls; iOS restricts many
+- Android uses ELF binaries; iOS requires Mach-O
+- Android's Bionic libc is Linux-like; iOS's libSystem is BSD-like
+- Android doesn't enforce code signing; iOS does rigorously
+
+### Realistic Implementation Path (Validated)
+
+| Component | Approach | Feasibility | Evidence |
+|-----------|----------|-------------|----------|
+| Build system (ashell_package.sh) | Termux-style | ✅ High | Patterns are reusable |
+| Native commands | Pre-bundled XCFrameworks | ✅ High | Standard Apple practice |
+| Downloadable commands | WebAssembly | ✅ High | a-Shell proven |
+| Package manager | Curated `apt` (not real apt) | ✅ Medium | Simpler than full apt |
+| Python runtime | BeeWare Python-Apple-support | ✅ High | Actively maintained |
+| Python extensions | Pre-bundled frameworks | ✅ High | Pyto, Carnets do this |
+| pip for pure Python | Standard pip | ✅ High | Works today |
+| pip for C extensions | ❌ Not possible | ❌ Impossible | App Store + iOS restrictions |
+| libarchive integration | libcompression + Swift tar | ⚠️ Medium | No Swift bindings exist |
+| SwiftTerm terminal | v1.12.0 | ✅ High | Production-ready |
+
+### Recommended Technical Stack (Post-Roast)
+
+**Build System:**
+- ashell_package.sh (Termux-style build recipes)
+- GitHub Actions with macOS runners (Apple license requirement)
+- Xcode toolchain (not Android NDK)
+
+**Package Manager:**
+- Command name: `apt` (familiar interface)
+- Implementation: Curated package list, no dependency resolution
+- Packages: Pre-bundled in app, not downloaded
+
+**Command Distribution:**
+- Tier 1: Native XCFrameworks (bundled with app)
+- Tier 2: WebAssembly (downloadable, App Store compliant)
+
+**Python:**
+- Runtime: BeeWare Python-Apple-support (Python 3.10-3.14)
+- Extensions: Pre-bundled numpy, pandas, matplotlib, scipy
+- pip: Pure Python packages only
+
+**Archive Handling:**
+- ZIP: ZIPFoundation library
+- Gzip/Bzip2: Apple libcompression framework
+- Tar: Custom Swift implementation (libarchive has no Swift bindings)
+
+**Terminal:**
+- SwiftTerm v1.12.0 (actively maintained, iOS 14+)
+
+### Honest Effort Estimates
+
+| Component | Original Estimate | Post-Roast Reality |
+|-----------|-------------------|-------------------|
+| apt package manager | 2-3 months | ❌ Abandon - not feasible |
+| Curated `apt` command | Not planned | 2-3 weeks (simpler scope) |
+| Build system | 1 month | 1 month (Termux patterns work) |
+| Pre-bundled packages | 2 weeks | 2-3 months (signing complexity) |
+| WebAssembly support | Existing | Reuse existing |
+| Python runtime | 1 month | 2-3 weeks (BeeWare exists) |
+| Python extensions | 1 month | Continuous (add per request) |
+| Full feature parity | 6 months | 2-3 months (realistic scope) |
+
+### References
+
+**Swift Libraries:**
+- SwiftTerm: https://github.com/migueldeicaza/SwiftTerm (v1.12.0, March 2026)
+- ZIPFoundation: https://github.com/weichsel/ZIPFoundation
+- Alamofire: https://github.com/Alamofire/Alamofire (v5.11.0)
+
+**Apple Documentation:**
+- App Store Review Guidelines: https://developer.apple.com/app-store/review/guidelines/
+- Section 2.5.2: Downloaded code restrictions
+- XCFramework documentation
+
+**Python on iOS:**
+- PEP 730: https://peps.python.org/pep-0730/
+- BeeWare Python-Apple-support: https://github.com/beeware/Python-Apple-support
+- Mobile Forge: https://github.com/beeware/mobile-forge
+
+**Termux:**
+- termux-packages: https://github.com/termux/termux-packages
+- APT patches: https://github.com/termux/termux-packages/tree/master/packages/apt
+
+**Existing iOS Terminal Apps:**
+- a-Shell: https://github.com/holzschu/a-shell (WASM approach)
+- iSH: https://github.com/ish-app/ish (x86 emulation)
+- Carnets: https://github.com/Carnets/Carnets (Python-focused)
+- Pyto: https://github.com/ColdGrub1384/Pyto (Pre-bundled Python)
+
+---
+
+## Implementation Progress
+
+### Completed
+- ✅ 4-subagent validation completed with realistic assessment
+- ✅ Directory structure: ashell-packages/root-packages/ and ashell-packages/packages/
+- ✅ Plan updated with user direction (apt with patches, custom iOS wheels)
+- ✅ apt build.sh recipe created with iOS patches
+- ✅ M2 epic with 8 child issues and dependencies
+- ✅ apt patches: 01-prefix, 02-ios-sandbox, 03-filesystem
+
+### In Progress
+- 🔄 Creating comprehensive beads issues for all milestones
+- 🔄 Documenting exact file paths and code snippets
+- 🔄 Setting up issue dependencies
+
+### Next Steps
+1. Create M1 (Platform Hardening) issues
+2. Create M0 (Contract & Documentation) issues
+3. Create Python runtime issues
+4. Create dependency package issues (dpkg, libz, etc.)
+5. All issues must have: code snippets, exact paths, copy-paste commands, agent notes
