@@ -1,0 +1,168 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'ashell-packages/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'ashell-packages/**'
+
+jobs:
+  # ==========================================================================
+  # TEST: Build System Validation (Linux/Docker)
+  # ==========================================================================
+  test-build-system:
+    name: Test Build System (Docker)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      run: |
+        docker build -t ashell-builder .
+
+    - name: Run build system tests
+      run: |
+        docker run --rm -v $(pwd):/workspace ashell-builder \
+          ./scripts/test-build-system.sh
+
+    - name: Validate package metadata
+      run: |
+        docker run --rm -v $(pwd):/workspace ashell-builder bash -c "
+          cd /workspace/ashell-packages
+          echo '=== Validating package metadata ==='
+          for pkg in */build.sh; do
+            pkg_name=\$(basename \$(dirname \$pkg))
+            echo -n \"Checking \$pkg_name: \"
+            bash -n \$pkg && echo '✓ OK' || echo '✗ SYNTAX ERROR'
+          done
+        "
+
+  # ==========================================================================
+  # BUILD: iOS Packages (macOS)
+  # ==========================================================================
+  build-ios:
+    name: Build iOS Packages
+    needs: test-build-system  # Only build if tests pass
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        package: [hello, coreutils-minimal]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Xcode
+      run: |
+        sudo xcode-select -s /Applications/Xcode_15.0.app
+        xcrun --sdk iphoneos --show-sdk-path
+        echo "XCODE_PATH=$(xcode-select -p)" >> $GITHUB_ENV
+
+    - name: Cache build artifacts
+      uses: actions/cache@v4
+      with:
+        path: ashell-packages/.build
+        key: ${{ runner.os }}-build-${{ matrix.package }}-${{ hashFiles('ashell-packages/${{ matrix.package }}/build.sh') }}}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ matrix.package }}-
+
+    - name: Build ${{ matrix.package }}
+      run: |
+        cd ashell-packages
+        ./build.sh ${{ matrix.package }}
+
+    - name: Verify XCFramework
+      run: |
+        PKG=${{ matrix.package }}
+        XCFRAMEWORK="ashell-packages/.build/$PKG/${PKG}.xcframework"
+        
+        if [[ ! -d "$XCFRAMEWORK" ]]; then
+          echo "❌ XCFramework not found: $XCFRAMEWORK"
+          exit 1
+        fi
+        
+        echo "✓ XCFramework found: $XCFRAMEWORK"
+        
+        # Verify structure
+        if [[ ! -f "$XCFRAMEWORK/Info.plist" ]]; then
+          echo "❌ XCFramework Info.plist missing"
+          exit 1
+        fi
+        
+        echo "✓ XCFramework Info.plist found"
+        
+        # Show contents
+        echo "Contents:"
+        find "$XCFRAMEWORK" -type f | head -20
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.package }}-xcframework
+        path: ashell-packages/.build/${{ matrix.package }}/*.xcframework
+        if-no-files-found: error
+
+  # ==========================================================================
+  # VERIFY: Artifact Integrity
+  # ==========================================================================
+  verify-artifacts:
+    name: Verify Build Artifacts
+    needs: build-ios
+    runs-on: macos-latest
+
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+
+    - name: Verify artifacts
+      run: |
+        echo "=== Downloaded Artifacts ==="
+        ls -la
+        
+        for dir in */; do
+          echo ""
+          echo "Checking: $dir"
+          find "$dir" -name "*.xcframework" -exec ls -la {} \;
+        done
+
+  # ==========================================================================
+  # RELEASE: Create Release Package
+  # ==========================================================================
+  create-release:
+    name: Create Release Package
+    needs: [build-ios, verify-artifacts]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+
+    - name: Create release archive
+      run: |
+        mkdir -p release
+        
+        for dir in */; do
+          if [[ -d "$dir" ]]; then
+            cp -R "$dir"* release/ 2>/dev/null || true
+          fi
+        done
+        
+        tar -czf ashell-packages-${GITHUB_SHA:0:8}.tar.gz release/
+
+    - name: Upload to release
+      uses: actions/upload-artifact@v4
+      with:
+        name: ashell-packages-release
+        path: ashell-packages-*.tar.gz
