@@ -1,0 +1,263 @@
+name: Build and Release
+
+# OPTIMIZED FOR 2000 MINUTES/MONTH LIMIT
+# Strategy:
+# - Only runs on tags (releases) and manual dispatch
+# - Caches aggressively
+# - Builds only changed packages on PRs
+# - Cancels redundant runs
+
+on:
+  push:
+    tags: ['v*', 'package-*']  # Only on release tags
+  pull_request:
+    paths: ['ashell-packages/**']  # Only if packages changed
+    types: [opened, synchronize]
+  workflow_dispatch:  # Manual trigger
+
+# Cancel redundant runs to save minutes
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  XCODE_VERSION: '15.0'
+  IOS_DEPLOYMENT_TARGET: '16.0'
+
+jobs:
+  # ============================================================================
+  # STAGE 1: Detect what to build (fast - runs on Ubuntu)
+  # ============================================================================
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.changes.outputs.packages }}
+      should_build: ${{ steps.changes.outputs.should_build }}
+      matrix: ${{ steps.changes.outputs.matrix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Need history to detect changes
+
+      - name: Detect changed packages
+        id: changes
+        run: |
+          # Get changed files
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} || echo "")
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD || echo "")
+          else
+            # Manual trigger - build specified packages or all
+            CHANGED_FILES="${{ github.event.inputs.packages || 'all' }}"
+          fi
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          # Determine which packages to build
+          if echo "$CHANGED_FILES" | grep -q "ashell-packages/"; then
+            # Extract package names from changed files
+            PACKAGES=$(echo "$CHANGED_FILES" | grep "ashell-packages/" | \
+              cut -d'/' -f2 | sort | uniq | \
+              while read pkg; do
+                if [[ -f "ashell-packages/$pkg/build.sh" ]]; then
+                  echo "$pkg"
+                fi
+              done | jq -R . | jq -s . | jq -c .)
+
+            if [[ "$PACKAGES" == "[]" ]]; then
+              # Build hello as fallback
+              PACKAGES='["hello"]'
+            fi
+          elif [[ "$CHANGED_FILES" == "all" ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            # Manual trigger - build hello only (conservative)
+            PACKAGES='["hello"]'
+          else
+            # No relevant changes
+            PACKAGES='[]'
+          fi
+
+          echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
+
+          if [[ "$PACKAGES" != "[]" ]]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            echo "matrix={\"package\":$PACKAGES}" >> $GITHUB_OUTPUT
+            echo "Will build: $PACKAGES"
+          else
+            echo "should_build=false" >> $GITHUB_OUTPUT
+            echo "No packages to build"
+          fi
+
+  # ============================================================================
+  # STAGE 2: Validate (fast - no macOS minutes used yet)
+  # ============================================================================
+  validate:
+    name: Validate
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: needs.detect-changes.outputs.should_build == 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate changed packages
+        run: |
+          PACKAGES='${{ needs.detect-changes.outputs.packages }}'
+
+          # Validate syntax
+          echo "$PACKAGES" | jq -r '.[]' | while read pkg; do
+            echo -n "Validating $pkg: "
+            if bash -n "ashell-packages/$pkg/build.sh"; then
+              echo "✓"
+            else
+              echo "✗ FAIL"
+              exit 1
+            fi
+          done
+
+  # ============================================================================
+  # STAGE 3: Build (uses macOS minutes - only if validation passed)
+  # ============================================================================
+  build:
+    name: Build ${{ matrix.package }}
+    needs: [detect-changes, validate]
+    runs-on: macos-14
+    if: needs.detect-changes.outputs.should_build == 'true'
+    strategy:
+      fail-fast: true  # Stop on first failure to save minutes
+      max-parallel: 2  # Limit concurrent builds
+      matrix: ${{fromJson(needs.detect-changes.outputs.matrix)}}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_${XCODE_VERSION}.app
+          echo "SDK: $(xcrun --sdk iphoneos --show-sdk-path)"
+
+      - name: Restore cache
+        uses: actions/cache/restore@v4
+        id: cache-restore
+        with:
+          path: ashell-packages/.build/downloads
+          key: ${{ runner.os }}-${{ matrix.package }}-downloads-${{ hashFiles('ashell-packages/${{ matrix.package }}/build.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.package }}-downloads-
+
+      - name: Build ${{ matrix.package }}
+        timeout-minutes: 15  # Hard limit per package
+        run: |
+          cd ashell-packages
+          ./build.sh ${{ matrix.package }}
+
+      - name: Verify XCFramework exists
+        run: |
+          XCFRAMEWORK="ashell-packages/.build/${{ matrix.package }}/${{ matrix.package }}.xcframework"
+          if [[ ! -d "$XCFRAMEWORK" ]]; then
+            echo "❌ XCFramework not found"
+            exit 1
+          fi
+          echo "✓ XCFramework: $(du -sh "$XCFRAMEWORK" | cut -f1)"
+
+      - name: Package artifact
+        run: |
+          mkdir -p artifacts
+          cd ashell-packages/.build/${{ matrix.package }}
+          tar -czf "../../../artifacts/${{ matrix.package }}-ios.tar.gz" *.xcframework 2>/dev/null || \
+          tar -czf "../../../artifacts/${{ matrix.package }}-ios.tar.gz" *
+
+      - name: Save cache
+        uses: actions/cache/save@v4
+        if: always()  # Save even if build failed (partial downloads)
+        with:
+          path: ashell-packages/.build/downloads
+          key: ${{ runner.os }}-${{ matrix.package }}-downloads-${{ hashFiles('ashell-packages/${{ matrix.package }}/build.sh') }}-${{ github.run_id }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.package }}-ios
+          path: artifacts/*.tar.gz
+          retention-days: 7  # Auto-delete after 7 days
+
+  # ============================================================================
+  # STAGE 4: Release (only on tags or manual dispatch)
+  # ============================================================================
+  release:
+    name: Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) ||
+      github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release
+          pattern: "*-ios"
+
+      - name: Collect release assets
+        run: |
+          mkdir -p release-assets
+          find release -name "*.tar.gz" -exec cp {} release-assets/ \;
+
+          # Create simple install script
+          cat > release-assets/install.sh << 'EOF'
+          #!/bin/bash
+          # Install a-Shell packages
+          # Usage: install.sh <package>
+
+          PKG="$1"
+          REPO="${ASHELL_REPO:-rudironsoni/a-shell-next}"
+          PREFIX="${ASHELL_PREFIX:-$HOME/Library/ashell}"
+
+          [[ -z "$PKG" ]] && { echo "Usage: install.sh <package>"; exit 1; }
+
+          echo "Downloading $PKG..."
+          curl -L "https://github.com/$REPO/releases/download/latest/${PKG}-ios.tar.gz" \
+              -o /tmp/${PKG}.tar.gz
+
+          echo "Installing to $PREFIX..."
+          mkdir -p "$PREFIX/Frameworks"
+          tar -xzf /tmp/${PKG}.tar.gz -C "$PREFIX/Frameworks/"
+          rm /tmp/${PKG}.tar.gz
+
+          echo "✓ $PKG installed"
+          EOF
+          chmod +x release-assets/install.sh
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name || 'latest' }}
+          name: ${{ github.ref_name || 'Latest Build' }}
+          files: release-assets/*
+          body: |
+            a-Shell Package Release
+
+            ## Installation
+
+            ```bash
+            curl -L https://github.com/${{ github.repository }}/releases/download/latest/install.sh | bash -s <package>
+            ```
+
+            ## Packages
+            ${{ join(needs.build.outputs.*, ', ') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "## Build Summary"
+          echo "Packages built: ${{ join(needs.build.outputs.*, ', ') }}"
+          echo "Artifacts:"
+          ls -la release-assets/
