@@ -115,11 +115,54 @@ ashell_step_patch_package() {
     ashell_info "No patches needed for hello"
 }
 
+# Override make step to build from source directory (simple package)
+ashell_step_make() {
+    ashell_info "Building package: $ASHELL_PKG_NAME"
+
+    local srcdir=$(ashell_pkg_srcdir)
+    local cpu_count
+    if command -v nproc &> /dev/null; then
+        cpu_count=$(nproc 2>/dev/null || echo 4)
+    else
+        cpu_count=4
+    fi
+
+    (cd "$srcdir" && make -j$cpu_count) || \
+        ashell_error "Build failed"
+}
+
+# Override install step for simple package
+ashell_step_make_install() {
+    ashell_info "Installing package: $ASHELL_PKG_NAME"
+
+    local srcdir=$(ashell_pkg_srcdir)
+    local stagingdir=$(ashell_pkg_stagingdir)
+
+    ashell_mkdir_p "$stagingdir/bin"
+
+    # Install directly from source directory
+    if [[ -f "$srcdir/hello" ]]; then
+        cp "$srcdir/hello" "$stagingdir/bin/"
+        chmod +x "$stagingdir/bin/hello"
+    else
+        ashell_error "Binary not found: $srcdir/hello"
+    fi
+}
+
 # Custom configure step - generate ios_system.h stub if needed
 ashell_step_configure() {
     ashell_info "Configuring hello package"
 
     local srcdir=$(ashell_pkg_srcdir)
+    local builddir=$(ashell_pkg_builddir)
+
+    # Create build directory
+    ashell_mkdir_p "$builddir"
+
+    # Set up iOS cross-compilation flags
+    local sdk_path=$(ashell_get_sdk_path)
+    export CC="$ASHELL_CC"
+    export CFLAGS="-arch arm64 -isysroot $sdk_path -mios-version-min=$ASHELL_DEPLOYMENT_TARGET -fembed-bitcode"
 
     # Create a minimal ios_system.h stub for building standalone
     # In production, this would come from the ashell-system Headers
@@ -147,22 +190,6 @@ EOF
 
     # No configure script needed for this simple package
     ashell_info "Configuration complete"
-}
-
-# Override install to include plist generation
-ashell_step_post_make_install() {
-    ashell_info "Finalizing hello installation"
-
-    local stagingdir=$(ashell_pkg_stagingdir)
-
-    # Create bin directory and copy binary
-    ashell_mkdir_p "$stagingdir/bin"
-
-    local bindir="$ASHELL_PKG_BUILDDIR/$ASHELL_PKG_NAME/build"
-    if [[ -f "$bindir/hello" ]]; then
-        cp "$bindir/hello" "$stagingdir/bin/"
-        chmod +x "$stagingdir/bin/hello"
-    fi
 }
 
 # Override XCFramework creation for command binary

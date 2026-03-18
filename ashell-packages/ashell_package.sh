@@ -295,7 +295,18 @@ ashell_step_make() {
     ashell_info "Building package: $ASHELL_PKG_NAME"
 
     local builddir=$(ashell_pkg_builddir)
-    local make_args="-j$(sysctl -n hw.ncpu) $ASHELL_PKG_EXTRA_MAKE_ARGS"
+
+    # Get CPU count (macOS uses sysctl, Linux uses nproc)
+    local cpu_count
+    if command -v sysctl &> /dev/null; then
+        cpu_count=$(sysctl -n hw.ncpu 2>/dev/null || echo 4)
+    elif command -v nproc &> /dev/null; then
+        cpu_count=$(nproc 2>/dev/null || echo 4)
+    else
+        cpu_count=4
+    fi
+
+    local make_args="-j$cpu_count $ASHELL_PKG_EXTRA_MAKE_ARGS"
 
     (cd "$builddir" && make $make_args) || \
         ashell_error "Build failed"
@@ -493,13 +504,15 @@ ashell_build_package() {
     ashell_info "Build completed successfully: $ASHELL_PKG_NAME"
 }
 
-# Export functions for use in package scripts
-export -f ashell_log ashell_info ashell_warning ashell_error
-export -f ashell_mkdir_p ashell_verify_checksum ashell_download ashell_substitute_prefix
-export -f ashell_pkg_srcdir ashell_pkg_builddir ashell_pkg_stagingdir
-export -f ashell_step_extract_package ashell_step_patch_package
-export -f ashell_step_pre_configure ashell_step_configure ashell_step_post_configure
-export -f ashell_step_pre_make ashell_step_make ashell_step_post_make
-export -f ashell_step_make_install ashell_step_post_make_install
-export -f ashell_step_create_xcframework ashell_step_generate_plist ashell_step_codesign
-export -f ashell_build_package
+# Export functions for use in package scripts (bash only)
+if [ -n "$BASH_VERSION" ]; then
+    export -f ashell_log ashell_info ashell_warning ashell_error
+    export -f ashell_mkdir_p ashell_verify_checksum ashell_download ashell_substitute_prefix
+    export -f ashell_pkg_srcdir ashell_pkg_builddir ashell_pkg_stagingdir
+    export -f ashell_step_extract_package ashell_step_patch_package
+    export -f ashell_step_pre_configure ashell_step_configure ashell_step_post_configure
+    export -f ashell_step_pre_make ashell_step_make ashell_step_post_make
+    export -f ashell_step_make_install ashell_step_post_make_install
+    export -f ashell_step_create_xcframework ashell_step_generate_plist ashell_step_codesign
+    export -f ashell_build_package
+fi
