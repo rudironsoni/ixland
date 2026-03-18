@@ -344,34 +344,42 @@ ashell_step_create_xcframework() {
     ashell_info "Creating XCFramework for: $ASHELL_PKG_NAME"
 
     local stagingdir=$(ashell_pkg_stagingdir)
-    local framework_dir="$ASHELL_PKG_BUILDDIR/$ASHELL_PKG_NAME/$ASHELL_PKG_NAME.framework"
+    local pkg_builddir="$ASHELL_PKG_BUILDDIR/$ASHELL_PKG_NAME"
+    local xcframework_dir="$pkg_builddir/$ASHELL_PKG_NAME.xcframework"
 
-    ashell_mkdir_p "$framework_dir"
+    # Remove existing XCFramework
+    rm -rf "$xcframework_dir"
 
-    # Collect libraries and binaries
-    local libs=()
-    if [[ -d "$stagingdir" ]]; then
-        while IFS= read -r -d '' lib; do
-            libs+=("$lib")
-        done < <(find "$stagingdir" -name "*.a" -print0 2>/dev/null || true)
-    fi
+    # Detect architectures to build
+    # For now, build single device slice (arm64)
+    # Multi-architecture builds require separate staging directories
+    local archs=("arm64")
 
-    # If no static libraries, look for object files
-    if [[ ${#libs[@]} -eq 0 ]]; then
-        ashell_warning "No static libraries found, checking for binaries"
-    fi
+    # Create framework slices for each architecture
+    for arch in "${archs[@]}"; do
+        local slice_name
+        if [[ "$arch" == "arm64" ]]; then
+            slice_name="ios-arm64"
+        elif [[ "$arch" == "x86_64" ]]; then
+            slice_name="ios-x86_64-simulator"
+        else
+            slice_name="ios-$arch"
+        fi
 
-    # Create framework structure
-    ashell_mkdir_p "$framework_dir/Headers"
-    ashell_mkdir_p "$framework_DIR/Modules"
+        local framework_dir="$xcframework_dir/$slice_name/$ASHELL_PKG_NAME.framework"
+        ashell_mkdir_p "$framework_dir"
 
-    # Copy headers if present
-    if [[ -d "$stagingdir/include" ]]; then
-        cp -R "$stagingdir/include/"* "$framework_dir/Headers/" 2>/dev/null || true
-    fi
+        # Create framework structure
+        ashell_mkdir_p "$framework_dir/Headers"
+        ashell_mkdir_p "$framework_dir/Modules"
 
-    # Generate module map
-    cat > "$framework_dir/Modules/module.modulemap" <<EOF
+        # Copy headers if present
+        if [[ -d "$stagingdir/include" ]]; then
+            cp -R "$stagingdir/include/"* "$framework_dir/Headers/" 2>/dev/null || true
+        fi
+
+        # Generate module map
+        cat > "$framework_dir/Modules/module.modulemap" <<EOF
 framework module $ASHELL_PKG_NAME {
     umbrella header "$ASHELL_PKG_NAME.h"
     export *
@@ -379,8 +387,8 @@ framework module $ASHELL_PKG_NAME {
 }
 EOF
 
-    # Create umbrella header
-    cat > "$framework_dir/Headers/$ASHELL_PKG_NAME.h" <<EOF
+        # Create umbrella header
+        cat > "$framework_dir/Headers/$ASHELL_PKG_NAME.h" <<EOF
 #import <Foundation/Foundation.h>
 
 //! Project version number for $ASHELL_PKG_NAME.
@@ -392,24 +400,113 @@ FOUNDATION_EXPORT const unsigned char ${ASHELL_PKG_NAME}_versionString[];
 // In this header, you should import all the public headers of your framework.
 EOF
 
-    # Include individual headers
-    for header in "$framework_dir/Headers/"*.h; do
-        if [[ -f "$header" && "$(basename "$header")" != "$ASHELL_PKG_NAME.h" ]]; then
-            echo "#import \"$(basename "$header")\"" >> "$framework_dir/Headers/$ASHELL_PKG_NAME.h"
-        fi
-    done
-
-    # Copy binaries
-    local bindir="$stagingdir${ASHELL_PREFIX//\$/}/bin"
-    if [[ -d "$bindir" ]]; then
-        for binary in "$bindir"/*; do
-            if [[ -f "$binary" && -x "$binary" ]]; then
-                cp "$binary" "$framework_dir/" || true
+        # Include individual headers
+        for header in "$framework_dir/Headers/"*.h; do
+            if [[ -f "$header" && "$(basename "$header")" != "$ASHELL_PKG_NAME.h" ]]; then
+                echo "#import \"$(basename "$header")\"" >> "$framework_dir/Headers/$ASHELL_PKG_NAME.h"
             fi
         done
-    fi
 
-    ashell_info "Framework created at $framework_dir"
+        # Copy binaries
+        local bindir="$stagingdir${ASHELL_PREFIX//\$/}/bin"
+        if [[ -d "$bindir" ]]; then
+            for binary in "$bindir"/*; do
+                if [[ -f "$binary" && -x "$binary" ]]; then
+                    cp "$binary" "$framework_dir/$ASHELL_PKG_NAME" || true
+                fi
+            done
+        fi
+
+        # Create framework Info.plist
+        cat > "$framework_dir/Info.plist" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleExecutable</key>
+    <string>$ASHELL_PKG_NAME</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.rudironsoni.ashell.$ASHELL_PKG_NAME</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>$ASHELL_PKG_NAME</string>
+    <key>CFBundlePackageType</key>
+    <string>FMWK</string>
+    <key>CFBundleShortVersionString</key>
+    <string>${ASHELL_PKG_VERSION:-1.0.0}</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>MinimumOSVersion</key>
+    <string>${ASHELL_DEPLOYMENT_TARGET:-16.0}</string>
+</dict>
+</plist>
+EOF
+    done
+
+    # Generate XCFramework Info.plist
+    local xcframework_plist="$xcframework_dir/Info.plist"
+    cat > "$xcframework_plist" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>AvailableLibraries</key>
+    <array>
+EOF
+
+    for arch in "${archs[@]}"; do
+        local slice_name
+        local platform_variant=""
+        if [[ "$arch" == "arm64" ]]; then
+            slice_name="ios-arm64"
+        elif [[ "$arch" == "x86_64" ]]; then
+            slice_name="ios-x86_64-simulator"
+            platform_variant="Simulator"
+        else
+            slice_name="ios-$arch"
+        fi
+
+        cat >> "$xcframework_plist" <<EOF
+        <dict>
+            <key>BinaryPath</key>
+            <string>$ASHELL_PKG_NAME.framework/$ASHELL_PKG_NAME</string>
+            <key>LibraryIdentifier</key>
+            <string>$slice_name</string>
+            <key>LibraryPath</key>
+            <string>$ASHELL_PKG_NAME.framework</string>
+            <key>SupportedArchitectures</key>
+            <array>
+                <string>$arch</string>
+            </array>
+            <key>SupportedPlatform</key>
+            <string>ios</string>
+EOF
+        if [[ -n "$platform_variant" ]]; then
+            cat >> "$xcframework_plist" <<EOF
+            <key>SupportedPlatformVariant</key>
+            <string>$platform_variant</string>
+EOF
+        fi
+        cat >> "$xcframework_plist" <<EOF
+        </dict>
+EOF
+    done
+
+    cat >> "$xcframework_plist" <<EOF
+    </array>
+    <key>CFBundlePackageType</key>
+    <string>XFWK</string>
+    <key>XCFrameworkFormatVersion</key>
+    <string>1.0</string>
+</dict>
+</plist>
+EOF
+
+    ashell_info "XCFramework created at $xcframework_dir"
+    ashell_info "  - Contains ${#archs[@]} architecture(s): ${archs[*]}"
 }
 
 # Generate commands.plist for command registration
