@@ -1,0 +1,105 @@
+From: a-Shell Build System
+Subject: iOS sandbox compatibility patches
+
+Disable features not available on iOS:
+- CD-ROM support (no physical media)
+- Root user operations (iOS apps run as mobile user)
+- Fork/exec (replaced with ashell-system threading model)
+
+--- a/apt-private/private-cmndline.cc
++++ b/apt-private/private-cmndline.cc
+@@ -120,8 +120,15 @@ bool CheckForAction(std::vector<CommandLine::Args> &Args,
+ // CheckRunningAsRoot - Check if running as root
+ bool CheckRunningAsRoot(const char *Cmd)
+ {
++   // iOS: Always run as mobile user, root not available in sandbox
++   #ifndef __APPLE__
+    if (getuid() == 0)
+       return _error->Error("%s should not be run as root", Cmd);
++   #else
++   // iOS: Skip root check, apps always run as mobile user
++   (void)Cmd;
++   #endif
+    return true;
+ }
+
+--- a/apt-pkg/deb/dpkgpm.cc
++++ b/apt-pkg/deb/dpkgpm.cc
+@@ -250,6 +250,15 @@ bool pkgDPkgPM::RunScriptsWithPkgs(const char *Cnf)
+ // Execute dpkg using ashell-system instead of fork/exec
+ bool pkgDPkgPM::ExecDpkg(const char *cmd)
+ {
++   // iOS: Use ashell-system ExecDpkg
++   // Instead of fork/exec, we use ashell_fork/ashell_execve
++   #ifdef __APPLE__
++   // Include ashell-system headers
++   extern "C" {
++      #include "ashell_system.h"
++   }
++   #endif
++
+    // Original dpkg execution would fork here
+    // On iOS, we use pthread simulation via ashell-system
+
+@@ -260,7 +269,16 @@ bool pkgDPkgPM::ExecDpkg(const char *cmd)
+       return false;
+    }
+
++   #ifdef __APPLE__
++   // Use ashell-system process simulation
++   pid_t pid = ashell_fork();
++   if (pid == 0) {
++      ashell_execve(cmd, args, environ);
++   }
++   #else
++   // Standard fork/exec
+    pid_t pid = fork();
+    if (pid == 0) {
+       execve(cmd, args, environ);
+    }
++   #endif
+
+    return true;
+ }
+
+--- a/apt-pkg/contrib/fileutl.cc
++++ b/apt-pkg/contrib/fileutl.cc
+@@ -150,10 +150,20 @@ bool ExecForked(const char *cmd)
+ // Fork and execute with ashell-system on iOS
+ bool ExecForked(const char *cmd)
+ {
++   #ifdef __APPLE__
++   // Use ashell-system threading instead of fork
++   extern "C" {
++      #include "ashell_system.h"
++   }
++   pid_t pid = ashell_fork();
++   if (pid == 0) {
++      ashell_execv(cmd, args);
++   }
++   #else
+    pid_t pid = fork();
+    if (pid == 0) {
+       execv(cmd, args);
+    }
++   #endif
+    return true;
+ }
+
+--- a/apt-pkg/deb/debsystem.cc
++++ b/apt-pkg/deb/debsystem.cc
+@@ -180,8 +180,13 @@ bool pkgDebianSystem::Initialize(Configuration &Cnf)
+    // Check lock
+    if (_config->FindB("Debug::NoLocking", false) == false)
+    {
++      // iOS: Disable locking (not supported in sandbox)
++      #ifndef __APPLE__
+       int FD = open("/var/lib/dpkg/lock", O_RDWR | O_CREAT | O_CLOEXEC, 0640);
+       // ... locking code ...
++      #else
++      // Skip locking on iOS
++      (void)Cnf;
++      #endif
+    }
+
+    return true;

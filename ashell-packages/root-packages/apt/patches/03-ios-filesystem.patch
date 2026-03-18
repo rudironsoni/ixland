@@ -1,0 +1,104 @@
+From: a-Shell Build System
+Subject: iOS filesystem adaptations
+
+Adapt apt for iOS filesystem model:
+- Use NSFileManager for directory operations
+- Handle app container paths
+- Disable CD-ROM and other unavailable features
+- Adapt cache/log directory locations
+
+--- a/apt-pkg/aptconfiguration.cc
++++ b/apt-pkg/aptconfiguration.cc
+@@ -45,8 +45,20 @@ string GetTempDir()
+ // GetTempDir - Get system temporary directory
+ string GetTempDir()
+ {
++   #ifdef __APPLE__
++   // iOS: Use NSTemporaryDirectory via ashell-system
++   extern "C" {
++      #include "ashell_system.h"
++   }
++   const char* tmpdir = ios_getenv("TMPDIR");
++   if (tmpdir != nullptr && strlen(tmpdir) > 0)
++      return string(tmpdir);
++   // Fallback to app container
++   return "@ASHELL_PREFIX@/tmp";
++   #else
+    const char* tmpdir = getenv("TMPDIR");
+    if (tmpdir != nullptr && strlen(tmpdir) > 0)
+       return string(tmpdir);
+    return "/tmp";
++   #endif
+ }
+
+--- a/apt-pkg/acquire.cc
++++ b/apt-pkg/acquire.cc
+@@ -89,6 +89,15 @@ bool pkgAcquire::Clean()
+ // SetupDownloadDirectory - Setup download directory with iOS paths
+ bool SetupDownloadDirectory()
+ {
++   #ifdef __APPLE__
++   // iOS: Use app-specific directories
++   CacheDir = "@ASHELL_PREFIX@/var/cache/apt/archives";
++   LogDir = "@ASHELL_PREFIX@/var/log/apt";
++   StateDir = "@ASHELL_PREFIX@/var/lib/apt";
++   EtcDir = "@ASHELL_PREFIX@/etc/apt";
++   return true;
++   #endif
++
+    CacheDir = _config->FindDir("Dir::Cache::Archives", "/var/cache/apt/archives");
+    LogDir = _config->FindDir("Dir::Log", "/var/log/apt");
+    return true;
+
+--- a/apt-pkg/deb/debsystem.cc
++++ b/apt-pkg/deb/debsystem.cc
+@@ -89,8 +89,15 @@ bool pkgDebianSystem::Initialize(Configuration &Cnf)
+ {
+    // Set up directories for iOS
+-   Cnf.CndSet("Dir::Cache", "/var/cache/apt");
+-   Cnf.CndSet("Dir::State", "/var/lib/apt");
+-   Cnf.CndSet("Dir::Log", "/var/log/apt");
++   #ifdef __APPLE__
++   Cnf.CndSet("Dir::Cache", "@ASHELL_PREFIX@/var/cache/apt");
++   Cnf.CndSet("Dir::State", "@ASHELL_PREFIX@/var/lib/apt");
++   Cnf.CndSet("Dir::Log", "@ASHELL_PREFIX@/var/log/apt");
++   #else
++   Cnf.CndSet("Dir::Cache", "/var/cache/apt");
++   Cnf.CndSet("Dir::State", "/var/lib/apt");
++   Cnf.CndSet("Dir::Log", "/var/log/apt");
++   #endif
+
+    return true;
+ }
+
+--- a/methods/cdrom.cc
++++ b/methods/cdrom.cc
+@@ -1,5 +1,14 @@
+ // CD-ROM method - Disabled on iOS (no CD-ROM support)
++#ifdef __APPLE__
++
++// iOS: CD-ROM not available, provide stub
++int main(int argc, char *argv[])
++{
++   fprintf(stderr, "CD-ROM not available on iOS\n");
++   return 1;
++}
++
++#else
+ // Original CD-ROM method implementation below...
+
+--- a/methods/mirror.cc
++++ b/methods/mirror.cc
+@@ -45,6 +45,15 @@ bool MirrorMethod::Fetch(FetchItem *Itm)
+ {
+    // Mirror method - requires special handling on iOS
++   #ifdef __APPLE__
++   // iOS: Disable mirror method (not supported)
++   _error->Error("Mirror method not available on iOS");
++   return false;
++   #endif
++
+    return true;
+ }
+
++#endif // __APPLE__

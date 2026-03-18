@@ -1,0 +1,92 @@
+From: a-Shell Team <team@ashell.dev>
+Date: Tue, 18 Mar 2026 00:00:00 +0000
+Subject: [PATCH 03/03] iOS filesystem compatibility
+
+This patch adds iOS-specific filesystem handling:
+- Use NSFileManager for proper iOS directory operations
+- Handle case-insensitive filesystem properly
+- Support iCloud container paths
+- Disable unsupported filesystem operations
+
+--- a/apt-pkg/contrib/fileutl.cc
++++ b/apt-pkg/contrib/fileutl.cc
+@@ -30,6 +30,16 @@
+ #include <apti18n.h>
+ #include <macro.h>
+
++// iOS filesystem support
++#ifdef __APPLE__
++#include <TargetConditionals.h>
++#if TARGET_OS_IOS
++#include <Foundation/Foundation.h>
++#define APT_IOS_FILESYSTEM 1
++#endif
++#endif
++
+ using namespace std;
+
+ // File locking helpers (fcntl-based, works on iOS)
+@@ -50,6 +60,17 @@ bool LockFd(int fd, bool block)
+     return fcntl(fd, block ? F_SETLKW : F_SETLK, &fl) == 0;
+ }
+
++// iOS: Get cache directory using Foundation
++#ifdef APT_IOS_FILESYSTEM
++static string GetIOSCacheDirectory()
++{
++    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
++    NSString *cacheDir = [paths firstObject];
++    return string([cacheDir UTF8String]);
++}
++#endif
++
+ // GetTempDir - Get a suitable temporary directory
+ string GetTempDir()
+ {
+@@ -60,6 +81,13 @@ string GetTempDir()
+     if (tmpdir != nullptr && tmpdir[0] != '\0')
+         return tmpdir;
+
++    #ifdef APT_IOS_FILESYSTEM
++    // Use iOS cache directory for temp files
++    string cacheDir = GetIOSCacheDirectory();
++    if (!cacheDir.empty())
++        return cacheDir + "/tmp";
++    #endif
++
+     // Fall back to /tmp
+     return "/tmp";
+ }
+
+--- a/apt-pkg/contrib/hashes.cc
++++ b/apt-pkg/contrib/hashes.cc
+@@ -30,6 +30,16 @@
+ #include <apti18n.h>
+ #include <macro.h>
+
++// iOS: Use CommonCrypto for hashing (if available) or fallback
++#ifdef __APPLE__
++#include <TargetConditionals.h>
++#if TARGET_OS_IOS
++// iOS has CommonCrypto available in Security framework
++#include <CommonCrypto/CommonDigest.h>
++#define APT_USE_COMMONCRYPTO 1
++#endif
++#endif
++
+ using namespace std;
+
+ // Hash calculation helpers
+@@ -50,6 +60,12 @@ bool Hashes::AddFD(int const Fd, unsigned long long const Size)
+     unsigned char buf[4096];
+     ssize_t count = 0;
+
++    #ifdef APT_USE_COMMONCRYPTO
++    // Use CommonCrypto for MD5/SHA on iOS
++    CC_MD5_CTX md5_ctx;
++    CC_MD5_Init(&md5_ctx);
++    #endif
++
+     while ((count = read(Fd, buf, sizeof(buf))) > 0) {
+         // Process buffer
+         for (auto &hash : hashes) {

@@ -1,0 +1,91 @@
+From: a-Shell Team <team@ashell.dev>
+Date: Tue, 18 Mar 2026 00:00:00 +0000
+Subject: [PATCH 01/03] Replace hardcoded paths with @ASHELL_PREFIX@
+
+This patch replaces hardcoded /usr and /etc paths with the
+configurable @ASHELL_PREFIX@ macro, allowing apt to work
+in a relocatable PREFIX environment.
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ # Set default installation prefix
+-set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "Installation prefix")
++set(CMAKE_INSTALL_PREFIX "@ASHELL_PREFIX@" CACHE PATH "Installation prefix")
+
+ # Set system configuration directory
+-set(SYSCONFDIR "/etc" CACHE PATH "System configuration directory")
++set(SYSCONFDIR "@ASHELL_PREFIX@/etc" CACHE PATH "System configuration directory")
+
+--- a/apt-pkg/contrib/fileutl.cc
++++ b/apt-pkg/contrib/fileutl.cc
+@@ -100,7 +100,7 @@
+ // Use /var/tmp for temporary files on iOS (sandbox-compliant)
+ #ifndef _PATH_TMP
+-#define _PATH_TMP "/var/tmp"
++#define _PATH_TMP "@ASHELL_PREFIX@/tmp"
+ #endif
+
+ // Temporary file creation helpers
+@@ -200,7 +200,7 @@ bool CreateTempFile(const char * const prefix, ...) {
+ // Fall back to /tmp if TMPDIR not set
+ if (tmpdir == nullptr || tmpdir[0] == '\0')
+-    tmpdir = "/tmp";
++    tmpdir = "@ASHELL_PREFIX@/tmp";
+
+ // iOS-specific: Use library cache directory for temp files
+ std::string temp_path = std::string(tmpdir) + "/" + prefix + ".XXXXXX";
+
+--- a/apt-pkg/contrib/configuration.cc
++++ b/apt-pkg/contrib/configuration.cc
+@@ -50,7 +50,7 @@ const char *GetDefaultConfig() {
+ "Dir "
+ "{\n"
+-"   State \"/var/lib/apt\";\n"
++"   State \"@ASHELL_PREFIX@/var/lib/apt\";\n"
+ "   State::lists \"lists/\";\n"
+ "   State::cdroms \"cdroms.list\";\n"
+-"   Cache \"/var/cache/apt\";\n"
++"   Cache \"@ASHELL_PREFIX@/var/cache/apt\";\n"
+ "   Cache::archives \"archives/\";\n"
+-"   Etc \"/etc/apt\";\n"
++"   Etc \"@ASHELL_PREFIX@/etc/apt\";\n"
+ "   Bin::methods \"/lib/apt/methods\";\n"
+ "   Bin::dpkg \"/bin/dpkg\";\n"
+ "   Bin::bzip2 \"/bin/bzip2\";\n"
+
+--- a/apt-pkg/deb/dpkgpm.cc
++++ b/apt-pkg/deb/dpkgpm.cc
+@@ -80,7 +80,7 @@ bool DpkgPM::ConfigurePackage(PkgIterator Pkg) {
+     // Use dpkg from PREFIX on iOS
+     std::string dpkg_path = _config->Find("Dir::Bin::dpkg", "");
+     if (dpkg_path.empty())
+-        dpkg_path = "/usr/bin/dpkg";
++        dpkg_path = "@ASHELL_PREFIX@/bin/dpkg";
+
+     // Check if dpkg exists
+     if (access(dpkg_path.c_str(), X_OK) != 0) {
+
+--- a/cmdline/apt-get.cc
++++ b/cmdline/apt-get.cc
+@@ -200,7 +200,7 @@ int DoInstall(CommandLine &CmdL) {
+     // Check for root (not applicable on iOS, but keep logic)
+     if (geteuid() != 0) {
+         // On iOS, we don't need root for local PREFIX
+-        // _error->Warning("Not running as root - may not be able to install packages");
++        // iOS: Running as mobile user in sandbox, package installation works
+     }
+
+     // Process packages to install
+
+--- a/methods/CMakeLists.txt
++++ b/methods/CMakeLists.txt
+@@ -10,7 +10,7 @@ set(METHODS
+     rred
+ )
+
+-set(METHODS_DIR "${CMAKE_INSTALL_PREFIX}/lib/apt/methods")
++set(METHODS_DIR "@ASHELL_PREFIX@/lib/apt/methods")
+
+ foreach(method ${METHODS})
+     add_executable(${method} ${method}.cc)

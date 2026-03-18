@@ -1,0 +1,57 @@
+From: a-Shell Build System
+Subject: Replace hardcoded paths with @ASHELL_PREFIX@
+
+Replace all hardcoded /usr, /etc, /var paths with @ASHELL_PREFIX@
+to support iOS sandbox installation.
+
+--- a/apt-pkg/deb/debsystem.cc
++++ b/apt-pkg/deb/debsystem.cc
+@@ -45,10 +45,10 @@ bool pkgDebianSystem::Initialize(Configuration &Cnf)
+
+    // Set up dpkg configuration
+-   Cnf.CndSet("Dir::Bin::dpkg", "/usr/bin/dpkg");
+-   Cnf.CndSet("Dir::Bin::dpkg-deb", "/usr/bin/dpkg-deb");
+-   Cnf.CndSet("Dir::Bin::dpkg-split", "/usr/bin/dpkg-split");
+-   Cnf.CndSet("Dir::State::status", "/var/lib/dpkg/status");
++   Cnf.CndSet("Dir::Bin::dpkg", "@ASHELL_PREFIX@/bin/dpkg");
++   Cnf.CndSet("Dir::Bin::dpkg-deb", "@ASHELL_PREFIX@/bin/dpkg-deb");
++   Cnf.CndSet("Dir::Bin::dpkg-split", "@ASHELL_PREFIX@/bin/dpkg-split");
++   Cnf.CndSet("Dir::State::status", "@ASHELL_PREFIX@/var/lib/dpkg/status");
+
+    return true;
+ }
+
+--- a/apt-pkg/contrib/fileutl.cc
++++ b/apt-pkg/contrib/fileutl.cc
+@@ -89,7 +89,7 @@ bool RunScripts(const char *Dir)
+ bool RunScripts(const char *Dir)
+ {
+-   return RunScripts(Dir, "sh", "/bin/sh");
++   return RunScripts(Dir, "sh", "@ASHELL_PREFIX@/bin/sh");
+ }
+
+ // RunScripts - Run a set of scripts from a directory
+
+--- a/apt-pkg/deb/dpkgpm.cc
++++ b/apt-pkg/deb/dpkgpm.cc
+@@ -120,7 +120,7 @@ void pkgDPkgPM::InitDisappearedPkgs()
+ {
+    // Initialize dpkg package manager
+-   DpkgDir = _config->FindDir("Dir::State::lists") + "../dpkg/";
++   DpkgDir = _config->FindDir("Dir::State::lists") + "dpkg/";
+ }
+
+ // BuildCommand - Build the command
+
+--- a/methods/gpgv.cc
++++ b/methods/gpgv.cc
+@@ -45,8 +45,8 @@ bool GPGVMethod::Fetch(FetchItem *Itm)
+ {
+    // Set up GPG verification
+-   string const gpgv = _config->Find("Dir::Bin::gpgv", "/usr/bin/gpgv");
+-   string const gpg = _config->Find("Dir::Bin::gpg", "/usr/bin/gpg");
++   string const gpgv = _config->Find("Dir::Bin::gpgv", "@ASHELL_PREFIX@/bin/gpgv");
++   string const gpg = _config->Find("Dir::Bin::gpg", "@ASHELL_PREFIX@/bin/gpg");
+
+    return true;
+ }
