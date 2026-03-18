@@ -336,14 +336,63 @@ Each thread can have a different:
 **Cause**: Missing or incorrect commands.plist
 **Fix**: Verify plist format and framework path
 
+## Thread Safety Guarantees
+
+### What is Thread-Safe
+
+All ios_system APIs are thread-safe:
+- `ios_system()` - Uses thread-local session
+- `ios_getenv()/ios_setenv()` - Per-session storage
+- `ios_stdout()/ios_stderr()/ios_stdin()` - Thread-local streams
+- `ios_switchSession()` - Atomic session switch
+
+### What is NOT Thread-Safe
+
+Standard libc functions are NOT thread-safe across sessions:
+- `getenv()` without ios_error.h - Uses global environment
+- Global `stdout` - Goes to wrong session
+- `chdir()` - Affects entire process
+
+### Recommendations
+
+1. **Always use ios_* functions** in multi-session contexts
+2. **Include ios_error.h** to redirect standard calls
+3. **Test with multiple windows** in a-Shell
+
+## Error Handling
+
+### Return Values
+
+| Function | Success | Error |
+|----------|---------|-------|
+| `ios_system()` | Exit status 0 | Non-zero exit status |
+| `ios_fork()` | - | Returns -1, errno=ENOSYS |
+| `ios_getenv()` | Pointer to value | NULL |
+| `ios_setenv()` | 0 | -1 |
+
+### errno Values
+
+- `ENOSYS` - Function not implemented (fork, vfork, etc.)
+- `EPERM` - Operation not permitted (sandbox violation)
+- `ENOENT` - No such file or directory
+- `ENOMEM` - Out of memory
+
 ## Version History
 
-| Version | Changes |
-|---------|---------|
-| 1.0 | Initial contract definition |
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | 2026-03 | Initial contract definition |
+| 1.1 | 2026-03 | Added thread safety section, error handling |
+
+## See Also
+
+- [Porting Guide](../guides/porting_guide.md) - Step-by-step porting instructions
+- [Package Manifest Schema](../specs/package-manifest-schema.md) - Build configuration
+- [iOS Build on Docker](../development/ios-build-on-docker.md) - CI/CD setup
 
 ## References
 
 - ios_system source: https://github.com/holzschu/ios_system
 - a-Shell: https://github.com/holzschu/a-shell
 - Termux packages (inspiration): https://github.com/termux/termux-packages
+- Apple iOS File System Programming Guide: https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/
