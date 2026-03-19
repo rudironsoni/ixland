@@ -1609,9 +1609,9 @@ Cell *bltin(Node **a, int n)	/* builtin functions. a[0] is type, a[1] is arg lis
 	case FSYSTEM:
 		fflush(thread_stdout);		/* in case something is buffered already */
             // iOS
-            int pid = ios_fork();
+            int pid = a_shell_fork();
             int returnValue;
-            ios_system(getsval(x));
+            a_shell_system(getsval(x));
             waitpid(pid, &returnValue, 0);
             u = (Awkfloat) returnValue / 256;   /* 256 is unix-dep */
 		// u = (Awkfloat) system(getsval(x)) / 256;   /* 256 is unix-dep */

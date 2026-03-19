@@ -191,7 +191,7 @@
 #define STDERR_FILENO fileno(thread_stderr)
 #undef STDOUT_FILENO
 #define STDOUT_FILENO fileno(thread_stdout)
-#define isatty ios_isatty
+#define isatty a_shell_isatty
 #endif
 
 #endif /* INCLUDES_H */

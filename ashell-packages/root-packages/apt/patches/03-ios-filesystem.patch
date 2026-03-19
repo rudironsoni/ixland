@@ -14,11 +14,11 @@ Adapt apt for iOS filesystem model:
  string GetTempDir()
  {
 +   #ifdef __APPLE__
-+   // iOS: Use NSTemporaryDirectory via ashell-system
++   // iOS: Use NSTemporaryDirectory via a-shell-kernel
 +   extern "C" {
-+      #include "ashell_system.h"
++      #include "a_shell_system.h"
 +   }
-+   const char* tmpdir = ios_getenv("TMPDIR");
++   const char* tmpdir = a_shell_getenv("TMPDIR");
 +   if (tmpdir != nullptr && strlen(tmpdir) > 0)
 +      return string(tmpdir);
 +   // Fallback to app container

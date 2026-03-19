@@ -87,7 +87,7 @@ can_output(void)
 #if !TARGET_OS_IPHONE
     return (getpgrp() == tcgetpgrp(STDOUT_FILENO));
 #else
-    return (ios_isatty(STDOUT_FILENO));
+    return (a_shell_isatty(STDOUT_FILENO));
 #endif
 }
 

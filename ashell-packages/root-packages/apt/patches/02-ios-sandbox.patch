@@ -4,7 +4,7 @@ Subject: iOS sandbox compatibility patches
 Disable features not available on iOS:
 - CD-ROM support (no physical media)
 - Root user operations (iOS apps run as mobile user)
-- Fork/exec (replaced with ashell-system threading model)
+- Fork/exec (replaced with a-shell-kernel threading model)
 
 --- a/apt-private/private-cmndline.cc
 +++ b/apt-private/private-cmndline.cc
@@ -26,30 +26,30 @@ Disable features not available on iOS:
 --- a/apt-pkg/deb/dpkgpm.cc
 +++ b/apt-pkg/deb/dpkgpm.cc
 @@ -250,6 +250,15 @@ bool pkgDPkgPM::RunScriptsWithPkgs(const char *Cnf)
- // Execute dpkg using ashell-system instead of fork/exec
+ // Execute dpkg using a-shell-kernel instead of fork/exec
  bool pkgDPkgPM::ExecDpkg(const char *cmd)
  {
-+   // iOS: Use ashell-system ExecDpkg
-+   // Instead of fork/exec, we use ashell_fork/ashell_execve
++   // iOS: Use a-shell-kernel ExecDpkg
++   // Instead of fork/exec, we use a_shell_fork/a_shell_execve
 +   #ifdef __APPLE__
-+   // Include ashell-system headers
++   // Include a-shell-kernel headers
 +   extern "C" {
-+      #include "ashell_system.h"
++      #include "a_shell_system.h"
 +   }
 +   #endif
 +
     // Original dpkg execution would fork here
-    // On iOS, we use pthread simulation via ashell-system
+    // On iOS, we use pthread simulation via a-shell-kernel
 
 @@ -260,7 +269,16 @@ bool pkgDPkgPM::ExecDpkg(const char *cmd)
        return false;
     }
 
 +   #ifdef __APPLE__
-+   // Use ashell-system process simulation
-+   pid_t pid = ashell_fork();
++   // Use a-shell-kernel process simulation
++   pid_t pid = a_shell_fork();
 +   if (pid == 0) {
-+      ashell_execve(cmd, args, environ);
++      a_shell_execve(cmd, args, environ);
 +   }
 +   #else
 +   // Standard fork/exec
@@ -65,17 +65,17 @@ Disable features not available on iOS:
 --- a/apt-pkg/contrib/fileutl.cc
 +++ b/apt-pkg/contrib/fileutl.cc
 @@ -150,10 +150,20 @@ bool ExecForked(const char *cmd)
- // Fork and execute with ashell-system on iOS
+ // Fork and execute with a-shell-kernel on iOS
  bool ExecForked(const char *cmd)
  {
 +   #ifdef __APPLE__
-+   // Use ashell-system threading instead of fork
++   // Use a-shell-kernel threading instead of fork
 +   extern "C" {
-+      #include "ashell_system.h"
++      #include "a_shell_system.h"
 +   }
-+   pid_t pid = ashell_fork();
++   pid_t pid = a_shell_fork();
 +   if (pid == 0) {
-+      ashell_execv(cmd, args);
++      a_shell_execv(cmd, args);
 +   }
 +   #else
     pid_t pid = fork();

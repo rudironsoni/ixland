@@ -120,7 +120,7 @@ date_main(int argc, char *argv[])
 	set_timezone = 0;
     // iOS: strftime uses TZ from the real environment, not from ours:
     global_TZ = getenv("TZ"); // so we can restore it later
-    local_TZ = ios_getenv("TZ");
+    local_TZ = a_shell_getenv("TZ");
     if (local_TZ)
         setenv("TZ", local_TZ, 1);
     else

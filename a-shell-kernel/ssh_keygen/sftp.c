@@ -340,7 +340,7 @@ local_do_shell(const char *args)
 #if !TARGET_OS_IPHONE
 			execl(shell, shell, "-c", args, (char *)NULL);
 #else
-            ios_execv(shell, &args);
+            a_shell_execv(shell, &args);
 #endif
 		} else {
 			debug3("Executing %s", shell);
@@ -2231,7 +2231,7 @@ interactive_loop(struct sftp_conn *conn, char *file1, char *file2)
 	interactive = !batchmode && isatty(STDIN_FILENO);
 #if TARGET_OS_IPHONE
     if (interactive)
-        ios_stopInteractive();
+        a_shell_stopInteractive();
 #endif
 
 	err = 0;
@@ -2616,7 +2616,7 @@ sftp_main(int argc, char **argv)
 	if (batchmode)
 		fclose(infile);
 
-// ssh waits for sftp in ios_system::cleanup_function, so this ends in an infinite loop
+// ssh waits for sftp in a_shell_system::cleanup_function, so this ends in an infinite loop
 //#if !TARGET_OS_IPHONE
     while (waitpid(sshpid, NULL, 0) == -1 && sshpid > 1)
 		if (errno != EINTR)

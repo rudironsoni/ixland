@@ -1,6 +1,6 @@
 //
 //  ios_trace.c
-//  ios_system
+//  a_shell_system
 //
 //  Structured trace hooks for debugging and monitoring
 //  Part of M1: Platform Hardening

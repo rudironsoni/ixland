@@ -116,7 +116,7 @@ xargs_main(int argc, char *argv[])
 #if !TARGET_OS_IPHONE
 	ep = environ;
 #else
-    ep = environmentVariables(ios_currentPid());
+    ep = environmentVariables(a_shell_currentPid());
 #endif
 	eofstr = "";
 	Jflag = nflag = 0;
@@ -625,13 +625,13 @@ exec:
 	switch(pid = vfork()) {
 	case -1:
 		err(1, "vfork");
-    default:   // ios_system: go through both branches
+    default:   // a_shell_system: go through both branches
 	// case 0:
 		if (oflag) {
 #if !TARGET_OS_IPHONE
 			if ((fd = open(_PATH_TTY, O_RDONLY)) == -1)
 #else
-            if ((fd = ios_getstdin()) == -1) 
+            if ((fd = a_shell_getstdin()) == -1) 
 #endif
             err(1, "can't open /dev/tty");
 		} else {
@@ -673,7 +673,7 @@ exec:
 }
 
 // wait for all children of current process (Unix default).
-// Won't work with the current version of ios_system.
+// Won't work with the current version of a_shell_system.
 static void
 waitchildren(const char *name, int waitall)
 {

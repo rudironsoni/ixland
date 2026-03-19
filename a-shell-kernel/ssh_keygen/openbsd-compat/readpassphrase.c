@@ -91,7 +91,7 @@ restart:
 	}
 #else
     // iOS: input must be ios_getty, because scp starts ssh and ssh asks for password.
-    input = ios_opentty();
+    input = a_shell_opentty();
     output = STDERR_FILENO;
     fflush(thread_stdout);
     fflush(thread_stderr);
@@ -218,7 +218,7 @@ restart:
     if (input != STDIN_FILENO)
 		(void)close(input);
 #else
-    ios_closetty();
+    a_shell_closetty();
 #endif
 
 	/*

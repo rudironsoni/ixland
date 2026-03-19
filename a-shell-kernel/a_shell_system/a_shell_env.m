@@ -1,6 +1,6 @@
 //
 //  ios_env.c
-//  ios_system
+//  a_shell_system
 //
 //  Standardized environment variable management for a-Shell
 //  Part of M1: Platform Hardening

@@ -2082,7 +2082,7 @@ ssh_session2_setup(struct ssh *ssh, int id, int success, void *arg)
 #else
     // get local set of environment variables, if we were started with execve
     client_session2_setup(ssh, id, tty_flag, subsystem_flag, "xterm-256color",
-        NULL, fileno(stdin), command, environmentVariables(ios_currentPid()));
+        NULL, fileno(stdin), command, environmentVariables(a_shell_currentPid()));
 #endif
     
 }

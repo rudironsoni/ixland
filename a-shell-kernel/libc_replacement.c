@@ -1,6 +1,6 @@
 //
 //  libc_replacement.c
-//  ios_system
+//  a_shell_system
 //
 //  Created by Nicolas Holzschuch on 30/04/2018.
 //  Copyright © 2018 Nicolas Holzschuch. All rights reserved.
@@ -114,7 +114,7 @@ int scanf (const char *format, ...) {
     va_end (ap);
     return (count);
 }
-int ios_fflush(FILE *stream) {
+int a_shell_fflush(FILE *stream) {
     if (stream == NULL) return 0;
     if (thread_stdout == NULL) thread_stdout = stdout;
     if (thread_stderr == NULL) thread_stderr = stderr;
@@ -123,14 +123,14 @@ int ios_fflush(FILE *stream) {
     if (fileno(stream) == STDERR_FILENO) return fflush(thread_stderr);
     return fflush(stream);
 }
-ssize_t ios_write(int fildes, const void *buf, size_t nbyte) {
+ssize_t a_shell_write(int fildes, const void *buf, size_t nbyte) {
     if (thread_stdout == NULL) thread_stdout = stdout;
     if (thread_stderr == NULL) thread_stderr = stderr;
     if (fildes == STDOUT_FILENO) return write(fileno(thread_stdout), buf, nbyte);
     if (fildes == STDERR_FILENO) return write(fileno(thread_stderr), buf, nbyte);
     return write(fildes, buf, nbyte);
 }
-size_t ios_fwrite(const void *restrict ptr, size_t size, size_t nitems, FILE *restrict stream) {
+size_t a_shell_fwrite(const void *restrict ptr, size_t size, size_t nitems, FILE *restrict stream) {
 #ifdef debugPrint
     return fwrite(ptr, size, nitems, stderr);
 #endif
@@ -140,14 +140,14 @@ size_t ios_fwrite(const void *restrict ptr, size_t size, size_t nitems, FILE *re
     if (fileno(stream) == STDERR_FILENO) return fwrite(ptr, size, nitems, thread_stderr);
     return fwrite(ptr, size, nitems, stream);
 }
-int ios_puts(const char *s) {
+int a_shell_puts(const char *s) {
     if (thread_stdout == NULL) thread_stdout = stdout;
     // puts adds a newline at the end.
     int returnValue = fputs(s, thread_stdout);
     fputc('\n', thread_stdout);
     return returnValue;
 }
-int ios_fputs(const char* s, FILE *stream) {
+int a_shell_fputs(const char* s, FILE *stream) {
 #ifdef debugPrint
     return fputs(s, stderr);
 #endif
@@ -157,7 +157,7 @@ int ios_fputs(const char* s, FILE *stream) {
     if (fileno(stream) == STDERR_FILENO) return fputs(s, thread_stderr);
     return fputs(s, stream);
 }
-int ios_fputc(int c, FILE *stream) {
+int a_shell_fputc(int c, FILE *stream) {
 #ifdef debugPrint
     return fputc(c, stderr);
 #endif
@@ -170,7 +170,7 @@ int ios_fputc(int c, FILE *stream) {
 
 #include <assert.h>
 
-int ios_putw(int w, FILE *stream) {
+int a_shell_putw(int w, FILE *stream) {
     if (thread_stdout == NULL) thread_stdout = stdout;
     if (thread_stderr == NULL) thread_stderr = stderr;
     if (fileno(stream) == STDOUT_FILENO) return putw(w, thread_stdout);
@@ -205,8 +205,8 @@ void makeLocal(void) {
     copyEnvironment[current_pid] = NULL;
 }
 
-inline pthread_t ios_getThreadId(pid_t pid) {
-    // return ios_getLastThreadId(); // previous behaviour
+inline pthread_t a_shell_getThreadId(pid_t pid) {
+    // return a_shell_getLastThreadId(); // previous behaviour
     if (pid >= IOS_MAX_THREADS) { return -1; }
     return thread_ids[pid];
 }
@@ -218,9 +218,9 @@ void newPreviousDirectory(void) {
 
 // We do not recycle process ids too quickly to avoid collisions.
 void storeEnvironment(char* envp[]);
-static inline const pid_t ios_nextAvailablePid(void) {
+static inline const pid_t a_shell_nextAvailablePid(void) {
     while (cleanup_counter > 0) { } // Don't start a command while another is ending.
-    // fprintf(stderr, "Locking in ios_nextAvailablePid\n");
+    // fprintf(stderr, "Locking in a_shell_nextAvailablePid\n");
     pthread_mutex_lock(&pid_mtx);
     char** currentEnvironment = environmentVariables(current_pid);
     int previousPidId = current_pid;
@@ -234,7 +234,7 @@ static inline const pid_t ios_nextAvailablePid(void) {
         storeEnvironment(currentEnvironment); // duplicate the environment variables
         getwd(previousDirectory[current_pid]); // store current working directory
         previousPid[current_pid] = previousPidId;
-        // fprintf(stderr, "Returning from ios_nextAvailablePid, pid= %d\n", current_pid);
+        // fprintf(stderr, "Returning from a_shell_nextAvailablePid, pid= %d\n", current_pid);
         return current_pid;
     }
     // We've already started more than IOS_MAX_THREADS threads.
@@ -247,7 +247,7 @@ static inline const pid_t ios_nextAvailablePid(void) {
             current_pid = 1;
             last_allocated_pid = 1;
         }
-        pthread_t thread_pid = ios_getThreadId(current_pid);
+        pthread_t thread_pid = a_shell_getThreadId(current_pid);
         if (thread_pid == 0) { // We found a not-active pid
             thread_ids[current_pid] = -1; // Not yet started
             numVariablesSet[current_pid] = 0;
@@ -255,7 +255,7 @@ static inline const pid_t ios_nextAvailablePid(void) {
             storeEnvironment(currentEnvironment); // duplicate the environment variables
             getwd(previousDirectory[current_pid]); // store current working directory
             previousPid[current_pid] = previousPidId;
-            // fprintf(stderr, "Returning from ios_nextAvailablePid, pid= %d\n", current_pid);
+            // fprintf(stderr, "Returning from a_shell_nextAvailablePid, pid= %d\n", current_pid);
             return current_pid;
         }
         // Dangerous: if the process is already killed, this wil crash
@@ -268,7 +268,7 @@ static inline const pid_t ios_nextAvailablePid(void) {
     }
 }
 
-inline void ios_storeThreadId(pthread_t thread) {
+inline void a_shell_storeThreadId(pthread_t thread) {
     // To avoid issues when a command starts a command without forking,
     // we only store thread IDs for the first thread of the "process".
     // fprintf(stderr, "Unlocking pid %d, storing thread %x current value: %x\n", current_pid, thread,  thread_ids[current_pid]);
@@ -310,7 +310,7 @@ char* libc_getenv(const char* variableName) {
 }
 
 extern void set_session_errno(int n);
-int ios_setenv_pid(const char* variableName, const char* value, int overwrite, int pid) {
+int a_shell_setenv_pid(const char* variableName, const char* value, int overwrite, int pid) {
     if (environment[pid] != NULL) {
         if (variableName == NULL) {
             set_session_errno(EINVAL);
@@ -354,15 +354,15 @@ int ios_setenv_pid(const char* variableName, const char* value, int overwrite, i
     }
 }
 
-int ios_setenv_parent(const char* variableName, const char* value, int overwrite) {
-    return ios_setenv_pid(variableName, value, overwrite, previousPid[current_pid]);
+int a_shell_setenv_parent(const char* variableName, const char* value, int overwrite) {
+    return a_shell_setenv_pid(variableName, value, overwrite, previousPid[current_pid]);
 }
 
-int ios_setenv(const char* variableName, const char* value, int overwrite) {
-    return ios_setenv_pid(variableName, value, overwrite, current_pid);
+int a_shell_setenv(const char* variableName, const char* value, int overwrite) {
+    return a_shell_setenv_pid(variableName, value, overwrite, current_pid);
 }
 
-int ios_putenv(char* string) {
+int a_shell_putenv(char* string) {
     if (environment[current_pid] != NULL) {
         unsigned length;
         char     *temp;
@@ -400,7 +400,7 @@ int ios_putenv(char* string) {
     }
 }
 
-int ios_unsetenv_pid(const char* variableName, int pid) {
+int a_shell_unsetenv_pid(const char* variableName, int pid) {
     // Someone calls unsetenv once the process has been terminated.
     // Best thing to do is erase the environment and return
     if (environment[pid] != NULL) {
@@ -453,12 +453,12 @@ int ios_unsetenv_pid(const char* variableName, int pid) {
     }
 }
 
-int ios_unsetenv_parent(const char* variableName) {
-    return ios_unsetenv_pid(variableName, previousPid[current_pid]);
+int a_shell_unsetenv_parent(const char* variableName) {
+    return a_shell_unsetenv_pid(variableName, previousPid[current_pid]);
 }
 
-int ios_unsetenv(const char* variableName) {
-    return ios_unsetenv_pid(variableName, current_pid);
+int a_shell_unsetenv(const char* variableName) {
+    return a_shell_unsetenv_pid(variableName, current_pid);
 }
 
 
@@ -524,8 +524,8 @@ char** environmentVariables(pid_t pid) {
     }
 }
 
-extern int chdir_nolock(const char* path); // defined in ios_system.m
-void ios_releaseThread(pthread_t thread) {
+extern int chdir_nolock(const char* path); // defined in a_shell_system.m
+void a_shell_releaseThread(pthread_t thread) {
     if (thread == NULL) {
         return;
     }
@@ -545,8 +545,8 @@ void ios_releaseThread(pthread_t thread) {
     // fprintf(stderr, "Not found\n");
 }
 
-void ios_releaseBackgroundThread(pthread_t thread) {
-    // Same as ios_releaseThread, but do not reset the directory.
+void a_shell_releaseBackgroundThread(pthread_t thread) {
+    // Same as a_shell_releaseThread, but do not reset the directory.
     for (int p = 0; p < IOS_MAX_THREADS; p++) {
         if (thread_ids[p] == thread) {
             // fprintf(stderr, "Found Id %d\n", p);
@@ -558,53 +558,53 @@ void ios_releaseBackgroundThread(pthread_t thread) {
     // fprintf(stderr, "Not found\n");
 }
 
-void ios_releaseThreadId(pid_t pid) {
+void a_shell_releaseThreadId(pid_t pid) {
     // Don't reset the environment; sometimes, commands try to change the environment while it is being erased.
     // resetEnvironment(pid);
     if (thread_ids[pid] != 0) {
-        // fprintf(stderr, "Locking for pid %d in ios_releaseThreadId\n", pid);
+        // fprintf(stderr, "Locking for pid %d in a_shell_releaseThreadId\n", pid);
         // fprintf(stderr, "Reset current directory to %s because process %d terminates\n", previousDirectory[pid], pid);
         chdir_nolock(previousDirectory[pid]);
         current_pid = previousPid[pid];
         thread_ids[pid] = 0;
-        // fprintf(stderr, "Unlocking for pid %d in ios_releaseThreadId\n", pid);
+        // fprintf(stderr, "Unlocking for pid %d in a_shell_releaseThreadId\n", pid);
     } else {
-        // fprintf(stderr, "ios_releaseThreadId: pid %d was already terminated.\n", pid);
+        // fprintf(stderr, "a_shell_releaseThreadId: pid %d was already terminated.\n", pid);
     }
 }
 
-pid_t ios_currentPid(void) {
+pid_t a_shell_currentPid(void) {
     return current_pid;
 }
 
 // Note to self: do not redefine getpid() unless you have a way to make it consistent even when a "process" starts a new thread.
 // 0MQ and asyncio rely on this.
-pid_t fork(void) { return ios_nextAvailablePid(); } // increases current_pid by 1.
-pid_t ios_fork(void) { return ios_nextAvailablePid(); } // increases current_pid by 1.
-pid_t vfork(void) { return ios_nextAvailablePid(); }
+pid_t fork(void) { return a_shell_nextAvailablePid(); } // increases current_pid by 1.
+pid_t a_shell_fork(void) { return a_shell_nextAvailablePid(); } // increases current_pid by 1.
+pid_t vfork(void) { return a_shell_nextAvailablePid(); }
 
 // simple replacement of waitpid for swift programs
 // We use "optnone" to prevent optimization, otherwise the while loops never end.
-__attribute__ ((optnone)) void ios_waitpid(pid_t pid) {
+__attribute__ ((optnone)) void a_shell_waitpid(pid_t pid) {
     
     executeWebAssemblyCommandsInOrder();
     
     pthread_t threadToWaitFor;
     // Old system: no explicit pid, just store last thread Id.
     if ((pid == -1) || (pid == 0)) {
-        threadToWaitFor = ios_getLastThreadId();
+        threadToWaitFor = a_shell_getLastThreadId();
         while (threadToWaitFor != 0) {
-            threadToWaitFor = ios_getLastThreadId();
+            threadToWaitFor = a_shell_getLastThreadId();
         }
         return;
     }
     // New system: thread Id is store with pid:
-    threadToWaitFor = ios_getThreadId(pid);
+    threadToWaitFor = a_shell_getThreadId(pid);
     while (threadToWaitFor != 0) {
         // -1: not started, >0 started, not finished, 0: finished
-        threadToWaitFor = ios_getThreadId(pid);
+        threadToWaitFor = a_shell_getThreadId(pid);
     }
-    // fprintf(stderr, "Returning from ios_waitpid for %d \n", pid);
+    // fprintf(stderr, "Returning from a_shell_waitpid for %d \n", pid);
     return;
 }
 
@@ -618,20 +618,20 @@ __attribute__ ((optnone)) pid_t waitpid(pid_t pid, int *stat_loc, int options) {
         executeWebAssemblyCommandsInOrder(); // start executing webAssembly commands
         // WNOHANG: just check that the process is still running:
         pthread_t threadToWaitFor;
-        if ((pid == -1) || (pid == 0)) threadToWaitFor = ios_getLastThreadId();
-        else threadToWaitFor = ios_getThreadId(pid);
+        if ((pid == -1) || (pid == 0)) threadToWaitFor = a_shell_getLastThreadId();
+        else threadToWaitFor = a_shell_getThreadId(pid);
         if (threadToWaitFor != 0) // the process is still running
             return 0;
         else {
-            if (stat_loc) *stat_loc = W_EXITCODE(ios_getCommandStatus(), 0);
+            if (stat_loc) *stat_loc = W_EXITCODE(a_shell_getCommandStatus(), 0);
             fflush(thread_stdout);
             fflush(thread_stderr);
-            return pid; // was "-1". See man page and https://github.com/holzschu/ios_system/issues/89
+            return pid; // was "-1". See man page and https://github.com/holzschu/a_shell_system/issues/89
         }
     } else {
         // Wait until the process is terminated:
-        ios_waitpid(pid);
-        if (stat_loc) *stat_loc = W_EXITCODE(ios_getCommandStatus(), 0);
+        a_shell_waitpid(pid);
+        if (stat_loc) *stat_loc = W_EXITCODE(a_shell_getCommandStatus(), 0);
         return pid;
     }
 }
@@ -640,7 +640,7 @@ __attribute__ ((optnone)) pid_t waitpid(pid_t pid, int *stat_loc, int options) {
 // With Python 3.13, it doesn't work and the standard version is called instead.
 // When that happens, we explicitly call this function (a copy of the previous one).
 // Also useful in Swift calls
-__attribute__ ((optnone)) pid_t ios_full_waitpid(pid_t pid, int *stat_loc, int options) {
+__attribute__ ((optnone)) pid_t a_shell_full_waitpid(pid_t pid, int *stat_loc, int options) {
     // pthread_join won't work,  because the thread might have been detached.
     // (and you can't re-join a detached thread).
     // -1 = the call waits for any child process (not good yet)
@@ -650,20 +650,20 @@ __attribute__ ((optnone)) pid_t ios_full_waitpid(pid_t pid, int *stat_loc, int o
         executeWebAssemblyCommandsInOrder(); // start executing webAssembly commands
         // WNOHANG: just check that the process is still running:
         pthread_t threadToWaitFor;
-        if ((pid == -1) || (pid == 0)) threadToWaitFor = ios_getLastThreadId();
-        else threadToWaitFor = ios_getThreadId(pid);
+        if ((pid == -1) || (pid == 0)) threadToWaitFor = a_shell_getLastThreadId();
+        else threadToWaitFor = a_shell_getThreadId(pid);
         if (threadToWaitFor != 0) // the process is still running
             return 0;
         else {
-            if (stat_loc) *stat_loc = W_EXITCODE(ios_getCommandStatus(), 0);
+            if (stat_loc) *stat_loc = W_EXITCODE(a_shell_getCommandStatus(), 0);
             fflush(thread_stdout);
             fflush(thread_stderr);
-            return pid; // was "-1". See man page and https://github.com/holzschu/ios_system/issues/89
+            return pid; // was "-1". See man page and https://github.com/holzschu/a_shell_system/issues/89
         }
     } else {
         // Wait until the process is terminated:
-        ios_waitpid(pid);
-        if (stat_loc) *stat_loc = W_EXITCODE(ios_getCommandStatus(), 0);
+        a_shell_waitpid(pid);
+        if (stat_loc) *stat_loc = W_EXITCODE(a_shell_getCommandStatus(), 0);
         return pid;
     }
 }
@@ -674,7 +674,7 @@ __attribute__ ((optnone)) pid_t ios_full_waitpid(pid_t pid, int *stat_loc, int o
 void vwarn(const char *fmt, va_list args)
 {
     if (thread_stderr == NULL) thread_stderr = stderr;
-    fputs(ios_progname(), thread_stderr);
+    fputs(a_shell_progname(), thread_stderr);
     if (fmt != NULL)
     {
         fputs(": ", thread_stderr);
@@ -688,7 +688,7 @@ void vwarn(const char *fmt, va_list args)
 void vwarnx(const char *fmt, va_list args)
 {
     if (thread_stderr == NULL) thread_stderr = stderr;
-    fputs(ios_progname(), thread_stderr);
+    fputs(a_shell_progname(), thread_stderr);
     fputs(": ", thread_stderr);
     if (fmt != NULL)
         vfprintf(thread_stderr, fmt, args);
@@ -702,7 +702,7 @@ void err(int eval, const char *fmt, ...) {
         vwarn(fmt, argptr);
         va_end(argptr);
     }
-    ios_exit(eval);
+    a_shell_exit(eval);
 }
 // void errc(int eval, int errorcode, const char *fmt, ...);
 void errc(int eval, int errorcode, const char *fmt, ...) {
@@ -710,7 +710,7 @@ void errc(int eval, int errorcode, const char *fmt, ...) {
     if (fmt != NULL) {
         va_list argptr;
         va_start(argptr, fmt);
-        fputs(ios_progname(), thread_stderr);
+        fputs(a_shell_progname(), thread_stderr);
         fputs(": ", thread_stderr);
         vfprintf(thread_stderr, fmt, argptr);
         fputs(": ", thread_stderr);
@@ -718,7 +718,7 @@ void errc(int eval, int errorcode, const char *fmt, ...) {
         putc('\n', thread_stderr);
         va_end(argptr);
     }
-    ios_exit(eval);
+    a_shell_exit(eval);
 }
 //     void errx(int eval, const char *fmt, ...);
 void errx(int eval, const char *fmt, ...) {
@@ -728,7 +728,7 @@ void errx(int eval, const char *fmt, ...) {
         vwarnx(fmt, argptr);
         va_end(argptr);
     }
-    ios_exit(eval);
+    a_shell_exit(eval);
 }
 //   void warn(const char *fmt, ...);
 void warn(const char *fmt, ...) {
@@ -751,7 +751,7 @@ void warnx(const char *fmt, ...) {
 // void warnc(int code, const char *fmt, ...);
 void warnc(int code, const char *fmt, ...) {
     if (thread_stderr == NULL) thread_stderr = stderr;
-    fputs(ios_progname(), thread_stderr);
+    fputs(a_shell_progname(), thread_stderr);
     if (fmt != NULL)
     {
         va_list argptr;

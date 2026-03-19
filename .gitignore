@@ -2,3 +2,29 @@
 # Dolt database files (added by bd init)
 .dolt/
 *.db
+# Build artifacts
+*.o
+*.a
+*.dylib
+*.so
+*.framework/
+*.xcframework/
+build/
+.build/
+DerivedData/
+*.dSYM
+*.d
+*.dia
+*.tbd
+
+# Generated files
+*.hmap
+*.LinkFileList
+*.modulevalidation
+*.pcm
+
+# Package build artifacts
+ashell-packages/root-packages/*/*.o
+ashell-packages/root-packages/*/*.a
+ashell-packages/root-packages/*/zconf.h
+ashell-packages/root-packages/*/zlib.pc

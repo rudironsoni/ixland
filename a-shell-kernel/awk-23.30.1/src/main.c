@@ -207,7 +207,7 @@ int awk_main(int argc, char *argv[])
 #if !TARGET_OS_IPHONE
 		envinit(environ);
 #else
-        envinit(environmentVariables(ios_currentPid()));
+        envinit(environmentVariables(a_shell_currentPid()));
 #endif
 	yyparse();
 	setlocale(LC_NUMERIC, ""); /* back to whatever it is locally */

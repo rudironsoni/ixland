@@ -1,6 +1,6 @@
 //
 //  ios_cmd.c
-//  ios_system
+//  a_shell_system
 //
 //  Runtime command registration API
 //  Part of M1: Platform Hardening
@@ -335,9 +335,9 @@ int ashell_execute_command(const char* name, int argc, char** argv) {
         return -1;
     }
 
-    ashell_trace_command_start(name, ios_currentPid());
+    ashell_trace_command_start(name, a_shell_currentPid());
     int result = func(argc, argv);
-    ashell_trace_command_end(name, ios_currentPid(), result);
+    ashell_trace_command_end(name, a_shell_currentPid(), result);
 
     return result;
 }
@@ -425,7 +425,7 @@ void ashell_get_registry_stats(ashell_registry_stats_t* stats) {
 // BACKWARD COMPATIBILITY
 // ============================================================================
 
-// Legacy compatibility with existing ios_system code
+// Legacy compatibility with existing a_shell_system code
 // These delegate to the new API
 
 void replaceCommand(NSString* commandName, NSString* functionName, bool allOccurences) {
