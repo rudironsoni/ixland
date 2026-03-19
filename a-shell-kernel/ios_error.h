@@ -42,8 +42,9 @@ extern "C" {
   #define fputc ios_fputc
   #define putw ios_putw
   #define putp ios_putp
-  #define fflush ios_fflush
-  #define abort() ios_exit(1)
+#define fflush ios_fflush
+// Note: abort() is implemented as a function in a_shell_system.m, not as a macro
+// #define abort() ios_exit(1)
 #endif
 
 // Thread-local input and output streams

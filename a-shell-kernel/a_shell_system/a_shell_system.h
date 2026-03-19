@@ -1,3 +1,6 @@
+#ifndef A_SHELL_SYSTEM_H
+#define A_SHELL_SYSTEM_H
+
 //
 //  ios_system.h
 //  ios_system
@@ -323,3 +326,5 @@ extern void ashell_session_close(const void* session_id);
 extern void ashell_session_stats(ashell_session_stats_t* stats);
 extern int ashell_session_cleanup_stale(int max_age_seconds);
 extern int ashell_session_validate(void);
+
+#endif /* A_SHELL_SYSTEM_H */
