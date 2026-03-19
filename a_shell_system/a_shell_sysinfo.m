@@ -17,6 +17,12 @@
 #include <pthread.h>
 #include "a_shell_system.h"
 
+// Process info APIs are only available on macOS, not iOS
+#if TARGET_OS_MAC && !TARGET_OS_IPHONE
+#include <libproc.h>
+#include <sys/proc_info.h>
+#endif
+
 // ============================================================================
 // SYSTEM INFO IMPLEMENTATION
 // ============================================================================
@@ -144,7 +150,8 @@ char* ios_sysinfo_format(const ios_sys_info_t* info) {
 ios_proc_info_t* ios_getproc_info(pid_t pid) {
     if (pid <= 0) return NULL;
 
-    // Use proc_pidinfo for process info (BSD API on iOS)
+#if TARGET_OS_MAC && !TARGET_OS_IPHONE
+    // Use proc_pidinfo for process info (BSD API on macOS)
     struct proc_bsdinfo proc_info;
     int ret = proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info));
 
@@ -176,6 +183,17 @@ ios_proc_info_t* ios_getproc_info(pid_t pid) {
     info->gid = proc_info.pbi_gid;
 
     return info;
+#else
+    // On iOS, process info APIs are restricted
+    // Return a minimal struct with just the PID
+    ios_proc_info_t* info = malloc(sizeof(ios_proc_info_t));
+    if (!info) return NULL;
+    memset(info, 0, sizeof(ios_proc_info_t));
+    info->pid = pid;
+    info->ppid = 0;
+    strncpy(info->name, "unknown", 255);
+    return info;
+#endif
 }
 
 // Free process info returned by ios_getproc_info

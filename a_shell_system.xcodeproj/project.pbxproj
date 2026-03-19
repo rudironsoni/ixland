@@ -894,6 +894,11 @@
 		D285147A25B1E4DC003405B4 /* openbsd-compat.h in Headers */ = {isa = PBXBuildFile; fileRef = D285147925B1E4DC003405B4 /* openbsd-compat.h */; };
 		D285149C25B200B9003405B4 /* openssl-compat.h in Headers */ = {isa = PBXBuildFile; fileRef = D285149B25B200B9003405B4 /* openssl-compat.h */; };
 		D28514A625B20351003405B4 /* config.h in Headers */ = {isa = PBXBuildFile; fileRef = D28514A525B20351003405B4 /* config.h */; };
+		BD0000000000000000000000A /* a_shell_cmd.m in Sources */ = {isa = PBXBuildFile; fileRef = BD00000000000000000000001 /* a_shell_cmd.m */; };
+		BD0000000000000000000000B /* a_shell_env.m in Sources */ = {isa = PBXBuildFile; fileRef = BD00000000000000000000002 /* a_shell_env.m */; };
+		BD0000000000000000000000C /* a_shell_session.m in Sources */ = {isa = PBXBuildFile; fileRef = BD00000000000000000000003 /* a_shell_session.m */; };
+		BD0000000000000000000000D /* a_shell_sysinfo.m in Sources */ = {isa = PBXBuildFile; fileRef = BD00000000000000000000004 /* a_shell_sysinfo.m */; };
+		BD0000000000000000000000E /* a_shell_trace.m in Sources */ = {isa = PBXBuildFile; fileRef = BD00000000000000000000005 /* a_shell_trace.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1554,6 +1559,11 @@
 		D285147925B1E4DC003405B4 /* openbsd-compat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "openbsd-compat.h"; path = "ssh_keygen/openbsd-compat/openbsd-compat.h"; sourceTree = "<group>"; };
 		D285149B25B200B9003405B4 /* openssl-compat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "openssl-compat.h"; path = "ssh_keygen/openbsd-compat/openssl-compat.h"; sourceTree = "<group>"; };
 		D28514A525B20351003405B4 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config.h; path = ssh_keygen/config.h; sourceTree = "<group>"; };
+		BD00000000000000000000001 /* a_shell_cmd.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = a_shell_cmd.m; path = a_shell_system/a_shell_cmd.m; sourceTree = "<group>"; };
+		BD00000000000000000000002 /* a_shell_env.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = a_shell_env.m; path = a_shell_system/a_shell_env.m; sourceTree = "<group>"; };
+		BD00000000000000000000003 /* a_shell_session.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = a_shell_session.m; path = a_shell_system/a_shell_session.m; sourceTree = "<group>"; };
+		BD00000000000000000000004 /* a_shell_sysinfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = a_shell_sysinfo.m; path = a_shell_system/a_shell_sysinfo.m; sourceTree = "<group>"; };
+		BD00000000000000000000005 /* a_shell_trace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = a_shell_trace.m; path = a_shell_system/a_shell_trace.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -3516,12 +3526,17 @@
 				22319FA01FDC2332004D875A /* getopt.c in Sources */,
 				225F06102016751900466685 /* getopt_long.c in Sources */,
 				22D99CED25AB76BF007F56C9 /* libc_replacement.c in Sources */,
-				223496B71FD5FC89007ED1A9 /* a_shell_system.m in Sources */,
-				2209215C24B3B05A00D3327B /* open.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		223EF2152B9623CA00A8ED5A /* Sources */ = {
+			223496B71FD5FC89007ED1A9 /* a_shell_system.m in Sources */,
+			2209215C24B3B05A00D3327B /* open.m in Sources */,
+			BD0000000000000000000000A /* a_shell_cmd.m in Sources */,
+			BD0000000000000000000000B /* a_shell_env.m in Sources */,
+			BD0000000000000000000000C /* a_shell_session.m in Sources */,
+			BD0000000000000000000000D /* a_shell_sysinfo.m in Sources */,
+			BD0000000000000000000000E /* a_shell_trace.m in Sources */,
+		);
+		runOnlyForDeploymentPostprocessing = 0;
+	};
+	223EF2152B9623CA00A8ED5A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (

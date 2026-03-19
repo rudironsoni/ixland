@@ -38,8 +38,7 @@ static pthread_mutex_t g_session_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_rwlock_t g_session_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 static bool g_sessions_initialized = false;
 
-// Thread-local current session (from ios_system.m)
-extern __thread void* currentSession;
+// currentSession is declared in a_shell_system.h
 
 // External session list (from ios_system.m)
 // We can't easily replace this, but we can wrap access to it

@@ -1,5 +1,5 @@
-#ifndef A_SHELL_SYSTEM_H
-#define A_SHELL_SYSTEM_H
+#ifndef A_SHELL_SYSTEM_INTERNAL_H
+#define A_SHELL_SYSTEM_INTERNAL_H
 
 //
 //  ios_system.h
@@ -23,6 +23,32 @@ extern __thread FILE* thread_stdin;
 extern __thread FILE* thread_stdout;
 extern __thread FILE* thread_stderr;
 extern __thread void* thread_context;
+
+// Session parameters structure (must match definition in a_shell_system.m)
+typedef struct _sessionParameters {
+    bool isMainThread;
+    char currentDir[MAXPATHLEN];
+    char previousDirectory[MAXPATHLEN];
+    char localMiniRoot[MAXPATHLEN];
+    pthread_t current_command_root_thread;
+    pthread_t lastThreadId;
+    pthread_t mainThreadId;
+    FILE* stdin;
+    FILE* stdout;
+    FILE* stderr;
+    FILE* tty;
+    const void* context;
+    int global_errno;
+    int numCommandsAllocated;
+    int numCommand;
+    char** commandName;
+    char columns[5];
+    char lines[5];
+    bool activePager;
+} sessionParameters;
+
+// Current session pointer (defined in a_shell_system.m)
+extern __thread sessionParameters* currentSession;
 
 // rust doesn't support extern __thread vars yet
 // see https://github.com/rust-lang/rust/issues/30795
@@ -327,4 +353,4 @@ extern void ashell_session_stats(ashell_session_stats_t* stats);
 extern int ashell_session_cleanup_stale(int max_age_seconds);
 extern int ashell_session_validate(void);
 
-#endif /* A_SHELL_SYSTEM_H */
+#endif /* A_SHELL_SYSTEM_INTERNAL_H */
