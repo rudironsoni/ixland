@@ -31,8 +31,8 @@
     XCTAssertEqual(result, 0, @"Appending to PATH should succeed");
     
     // Get PATH and verify it contains our directory
-    const char* path = ios_getenv("PATH");
-    XCTAssertNotNil(path, @"PATH should exist");
+    char* path = ios_getenv("PATH");
+    XCTAssertTrue(path != NULL, @"PATH should exist");
     XCTAssertTrue(strstr(path, testDir) != NULL, @"PATH should contain appended directory");
 }
 
@@ -43,8 +43,8 @@
     int result = ashell_env_path_prepend(testDir);
     XCTAssertEqual(result, 0, @"Prepending to PATH should succeed");
     
-    const char* path = ios_getenv("PATH");
-    XCTAssertNotNil(path, @"PATH should exist");
+    char* path = ios_getenv("PATH");
+    XCTAssertTrue(path != NULL, @"PATH should exist");
     // Should be at the beginning
     XCTAssertTrue(strstr(path, testDir) != NULL, @"PATH should contain prepended directory");
 }
@@ -66,13 +66,12 @@
 
 // Test environment variable set and get
 - (void)testEnvironmentVariableSetGet {
-    const char* result = ios_setenv("TEST_VAR", "test_value", 1);
-    // ios_setenv returns pointer to value on success
-    XCTAssertNotNil(result, @"Setting environment variable should succeed");
+    int result = ios_setenv("TEST_VAR", "test_value", 1);
+    XCTAssertEqual(result, 0, @"Setting environment variable should succeed");
     
-    const char* value = ios_getenv("TEST_VAR");
-    XCTAssertNotNil(value, @"Should be able to get TEST_VAR");
-    XCTAssertEqualObjects(@(value), @"test_value", @"Value should match");
+    char* value = ios_getenv("TEST_VAR");
+    XCTAssertTrue(value != NULL, @"Should be able to get TEST_VAR");
+    XCTAssertTrue(strcmp(value, "test_value") == 0, @"Value should match");
 }
 
 // Test environment variable unset
@@ -82,14 +81,14 @@
     int result = ios_unsetenv("UNSET_ME");
     XCTAssertEqual(result, 0, @"Unsetting should succeed");
     
-    const char* value = ios_getenv("UNSET_ME");
-    XCTAssertNil(value, @"Unset variable should be NULL");
+    char* value = ios_getenv("UNSET_ME");
+    XCTAssertTrue(value == NULL, @"Unset variable should be NULL");
 }
 
 // Test HOME directory
 - (void)testHomeDirectory {
-    const char* home = ios_getenv("HOME");
-    XCTAssertNotNil(home, @"HOME should be set");
+    char* home = ios_getenv("HOME");
+    XCTAssertTrue(home != NULL, @"HOME should be set");
     XCTAssertTrue(strlen(home) > 0, @"HOME should not be empty");
 }
 
@@ -98,7 +97,7 @@
     int count = 0;
     char** paths = ashell_env_get_path_array(&count);
     
-    XCTAssertNotNil(paths, @"Should get path array");
+    XCTAssertTrue(paths != NULL, @"Should get path array");
     XCTAssertGreaterThan(count, 0, @"Should have at least one path entry");
     
     // Free the array

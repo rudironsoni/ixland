@@ -46,12 +46,12 @@
     ashell_session_register(&self.sessionId, self.testSession);
     
     void* found = ashell_session_get(&self.sessionId);
-    XCTAssertEqual(found, self.testSession, @"Should find registered session");
+    XCTAssertTrue(found == self.testSession, @"Should find registered session");
     
     // Look up non-existent
     int nonExistent = 999999;
     void* notFound = ashell_session_get(&nonExistent);
-    XCTAssertNil((__bridge id)notFound, @"Should return NULL for non-existent session");
+    XCTAssertTrue(notFound == NULL, @"Should return NULL for non-existent session");
     
     ashell_session_unregister(&self.sessionId);
 }
