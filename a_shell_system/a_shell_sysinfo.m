@@ -1,6 +1,6 @@
 //
 //  ios_sysinfo.c
-//  ios_system
+//  a_shell_system
 //
 //  System information APIs for iOS (replaces /proc filesystem)
 //  Part of M4: Interactive UX & System Info
@@ -28,26 +28,26 @@
 // ============================================================================
 
 // Cache for system info (doesn't change often)
-static ios_sys_info_t g_sysinfo_cache;
+static a_shell_sys_info_t g_sysinfo_cache;
 static time_t g_sysinfo_cache_time = 0;
 static pthread_mutex_t g_sysinfo_mutex = PTHREAD_MUTEX_INITIALIZER;
 static const int SYSINFO_CACHE_TTL = 5; // Cache for 5 seconds
 
 // Get system info using iOS native APIs
 // This replaces reading from /proc/cpuinfo, /proc/meminfo, etc.
-ios_sys_info_t ios_getsys_info(void) {
+a_shell_sys_info_t a_shell_getsys_info(void) {
     pthread_mutex_lock(&g_sysinfo_mutex);
 
     time_t now = time(NULL);
 
     // Return cached value if still valid
     if (g_sysinfo_cache_time > 0 && (now - g_sysinfo_cache_time) < SYSINFO_CACHE_TTL) {
-        ios_sys_info_t result = g_sysinfo_cache;
+        a_shell_sys_info_t result = g_sysinfo_cache;
         pthread_mutex_unlock(&g_sysinfo_mutex);
         return result;
     }
 
-    ios_sys_info_t info;
+    a_shell_sys_info_t info;
     memset(&info, 0, sizeof(info));
 
     // Get CPU count
@@ -110,7 +110,7 @@ ios_sys_info_t ios_getsys_info(void) {
 }
 
 // Format system info as string (for debugging/display)
-char* ios_sysinfo_format(const ios_sys_info_t* info) {
+char* a_shell_sysinfo_format(const a_shell_sys_info_t* info) {
     if (!info) return NULL;
 
     // Calculate sizes in human-readable format
@@ -147,7 +147,7 @@ char* ios_sysinfo_format(const ios_sys_info_t* info) {
 
 // Get process information for a specific PID
 // Returns allocated struct (caller must free), or NULL on error
-ios_proc_info_t* ios_getproc_info(pid_t pid) {
+a_shell_proc_info_t* a_shell_getproc_info(pid_t pid) {
     if (pid <= 0) return NULL;
 
 #if TARGET_OS_MAC && !TARGET_OS_IPHONE
@@ -159,10 +159,10 @@ ios_proc_info_t* ios_getproc_info(pid_t pid) {
         return NULL; // Process doesn't exist or error
     }
 
-    ios_proc_info_t* info = malloc(sizeof(ios_proc_info_t));
+    a_shell_proc_info_t* info = malloc(sizeof(a_shell_proc_info_t));
     if (!info) return NULL;
 
-    memset(info, 0, sizeof(ios_proc_info_t));
+    memset(info, 0, sizeof(a_shell_proc_info_t));
 
     info->pid = pid;
     info->ppid = proc_info.pbi_ppid;
@@ -186,9 +186,9 @@ ios_proc_info_t* ios_getproc_info(pid_t pid) {
 #else
     // On iOS, process info APIs are restricted
     // Return a minimal struct with just the PID
-    ios_proc_info_t* info = malloc(sizeof(ios_proc_info_t));
+    a_shell_proc_info_t* info = malloc(sizeof(a_shell_proc_info_t));
     if (!info) return NULL;
-    memset(info, 0, sizeof(ios_proc_info_t));
+    memset(info, 0, sizeof(a_shell_proc_info_t));
     info->pid = pid;
     info->ppid = 0;
     strncpy(info->name, "unknown", 255);
@@ -196,14 +196,14 @@ ios_proc_info_t* ios_getproc_info(pid_t pid) {
 #endif
 }
 
-// Free process info returned by ios_getproc_info
-void ios_freeproc_info(ios_proc_info_t* info) {
+// Free process info returned by a_shell_getproc_info
+void a_shell_freeproc_info(a_shell_proc_info_t* info) {
     free(info);
 }
 
 // List all running processes
 // Returns array of pids (caller must free), sets count
-pid_t* ios_list_processes(int* count) {
+pid_t* a_shell_list_processes(int* count) {
     if (!count) return NULL;
 
     // Get list of all PIDs
@@ -249,12 +249,12 @@ pid_t* ios_list_processes(int* count) {
 }
 
 // Get current process info
-ios_proc_info_t* ios_getproc_self(void) {
-    return ios_getproc_info(getpid());
+a_shell_proc_info_t* a_shell_getproc_self(void) {
+    return a_shell_getproc_info(getpid());
 }
 
 // Format process info as string (for debugging/display)
-char* ios_procinfo_format(const ios_proc_info_t* info) {
+char* a_shell_procinfo_format(const a_shell_proc_info_t* info) {
     if (!info) return NULL;
 
     size_t bufsize = 512;
@@ -286,27 +286,27 @@ char* ios_procinfo_format(const ios_proc_info_t* info) {
 // ============================================================================
 
 // Print system info to stdout (for debugging)
-void ios_print_sysinfo(void) {
-    ios_sys_info_t info = ios_getsys_info();
-    char* formatted = ios_sysinfo_format(&info);
+void a_shell_print_sysinfo(void) {
+    a_shell_sys_info_t info = a_shell_getsys_info();
+    char* formatted = a_shell_sysinfo_format(&info);
     if (formatted) {
-        fputs(formatted, ios_stdout());
+        fputs(formatted, a_shell_stdout());
         free(formatted);
     }
 }
 
 // Print process info to stdout
-void ios_print_procinfo(pid_t pid) {
-    ios_proc_info_t* info = ios_getproc_info(pid);
+void a_shell_print_procinfo(pid_t pid) {
+    a_shell_proc_info_t* info = a_shell_getproc_info(pid);
     if (info) {
-        char* formatted = ios_procinfo_format(info);
+        char* formatted = a_shell_procinfo_format(info);
         if (formatted) {
-            fputs(formatted, ios_stdout());
+            fputs(formatted, a_shell_stdout());
             free(formatted);
         }
-        ios_freeproc_info(info);
+        a_shell_freeproc_info(info);
     } else {
-        fprintf(ios_stderr(), "Cannot get info for PID %d\n", pid);
+        fprintf(a_shell_stderr(), "Cannot get info for PID %d\n", pid);
     }
 }
 

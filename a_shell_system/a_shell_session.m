@@ -1,6 +1,6 @@
 //
 //  ios_session.c
-//  ios_system
+//  a_shell_system
 //
 //  Thread-safe session management for a-Shell
 //  Part of M1: Platform Hardening
@@ -40,7 +40,7 @@ static bool g_sessions_initialized = false;
 
 // currentSession is declared in a_shell_system.h
 
-// External session list (from ios_system.m)
+// External session list (from a_shell_system.m)
 // We can't easily replace this, but we can wrap access to it
 
 // ============================================================================
@@ -312,8 +312,8 @@ void ashell_session_touch(const void* session_id) {
 // THREAD-SAFE SESSION OPERATIONS
 // ============================================================================
 
-// Thread-safe version of ios_switchSession
-// This wraps the original ios_switchSession with proper synchronization
+// Thread-safe version of a_shell_switchSession
+// This wraps the original a_shell_switchSession with proper synchronization
 void ashell_session_switch(const void* session_id) {
     if (!session_id) return;
 
@@ -329,10 +329,10 @@ void ashell_session_switch(const void* session_id) {
     // Trace the switch
     ashell_trace_session_switch(from_session, session_id);
 
-    // Call the original ios_switchSession
-    // Note: In actual integration, ios_switchSession would be refactored to use
+    // Call the original a_shell_switchSession
+    // Note: In actual integration, a_shell_switchSession would be refactored to use
     // the session registry directly. This wrapper provides a transition path.
-    extern void ios_switchSession(const void* sessionId);
+    extern void a_shell_switchSession(const void* sessionId);
 
     pthread_rwlock_rdlock(&g_session_rwlock);
 
@@ -349,10 +349,10 @@ void ashell_session_switch(const void* session_id) {
     pthread_rwlock_unlock(&g_session_rwlock);
 
     // Perform the actual switch (this may create the session if needed)
-    ios_switchSession(session_id);
+    a_shell_switchSession(session_id);
 }
 
-// Thread-safe version of ios_closeSession
+// Thread-safe version of a_shell_closeSession
 void ashell_session_close(const void* session_id) {
     if (!session_id) return;
 
@@ -386,8 +386,8 @@ void ashell_session_close(const void* session_id) {
     pthread_rwlock_unlock(&g_session_rwlock);
 
     // Call original close
-    extern void ios_closeSession(const void* sessionId);
-    ios_closeSession(session_id);
+    extern void a_shell_closeSession(const void* sessionId);
+    a_shell_closeSession(session_id);
 
     ashell_trace(ASHELL_TRACE_INFO, "[SESSION] Closed session: %p", session_id);
 }

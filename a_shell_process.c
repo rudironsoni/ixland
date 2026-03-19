@@ -80,7 +80,7 @@ a_shell_process_t* find_process(pid_t pid) {
 }
 
 // Allocate new virtual PID
-pid_t ios_vfork(void) {
+pid_t a_shell_vfork(void) {
     pthread_mutex_lock(&process_table_lock);
     
     // Find available slot
@@ -119,19 +119,19 @@ pid_t ios_vfork(void) {
 }
 
 // Fork (returns ENOSYS since real fork not available on iOS)
-pid_t ios_fork(void) {
+pid_t a_shell_fork(void) {
     // On iOS, fork() returns ENOSYS
     errno = ENOSYS;
     return -1;
 }
 
 // Get current PID
-pid_t ios_getpid(void) {
+pid_t a_shell_getpid(void) {
     return current_vpid ? current_vpid : getpid();
 }
 
 // Get parent PID
-pid_t ios_getppid(void) {
+pid_t a_shell_getppid(void) {
     a_shell_process_t *proc = find_process(current_vpid);
     if (proc) {
         return proc->ppid;
@@ -140,7 +140,7 @@ pid_t ios_getppid(void) {
 }
 
 // Wait for child process
-pid_t ios_waitpid(pid_t pid, int *stat_loc, int options) {
+pid_t a_shell_waitpid(pid_t pid, int *stat_loc, int options) {
     if (pid < -1) {
         // Wait for any child in process group
         // TODO: Implement process groups
@@ -213,12 +213,12 @@ pid_t ios_waitpid(pid_t pid, int *stat_loc, int options) {
 }
 
 // Simple wait (wait for any child)
-pid_t ios_wait(int *stat_loc) {
-    return ios_waitpid(-1, stat_loc, 0);
+pid_t a_shell_wait(int *stat_loc) {
+    return a_shell_waitpid(-1, stat_loc, 0);
 }
 
 // Exit process
-void ios_exit(int status) {
+void a_shell_exit(int status) {
     a_shell_process_t *proc = find_process(current_vpid);
     if (proc) {
         pthread_mutex_lock(&proc->cleanup_lock);
@@ -273,12 +273,12 @@ static void init_cleanup_thread(void) {
 }
 
 // Signal handling stubs (for future implementation)
-sig_t ios_signal(int sig, sig_t func) {
+sig_t a_shell_signal(int sig, sig_t func) {
     // TODO: Implement signal handling
     return SIG_DFL;
 }
 
-int ios_killpid(pid_t pid, int sig) {
+int a_shell_killpid(pid_t pid, int sig) {
     a_shell_process_t *proc = find_process(pid);
     if (!proc) {
         errno = ESRCH;
@@ -290,17 +290,17 @@ int ios_killpid(pid_t pid, int sig) {
 }
 
 // Process tree helpers
-pid_t ios_getpgrp(void) {
+pid_t a_shell_getpgrp(void) {
     // TODO: Implement process groups
-    return ios_getpid();
+    return a_shell_getpid();
 }
 
-int ios_setpgid(pid_t pid, pid_t pgid) {
+int a_shell_setpgid(pid_t pid, pid_t pgid) {
     // TODO: Implement process groups
     return 0;
 }
 
-pid_t ios_setsid(void) {
+pid_t a_shell_setsid(void) {
     // TODO: Implement sessions
-    return ios_getpid();
+    return a_shell_getpid();
 }

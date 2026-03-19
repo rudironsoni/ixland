@@ -17,23 +17,23 @@ int main() {
     printf("Checking ios_* function declarations...\n");
     
     void *ptr;
-    ptr = (void*)ios_system;
-    printf("  ios_system: %p\n", ptr);
+    ptr = (void*)a_shell_system;
+    printf("  a_shell_system: %p\n", ptr);
     
-    ptr = (void*)ios_fork;
-    printf("  ios_fork: %p\n", ptr);
+    ptr = (void*)a_shell_fork;
+    printf("  a_shell_fork: %p\n", ptr);
     
-    ptr = (void*)ios_execv;
-    printf("  ios_execv: %p\n", ptr);
+    ptr = (void*)a_shell_execv;
+    printf("  a_shell_execv: %p\n", ptr);
     
-    ptr = (void*)ios_getenv;
-    printf("  ios_getenv: %p\n", ptr);
+    ptr = (void*)a_shell_getenv;
+    printf("  a_shell_getenv: %p\n", ptr);
     
-    ptr = (void*)ios_setenv;
-    printf("  ios_setenv: %p\n", ptr);
+    ptr = (void*)a_shell_setenv;
+    printf("  a_shell_setenv: %p\n", ptr);
     
-    ptr = (void*)ios_exit;
-    printf("  ios_exit: %p\n", ptr);
+    ptr = (void*)a_shell_exit;
+    printf("  a_shell_exit: %p\n", ptr);
     
     printf("\nAll headers compiled successfully!\n");
     
