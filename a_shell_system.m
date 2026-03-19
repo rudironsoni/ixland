@@ -233,12 +233,8 @@ void set_session_errno(int n) {
 void abort(void) {
     ios_exit(1);
 }
-void exit(int n) {
-    ios_exit(n);
-}
-void _exit(int n) {
-    ios_exit(n);
-}
+// exit() and _exit() are already macros in ios_error.h, so we don't define them here
+// The macros point to ios_exit() which is defined at line 218
 //
 
 int canSetSignal() {
@@ -4101,3 +4097,4 @@ void ios_releasePythonLibraryName(char* name) {
     }
     free(name);
 }
+
