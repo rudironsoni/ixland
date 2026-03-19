@@ -899,6 +899,9 @@
 		BD0000000000000000000000C /* a_shell_session.m in Sources */ = {isa = PBXBuildFile; fileRef = BD00000000000000000000003 /* a_shell_session.m */; };
 		BD0000000000000000000000D /* a_shell_sysinfo.m in Sources */ = {isa = PBXBuildFile; fileRef = BD00000000000000000000004 /* a_shell_sysinfo.m */; };
 		BD0000000000000000000000E /* a_shell_trace.m in Sources */ = {isa = PBXBuildFile; fileRef = BD00000000000000000000005 /* a_shell_trace.m */; };
+		BD0000000000000000000001A /* a_shell_env_tests.m in Sources */ = {isa = PBXBuildFile; fileRef = BD00000000000000000000010 /* a_shell_env_tests.m */; };
+		BD0000000000000000000001B /* a_shell_session_tests.m in Sources */ = {isa = PBXBuildFile; fileRef = BD00000000000000000000011 /* a_shell_session_tests.m */; };
+		BD0000000000000000000001C /* a_shell_cmd_tests.m in Sources */ = {isa = PBXBuildFile; fileRef = BD00000000000000000000012 /* a_shell_cmd_tests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1564,6 +1567,9 @@
 		BD00000000000000000000003 /* a_shell_session.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = a_shell_session.m; path = a_shell_system/a_shell_session.m; sourceTree = "<group>"; };
 		BD00000000000000000000004 /* a_shell_sysinfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = a_shell_sysinfo.m; path = a_shell_system/a_shell_sysinfo.m; sourceTree = "<group>"; };
 		BD00000000000000000000005 /* a_shell_trace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = a_shell_trace.m; path = a_shell_system/a_shell_trace.m; sourceTree = "<group>"; };
+		BD00000000000000000000010 /* a_shell_env_tests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = a_shell_env_tests.m; path = tests/a_shell_env_tests.m; sourceTree = "<group>"; };
+		BD00000000000000000000011 /* a_shell_session_tests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = a_shell_session_tests.m; path = tests/a_shell_session_tests.m; sourceTree = "<group>"; };
+		BD00000000000000000000012 /* a_shell_cmd_tests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = a_shell_cmd_tests.m; path = tests/a_shell_cmd_tests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
