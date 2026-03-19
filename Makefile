@@ -2,13 +2,13 @@
 # Unified build system for the entire project
 # 
 # Usage:
-#   make              - Build everything
-#   make kernel       - Build the a-shell-kernel framework
-#   make kernel-ios   - Build kernel for iOS device only
-#   make kernel-sim   - Build kernel for iOS Simulator only
-#   make clean        - Clean all build artifacts
-#   make test         - Run tests
-#   make install      - Install built artifacts
+#   make                  - Build everything
+#   make build            - Build the a-shell-kernel framework
+#   make build-ios        - Build for iOS device only
+#   make build-simulator  - Build for iOS Simulator only
+#   make clean            - Clean all build artifacts
+#   make test             - Run tests
+#   make install          - Install built artifacts
 #
 # This Makefile delegates to component-specific Makefiles
 
@@ -26,38 +26,38 @@ KERNEL_DIR := a-shell-kernel
 # ==============================================================================
 # Phony Targets
 # ==============================================================================
-.PHONY: all kernel kernel-ios kernel-sim clean test install help
+.PHONY: all build build-ios build-simulator clean test install help
 
 # Default target
-all: kernel
+all: build
 
 # ==============================================================================
-# Kernel Targets
+# Build Targets
 # ==============================================================================
 
 # Build a-shell-kernel XCFramework (both iOS and Simulator)
-kernel:
+build:
 	@echo "=========================================="
 	@echo "Building a-shell-kernel"
 	@echo "=========================================="
 	@$(MAKE) -C $(KERNEL_DIR) xcframework CONFIGURATION=$(CONFIGURATION)
 
-# Build kernel for iOS device only
-kernel-ios:
+# Build for iOS device only
+build-ios:
 	@echo "=========================================="
 	@echo "Building a-shell-kernel for iOS Device"
 	@echo "=========================================="
 	@$(MAKE) -C $(KERNEL_DIR) ios CONFIGURATION=$(CONFIGURATION)
 
-# Build kernel for iOS Simulator only
-kernel-sim:
+# Build for iOS Simulator only
+build-simulator:
 	@echo "=========================================="
 	@echo "Building a-shell-kernel for iOS Simulator"
 	@echo "=========================================="
 	@$(MAKE) -C $(KERNEL_DIR) simulator CONFIGURATION=$(CONFIGURATION)
 
 # Clean kernel build artifacts
-kernel-clean:
+clean-kernel:
 	@$(MAKE) -C $(KERNEL_DIR) clean
 
 # ==============================================================================
@@ -65,7 +65,7 @@ kernel-clean:
 # ==============================================================================
 
 # Clean all build artifacts across all components
-clean: kernel-clean
+clean: clean-kernel
 	@echo "Cleaning all build artifacts..."
 	@rm -rf $(BUILD_ROOT)
 	@echo "Clean complete"
@@ -73,10 +73,10 @@ clean: kernel-clean
 # Run tests
 test:
 	@echo "Running tests..."
-	@echo "TODO: Implement test targets"
+	@$(MAKE) -C $(KERNEL_DIR) test
 
 # Install built artifacts
-install: kernel
+install: build
 	@echo "Installing built artifacts..."
 	@$(MAKE) -C $(KERNEL_DIR) install
 
@@ -124,33 +124,33 @@ help:
 	@echo "Usage: make [target] [VARIABLE=value]"
 	@echo ""
 	@echo "Main Targets:"
-	@echo "  all          - Build everything (default)"
-	@echo "  kernel       - Build a-shell-kernel XCFramework"
-	@echo "  kernel-ios   - Build kernel for iOS device only"
-	@echo "  kernel-sim   - Build kernel for iOS Simulator only"
-	@echo "  kernel-clean - Clean kernel build artifacts"
-	@echo "  clean        - Clean all build artifacts"
-	@echo "  test         - Run tests"
-	@echo "  install      - Install built artifacts"
-	@echo "  help         - Show this help message"
+	@echo "  all              - Build everything (default)"
+	@echo "  build            - Build a-shell-kernel XCFramework"
+	@echo "  build-ios        - Build for iOS device only"
+	@echo "  build-simulator  - Build for iOS Simulator only"
+	@echo "  clean-kernel     - Clean kernel build artifacts"
+	@echo "  clean            - Clean all build artifacts"
+	@echo "  test             - Run tests"
+	@echo "  install          - Install built artifacts"
+	@echo "  help             - Show this help message"
 	@echo ""
 	@echo "Development Targets:"
-	@echo "  debug        - Build with Debug configuration"
-	@echo "  release      - Build with Release configuration"
-	@echo "  verbose      - Build with verbose output"
-	@echo "  dry-run      - Show what would be built"
-	@echo "  settings     - Show build settings"
-	@echo "  destinations - List available build destinations"
+	@echo "  debug            - Build with Debug configuration"
+	@echo "  release          - Build with Release configuration"
+	@echo "  verbose          - Build with verbose output"
+	@echo "  dry-run          - Show what would be built"
+	@echo "  settings         - Show build settings"
+	@echo "  destinations     - List available build destinations"
 	@echo ""
 	@echo "Variables:"
 	@echo "  CONFIGURATION=Release    - Build configuration (Debug/Release)"
 	@echo "  BUILD_ROOT=build         - Output directory"
 	@echo ""
 	@echo "Examples:"
-	@echo "  make                     # Build everything"
-	@echo "  make kernel CONFIGURATION=Debug"
-	@echo "  make kernel-sim          # Build simulator only"
-	@echo "  make clean               # Clean everything"
+	@echo "  make                         # Build everything"
+	@echo "  make build CONFIGURATION=Debug"
+	@echo "  make build-simulator         # Build simulator only"
+	@echo "  make clean                   # Clean everything"
 
 # ==============================================================================
 # Project Info

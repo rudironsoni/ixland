@@ -131,15 +131,15 @@ make CONFIGURATION=Debug # Explicit configuration
 
 **Build specific targets:**
 ```bash
-make kernel             # Build a-shell-kernel XCFramework
-make kernel-ios         # Build for iOS device only (arm64)
-make kernel-sim         # Build for iOS Simulator only
+make build              # Build a-shell-kernel XCFramework
+make build-ios          # Build for iOS device only (arm64)
+make build-simulator    # Build for iOS Simulator only
 ```
 
 **Clean build artifacts:**
 ```bash
 make clean              # Clean all build artifacts
-make kernel-clean       # Clean only kernel build artifacts
+make clean-kernel       # Clean only kernel build artifacts
 ```
 
 **Development helpers:**
