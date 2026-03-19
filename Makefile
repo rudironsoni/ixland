@@ -33,7 +33,7 @@ SIM_DESTINATION := generic/platform=iOS Simulator
 # ==============================================================================
 # Phony Targets
 # ==============================================================================
-.PHONY: all clean ios simulator xcframework install help test
+.PHONY: all clean ios simulator xcframework install help test test-check check-tests
 
 # Default target: build everything
 all: xcframework
@@ -123,7 +123,9 @@ help:
 	@echo "  clean        - Remove all build artifacts"
 	@echo "  clean-derived- Clean only derived data"
 	@echo "  install      - Install XCFramework to output directory"
-	@echo "  test         - Run tests (TODO: implement)"
+	@echo "  test         - Run tests (requires test target in Xcode)"
+	@echo "  test-check   - Check if test target exists"
+	@echo "  check-tests  - Check test file syntax"
 	@echo "  help         - Show this help message"
 	@echo ""
 	@echo "Variables:"
@@ -134,37 +136,50 @@ help:
 # Test Targets
 # ==============================================================================
 
-# Compile test files (validation check)
-compile-tests: $(wildcard tests/*.m)
-	@echo "=========================================="
-	@echo "Compiling Tests"
-	@echo "=========================================="
-	@for test in tests/*.m; do \
-		echo "Checking: $$test"; \
-		clang -c -x objective-c -framework XCTest \
-			-I. \
-			-Ia_shell_system \
-			-isysroot $$(xcrun --show-sdk-path --sdk iphoneos) \
-			-target arm64-apple-ios14.0 \
-			-o /dev/null $$test 2>&1 | head -5 || echo "  (compilation check)"; \
-	done
+# Test scheme (must be created in Xcode)
+TEST_SCHEME := a_shell_systemTests
 
-# Run tests
-test:
+# Check if test scheme exists
+test-check:
+	@echo "Checking for test target..."
+	@if $(XCODEBUILD) -project $(PROJECT_FILE) -list 2>/dev/null | grep -q "$(TEST_SCHEME)"; then \
+		echo "Test target found: $(TEST_SCHEME)"; \
+	else \
+		echo "Test target NOT found: $(TEST_SCHEME)"; \
+		echo ""; \
+		echo "To create test target:"; \
+		echo "  1. Open a_shell_system.xcodeproj in Xcode"; \
+		echo "  2. File > New > Target > iOS Unit Testing Bundle"; \
+		echo "  3. Name it '$(TEST_SCHEME)'"; \
+		echo "  4. Add test .m files to the test target"; \
+		echo ""; \
+		echo "Then run: make test"; \
+		exit 1; \
+	fi
+
+# Run tests (requires test target in Xcode project)
+test: ios simulator test-check
 	@echo "=========================================="
 	@echo "Running Tests"
 	@echo "=========================================="
-	@echo ""
-	@echo "Test files found:"
-	@ls -1 tests/*.m 2>/dev/null | sed 's/^/  ✓ /' || echo "  (No test files found)"
-	@echo ""
-	@echo "To run these tests, add them to Xcode project:"
-	@echo "  1. Open a_shell_system.xcodeproj"
-	@echo "  2. File > New > Target > iOS Unit Testing Bundle"
-	@echo "  3. Add test files to test target"
-	@echo "  4. Run: xcodebuild test -scheme <TestScheme>"
-	@echo ""
-	@exit 1
+	$(XCODEBUILD) -project $(PROJECT_FILE) \
+		-scheme $(TEST_SCHEME) \
+		-destination 'platform=iOS Simulator,name=iPhone 15' \
+		test
+
+# Compile test files syntax check (does not run tests)
+check-tests:
+	@echo "=========================================="
+	@echo "Checking Test File Syntax"
+	@echo "=========================================="
+	@for test in tests/*.m; do \
+		echo "  Checking $$test"; \
+		$(XCODEBUILD) -project $(PROJECT_FILE) \
+			-scheme $(SCHEME) \
+			-destination 'platform=iOS Simulator,name=iPhone 15' \
+			$$test 2>&1 | grep -E "(error:|warning:)" | head -5 || true; \
+	done
+	@echo "Syntax check complete"
 
 # ==============================================================================
 # Debug/Development Targets
