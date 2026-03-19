@@ -1,0 +1,2 @@
+Target dependency graph (1 target)
+Target 'a_shell_system' in project 'a_shell_system' (no dependencies)
