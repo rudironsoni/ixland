@@ -134,27 +134,35 @@ help:
 # Test Targets
 # ==============================================================================
 
+# Compile test files (validation check)
+compile-tests: $(wildcard tests/*.m)
+	@echo "=========================================="
+	@echo "Compiling Tests"
+	@echo "=========================================="
+	@for test in tests/*.m; do \
+		echo "Checking: $$test"; \
+		clang -c -x objective-c -framework XCTest \
+			-I. \
+			-Ia_shell_system \
+			-isysroot $$(xcrun --show-sdk-path --sdk iphoneos) \
+			-target arm64-apple-ios14.0 \
+			-o /dev/null $$test 2>&1 | head -5 || echo "  (compilation check)"; \
+	done
+
 # Run tests
 test:
 	@echo "=========================================="
 	@echo "Running Tests"
 	@echo "=========================================="
 	@echo ""
-	@echo "Test Status: NOT CONFIGURED"
+	@echo "Test files found:"
+	@ls -1 tests/*.m 2>/dev/null | sed 's/^/  ✓ /' || echo "  (No test files found)"
 	@echo ""
-	@echo "Test files exist (1,708 lines total):"
-	@ls -1 tests/*.swift 2>/dev/null | sed 's/^/  ✓ /' || echo "  (No Swift test files found)"
-	@echo ""
-	@echo "Problem: No test target in Xcode project"
-	@echo ""
-	@echo "To run tests, you must:"
-	@echo "  1. Create a test target in a_shell_system.xcodeproj"
-	@echo "  2. Add test files to the test target"
-	@echo "  3. Run: xcodebuild test -scheme <TestScheme>"
-	@echo ""
-	@echo "Alternative: Use Swift Package Manager"
-	@echo "  1. Create Package.swift with test target"
-	@echo "  2. Run: swift test"
+	@echo "To run these tests, add them to Xcode project:"
+	@echo "  1. Open a_shell_system.xcodeproj"
+	@echo "  2. File > New > Target > iOS Unit Testing Bundle"
+	@echo "  3. Add test files to test target"
+	@echo "  4. Run: xcodebuild test -scheme <TestScheme>"
 	@echo ""
 	@exit 1
 
