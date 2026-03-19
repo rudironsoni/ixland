@@ -64,8 +64,8 @@
 		22319FA01FDC2332004D875A /* getopt.c in Sources */ = {isa = PBXBuildFile; fileRef = 22319F9E1FDC2332004D875A /* getopt.c */; };
 		22327A9F209E3ADD0026B98C /* md5.c in Sources */ = {isa = PBXBuildFile; fileRef = 22327A9E209E3ADD0026B98C /* md5.c */; };
 		22327AA1209E3AE30026B98C /* commoncrypto.c in Sources */ = {isa = PBXBuildFile; fileRef = 22327AA0209E3AE30026B98C /* commoncrypto.c */; };
-		223496B01FD5FC71007ED1A9 /* ios_system.h in Headers */ = {isa = PBXBuildFile; fileRef = 223496AE1FD5FC71007ED1A9 /* ios_system.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		223496B71FD5FC89007ED1A9 /* ios_system.m in Sources */ = {isa = PBXBuildFile; fileRef = 223496B61FD5FC89007ED1A9 /* ios_system.m */; };
+		223496B01FD5FC71007ED1A9 /* a_shell_kernel.h in Headers */ = {isa = PBXBuildFile; fileRef = 223496AE1FD5FC71007ED1A9 /* a_shell_kernel.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		223496B71FD5FC89007ED1A9 /* a_shell_kernel.m in Sources */ = {isa = PBXBuildFile; fileRef = 223496B61FD5FC89007ED1A9 /* a_shell_kernel.m */; };
 		223EF2172B9623CA00A8ED5A /* explicit_bzero.c in Sources */ = {isa = PBXBuildFile; fileRef = 2261379221F0E59D0097B3A0 /* explicit_bzero.c */; };
 		223EF21B2B9623CA00A8ED5A /* addr.c in Sources */ = {isa = PBXBuildFile; fileRef = 229876A02621ACFA002D3690 /* addr.c */; };
 		223EF21D2B9623CA00A8ED5A /* krl.c in Sources */ = {isa = PBXBuildFile; fileRef = 228D203A21CB9C2100A9B528 /* krl.c */; };
@@ -651,7 +651,7 @@
 		22B114752817CABD00A5BF16 /* libtermcap.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 22B114742817CABD00A5BF16 /* libtermcap.tbd */; };
 		22B753052068DF8400F2B025 /* shell.h in Headers */ = {isa = PBXBuildFile; fileRef = 22B753042068DF8400F2B025 /* shell.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		22B7530B2069801700F2B025 /* curl_ios.h in Headers */ = {isa = PBXBuildFile; fileRef = 22B7530A2069801700F2B025 /* curl_ios.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		22C1D2E920A842460093127F /* ios_error.h in Headers */ = {isa = PBXBuildFile; fileRef = 22CF27661FDB3FDA0087DDAD /* ios_error.h */; };
+		22C1D2E920A842460093127F /* a_shell_error.h in Headers */ = {isa = PBXBuildFile; fileRef = 22CF27661FDB3FDA0087DDAD /* a_shell_error.h */; };
 		22C505852098ADD800FDDFA9 /* y.tab.c in Sources */ = {isa = PBXBuildFile; fileRef = 22C5057D2098ADD700FDDFA9 /* y.tab.c */; };
 		22C505862098ADD800FDDFA9 /* find.c in Sources */ = {isa = PBXBuildFile; fileRef = 22C5057E2098ADD700FDDFA9 /* find.c */; };
 		22C505872098ADD800FDDFA9 /* ls.c in Sources */ = {isa = PBXBuildFile; fileRef = 22C5057F2098ADD700FDDFA9 /* ls.c */; };
@@ -957,9 +957,9 @@
 		22327A9E209E3ADD0026B98C /* md5.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = md5.c; path = text_cmds/md5/md5.c; sourceTree = SOURCE_ROOT; };
 		22327AA0209E3AE30026B98C /* commoncrypto.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = commoncrypto.c; path = text_cmds/md5/commoncrypto.c; sourceTree = SOURCE_ROOT; };
 		223496AB1FD5FC71007ED1A9 /* ios_system.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ios_system.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		223496AE1FD5FC71007ED1A9 /* ios_system.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ios_system.h; sourceTree = "<group>"; };
+		223496AE1FD5FC71007ED1A9 /* a_shell_kernel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = a_shell_kernel.h; sourceTree = "<group>"; };
 		223496AF1FD5FC71007ED1A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		223496B61FD5FC89007ED1A9 /* ios_system.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ios_system.m; sourceTree = "<group>"; };
+		223496B61FD5FC89007ED1A9 /* a_shell_kernel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = a_shell_kernel.m; sourceTree = "<group>"; };
 		223A5CC121CB82B70022B5D5 /* ssh-keygen.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "ssh-keygen.c"; path = "ssh_keygen/ssh-keygen.c"; sourceTree = "<group>"; };
 		223A5CC321CB8DB90022B5D5 /* log.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = log.c; path = ssh_keygen/log.c; sourceTree = "<group>"; };
 		223EF1E72B95D46900A8ED5A /* sshd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sshd.c; sourceTree = "<group>"; };
@@ -1487,7 +1487,7 @@
 		22C505902098B56400FDDFA9 /* diff.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = diff.c; path = bsd_diff/diff.c; sourceTree = SOURCE_ROOT; };
 		22C505912098B56400FDDFA9 /* diffreg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = diffreg.c; path = bsd_diff/diffreg.c; sourceTree = SOURCE_ROOT; };
 		22CF27601FDB3FDA0087DDAD /* libutil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libutil.h; path = libutil/libutil.h; sourceTree = SOURCE_ROOT; };
-		22CF27661FDB3FDA0087DDAD /* ios_error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ios_error.h; sourceTree = SOURCE_ROOT; };
+		22CF27661FDB3FDA0087DDAD /* a_shell_error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = a_shell_error.h; sourceTree = SOURCE_ROOT; };
 		22CF27691FDB3FDA0087DDAD /* printenv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = printenv.c; sourceTree = "<group>"; };
 		22CF276C1FDB3FDA0087DDAD /* env.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = env.c; sourceTree = "<group>"; };
 		22CF276D1FDB3FDA0087DDAD /* envopts.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = envopts.c; sourceTree = "<group>"; };
@@ -1708,10 +1708,10 @@
 			isa = PBXGroup;
 			children = (
 				22319F9E1FDC2332004D875A /* getopt.c */,
-				223496B61FD5FC89007ED1A9 /* ios_system.m */,
+				223496B61FD5FC89007ED1A9 /* a_shell_kernel.m */,
 				22D99CEC25AB76BE007F56C9 /* libc_replacement.c */,
 				225F060F2016751800466685 /* getopt_long.c */,
-				22CF27661FDB3FDA0087DDAD /* ios_error.h */,
+				22CF27661FDB3FDA0087DDAD /* a_shell_error.h */,
 				22B7530A2069801700F2B025 /* curl_ios.h */,
 				22B753042068DF8400F2B025 /* shell.h */,
 				226378091FDB3EC700AE8827 /* file_cmds_ios */,
@@ -1760,7 +1760,7 @@
 		223496AD1FD5FC71007ED1A9 /* ios_system */ = {
 			isa = PBXGroup;
 			children = (
-				223496AE1FD5FC71007ED1A9 /* ios_system.h */,
+				223496AE1FD5FC71007ED1A9 /* a_shell_kernel.h */,
 				223496AF1FD5FC71007ED1A9 /* Info.plist */,
 			);
 			path = ios_system;
@@ -2969,7 +2969,7 @@
 			files = (
 				2263787D1FDB3EE400AE8827 /* extern.h in Headers */,
 				226378781FDB3EE400AE8827 /* pathnames.h in Headers */,
-				223496B01FD5FC71007ED1A9 /* ios_system.h in Headers */,
+				223496B01FD5FC71007ED1A9 /* a_shell_kernel.h in Headers */,
 				226378751FDB3EE400AE8827 /* termcap.h in Headers */,
 				226378951FDB3EE400AE8827 /* ls.h in Headers */,
 				225782911FDB4D390050F312 /* curl_config.h in Headers */,
@@ -2977,7 +2977,7 @@
 				22CF278C1FDB3FDB0087DDAD /* libutil.h in Headers */,
 				226378B21FDB3EE400AE8827 /* zopen.h in Headers */,
 				226378811FDB3EE400AE8827 /* ncurses_dll.h in Headers */,
-				22C1D2E920A842460093127F /* ios_error.h in Headers */,
+				22C1D2E920A842460093127F /* a_shell_error.h in Headers */,
 				226378A81FDB3EE400AE8827 /* chmod_acl.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3516,7 +3516,7 @@
 				22319FA01FDC2332004D875A /* getopt.c in Sources */,
 				225F06102016751900466685 /* getopt_long.c in Sources */,
 				22D99CED25AB76BF007F56C9 /* libc_replacement.c in Sources */,
-				223496B71FD5FC89007ED1A9 /* ios_system.m in Sources */,
+				223496B71FD5FC89007ED1A9 /* a_shell_kernel.m in Sources */,
 				2209215C24B3B05A00D3327B /* open.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
