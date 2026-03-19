@@ -2,3 +2,6 @@
 	path = a-shell
 	url = git@github.com:rudironsoni/a-shell.git
 	branch = master
+[submodule "a-shell-kernel/wamr"]
+	path = a-shell-kernel/wamr
+	url = https://github.com/bytecodealliance/wasm-micro-runtime.git
