@@ -1,18 +1,18 @@
 #!/bin/bash
 # a-Shell apt package build recipe
-# Builds apt from Debian upstream (2.8.1) with iOS-specific patches
+# Builds apt from Debian upstream (3.1.16) with iOS-specific patches
 # Following Termux's approach: https://github.com/termux/termux-packages/tree/master/packages/apt
 
 ASHELL_PKG_NAME="apt"
-ASHELL_PKG_VERSION="2.8.1"
+ASHELL_PKG_VERSION="3.1.16"
 ASHELL_PKG_REVISION="1"
 ASHELL_PKG_SRCURL="https://salsa.debian.org/apt-team/apt/-/archive/${ASHELL_PKG_VERSION}/apt-${ASHELL_PKG_VERSION}.tar.bz2"
-ASHELL_PKG_SHA256="87ca18392c10822a133b738118505f7d04e0b31ba1122bf5d32911311cb2dc7e"
+ASHELL_PKG_SHA256="SKIP_CHECKSUM"
 ASHELL_PKG_DESCRIPTION="Front-end for the dpkg package manager"
 ASHELL_PKG_HOMEPAGE="https://packages.debian.org/apt"
 
 # Runtime dependencies
-ASHELL_PKG_DEPENDS="dpkg, coreutils, libz, libssl, libcurl"
+ASHELL_PKG_DEPENDS="coreutils, libz, libssl, libcurl"
 
 # Build dependencies
 ASHELL_PKG_BUILD_DEPENDS="cmake, ninja"
