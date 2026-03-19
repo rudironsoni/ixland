@@ -118,13 +118,50 @@ For more details, see README.md and docs/QUICKSTART.md.
 
 ## Build & Test
 
-_Add your build and test commands here_
+### Build System
 
+This project uses **Make** for building, following proper engineering practices.
+
+**Build the entire project:**
 ```bash
-# Example:
-# npm install
-# npm test
+make                    # Build everything (default: Release)
+make debug              # Build with Debug configuration
+make CONFIGURATION=Debug # Explicit configuration
 ```
+
+**Build specific targets:**
+```bash
+make kernel             # Build a-shell-kernel XCFramework
+make kernel-ios         # Build for iOS device only (arm64)
+make kernel-sim         # Build for iOS Simulator only
+```
+
+**Clean build artifacts:**
+```bash
+make clean              # Clean all build artifacts
+make kernel-clean       # Clean only kernel build artifacts
+```
+
+**Development helpers:**
+```bash
+make help               # Show all available targets
+make dry-run            # Show what would be built
+make verbose            # Build with verbose output
+make settings           # Show Xcode build settings
+```
+
+**Direct kernel Makefile (in a-shell-kernel/ directory):**
+```bash
+cd a-shell-kernel
+make ios                # Build iOS framework
+make simulator          # Build Simulator framework
+make xcframework        # Create universal XCFramework
+make clean              # Clean build artifacts
+```
+
+### Testing
+
+_TODO: Add test commands here_
 
 ## Architecture Overview
 
