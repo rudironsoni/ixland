@@ -6,8 +6,8 @@
 //  Copyright © 2019 Nicolas Holzschuch. All rights reserved.
 //
 #include <stdio.h>
-#include "ios_system/ios_system.h"
-#include "ios_error.h"
+#include "../a_shell_system/a_shell_system.h"
+#include "../a_shell_error.h"
 
 #import <UIKit/UIKit.h>
 

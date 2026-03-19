@@ -6,7 +6,7 @@
 	<integer>12</integer>
 	<key>logs</key>
 	<dict>
-		<key>D265D7B1-650C-4016-ACA1-7FCC9363DCD6</key>
+		<key>407FFE94-113F-4FC9-93D3-32A04F4F6BFD</key>
 		<dict>
 			<key>className</key>
 			<string>IDECommandLineBuildLog</string>
@@ -15,7 +15,7 @@
 			<key>domainType</key>
 			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
 			<key>fileName</key>
-			<string>D265D7B1-650C-4016-ACA1-7FCC9363DCD6.xcactivitylog</string>
+			<string>407FFE94-113F-4FC9-93D3-32A04F4F6BFD.xcactivitylog</string>
 			<key>hasPrimaryLog</key>
 			<true/>
 			<key>primaryObservable</key>
@@ -32,21 +32,63 @@
 				<integer>0</integer>
 			</dict>
 			<key>schemeIdentifier-containerName</key>
-			<string>ios_system project</string>
+			<string>a_shell_system project</string>
 			<key>schemeIdentifier-schemeName</key>
-			<string>ios_system</string>
+			<string>a_shell_system</string>
 			<key>schemeIdentifier-sharedScheme</key>
 			<integer>1</integer>
 			<key>signature</key>
-			<string>Cleaning project ios_system with scheme ios_system and configuration Release</string>
+			<string>Cleaning project a_shell_system with scheme a_shell_system and configuration Release</string>
 			<key>timeStartedRecording</key>
-			<real>795614542.66465199</real>
+			<real>795618737.94970596</real>
 			<key>timeStoppedRecording</key>
-			<real>795614543.078197</real>
+			<real>795618738.32132995</real>
 			<key>title</key>
-			<string>Cleaning project ios_system with scheme ios_system and configuration Release</string>
+			<string>Cleaning project a_shell_system with scheme a_shell_system and configuration Release</string>
 			<key>uniqueIdentifier</key>
-			<string>D265D7B1-650C-4016-ACA1-7FCC9363DCD6</string>
+			<string>407FFE94-113F-4FC9-93D3-32A04F4F6BFD</string>
+		</dict>
+		<key>E943EB30-D5AD-4E5E-B2E6-EAC9F4A31EB4</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>E943EB30-D5AD-4E5E-B2E6-EAC9F4A31EB4.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>0</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>0</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>a_shell_system project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>a_shell_system</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Cleaning project a_shell_system with scheme a_shell_system and configuration Release</string>
+			<key>timeStartedRecording</key>
+			<real>795618675.56383395</real>
+			<key>timeStoppedRecording</key>
+			<real>795618676.00294101</real>
+			<key>title</key>
+			<string>Cleaning project a_shell_system with scheme a_shell_system and configuration Release</string>
+			<key>uniqueIdentifier</key>
+			<string>E943EB30-D5AD-4E5E-B2E6-EAC9F4A31EB4</string>
 		</dict>
 	</dict>
 </dict>

@@ -33,8 +33,8 @@ if [[ "$ARCH" == "arm64" || "$ARCH" == "all" ]]; then
     echo "Building for iOS arm64..."
     
     xcodebuild \
-        -project ios_system.xcodeproj \
-        -scheme ios_system \
+        -project a_shell_system.xcodeproj \
+        -scheme a_shell_system \
         -destination 'generic/platform=iOS' \
         -configuration Release \
         -derivedDataPath "$BUILD_DIR/DerivedData/ios" \
@@ -48,8 +48,8 @@ if [[ "$ARCH" == "simulator" || "$ARCH" == "all" ]]; then
     echo "Building for iOS Simulator x86_64..."
     
     xcodebuild \
-        -project ios_system.xcodeproj \
-        -scheme ios_system \
+        -project a_shell_system.xcodeproj \
+        -scheme a_shell_system \
         -destination 'generic/platform=iOS Simulator' \
         -configuration Release \
         -derivedDataPath "$BUILD_DIR/DerivedData/simulator" \
@@ -62,8 +62,8 @@ if [[ "$ARCH" == "all" ]]; then
     echo ""
     echo "Creating XCFramework..."
     
-    IOS_FRAMEWORK="$BUILD_DIR/DerivedData/ios/Build/Products/Release-iphoneos/ios_system.framework"
-    SIM_FRAMEWORK="$BUILD_DIR/DerivedData/simulator/Build/Products/Release-iphonesimulator/ios_system.framework"
+    IOS_FRAMEWORK="$BUILD_DIR/DerivedData/ios/Build/Products/Release-iphoneos/a_shell_system.framework"
+    SIM_FRAMEWORK="$BUILD_DIR/DerivedData/simulator/Build/Products/Release-iphonesimulator/a_shell_system.framework"
     
     if [[ -d "$IOS_FRAMEWORK" && -d "$SIM_FRAMEWORK" ]]; then
         xcodebuild -create-xcframework \
