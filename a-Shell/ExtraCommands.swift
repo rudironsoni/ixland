@@ -2104,4 +2104,3 @@ public func executeCommandAndWait(command: String) {
     ios_releaseThreadId(pid)
 }
 
-
