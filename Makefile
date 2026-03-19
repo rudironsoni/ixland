@@ -164,8 +164,8 @@ test: ios simulator test-check
 	@echo "=========================================="
 	$(XCODEBUILD) -project $(PROJECT_FILE) \
 		-scheme $(TEST_SCHEME) \
-		-destination 'platform=iOS Simulator,name=iPhone 15' \
-		test
+		-destination 'platform=iOS Simulator,name=iPhone 17' \
+		test 2>&1 | tail -100
 
 # Compile test files syntax check (does not run tests)
 check-tests:
