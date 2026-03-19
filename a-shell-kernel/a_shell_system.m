@@ -7,7 +7,7 @@
 
 #import <UIKit/UIKit.h>
 
-#include "ios_system.h"
+#include "a_shell_system.h"
 
 // ios_system(cmd): Executes the command in "cmd". The goal is to be a drop-in replacement for system(), as much as possible.
 // We assume cmd is the command. If vim has prepared '/bin/sh -c "(command -arguments) < inputfile > outputfile",
