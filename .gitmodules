@@ -2,7 +2,3 @@
 	path = a-shell
 	url = git@github.com:rudironsoni/a-shell.git
 	branch = master
-[submodule "ios_system"]
-	path = ios_system
-	url = git@github.com:rudironsoni/ios_system.git
-	branch = master
