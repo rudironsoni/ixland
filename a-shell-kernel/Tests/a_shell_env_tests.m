@@ -1,5 +1,6 @@
 // a_shell_env_tests.m
 // Unit tests for environment variable management
+// XNU-style: Use explicit boolean assertions for C pointers
 
 #import <XCTest/XCTest.h>
 #import "a_shell_system/a_shell_system.h"
@@ -11,7 +12,6 @@
 
 - (void)setUp {
     [super setUp];
-    ashell_env_initialize();
 }
 
 - (void)tearDown {
@@ -20,7 +20,7 @@
 
 // Test environment initialization
 - (void)testEnvironmentInitialization {
-    XCTAssertTrue(ashell_env_is_initialized(), @"Environment should be initialized");
+    XCTAssertTrue(ashell_env_is_initialized() != 0, @"Environment should be initialized");
 }
 
 // Test PATH manipulation - append
@@ -45,7 +45,6 @@
     
     char* path = ios_getenv("PATH");
     XCTAssertTrue(path != NULL, @"PATH should exist");
-    // Should be at the beginning
     XCTAssertTrue(strstr(path, testDir) != NULL, @"PATH should contain prepended directory");
 }
 
@@ -60,7 +59,7 @@
     int result = ashell_env_path_remove(testDir);
     XCTAssertEqual(result, 0, @"Removing from PATH should succeed");
     
-    const char* path = ios_getenv("PATH");
+    char* path = ios_getenv("PATH");
     XCTAssertTrue(strstr(path, testDir) == NULL, @"PATH should not contain removed directory");
 }
 
