@@ -64,8 +64,8 @@
 		22319FA01FDC2332004D875A /* getopt.c in Sources */ = {isa = PBXBuildFile; fileRef = 22319F9E1FDC2332004D875A /* getopt.c */; };
 		22327A9F209E3ADD0026B98C /* md5.c in Sources */ = {isa = PBXBuildFile; fileRef = 22327A9E209E3ADD0026B98C /* md5.c */; };
 		22327AA1209E3AE30026B98C /* commoncrypto.c in Sources */ = {isa = PBXBuildFile; fileRef = 22327AA0209E3AE30026B98C /* commoncrypto.c */; };
-		223496B01FD5FC71007ED1A9 /* a_shell_kernel.h in Headers */ = {isa = PBXBuildFile; fileRef = 223496AE1FD5FC71007ED1A9 /* a_shell_kernel.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		223496B71FD5FC89007ED1A9 /* a_shell_kernel.m in Sources */ = {isa = PBXBuildFile; fileRef = 223496B61FD5FC89007ED1A9 /* a_shell_kernel.m */; };
+		223496B01FD5FC71007ED1A9 /* a_shell_system.h in Headers */ = {isa = PBXBuildFile; fileRef = 223496AE1FD5FC71007ED1A9 /* a_shell_system.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		223496B71FD5FC89007ED1A9 /* a_shell_system.m in Sources */ = {isa = PBXBuildFile; fileRef = 223496B61FD5FC89007ED1A9 /* a_shell_system.m */; };
 		223EF2172B9623CA00A8ED5A /* explicit_bzero.c in Sources */ = {isa = PBXBuildFile; fileRef = 2261379221F0E59D0097B3A0 /* explicit_bzero.c */; };
 		223EF21B2B9623CA00A8ED5A /* addr.c in Sources */ = {isa = PBXBuildFile; fileRef = 229876A02621ACFA002D3690 /* addr.c */; };
 		223EF21D2B9623CA00A8ED5A /* krl.c in Sources */ = {isa = PBXBuildFile; fileRef = 228D203A21CB9C2100A9B528 /* krl.c */; };
@@ -126,7 +126,7 @@
 		223EF28B2B9623CA00A8ED5A /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 22F567DD2020BAD9009850FD /* libz.tbd */; };
 		223EF28C2B9623CA00A8ED5A /* openssl.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = D212F99525B06810007F5D2D /* openssl.xcframework */; };
 		223EF28D2B9623CA00A8ED5A /* libresolv.9.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2253BA1D201942B10019CB39 /* libresolv.9.tbd */; };
-		223EF28E2B9623CA00A8ED5A /* ios_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* ios_system.framework */; };
+		223EF28E2B9623CA00A8ED5A /* a_shell_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* a_shell_system.framework */; };
 		223EF2902B9623CA00A8ED5A /* ssh_cmd.h in Headers */ = {isa = PBXBuildFile; fileRef = 22F6A16820683D5200E618F9 /* ssh_cmd.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		223EF2912B9623CA00A8ED5A /* openssl-compat.h in Headers */ = {isa = PBXBuildFile; fileRef = D285149B25B200B9003405B4 /* openssl-compat.h */; };
 		223EF2922B9623CA00A8ED5A /* ssherr.h in Headers */ = {isa = PBXBuildFile; fileRef = D285145525B1DE61003405B4 /* ssherr.h */; };
@@ -289,7 +289,7 @@
 		224DF7192B75758E00F13C58 /* blowfish.c in Sources */ = {isa = PBXBuildFile; fileRef = 2217ECE121CBBA970049B382 /* blowfish.c */; };
 		224DF71A2B7575B100F13C58 /* misc.c in Sources */ = {isa = PBXBuildFile; fileRef = 22A3736B21CB99EB00230846 /* misc.c */; };
 		224DF71B2B7575D800F13C58 /* hash.c in Sources */ = {isa = PBXBuildFile; fileRef = 2217ECE321CBBACD0049B382 /* hash.c */; };
-		224DF71C2B75760200F13C58 /* ios_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* ios_system.framework */; };
+		224DF71C2B75760200F13C58 /* a_shell_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* a_shell_system.framework */; };
 		224DF71D2B75762D00F13C58 /* xmalloc.c in Sources */ = {isa = PBXBuildFile; fileRef = 224AAC5621CB920500F8C22F /* xmalloc.c */; };
 		224DF71E2B75765300F13C58 /* sshkey.c in Sources */ = {isa = PBXBuildFile; fileRef = 22A3736921CB986900230846 /* sshkey.c */; };
 		224DF71F2B75768700F13C58 /* sshbuf.c in Sources */ = {isa = PBXBuildFile; fileRef = 22A3735F21CB96FC00230846 /* sshbuf.c */; };
@@ -441,7 +441,7 @@
 		225479222B73814B005041FF /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 22F567DD2020BAD9009850FD /* libz.tbd */; };
 		225479232B73814B005041FF /* openssl.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = D212F99525B06810007F5D2D /* openssl.xcframework */; };
 		225479242B73814B005041FF /* libresolv.9.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2253BA1D201942B10019CB39 /* libresolv.9.tbd */; };
-		225479252B73814B005041FF /* ios_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* ios_system.framework */; };
+		225479252B73814B005041FF /* a_shell_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* a_shell_system.framework */; };
 		225479272B73814B005041FF /* ssh_cmd.h in Headers */ = {isa = PBXBuildFile; fileRef = 22F6A16820683D5200E618F9 /* ssh_cmd.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		225479282B73814B005041FF /* openssl-compat.h in Headers */ = {isa = PBXBuildFile; fileRef = D285149B25B200B9003405B4 /* openssl-compat.h */; };
 		225479292B73814B005041FF /* ssherr.h in Headers */ = {isa = PBXBuildFile; fileRef = D285145525B1DE61003405B4 /* ssherr.h */; };
@@ -555,7 +555,7 @@
 		228265132067F1BB002F9671 /* rmdir.c in Sources */ = {isa = PBXBuildFile; fileRef = 2263780C1FDB3EE100AE8827 /* rmdir.c */; };
 		228265142067F1BF002F9671 /* stat.c in Sources */ = {isa = PBXBuildFile; fileRef = 226378451FDB3EE300AE8827 /* stat.c */; };
 		228265152067F1C3002F9671 /* touch.c in Sources */ = {isa = PBXBuildFile; fileRef = 2263781C1FDB3EE200AE8827 /* touch.c */; };
-		228265162067F29B002F9671 /* ios_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* ios_system.framework */; };
+		228265162067F29B002F9671 /* a_shell_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* a_shell_system.framework */; };
 		228265172067F2A4002F9671 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 22CF27AC1FDB42AF0087DDAD /* libbz2.tbd */; };
 		228265182067F2B4002F9671 /* libncurses.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 227F87D6202EFA68001751C6 /* libncurses.tbd */; };
 		228D204D21CB9E5F00A9B528 /* bsd-misc.c in Sources */ = {isa = PBXBuildFile; fileRef = 228D204C21CB9E5F00A9B528 /* bsd-misc.c */; };
@@ -564,7 +564,7 @@
 		229876832621A861002D3690 /* libressl-api-compat.c in Sources */ = {isa = PBXBuildFile; fileRef = 229876822621A861002D3690 /* libressl-api-compat.c */; };
 		229876BF2621E947002D3690 /* recallocarray.c in Sources */ = {isa = PBXBuildFile; fileRef = 229876BE2621E947002D3690 /* recallocarray.c */; };
 		22A3735E21CB961900230846 /* strtonum.c in Sources */ = {isa = PBXBuildFile; fileRef = 22A3735D21CB961900230846 /* strtonum.c */; };
-		22AFD0172067F78200881B2A /* ios_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* ios_system.framework */; };
+		22AFD0172067F78200881B2A /* a_shell_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* a_shell_system.framework */; };
 		22AFD0182067F78800881B2A /* libxml2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 22F568222020C42F009850FD /* libxml2.tbd */; };
 		22AFD0192067F79200881B2A /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 22CF27AC1FDB42AF0087DDAD /* libbz2.tbd */; };
 		22AFD01A2067F7C800881B2A /* bsdtar.c in Sources */ = {isa = PBXBuildFile; fileRef = 22577F4B1FDB47B70050F312 /* bsdtar.c */; };
@@ -697,10 +697,10 @@
 		22F6A11F2068395B00E618F9 /* pr_time.c in Sources */ = {isa = PBXBuildFile; fileRef = 22CF27801FDB3FDA0087DDAD /* pr_time.c */; };
 		22F6A1202068395B00E618F9 /* proc_compare.c in Sources */ = {isa = PBXBuildFile; fileRef = 22CF27811FDB3FDA0087DDAD /* proc_compare.c */; };
 		22F6A1212068395B00E618F9 /* w.c in Sources */ = {isa = PBXBuildFile; fileRef = 22CF27841FDB3FDA0087DDAD /* w.c */; };
-		22F6A122206839BB00E618F9 /* ios_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* ios_system.framework */; };
+		22F6A122206839BB00E618F9 /* a_shell_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* a_shell_system.framework */; };
 		22F6A12C206839EF00E618F9 /* text.h in Headers */ = {isa = PBXBuildFile; fileRef = 22F6A12A206839EF00E618F9 /* text.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		22F6A130206839FF00E618F9 /* libresolv.9.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2253BA1D201942B10019CB39 /* libresolv.9.tbd */; };
-		22F6A13120683A0B00E618F9 /* ios_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* ios_system.framework */; };
+		22F6A13120683A0B00E618F9 /* a_shell_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* a_shell_system.framework */; };
 		22F6A13220683A1100E618F9 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 22CF27AC1FDB42AF0087DDAD /* libbz2.tbd */; };
 		22F6A13320683A1800E618F9 /* cmap.c in Sources */ = {isa = PBXBuildFile; fileRef = 22D8DEB920079E4C00FAADB7 /* cmap.c */; };
 		22F6A13520683A1D00E618F9 /* cset.c in Sources */ = {isa = PBXBuildFile; fileRef = 22D8DEB820079E4C00FAADB7 /* cset.c */; };
@@ -734,9 +734,9 @@
 		22F6A15D20683BCE00E618F9 /* run.c in Sources */ = {isa = PBXBuildFile; fileRef = 2248DB1B2004F82600F2944C /* run.c */; };
 		22F6A15E20683BCE00E618F9 /* tran.c in Sources */ = {isa = PBXBuildFile; fileRef = 2248DB212004F82700F2944C /* tran.c */; };
 		22F6A15F20683BCE00E618F9 /* awkgram.tab.c in Sources */ = {isa = PBXBuildFile; fileRef = 2248DB1A2004F82600F2944C /* awkgram.tab.c */; };
-		22F6A16020683BDC00E618F9 /* ios_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* ios_system.framework */; };
+		22F6A16020683BDC00E618F9 /* a_shell_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* a_shell_system.framework */; };
 		22F6A16A20683D5200E618F9 /* ssh_cmd.h in Headers */ = {isa = PBXBuildFile; fileRef = 22F6A16820683D5200E618F9 /* ssh_cmd.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		22F6A16E20683D6F00E618F9 /* ios_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* ios_system.framework */; };
+		22F6A16E20683D6F00E618F9 /* a_shell_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* a_shell_system.framework */; };
 		22F6A1A820683E5000E618F9 /* libresolv.9.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2253BA1D201942B10019CB39 /* libresolv.9.tbd */; };
 		22F6A1A920683E5700E618F9 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 22F567DD2020BAD9009850FD /* libz.tbd */; };
 		22F6A1B720683F6700E618F9 /* amigaos.c in Sources */ = {isa = PBXBuildFile; fileRef = 22577F9F1FDB4D370050F312 /* amigaos.c */; settings = {COMPILER_FLAGS = "-DHAVE_CONFIG_H -I curl/curl/include/ -I curl/curl/lib/ -DBUILDING_LIBCURL -I ./Frameworks/libssh2.framework/Headers"; }; };
@@ -884,7 +884,7 @@
 		22F6A25A20683F8500E618F9 /* tool_vms.c in Sources */ = {isa = PBXBuildFile; fileRef = 225781121FDB4D380050F312 /* tool_vms.c */; settings = {COMPILER_FLAGS = "-DHAVE_CONFIG_H -I curl/curl/include/ -I curl/curl/lib/ -DBUILDING_LIBCURL -I ./Frameworks/libssh2.framework/Headers"; }; };
 		22F6A25C20683F8500E618F9 /* tool_writeout.c in Sources */ = {isa = PBXBuildFile; fileRef = 225781161FDB4D380050F312 /* tool_writeout.c */; settings = {COMPILER_FLAGS = "-DHAVE_CONFIG_H -I curl/curl/include/ -I curl/curl/lib/ -I ./Frameworks/libssh2.framework/Headers"; }; };
 		22F6A25D20683F8600E618F9 /* tool_xattr.c in Sources */ = {isa = PBXBuildFile; fileRef = 225781181FDB4D380050F312 /* tool_xattr.c */; settings = {COMPILER_FLAGS = "-DHAVE_CONFIG_H -I curl/curl/include/ -I curl/curl/lib/ -DBUILDING_LIBCURL -I ./Frameworks/libssh2.framework/Headers"; }; };
-		22F6A25E20683F9B00E618F9 /* ios_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* ios_system.framework */; };
+		22F6A25E20683F9B00E618F9 /* a_shell_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9 /* a_shell_system.framework */; };
 		D212F98C25B066E9007F5D2D /* libssh2.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = D212F98A25B066E9007F5D2D /* libssh2.xcframework */; };
 		D212F99725B06810007F5D2D /* openssl.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = D212F99525B06810007F5D2D /* openssl.xcframework */; };
 		D285143225B1D7CD003405B4 /* sshkey.h in Headers */ = {isa = PBXBuildFile; fileRef = D285143125B1D7CD003405B4 /* sshkey.h */; };
@@ -956,10 +956,10 @@
 		22319F9E1FDC2332004D875A /* getopt.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = getopt.c; sourceTree = "<group>"; };
 		22327A9E209E3ADD0026B98C /* md5.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = md5.c; path = text_cmds/md5/md5.c; sourceTree = SOURCE_ROOT; };
 		22327AA0209E3AE30026B98C /* commoncrypto.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = commoncrypto.c; path = text_cmds/md5/commoncrypto.c; sourceTree = SOURCE_ROOT; };
-		223496AB1FD5FC71007ED1A9 /* ios_system.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ios_system.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		223496AE1FD5FC71007ED1A9 /* a_shell_kernel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = a_shell_kernel.h; sourceTree = "<group>"; };
+		223496AB1FD5FC71007ED1A9 /* a_shell_system.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = a_shell_system.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		223496AE1FD5FC71007ED1A9 /* a_shell_system.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = a_shell_system.h; sourceTree = "<group>"; };
 		223496AF1FD5FC71007ED1A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		223496B61FD5FC89007ED1A9 /* a_shell_kernel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = a_shell_kernel.m; sourceTree = "<group>"; };
+		223496B61FD5FC89007ED1A9 /* a_shell_system.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = a_shell_system.m; sourceTree = "<group>"; };
 		223A5CC121CB82B70022B5D5 /* ssh-keygen.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "ssh-keygen.c"; path = "ssh_keygen/ssh-keygen.c"; sourceTree = "<group>"; };
 		223A5CC321CB8DB90022B5D5 /* log.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = log.c; path = ssh_keygen/log.c; sourceTree = "<group>"; };
 		223EF1E72B95D46900A8ED5A /* sshd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sshd.c; sourceTree = "<group>"; };
@@ -976,7 +976,7 @@
 		223EF20B2B96227600A8ED5A /* sftp-server.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "sftp-server.c"; sourceTree = "<group>"; };
 		223EF2102B96231000A8ED5A /* sftp-realpath.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "sftp-realpath.c"; sourceTree = "<group>"; };
 		223EF29B2B9623CA00A8ED5A /* sshd.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = sshd.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		223EF29C2B9623CB00A8ED5A /* ssh_cmd copy3-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "ssh_cmd copy3-Info.plist"; path = "/Users/holzschu/src/Xcode_iPad/ios_system/ssh_cmd copy3-Info.plist"; sourceTree = "<absolute>"; };
+		223EF29C2B9623CB00A8ED5A /* ssh_cmd copy3-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "ssh_cmd copy3-Info.plist"; path = "/Users/holzschu/src/Xcode_iPad/a_shell_system/ssh_cmd copy3-Info.plist"; sourceTree = "<absolute>"; };
 		223EF2F72B962D1C00A8ED5A /* auth2-pubkey.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "auth2-pubkey.c"; path = "ssh_keygen/auth2-pubkey.c"; sourceTree = SOURCE_ROOT; };
 		223EF2FD2B962ED200A8ED5A /* auth2-kbdint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "auth2-kbdint.c"; path = "ssh_keygen/auth2-kbdint.c"; sourceTree = SOURCE_ROOT; };
 		223EF2FF2B962F0E00A8ED5A /* auth2-hostbased.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "auth2-hostbased.c"; path = "ssh_keygen/auth2-hostbased.c"; sourceTree = SOURCE_ROOT; };
@@ -1043,9 +1043,9 @@
 		224DF7502B7945E600F13C58 /* dirname.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = dirname.c; path = shell_cmds/dirname/dirname.c; sourceTree = SOURCE_ROOT; };
 		224DF7522B7956FF00F13C58 /* basename.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = basename.c; path = shell_cmds/basename/basename.c; sourceTree = SOURCE_ROOT; };
 		2253BA1D201942B10019CB39 /* libresolv.9.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.9.tbd; path = usr/lib/libresolv.9.tbd; sourceTree = SDKROOT; };
-		225478B42B6D903B005041FF /* ssh_cmd copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "ssh_cmd copy-Info.plist"; path = "/Users/holzschu/src/Xcode_iPad/ios_system/ssh_cmd copy-Info.plist"; sourceTree = "<absolute>"; };
+		225478B42B6D903B005041FF /* ssh_cmd copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "ssh_cmd copy-Info.plist"; path = "/Users/holzschu/src/Xcode_iPad/a_shell_system/ssh_cmd copy-Info.plist"; sourceTree = "<absolute>"; };
 		225479322B73814B005041FF /* ssh_cmdA.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ssh_cmdA.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		225479332B73814D005041FF /* ssh_cmd copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "ssh_cmd copy2-Info.plist"; path = "/Users/holzschu/src/Xcode_iPad/ios_system/ssh_cmd copy2-Info.plist"; sourceTree = "<absolute>"; };
+		225479332B73814D005041FF /* ssh_cmd copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "ssh_cmd copy2-Info.plist"; path = "/Users/holzschu/src/Xcode_iPad/a_shell_system/ssh_cmd copy2-Info.plist"; sourceTree = "<absolute>"; };
 		22577D451FDB47A90050F312 /* err.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = err.c; sourceTree = "<group>"; };
 		22577D461FDB47A90050F312 /* lafe_err.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lafe_err.h; sourceTree = "<group>"; };
 		22577D471FDB47A90050F312 /* lafe_platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lafe_platform.h; sourceTree = "<group>"; };
@@ -1572,7 +1572,7 @@
 				223EF28B2B9623CA00A8ED5A /* libz.tbd in Frameworks */,
 				223EF28C2B9623CA00A8ED5A /* openssl.xcframework in Frameworks */,
 				223EF28D2B9623CA00A8ED5A /* libresolv.9.tbd in Frameworks */,
-				223EF28E2B9623CA00A8ED5A /* ios_system.framework in Frameworks */,
+				223EF28E2B9623CA00A8ED5A /* a_shell_system.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1582,7 +1582,7 @@
 			files = (
 				224DF7492B757D5F00F13C58 /* openssl.xcframework in Frameworks */,
 				224DF7342B757AE200F13C58 /* libresolv.9.tbd in Frameworks */,
-				224DF71C2B75760200F13C58 /* ios_system.framework in Frameworks */,
+				224DF71C2B75760200F13C58 /* a_shell_system.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1594,7 +1594,7 @@
 				225479232B73814B005041FF /* openssl.xcframework in Frameworks */,
 				223EF3042B96303A00A8ED5A /* libssh2.xcframework in Frameworks */,
 				225479242B73814B005041FF /* libresolv.9.tbd in Frameworks */,
-				225479252B73814B005041FF /* ios_system.framework in Frameworks */,
+				225479252B73814B005041FF /* a_shell_system.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1604,7 +1604,7 @@
 			files = (
 				22AFD0192067F79200881B2A /* libbz2.tbd in Frameworks */,
 				22AFD0182067F78800881B2A /* libxml2.tbd in Frameworks */,
-				22AFD0172067F78200881B2A /* ios_system.framework in Frameworks */,
+				22AFD0172067F78200881B2A /* a_shell_system.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1614,7 +1614,7 @@
 			files = (
 				228265182067F2B4002F9671 /* libncurses.tbd in Frameworks */,
 				228265172067F2A4002F9671 /* libbz2.tbd in Frameworks */,
-				228265162067F29B002F9671 /* ios_system.framework in Frameworks */,
+				228265162067F29B002F9671 /* a_shell_system.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1623,7 +1623,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				22F6A130206839FF00E618F9 /* libresolv.9.tbd in Frameworks */,
-				22F6A122206839BB00E618F9 /* ios_system.framework in Frameworks */,
+				22F6A122206839BB00E618F9 /* a_shell_system.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1632,7 +1632,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				22F6A13220683A1100E618F9 /* libbz2.tbd in Frameworks */,
-				22F6A13120683A0B00E618F9 /* ios_system.framework in Frameworks */,
+				22F6A13120683A0B00E618F9 /* a_shell_system.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1640,7 +1640,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				22F6A16020683BDC00E618F9 /* ios_system.framework in Frameworks */,
+				22F6A16020683BDC00E618F9 /* a_shell_system.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1652,7 +1652,7 @@
 				227011A9262F222C0081F6FC /* openssl.xcframework in Frameworks */,
 				223EF3032B96303800A8ED5A /* libssh2.xcframework in Frameworks */,
 				22F6A1A820683E5000E618F9 /* libresolv.9.tbd in Frameworks */,
-				22F6A16E20683D6F00E618F9 /* ios_system.framework in Frameworks */,
+				22F6A16E20683D6F00E618F9 /* a_shell_system.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1661,7 +1661,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D212F98C25B066E9007F5D2D /* libssh2.xcframework in Frameworks */,
-				22F6A25E20683F9B00E618F9 /* ios_system.framework in Frameworks */,
+				22F6A25E20683F9B00E618F9 /* a_shell_system.framework in Frameworks */,
 				D212F99725B06810007F5D2D /* openssl.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1708,7 +1708,7 @@
 			isa = PBXGroup;
 			children = (
 				22319F9E1FDC2332004D875A /* getopt.c */,
-				223496B61FD5FC89007ED1A9 /* a_shell_kernel.m */,
+				223496B61FD5FC89007ED1A9 /* a_shell_system.m */,
 				22D99CEC25AB76BE007F56C9 /* libc_replacement.c */,
 				225F060F2016751800466685 /* getopt_long.c */,
 				22CF27661FDB3FDA0087DDAD /* a_shell_error.h */,
@@ -1721,7 +1721,7 @@
 				2248DB192004F7F100F2944C /* awk */,
 				22F6A1B020683F4100E618F9 /* curl */,
 				22577F9D1FDB4D220050F312 /* curl_grp */,
-				223496AD1FD5FC71007ED1A9 /* ios_system */,
+				223496AD1FD5FC71007ED1A9 /* a_shell_system */,
 				228264E92067F0A9002F9671 /* files */,
 				225E1B6C2067F39F005AC151 /* tar */,
 				22F6A10D2068390800E618F9 /* text */,
@@ -1742,7 +1742,7 @@
 		223496AC1FD5FC71007ED1A9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				223496AB1FD5FC71007ED1A9 /* ios_system.framework */,
+				223496AB1FD5FC71007ED1A9 /* a_shell_system.framework */,
 				228264E82067F0A9002F9671 /* files.framework */,
 				225E1B6B2067F39F005AC151 /* tar.framework */,
 				22F6A10C2068390800E618F9 /* shell.framework */,
@@ -1757,13 +1757,13 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		223496AD1FD5FC71007ED1A9 /* ios_system */ = {
+		223496AD1FD5FC71007ED1A9 /* a_shell_system */ = {
 			isa = PBXGroup;
 			children = (
-				223496AE1FD5FC71007ED1A9 /* a_shell_kernel.h */,
+				223496AE1FD5FC71007ED1A9 /* a_shell_system.h */,
 				223496AF1FD5FC71007ED1A9 /* Info.plist */,
 			);
-			path = ios_system;
+			path = a_shell_system;
 			sourceTree = "<group>";
 		};
 		223497AB1FD6CF7A007ED1A9 /* Frameworks */ = {
@@ -2722,7 +2722,7 @@
 				22C5057D2098ADD700FDDFA9 /* y.tab.c */,
 			);
 			name = find;
-			path = ios_system;
+			path = a_shell_system;
 			sourceTree = "<group>";
 		};
 		22C5058D2098B51A00FDDFA9 /* diff */ = {
@@ -2969,7 +2969,7 @@
 			files = (
 				2263787D1FDB3EE400AE8827 /* extern.h in Headers */,
 				226378781FDB3EE400AE8827 /* pathnames.h in Headers */,
-				223496B01FD5FC71007ED1A9 /* a_shell_kernel.h in Headers */,
+				223496B01FD5FC71007ED1A9 /* a_shell_system.h in Headers */,
 				226378751FDB3EE400AE8827 /* termcap.h in Headers */,
 				226378951FDB3EE400AE8827 /* ls.h in Headers */,
 				225782911FDB4D390050F312 /* curl_config.h in Headers */,
@@ -3085,9 +3085,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		223496AA1FD5FC71007ED1A9 /* ios_system */ = {
+		223496AA1FD5FC71007ED1A9 /* a_shell_system */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 223496B31FD5FC71007ED1A9 /* Build configuration list for PBXNativeTarget "ios_system" */;
+			buildConfigurationList = 223496B31FD5FC71007ED1A9 /* Build configuration list for PBXNativeTarget "a_shell_system" */;
 			buildPhases = (
 				223496A61FD5FC71007ED1A9 /* Sources */,
 				223496A71FD5FC71007ED1A9 /* Frameworks */,
@@ -3098,11 +3098,11 @@
 			);
 			dependencies = (
 			);
-			name = ios_system;
+			name = a_shell_system;
 			packageProductDependencies = (
 			);
-			productName = ios_system;
-			productReference = 223496AB1FD5FC71007ED1A9 /* ios_system.framework */;
+			productName = a_shell_system;
+			productReference = 223496AB1FD5FC71007ED1A9 /* a_shell_system.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		223EF2132B9623CA00A8ED5A /* sshd */ = {
@@ -3344,7 +3344,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 223496A51FD5FC71007ED1A9 /* Build configuration list for PBXProject "ios_system" */;
+			buildConfigurationList = 223496A51FD5FC71007ED1A9 /* Build configuration list for PBXProject "a_shell_system" */;
 			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -3359,7 +3359,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				223496AA1FD5FC71007ED1A9 /* ios_system */,
+				223496AA1FD5FC71007ED1A9 /* a_shell_system */,
 				228264E72067F0A9002F9671 /* files */,
 				225E1B6A2067F39F005AC151 /* tar */,
 				22F6A10B2068390800E618F9 /* shell */,
@@ -3516,7 +3516,7 @@
 				22319FA01FDC2332004D875A /* getopt.c in Sources */,
 				225F06102016751900466685 /* getopt_long.c in Sources */,
 				22D99CED25AB76BF007F56C9 /* libc_replacement.c in Sources */,
-				223496B71FD5FC89007ED1A9 /* a_shell_kernel.m in Sources */,
+				223496B71FD5FC89007ED1A9 /* a_shell_system.m in Sources */,
 				2209215C24B3B05A00D3327B /* open.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4537,7 +4537,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -4546,7 +4546,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
 				);
-				INFOPLIST_FILE = ios_system/Info.plist;
+				INFOPLIST_FILE = a_shell_system/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -4587,7 +4587,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -4596,7 +4596,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
 				);
-				INFOPLIST_FILE = ios_system/Info.plist;
+				INFOPLIST_FILE = a_shell_system/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -4636,7 +4636,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -4684,7 +4684,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -4733,7 +4733,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -4784,7 +4784,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -4832,7 +4832,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -4881,7 +4881,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -4929,7 +4929,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -4972,7 +4972,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -5014,7 +5014,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -5050,7 +5050,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -5087,7 +5087,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -5143,7 +5143,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -5195,7 +5195,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -5231,7 +5231,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -5266,7 +5266,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -5286,7 +5286,7 @@
 					"-Wunused-const-variable",
 					"-Wincompatible-pointer-types-discards-qualifiers",
 					"-I",
-					ios_system/,
+					a_shell_system/,
 				);
 				OTHER_LDFLAGS = (
 					"-Xlinker",
@@ -5310,7 +5310,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -5329,7 +5329,7 @@
 					"-Wunused-const-variable",
 					"-Wincompatible-pointer-types-discards-qualifiers",
 					"-I",
-					ios_system/,
+					a_shell_system/,
 				);
 				OTHER_LDFLAGS = (
 					"-Xlinker",
@@ -5353,7 +5353,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -5401,7 +5401,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -5449,7 +5449,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -5505,7 +5505,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = VG8Z23C8YL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -5554,7 +5554,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		223496A51FD5FC71007ED1A9 /* Build configuration list for PBXProject "ios_system" */ = {
+		223496A51FD5FC71007ED1A9 /* Build configuration list for PBXProject "a_shell_system" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				223496B11FD5FC71007ED1A9 /* Debug */,
@@ -5563,7 +5563,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		223496B31FD5FC71007ED1A9 /* Build configuration list for PBXNativeTarget "ios_system" */ = {
+		223496B31FD5FC71007ED1A9 /* Build configuration list for PBXNativeTarget "a_shell_system" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				223496B41FD5FC71007ED1A9 /* Debug */,
