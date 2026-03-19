@@ -33,7 +33,7 @@ SIM_DESTINATION := generic/platform=iOS Simulator
 # ==============================================================================
 # Phony Targets
 # ==============================================================================
-.PHONY: all clean ios simulator xcframework install help
+.PHONY: all clean ios simulator xcframework install help test
 
 # Default target: build everything
 all: xcframework
@@ -123,11 +123,32 @@ help:
 	@echo "  clean        - Remove all build artifacts"
 	@echo "  clean-derived- Clean only derived data"
 	@echo "  install      - Install XCFramework to output directory"
+	@echo "  test         - Run tests (TODO: implement)"
 	@echo "  help         - Show this help message"
 	@echo ""
 	@echo "Variables:"
 	@echo "  CONFIGURATION=Release  - Build configuration (Debug/Release)"
 	@echo "  BUILD_ROOT=../build    - Output directory"
+
+# ==============================================================================
+# Test Targets
+# ==============================================================================
+
+# Run tests
+test:
+	@echo "=========================================="
+	@echo "Running Tests"
+	@echo "=========================================="
+	@echo "TODO: Implement test runner"
+	@echo ""
+	@echo "Test files available in tests/:"
+	@ls -1 tests/*.swift 2>/dev/null | sed 's/^/  - /' || echo "  (No Swift test files found)"
+	@echo ""
+	@echo "Tests should include:"
+	@echo "  - Unit tests for a_shell_system components"
+	@echo "  - Integration tests for command execution"
+	@echo "  - Performance benchmarks"
+	@echo "  - Memory safety tests"
 
 # ==============================================================================
 # Debug/Development Targets
