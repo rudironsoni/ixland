@@ -902,6 +902,7 @@
 		BD0000000000000000000001A /* a_shell_env_tests.m in Sources */ = {isa = PBXBuildFile; fileRef = BD00000000000000000000010 /* a_shell_env_tests.m */; };
 		BD0000000000000000000001B /* a_shell_session_tests.m in Sources */ = {isa = PBXBuildFile; fileRef = BD00000000000000000000011 /* a_shell_session_tests.m */; };
 		BD0000000000000000000001C /* a_shell_cmd_tests.m in Sources */ = {isa = PBXBuildFile; fileRef = BD00000000000000000000012 /* a_shell_cmd_tests.m */; };
+		EA58C152DC00E2885A45CAD3 /* a_shell_system.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223496AB1FD5FC71007ED1A9; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1570,6 +1571,7 @@
 		BD00000000000000000000010 /* a_shell_env_tests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = a_shell_env_tests.m; path = tests/a_shell_env_tests.m; sourceTree = "<group>"; };
 		BD00000000000000000000011 /* a_shell_session_tests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = a_shell_session_tests.m; path = tests/a_shell_session_tests.m; sourceTree = "<group>"; };
 		BD00000000000000000000012 /* a_shell_cmd_tests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = a_shell_cmd_tests.m; path = tests/a_shell_cmd_tests.m; sourceTree = "<group>"; };
+		C8121DFB9278F3AB5B45A7EE /* a_shell_systemTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = a_shell_systemTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1679,6 +1681,14 @@
 				D212F98C25B066E9007F5D2D /* libssh2.xcframework in Frameworks */,
 				22F6A25E20683F9B00E618F9 /* a_shell_system.framework in Frameworks */,
 				D212F99725B06810007F5D2D /* openssl.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9DC10C867438F9A6F4729B3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EA58C152DC00E2885A45CAD3 /* a_shell_system.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2976,6 +2986,16 @@
 			path = curl;
 			sourceTree = "<group>";
 		};
+		4A2C8C89BE9CB4A57E40644A /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				BD00000000000000000000010 /* a_shell_env_tests.m */,
+				BD00000000000000000000011 /* a_shell_session_tests.m */,
+				BD00000000000000000000012 /* a_shell_cmd_tests.m */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -3312,6 +3332,22 @@
 			productReference = 22F6A1AF20683F4100E618F9 /* curl_ios.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		E138D086BC3A128D57416655 /* a_shell_systemTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CCAC22CAFF54E69A4346DE64 /* Build configuration list for PBXNativeTarget "a_shell_systemTests" */;
+			buildPhases = (
+				6B823BD5AFE6D28D2B499C29 /* Sources */,
+				E9DC10C867438F9A6F4729B3 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = a_shell_systemTests;
+			productName = a_shell_systemTests;
+			productReference = C8121DFB9278F3AB5B45A7EE /* a_shell_systemTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -3386,6 +3422,7 @@
 				225478B82B73814B005041FF /* ssh_cmdA */,
 				224DF70D2B75712B00F13C58 /* ssh_agent */,
 				223EF2132B9623CA00A8ED5A /* sshd */,
+				E138D086BC3A128D57416655 /* a_shell_systemTests */,
 			);
 		};
 /* End PBXProject section */
@@ -4417,6 +4454,16 @@
 				22F6A1D220683F6700E618F9 /* fileinfo.c in Sources */,
 				22F6A21120683F6700E618F9 /* strerror.c in Sources */,
 				222419D22A90A3EC003AB5B7 /* dynhds.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6B823BD5AFE6D28D2B499C29 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD0000000000000000000001A /* a_shell_env_tests.m in Sources */,
+				BD0000000000000000000001B /* a_shell_session_tests.m in Sources */,
+				BD0000000000000000000001C /* a_shell_cmd_tests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5572,6 +5619,73 @@
 			};
 			name = Release;
 		};
+		C8BDDD5DC2DC66ACB749AA35 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.example.a-shell-systemTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_TARGET_NAME = a_shell_system;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		67496772EDBF2FA9AB4E657E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.example.a-shell-systemTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_TARGET_NAME = a_shell_system;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -5679,6 +5793,15 @@
 			buildConfigurations = (
 				22F6A1B520683F4100E618F9 /* Debug */,
 				22F6A1B620683F4100E618F9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CCAC22CAFF54E69A4346DE64 /* Build configuration list for PBXNativeTarget "a_shell_systemTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C8BDDD5DC2DC66ACB749AA35 /* Debug */,
+				67496772EDBF2FA9AB4E657E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
