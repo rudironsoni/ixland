@@ -68,27 +68,7 @@ void* ios_context(void) {
 }
 
 // Parameters for each session. We can have multiple sessions running in parallel.
-typedef struct _sessionParameters {
-    bool isMainThread;   // are we on the first command?
-    char currentDir[MAXPATHLEN];
-    char previousDirectory[MAXPATHLEN];
-    char localMiniRoot[MAXPATHLEN];
-    pthread_t current_command_root_thread; // thread ID of first command
-    pthread_t lastThreadId; // thread ID of last command.
-    pthread_t mainThreadId; // thread ID of parent command, if any (e.g. vim, which starts "sh -c cd dir && flake8 file")
-    FILE* stdin;
-    FILE* stdout;
-    FILE* stderr;
-    FILE* tty;
-    const void* context;
-    int global_errno;
-    int numCommandsAllocated;
-    int numCommand;
-    char** commandName;
-    char columns[5];
-    char lines[5];
-    bool activePager;
-} sessionParameters;
+// The sessionParameters struct is now defined in a_shell_system/a_shell_system.h
 
 static void initSessionParameters(sessionParameters* sp) {
     // NSFileManager *fileManager = [[NSFileManager alloc] init];
@@ -168,7 +148,7 @@ static NSMutableDictionary* aliasDictionary;
 
 // pointer to sessionParameters. thread-local variable so the entire system is thread-safe.
 // The sessionParameters pointer is shared by all threads in the same session.
-static __thread sessionParameters* currentSession = NULL;
+__thread sessionParameters* currentSession = NULL;
 // Python3 multiple interpreters:
 // limit to 6 = 1 kernel, 4 notebooks, one extra.
 static const int MaxPythonInterpreters = 6; // const so we can allocate an array
@@ -2417,42 +2397,6 @@ const void* ios_getContext(void) {
 }
 
 // For customization:
-// replaces a function  (e.g. ls_main) with another one, provided by the user (ls_mine_main)
-// if the function does not exist, add it to the list
-// if "allOccurences" is true, search for all commands that share the same function, replace them too.
-// ("compress" and "uncompress" both point to compress_main. You probably want to replace both, but maybe
-// you just happen to have a very fast uncompress, different from compress).
-// We work with function names, not function pointers.
-void replaceCommand(NSString* commandName, NSString* functionName, bool allOccurences) {
-    // Does that function exist / is reachable? We've had problems with stripping.
-    int (*function)(int ac, char** av) = NULL;
-    function = dlsym(RTLD_MAIN_ONLY, functionName.UTF8String);
-    if (function == NULL) {
-        // more extensive search, but more expensive too.
-        function = dlsym(RTLD_DEFAULT, functionName.UTF8String);
-    }
-    if (!function) {
-        NSLog(@"replaceCommand: %@ (%s) does not exist", functionName, functionName.UTF8String);
-        return; // if not, we don't replace.
-    }
-    if (commandList == nil) initializeCommandList();
-    NSArray* oldValues = [commandList objectForKey: commandName];
-    NSString* oldFunctionName = nil;
-    if (oldValues != nil) oldFunctionName = oldValues[1];
-    NSMutableDictionary *mutableDict = [commandList mutableCopy];
-    mutableDict[commandName] = [NSArray arrayWithObjects: @"MAIN", functionName, @"", @"file", nil];
-    
-    if ((oldFunctionName != nil) && allOccurences) {
-        // scan through all dictionary entries
-        for (NSString* existingCommand in mutableDict.allKeys) {
-            NSArray* currentPosition = [mutableDict objectForKey: existingCommand];
-            if ([currentPosition[1] isEqualToString:oldFunctionName])
-                [mutableDict setValue: [NSArray arrayWithObjects: @"MAIN", functionName, @"", @"file", nil] forKey: existingCommand];
-        }
-    }
-    commandList = [mutableDict copy]; // back to non-mutable version
-}
-
 // For customization:
 // Add an entire plist file defining multiple commands. Commands follow the same syntax as initializeCommandList:
 //
