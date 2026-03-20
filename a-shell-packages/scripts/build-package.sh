@@ -28,8 +28,10 @@ fi
 
 a_shell_info "Building package: $PKG_NAME"
 
-# Source package build script
-source "$PKG_DIR/build.sh"
+    # Source package build script
+    # Unset CPPFLAGS to avoid injecting kernel headers that break builds
+    unset CPPFLAGS
+    source "$PKG_DIR/build.sh"
 
 # Download and extract
 a_shell_step "Downloading $A_SHELL_PKG_NAME..."

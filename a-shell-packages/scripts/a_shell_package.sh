@@ -71,21 +71,29 @@ a_shell_setup_toolchain() {
         XCODE_PATH=$(xcode-select -p 2>/dev/null || echo "/Applications/Xcode.app/Contents/Developer")
     fi
     
-    # Set compiler
+    # Get SDK path
+    export SDK_PATH=$(xcrun -sdk $IOS_SDK --show-sdk-path)
+    
+    # Set compiler with sysroot
     export CC="xcrun -sdk $IOS_SDK clang -arch $IOS_ARCH"
     export CXX="xcrun -sdk $IOS_SDK clang++ -arch $IOS_ARCH"
     export AR="xcrun -sdk $IOS_SDK ar"
     export RANLIB="xcrun -sdk $IOS_SDK ranlib"
     export LD="xcrun -sdk $IOS_SDK ld"
     
-    # Compiler flags
-    export CFLAGS="-arch $IOS_ARCH -mios-version-min=$IOS_VERSION -fembed-bitcode -O2 -I$A_SHELL_PREFIX/include"
+    # Compiler flags with proper sysroot
+    export CFLAGS="-arch $IOS_ARCH -mios-version-min=$IOS_VERSION -isysroot $SDK_PATH -fembed-bitcode -O2"
     export CXXFLAGS="$CFLAGS"
-    export LDFLAGS="-arch $IOS_ARCH -mios-version-min=$IOS_VERSION -L$A_SHELL_PREFIX/lib -Wl,-rpath,@executable_path/../lib"
+    export LDFLAGS="-arch $IOS_ARCH -mios-version-min=$IOS_VERSION -isysroot $SDK_PATH"
     
-    # Inject kernel headers
-    if [ -f "$A_SHELL_PKG_BUILDER_DIR/../a-shell-kernel/include/linux/unistd.h" ]; then
-        export CPPFLAGS="-include $A_SHELL_PKG_BUILDER_DIR/../a-shell-kernel/include/linux/unistd.h $CPPFLAGS"
+    # Include paths (only if directories exist)
+    if [ -d "$A_SHELL_PREFIX/include" ]; then
+        export CFLAGS="$CFLAGS -I$A_SHELL_PREFIX/include"
+        export CPPFLAGS="-I$A_SHELL_PREFIX/include $CPPFLAGS"
+    fi
+    
+    if [ -d "$A_SHELL_PREFIX/lib" ]; then
+        export LDFLAGS="$LDFLAGS -L$A_SHELL_PREFIX/lib"
     fi
     
     # Standard Unix paths
@@ -93,6 +101,7 @@ a_shell_setup_toolchain() {
     export PKG_CONFIG_PATH="$A_SHELL_PREFIX/lib/pkgconfig:$A_SHELL_PREFIX/share/pkgconfig"
     
     a_shell_info "Toolchain: $CC"
+    a_shell_info "SDK: $SDK_PATH"
     a_shell_info "Prefix: $A_SHELL_PREFIX"
 }
 

@@ -10,13 +10,18 @@ A_SHELL_PKG_DESCRIPTION="OpenSSL cryptographic library"
 
 a_shell_pkg_configure() {
     # OpenSSL uses Configure script (capital C)
+    # Use ios64-cross target with proper sysroot
+    export CC="xcrun -sdk $IOS_SDK clang -arch $IOS_ARCH"
+    export CFLAGS="-arch $IOS_ARCH -mios-version-min=$IOS_VERSION -isysroot $SDK_PATH -fembed-bitcode -O2"
+    export LDFLAGS="-arch $IOS_ARCH -mios-version-min=$IOS_VERSION -isysroot $SDK_PATH"
+    
     ./Configure ios64-cross \
         --prefix="$A_SHELL_PREFIX" \
         --openssldir="$A_SHELL_PREFIX/etc/ssl" \
-        --with-zlib-include="$A_SHELL_PREFIX/include" \
-        --with-zlib-lib="$A_SHELL_PREFIX/lib" \
+        --libdir=lib \
         no-shared \
         no-tests \
+        no-apps \
         || a_shell_error "Configure failed"
 }
 
