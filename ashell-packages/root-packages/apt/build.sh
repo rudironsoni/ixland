@@ -13,6 +13,7 @@ ASHELL_PKG_HOMEPAGE="https://packages.debian.org/apt"
 
 # Runtime dependencies
 ASHELL_PKG_DEPENDS="coreutils, libz, libssl, libcurl"
+# Note: dpkg support disabled for now - apt can work standalone
 
 # Build dependencies
 ASHELL_PKG_BUILD_DEPENDS="cmake, ninja"
