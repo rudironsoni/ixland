@@ -1815,7 +1815,7 @@ static int splitCommandAndExecute(char* command) {
             pid_t pid = a_shell_fork();
             returnValue = a_shell_system(command);
             NSLog(@"Started command, stored last_thread= %x pid: %d", currentSession->lastThreadId, pid);
-            a_shell_waitpid(pid);
+            a_shell_wait_for_thread(pid);
             break;
         }
         long nextCommandPosition = 0;
@@ -1834,7 +1834,7 @@ static int splitCommandAndExecute(char* command) {
         pid_t pid = a_shell_fork();
         returnValue = a_shell_system(command);
         NSLog(@"Started command (2), stored last_thread= %x", currentSession->lastThreadId);
-        a_shell_waitpid(pid);
+        a_shell_wait_for_thread(pid);
         if (andNextCommand && (returnValue != 0)) {
             // && + the command returned error, we return:
             break;
@@ -1905,7 +1905,7 @@ int sh_main(int argc, char** argv) {
         argv[0][0] = 'h';  // prevent termination?
         pid_t pid = a_shell_fork();
         int returnValue = a_shell_system(newCommand);
-        a_shell_waitpid(pid);
+        a_shell_wait_for_thread(pid);
         free(newCommand);
         return returnValue;
     }
@@ -1994,7 +1994,7 @@ int a_shell_execv(const char *path, char* const argv[]) {
     return returnValue;
 }
 
-int a_shell_execve(const char *path, char* const argv[], char* envp[]) {
+int a_shell_execve(const char *path, char* const argv[], char *const envp[]) {
     // save the environment (done) and current dir (TODO)
     storeEnvironment(envp);
     int returnValue = a_shell_execv(path, argv);
@@ -2126,7 +2126,7 @@ void a_shell_activateChildStreams(FILE** old_stdin, FILE** old_stdout,  FILE ** 
     }
 }
 
-int a_shell_kill(void)
+int a_shell_kill_current(void)
 {
     if (currentSession == NULL) return ESRCH;
     if (currentSession->current_command_root_thread > 0) {
@@ -2177,7 +2177,7 @@ int a_shell_kill(void)
 }
 
 extern pthread_t a_shell_getThreadId(pid_t pid);
-int a_shell_killpid(pid_t pid, int sig) {
+int a_shell_kill_command(pid_t pid, int sig) {
     if (a_shell_getThreadId(pid) > 0) {
         return pthread_kill(a_shell_getThreadId(pid), sig);
     }

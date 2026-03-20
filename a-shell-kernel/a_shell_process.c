@@ -118,12 +118,7 @@ pid_t a_shell_vfork(void) {
     return vpid;
 }
 
-// Fork (returns ENOSYS since real fork not available on iOS)
-pid_t a_shell_fork(void) {
-    // On iOS, fork() returns ENOSYS
-    errno = ENOSYS;
-    return -1;
-}
+/* Note: a_shell_fork is defined in libc_replacement.c */
 
 // Get current PID
 pid_t a_shell_getpid(void) {

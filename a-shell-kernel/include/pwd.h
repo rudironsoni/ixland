@@ -10,23 +10,12 @@
 #include <sys/types.h>
 #include <stddef.h>
 
+/* Include system pwd.h first to get struct passwd */
+#include <pwd.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/* ============================================================================
- * Data Structures
- * ============================================================================ */
-
-struct passwd {
-    char *pw_name;
-    char *pw_passwd;
-    uid_t pw_uid;
-    gid_t pw_gid;
-    char *pw_gecos;
-    char *pw_dir;
-    char *pw_shell;
-};
 
 /* ============================================================================
  * Get User Information

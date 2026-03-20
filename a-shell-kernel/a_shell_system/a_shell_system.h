@@ -9,6 +9,12 @@
 //  Copyright © 2017 Nicolas Holzschuch. All rights reserved.
 //
 
+#include <stdio.h>
+#include <stdbool.h>
+#include <pthread.h>
+#include <sys/param.h>  /* For MAXPATHLEN */
+
+#ifdef __OBJC__
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
@@ -17,6 +23,7 @@ FOUNDATION_EXPORT double a_shell_versionNumber;
 
 //! Project version string for a_shell_system.
 FOUNDATION_EXPORT const unsigned char a_shell_versionString[];
+#endif /* __OBJC__ */
 
 // Thread-local input and output streams
 extern __thread FILE* thread_stdin;
@@ -66,9 +73,10 @@ extern bool joinMainThread;
 extern int a_shell_executable(const char* inputCmd); // does this command exist? (executable file or builtin command)
 extern int a_shell_system(const char* inputCmd); // execute this command (executable file or builtin command)
 extern FILE *a_shell_popen(const char *command, const char *type); // Execute this command and pipe the result
-extern int a_shell_kill(void); // kill the current running command
-extern int a_shell_killpid(pid_t pid, int sig); // kill the current running command
+extern int a_shell_kill_current(void); // kill the current running command
+extern int a_shell_kill_command(pid_t pid, int sig); // kill a specific command
 extern int chdir(const char* path);
+extern void a_shell_exit(int status); // exit the current process
 
 extern int a_shell_isatty(int fd); // test whether a file descriptor refers to a terminal
 extern pthread_t a_shell_getLastThreadId(void);
@@ -83,14 +91,19 @@ extern char * a_shell_getenv(const char *name);
 extern int a_shell_setenv(const char* variableName, const char* value, int overwrite);
 int a_shell_unsetenv(const char* variableName);
 extern char** environmentVariables(pid_t pid);
+#ifdef __OBJC__
 extern NSArray* environmentAsArray(void);
+#endif
 extern void storeEnvironment(char* envp[]);
 extern pid_t a_shell_fork(void);
-extern void a_shell_waitpid(pid_t pid);
+extern void a_shell_wait_for_thread(pid_t pid);
 extern pid_t a_shell_full_waitpid(pid_t pid, int *stat_loc, int options);
+#ifdef __OBJC__
 extern NSString *a_shell_getLogicalPWD(const void* sessionId);
+#endif
 void a_shell_setWindowSize(int width, int height, const void* sessionId);
 
+#ifdef __OBJC__
 extern NSString* commandsAsString(void);
 extern NSArray* commandsAsArray(void);      // set of all commands, in an NSArray
 extern NSArray* aliasesAsArray(void);       // set of all aliases defined, in an NSArray
@@ -102,6 +115,7 @@ extern int a_shell_setMiniRoot(NSString*);  // restricts operations to a certain
 extern int a_shell_setMiniRootURL(NSURL*);  // restricts operations to a certain hierarchy
 extern int a_shell_setAllowedPaths(NSArray<NSString *> *paths);  // restricts operations to a certain hierarchy
 extern void a_shell_setBookmarkDictionaryName(NSString*);  // name of the dictionary in user preferences, holding the bookmarks.
+#endif
 extern void a_shell_switchSession(const void* sessionid);
 extern void a_shell_closeSession(const void* sessionid);
 extern void a_shell_setStreams(FILE* _stdin, FILE* _stdout, FILE* _stderr);
@@ -111,13 +125,17 @@ extern int a_shell_gettty(void);
 extern int a_shell_activePager(void);
 extern void a_shell_setContext(const void *context);
 extern const void* a_shell_getContext(void);
+#ifdef __OBJC__
 extern void a_shell_setDirectoryURL(NSURL* workingDirectoryURL);
+#endif
 extern void newPreviousDirectory(void);
 extern void makeGlobal(void);
 extern void makeLocal(void);
+#ifdef __OBJC__
 extern void replaceCommand(NSString* commandName, NSString* functionName, bool allOccurences);
 extern NSError* addCommandList(NSString* fileLocation);
 extern NSArray* backgroundCommandList;
+#endif
 extern int numPythonInterpreters;
 extern int numPerlInterpreters;
 extern int numTeXInterpreters;
