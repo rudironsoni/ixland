@@ -579,13 +579,13 @@ pid_t a_shell_currentPid(void) {
 
 // Note to self: do not redefine getpid() unless you have a way to make it consistent even when a "process" starts a new thread.
 // 0MQ and asyncio rely on this.
-pid_t fork(void) { return a_shell_nextAvailablePid(); } // increases current_pid by 1.
+/* fork() is provided via macro in linux/unistd.h -> a_shell_fork() */
 pid_t a_shell_fork(void) { return a_shell_nextAvailablePid(); } // increases current_pid by 1.
-pid_t vfork(void) { return a_shell_nextAvailablePid(); }
+pid_t a_shell_vfork(void) { return a_shell_nextAvailablePid(); }
 
 // simple replacement of waitpid for swift programs
 // We use "optnone" to prevent optimization, otherwise the while loops never end.
-__attribute__ ((optnone)) void a_shell_waitpid(pid_t pid) {
+__attribute__ ((optnone)) void a_shell_wait_for_thread(pid_t pid) {
     
     executeWebAssemblyCommandsInOrder();
     
@@ -630,7 +630,7 @@ __attribute__ ((optnone)) pid_t waitpid(pid_t pid, int *stat_loc, int options) {
         }
     } else {
         // Wait until the process is terminated:
-        a_shell_waitpid(pid);
+        a_shell_wait_for_thread(pid);
         if (stat_loc) *stat_loc = W_EXITCODE(a_shell_getCommandStatus(), 0);
         return pid;
     }
@@ -662,7 +662,7 @@ __attribute__ ((optnone)) pid_t a_shell_full_waitpid(pid_t pid, int *stat_loc, i
         }
     } else {
         // Wait until the process is terminated:
-        a_shell_waitpid(pid);
+        a_shell_wait_for_thread(pid);
         if (stat_loc) *stat_loc = W_EXITCODE(a_shell_getCommandStatus(), 0);
         return pid;
     }

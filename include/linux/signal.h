@@ -20,6 +20,7 @@ extern "C" {
  * ============================================================================ */
 
 typedef void (*a_shell_sighandler_t)(int);
+typedef void (*sighandler_t)(int);  /* Standard POSIX type */
 
 /* ============================================================================
  * Signal Handling Functions

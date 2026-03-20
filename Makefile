@@ -88,6 +88,8 @@ $(XCFRAMEWORK): $(IOS_FRAMEWORK) $(SIM_FRAMEWORK)
 		-framework $(IOS_FRAMEWORK) \
 		-framework $(SIM_FRAMEWORK) \
 		-output $@
+	@echo "Copying kernel headers to XCFramework..."
+	@cp -r include $@/
 	@echo "XCFramework created: $@"
 
 # ==============================================================================
@@ -172,14 +174,23 @@ check-tests:
 	@echo "=========================================="
 	@echo "Checking Test File Syntax"
 	@echo "=========================================="
-	@for test in tests/*.m; do \
+	@for test in tests/*.c; do \
 		echo "  Checking $$test"; \
-		$(XCODEBUILD) -project $(PROJECT_FILE) \
-			-scheme $(SCHEME) \
-			-destination 'platform=iOS Simulator,name=iPhone 15' \
-			$$test 2>&1 | grep -E "(error:|warning:)" | head -5 || true; \
+		cc -c $$test -o /tmp/test.o 2>&1 | grep -E "(error:|warning:)" | head -5 || true; \
 	done
 	@echo "Syntax check complete"
+
+# Compile all test files (using system headers, not our Linux headers)
+test-compile:
+	@echo "=========================================="
+	@echo "Compiling All Test Files"
+	@echo "=========================================="
+	@for test in tests/*.c; do \
+		name=$$(basename $$test .c); \
+		echo "  Compiling $$name.c"; \
+		cc -c $$test -o /tmp/$$name.o || exit 1; \
+	done
+	@echo "All tests compiled successfully"
 
 # ==============================================================================
 # Debug/Development Targets
