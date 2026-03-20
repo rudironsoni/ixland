@@ -13,15 +13,14 @@ BLUE='\\033[0;34m'
 NC='\\033[0m'
 
 # Package list in build order
-PACKAGES="libz libssl libcurl curl dpkg apt bash zsh"
+PACKAGES="libz libssl libcurl curl apt bash zsh"
 
 # Dependency mapping (pkg:dep1,dep2,...)
 DEPS_libz=""
 DEPS_libssl=""
 DEPS_libcurl="libz libssl"
 DEPS_curl="libcurl"
-DEPS_dpkg="libz"
-DEPS_apt="libz dpkg"
+DEPS_apt="libz libssl libcurl"
 DEPS_bash="libz"
 DEPS_zsh="libz"
 
