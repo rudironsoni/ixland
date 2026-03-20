@@ -38,7 +38,7 @@ __FBSDID("$FreeBSD$");
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static void usage(void) __dead2;
 

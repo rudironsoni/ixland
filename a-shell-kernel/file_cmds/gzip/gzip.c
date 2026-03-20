@@ -73,7 +73,7 @@ __FBSDID("$FreeBSD: head/usr.bin/gzip/gzip.c 290073 2015-10-27 21:26:05Z delphij
 int futimens(int fd, const struct timespec times[2]);
 #endif /* __APPLE__ */
 #include <stdbool.h> // for booleans
-#include "ios_error.h"
+#include "a_shell_system.h"
 // iOS: Until someone install the header file (the library exists)
 #define NO_XZ_SUPPORT
 

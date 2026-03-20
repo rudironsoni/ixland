@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "awk.h"
 #include "ytab.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static char *printname[95] = {
 	(char *) "FIRSTTOKEN",	/* 258 */

@@ -65,7 +65,7 @@ __FBSDID("$FreeBSD$");
 #include "extern.h"
 #include "vary.h"
 #include <errno.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #ifndef	TM_YEAR_BASE
 #define	TM_YEAR_BASE	1900

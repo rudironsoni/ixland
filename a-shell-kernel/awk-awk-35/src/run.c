@@ -40,7 +40,7 @@ THIS SOFTWARE.
 #include "awk.h"
 #include "awkgram.tab.h"
 
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static void stdinit(void);
 static void flush_all(void);

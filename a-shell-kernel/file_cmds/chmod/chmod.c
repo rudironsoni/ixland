@@ -60,7 +60,7 @@ __RCSID("$FreeBSD: src/bin/chmod/chmod.c,v 1.27 2002/08/04 05:29:13 obrien Exp $
 
 #ifdef __APPLE__
 #include "chmod_acl.h"
-#include "ios_error.h" // remap exit to pthread_exit
+#include "a_shell_system.h" // remap exit to pthread_exit
 
 #endif /*__APPLE__*/
 

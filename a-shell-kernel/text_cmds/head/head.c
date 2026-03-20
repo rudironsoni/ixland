@@ -54,7 +54,7 @@ __FBSDID("$FreeBSD: src/usr.bin/head/head.c,v 1.20 2007/01/11 20:23:01 brooks Ex
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 /*
  * head - give the first few lines of a stream or of each of a set of files

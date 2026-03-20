@@ -37,7 +37,7 @@ __FBSDID("$FreeBSD$");
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "ios_error.h"  // remaps exit() to pthread_exit(NULL)
+#include "a_shell_system.h"  // remaps exit() to pthread_exit(NULL)
 
 /* This file defines a single public function. */
 time_t get_date(time_t now, char *);

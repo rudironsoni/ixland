@@ -93,7 +93,7 @@
 #include "ssh-pkcs11.h"
 #include "sk-api.h"
 // iOS additions:
-#include "ios_error.h"
+#include "a_shell_system.h"
 extern void makeGlobal(void);
 extern void makeLocal(void);
 static void* runSocketInBackground(void* parameters);

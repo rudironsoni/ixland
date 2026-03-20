@@ -28,7 +28,7 @@ THIS SOFTWARE.
 #include <ctype.h>
 #include "awk.h"
 #include "ytab.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 
 extern __thread YYSTYPE	yylval;

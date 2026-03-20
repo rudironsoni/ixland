@@ -71,7 +71,7 @@ __FBSDID("$FreeBSD: src/usr.bin/tar/bsdtar.c,v 1.93 2008/11/08 04:43:24 kientzle
 
 #include "bsdtar.h"
 #include "lafe_err.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #ifdef __MINGW32__
 int _CRT_glob = 0; /* Disable broken CRT globbing. */

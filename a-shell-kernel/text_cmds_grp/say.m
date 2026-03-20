@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "a_shell_system/a_shell_system.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 #include <getopt.h>
 #import <AVFoundation/AVFoundation.h>
 

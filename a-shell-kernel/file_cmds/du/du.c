@@ -67,7 +67,7 @@ __FBSDID("$FreeBSD: src/usr.bin/du/du.c,v 1.38 2005/04/09 14:31:40 stefanf Exp $
 #include <string.h>
 #include <sysexits.h>
 #include <unistd.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #ifdef __APPLE__
 // #include <get_compat.h>

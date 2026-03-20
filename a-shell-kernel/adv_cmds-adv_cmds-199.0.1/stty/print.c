@@ -51,7 +51,7 @@ __FBSDID("$FreeBSD$");
 #include <sys/ioctl_compat.h>	/* XXX NTTYDISC is too well hidden */
 #endif
 #else
-#include "ios_error.h"
+#include "a_shell_system.h"
 #define printf(...) fprintf (thread_stdout, ##__VA_ARGS__)
 #endif
 

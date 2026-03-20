@@ -34,7 +34,7 @@ __FBSDID("$FreeBSD$");
 #include <stdio.h>
 #include "vary.h"
 #include <errno.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 struct trans {
   int val;

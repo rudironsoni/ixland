@@ -101,7 +101,7 @@ static const char sccsid[] = "@(#)w.c	8.4 (Berkeley) 4/16/94";
 #include <TargetConditionals.h>
 
 #include "extern.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static struct timeval	boottime;
 #if !HAVE_UTMPX

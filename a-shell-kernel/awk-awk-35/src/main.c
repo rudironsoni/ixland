@@ -39,7 +39,7 @@ const char	*version = "version 20200816";
 #define COMPAT_MODE(func, mode) 1
 // #endif
 #include <TargetConditionals.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 extern	char	**environ;
 extern	__thread int	nfields;

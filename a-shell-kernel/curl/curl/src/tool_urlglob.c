@@ -33,7 +33,7 @@
 #include "dynbuf.h"
 #include <TargetConditionals.h>
 #if TARGET_OS_IPHONE
-#include "ios_error.h"
+#include "a_shell_system.h"
 #undef printf
 #define printf(...) fprintf (thread_stdout, ##__VA_ARGS__)
 #undef stderr

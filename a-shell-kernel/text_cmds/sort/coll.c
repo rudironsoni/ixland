@@ -45,7 +45,7 @@ __FBSDID("$FreeBSD: head/usr.bin/sort/coll.c 298089 2016-04-15 22:31:22Z pfg $")
 
 #include "coll.h"
 #include "vsort.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 struct key_specs *keys;
 size_t keys_num = 0;

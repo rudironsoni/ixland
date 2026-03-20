@@ -66,7 +66,7 @@ __FBSDID("$FreeBSD: src/bin/cp/utils.c,v 1.46 2005/09/05 04:36:08 csjp Exp $");
 #endif /* __APPLE__ */
 
 #include "extern.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 #define	cp_pct(x,y)	(int)(100.0 * (double)(x) / (double)(y))
 
 int

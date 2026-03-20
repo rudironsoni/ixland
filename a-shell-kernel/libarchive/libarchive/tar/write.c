@@ -88,7 +88,7 @@ __FBSDID("$FreeBSD: src/usr.bin/tar/write.c,v 1.79 2008/11/27 05:49:52 kientzle 
 #include <libgen.h>
 #include <paths.h>
 #endif
-#include "ios_error.h"  // remaps exit() to pthread_exit(NULL)
+#include "a_shell_system.h"  // remaps exit() to pthread_exit(NULL)
 
 #include "bsdtar.h"
 #include "lafe_err.h"

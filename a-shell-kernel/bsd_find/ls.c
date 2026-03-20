@@ -54,7 +54,7 @@ __FBSDID("$FreeBSD$");
 #include <unistd.h>
 
 #include "find.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 
 /* Derived from the print routines in the ls(1) source code. */

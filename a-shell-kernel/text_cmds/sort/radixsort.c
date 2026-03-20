@@ -44,7 +44,7 @@ __FBSDID("$FreeBSD: head/usr.bin/sort/radixsort.c 281133 2015-04-06 03:02:20Z pf
 
 #include "coll.h"
 #include "radixsort.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #define DEFAULT_SORT_FUNC_RADIXSORT mergesort
 

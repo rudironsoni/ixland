@@ -77,7 +77,7 @@ __FBSDID("$FreeBSD: src/bin/cp/cp.c,v 1.52 2005/09/05 04:36:08 csjp Exp $");
 // #include <get_compat.h>
 // #else /* !__APPLE__ */
 #define COMPAT_MODE(a,b) (1)
-#include "ios_error.h"
+#include "a_shell_system.h"
 #endif /* __APPLE__ */
 
 #include "extern.h"

@@ -53,7 +53,7 @@ __FBSDID("$FreeBSD: head/usr.bin/sort/sort.c 289751 2015-10-22 10:57:15Z gabor $
 #include "coll.h"
 #include "file.h"
 #include "sort.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #ifndef WITHOUT_NLS
 #include <nl_types.h>

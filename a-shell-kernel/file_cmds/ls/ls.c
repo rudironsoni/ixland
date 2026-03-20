@@ -80,7 +80,7 @@ __RCSID("$FreeBSD: src/bin/ls/ls.c,v 1.66 2002/09/21 01:28:36 wollman Exp $");
 #endif /* __APPLE__ */
 #include "ls.h"
 #include "extern.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 /*
  * Upward approximation of the maximum number of characters needed to

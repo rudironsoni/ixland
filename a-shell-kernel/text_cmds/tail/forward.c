@@ -60,7 +60,7 @@ static const char sccsid[] = "@(#)forward.c	8.1 (Berkeley) 6/6/93";
 #include <unistd.h>
 
 #include "extern.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static void rlines(FILE *, off_t, struct stat *);
 static void show(file_info_t *);

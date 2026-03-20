@@ -52,7 +52,7 @@ __RCSID("$FreeBSD: src/bin/rmdir/rmdir.c,v 1.13 2002/06/30 05:15:03 obrien Exp $
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static int rm_path(char *);
 static void usage(void);

@@ -33,7 +33,7 @@ THIS SOFTWARE.
 #include "awk.h"
 #include "ytab.h"
 #include <fcntl.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #define	HAT	(NCHARS+2)	/* matches ^ in regular expr */
 				/* NCHARS is 2**n */

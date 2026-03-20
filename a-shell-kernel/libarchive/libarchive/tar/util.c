@@ -61,7 +61,7 @@ __FBSDID("$FreeBSD: src/usr.bin/tar/util.c,v 1.23 2008/12/15 06:00:25 kientzle E
 
 #include "bsdtar.h"
 #include "lafe_err.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static size_t	bsdtar_expand_char(char *, size_t, char);
 static const char *strip_components(const char *path, int elements);

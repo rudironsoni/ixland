@@ -73,7 +73,7 @@ __FBSDID("$FreeBSD: src/usr.bin/tar/tree.c,v 1.9 2008/11/27 05:49:52 kientzle Ex
 #if defined(HAVE_WINDOWS_H) && !defined(__CYGWIN__)
 #include <windows.h>
 #endif
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #include "tree.h"
 

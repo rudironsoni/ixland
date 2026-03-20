@@ -66,7 +66,7 @@ __FBSDID("$FreeBSD$");
 
 #include "find.h"
 #include <TargetConditionals.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 
 static PLAN *palloc(OPTION *);

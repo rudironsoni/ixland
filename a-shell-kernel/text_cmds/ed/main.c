@@ -67,7 +67,7 @@ static const char copyright[] =
 
 #include "ed.h"
 // from ios_system:
-#include "ios_error.h"
+#include "a_shell_system.h"
 #include <pthread.h>
 
 #ifdef _POSIX_SOURCE

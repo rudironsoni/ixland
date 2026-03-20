@@ -69,7 +69,7 @@ __used static const char rcsid[] =
 // #else
 #define COMPAT_MODE(func, mode) 1
 #endif
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static int dflag, eval, fflag, iflag, Pflag, vflag, Wflag, stdin_ok;
 static uid_t uid;

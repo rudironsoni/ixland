@@ -63,7 +63,7 @@ __FBSDID("$FreeBSD: src/bin/cat/cat.c,v 1.32 2005/01/10 08:39:20 imp Exp $");
 #include <string.h>
 #include <unistd.h>
 #include <stddef.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static __thread int bflag, eflag, nflag, sflag, tflag, vflag;
 static __thread int rval;

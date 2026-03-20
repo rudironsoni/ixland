@@ -1,7 +1,7 @@
 #include "tool_setup.h"
 #include <TargetConditionals.h>
 #if TARGET_OS_IPHONE
-#include "ios_error.h"
+#include "a_shell_system.h"
 #undef stdout
 #define stdout thread_stdout
 #endif

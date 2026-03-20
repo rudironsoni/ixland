@@ -50,7 +50,7 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_read_support_format_iso9660.c 20
 #include "archive_private.h"
 #include "archive_read_private.h"
 #include "archive_string.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 /*
  * An overview of ISO 9660 format:

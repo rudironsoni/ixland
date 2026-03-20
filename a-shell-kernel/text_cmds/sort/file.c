@@ -49,7 +49,7 @@ __FBSDID("$FreeBSD: head/usr.bin/sort/file.c 298089 2016-04-15 22:31:22Z pfg $")
 #include "coll.h"
 #include "file.h"
 #include "radixsort.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 unsigned long long free_memory = 1000000;
 unsigned long long available_free_memory = 1000000;

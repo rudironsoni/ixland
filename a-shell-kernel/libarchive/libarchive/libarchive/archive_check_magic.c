@@ -46,7 +46,7 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_check_magic.c 201089 2009-12-28 
 #endif
 
 #include "archive_private.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static void
 errmsg(const char *m)

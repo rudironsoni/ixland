@@ -52,7 +52,7 @@ __FBSDID("$FreeBSD: src/bin/echo/echo.c,v 1.18 2005/01/10 08:39:22 imp Exp $");
 #include <unistd.h>
 // iOS
 #include <stdio.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 #include <pthread.h>
 
 /*

@@ -34,7 +34,7 @@ __FBSDID("$FreeBSD: src/bin/ed/glbl.c,v 1.13 2002/06/30 05:13:53 obrien Exp $");
 #include <sys/wait.h>
 
 #include "ed.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 
 /* build_active_list:  add line matching a pattern to the global-active list */

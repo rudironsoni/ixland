@@ -30,7 +30,7 @@
 __FBSDID("$FreeBSD: src/bin/ed/re.c,v 1.20 2003/07/20 10:24:09 ru Exp $");
 
 #include "ed.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 
 extern __thread int patlock;

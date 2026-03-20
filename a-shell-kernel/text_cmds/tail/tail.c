@@ -59,7 +59,7 @@ static const char sccsid[] = "@(#)tail.c	8.1 (Berkeley) 6/6/93";
 #include <unistd.h>
 
 #include "extern.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 int Fflag, fflag, tail_qflag, rflag, rval, no_files;
 const char *tail_fname;

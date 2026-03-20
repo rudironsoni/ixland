@@ -30,7 +30,7 @@ THIS SOFTWARE.
 #include <stdlib.h>
 #include "awk.h"
 #include "ytab.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #define	FULLTAB	2	/* rehash when table gets this x full */
 #define	GROWTAB 4	/* grow table by this factor */

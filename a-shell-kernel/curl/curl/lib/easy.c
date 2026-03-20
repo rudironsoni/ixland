@@ -25,7 +25,7 @@
 #include "curl_setup.h"
 #include <TargetConditionals.h>
 #if TARGET_OS_IPHONE
-#include "ios_error.h"
+#include "a_shell_system.h"
 #undef stderr
 #define stderr thread_stderr
 #endif

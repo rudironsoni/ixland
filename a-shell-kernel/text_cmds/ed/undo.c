@@ -29,7 +29,7 @@
 __FBSDID("$FreeBSD: src/bin/ed/undo.c,v 1.12 2002/06/30 05:13:53 obrien Exp $");
 
 #include "ed.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 
 #define USIZE 100				/* undo stack size */

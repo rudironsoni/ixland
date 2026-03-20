@@ -72,7 +72,7 @@ __used static const char rcsid[] =
 #include <sysexits.h>
 #include <unistd.h>
 #include "libutil.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #ifdef __APPLE__
 // #include "get_compat.h"

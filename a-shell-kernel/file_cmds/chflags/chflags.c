@@ -52,7 +52,7 @@ __FBSDID("$FreeBSD: src/bin/chflags/chflags.c,v 1.26.2.1.2.1 2009/10/25 01:10:29
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 
 static void usage(void);

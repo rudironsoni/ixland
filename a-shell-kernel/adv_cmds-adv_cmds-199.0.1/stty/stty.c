@@ -58,7 +58,7 @@ __FBSDID("$FreeBSD$");
 // stty is mostly useless inside a-Shell. But we keep it because other commands might need it.
 #include <TargetConditionals.h>
 #if TARGET_OS_IPHONE
-#include "ios_error.h"
+#include "a_shell_system.h"
 #endif
 
 int

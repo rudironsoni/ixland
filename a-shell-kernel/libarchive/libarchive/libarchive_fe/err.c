@@ -39,7 +39,7 @@ __FBSDID("$FreeBSD$");
 #endif
 
 #include "lafe_err.h"   
-#include "ios_error.h"  // remaps exit() to pthread_exit(NULL)
+#include "a_shell_system.h"  // remaps exit() to pthread_exit(NULL)
 
 const __thread char *lafe_progname;
 

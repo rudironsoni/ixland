@@ -33,7 +33,7 @@ __FBSDID("$FreeBSD: head/usr.bin/sort/mem.c 281132 2015-04-06 02:35:55Z pfg $");
 #include <string.h>
 
 #include "mem.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 /*
  * malloc() wrapper.

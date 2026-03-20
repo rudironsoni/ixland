@@ -34,7 +34,7 @@ __FBSDID("$FreeBSD: src/bin/ed/buf.c,v 1.22 2002/06/30 05:13:53 obrien Exp $");
 
 #include "ed.h"
 // from ios_system:
-#include "ios_error.h"
+#include "a_shell_system.h"
 #include <pthread.h>
 #import <Foundation/Foundation.h>
 

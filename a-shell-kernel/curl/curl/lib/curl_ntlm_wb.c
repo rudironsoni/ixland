@@ -58,7 +58,7 @@
 #include "strcase.h"
 #include <TargetConditionals.h>
 #if TARGET_OS_IPHONE
-#include "ios_error.h"
+#include "a_shell_system.h"
 #undef STDIN_FILENO
 #define STDIN_FILENO fileno(thread_stdin)
 #undef STDOUT_FILENO

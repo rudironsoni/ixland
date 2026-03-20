@@ -49,7 +49,7 @@ __FBSDID("$FreeBSD$");
 #include <time.h>
 
 #include "find.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 
 static PLAN *yanknode(PLAN **);

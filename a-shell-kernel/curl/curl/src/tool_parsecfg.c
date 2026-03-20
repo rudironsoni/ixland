@@ -36,7 +36,7 @@
 #include "dynbuf.h"
 #include <TargetConditionals.h>
 #if TARGET_OS_IPHONE
-#include "ios_error.h"
+#include "a_shell_system.h"
 #undef stdin
 #define stdin thread_stdin
 #undef stderr

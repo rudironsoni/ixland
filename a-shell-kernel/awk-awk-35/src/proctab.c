@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "awk.h"
 #include "awkgram.tab.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static const char * const printname[98] = {
 	"FIRSTTOKEN",	/* 258 */

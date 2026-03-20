@@ -67,7 +67,7 @@ __FBSDID("$FreeBSD: src/usr.bin/xargs/xargs.c,v 1.57 2005/02/27 02:01:31 gad Exp
 
 #include <TargetConditionals.h>
 #ifdef TARGET_OS_IPHONE
-#include "ios_error.h"
+#include "a_shell_system.h"
 #undef stderr
 #define stderr thread_stderr
 #endif

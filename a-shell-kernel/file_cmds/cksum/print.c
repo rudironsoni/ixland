@@ -46,7 +46,7 @@ __FBSDID("$FreeBSD: src/usr.bin/cksum/print.c,v 1.7 2003/03/13 23:32:28 robert E
 #include <stdint.h>
 
 #include "extern.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 void
 pcrc(char *fn, uint32_t val, off_t len)

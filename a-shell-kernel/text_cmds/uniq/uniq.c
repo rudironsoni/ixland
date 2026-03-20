@@ -62,7 +62,7 @@ static const char rcsid[] =
 #include <unistd.h>
 #include <wchar.h>
 #include <wctype.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static int cflag, dflag, uflag, iflag;
 static long numchars, numfields;

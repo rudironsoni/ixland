@@ -30,7 +30,7 @@
 __FBSDID("$FreeBSD: src/bin/ed/sub.c,v 1.15 2002/06/30 05:13:53 obrien Exp $");
 
 #include "ed.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 
 char *rhbuf;			/* rhs substitution buffer */

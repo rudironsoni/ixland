@@ -57,7 +57,7 @@ __RCSID("$FreeBSD: src/bin/mkdir/mkdir.c,v 1.26 2002/06/30 05:13:54 obrien Exp $
 #include <string.h>
 #include <sysexits.h>
 #include <unistd.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static void	usage(void);
 

@@ -40,7 +40,7 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_util.c 201098 2009-12-28 02:58:1
 #include "archive.h"
 #include "archive_private.h"
 #include "archive_string.h"
-#include "ios_error.h"  // remaps exit() to pthread_exit(NULL)
+#include "a_shell_system.h"  // remaps exit() to pthread_exit(NULL)
 
 #if ARCHIVE_VERSION_NUMBER < 3000000
 /* These disappear in libarchive 3.0 */

@@ -10,7 +10,7 @@
 #define NEWBOT 1
 
 // iOS: make sure our functions get priority:
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 /*
  * Standard include file for "less".

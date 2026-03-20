@@ -52,7 +52,7 @@ __FBSDID("$FreeBSD: src/bin/ln/ln.c,v 1.34 2006/02/14 11:08:05 glebius Exp $");
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static int	fflag;				/* Unlink existing files. */
 static int	Fflag;				/* Remove empty directories also. */

@@ -57,7 +57,7 @@ __RCSID("$NetBSD: tee.c,v 1.6 1997/10/20 00:37:11 lukem Exp $");
 #include <string.h>
 #include <locale.h>
 #include <err.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 typedef struct _list {
 	struct _list *next;

@@ -34,7 +34,7 @@ THIS SOFTWARE.
 #include "awk.h"
 #include "ytab.h"
 
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #define tempfree(x)	if (istemp(x)) tfree(x); /* else */
 

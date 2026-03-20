@@ -58,7 +58,7 @@ __used static const char sccsid[] = "@(#)touch.c	8.1 (Berkeley) 6/6/93";
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static int	rw(char *, struct stat *, int);
 static void	stime_arg1(char *, struct timeval *);

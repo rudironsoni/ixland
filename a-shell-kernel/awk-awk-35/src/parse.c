@@ -28,7 +28,7 @@ THIS SOFTWARE.
 #include <stdlib.h>
 #include "awk.h"
 #include "awkgram.tab.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 Node *nodealloc(int n)
 {

@@ -20,7 +20,7 @@ __FBSDID("$FreeBSD: head/lib/libmd/mdXhl.c 294037 2016-01-14 21:08:23Z jtl $");
 #include <stdlib.h>
 
 #include "commoncrypto.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #define LENGTH CC_MD5_DIGEST_LENGTH
 

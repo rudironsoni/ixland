@@ -31,7 +31,7 @@ THIS SOFTWARE.
 #include <stdarg.h>
 #include <limits.h>
 #include "awk.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 char	EMPTY[] = { '\0' };
 __thread FILE	*infile	= NULL;

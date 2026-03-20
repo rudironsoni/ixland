@@ -80,7 +80,7 @@ __RCSID("$FreeBSD: src/bin/mv/mv.c,v 1.39 2002/07/09 17:45:13 johan Exp $");
 #endif /* __APPLE__ */ 
 
 #include "pathnames.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static int fflg, iflg, nflg, vflg;
 

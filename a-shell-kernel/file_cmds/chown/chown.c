@@ -60,7 +60,7 @@ __RCSID("$FreeBSD: src/usr.sbin/chown/chown.c,v 1.24 2002/07/17 16:22:24 dwmalon
 #include <string.h>
 #include <unistd.h>
 #include <sys/time.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #ifdef __APPLE__
 // #include <get_compat.h>

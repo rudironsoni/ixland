@@ -47,7 +47,7 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_read_open_filename.c 201093 2009
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #include "archive.h"
 

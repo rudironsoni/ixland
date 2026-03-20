@@ -50,7 +50,7 @@ __FBSDID("$FreeBSD$");
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>
 #endif
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #include "archive.h"
 #include "archive_endian.h"

@@ -80,7 +80,7 @@ __FBSDID("$FreeBSD: src/usr.bin/tar/read.c,v 1.40 2008/08/21 06:41:14 kientzle E
 
 #include "bsdtar.h"
 #include "lafe_err.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 struct progress_data {
 	struct bsdtar *bsdtar;

@@ -54,7 +54,7 @@ static const char sccsid[] = "@(#)compile.c	8.1 (Berkeley) 6/6/93";
 
 #include "defs.h"
 #include "extern.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 // #ifdef __APPLE__
 // #include <get_compat.h>

@@ -51,7 +51,7 @@ __FBSDID("$FreeBSD: src/bin/pwd/pwd.c,v 1.25 2005/02/09 17:37:38 ru Exp $");
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static char *getcwd_logical(void);
 static void usage(void);

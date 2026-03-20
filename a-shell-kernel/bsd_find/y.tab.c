@@ -152,7 +152,7 @@ __FBSDID("$FreeBSD$");
    unportable getdate.c's), but that seems to cause as many problems
    as it solves.  */
 #include <time.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #define yylex getdate_yylex
 #define yyerror getdate_yyerror

@@ -62,7 +62,7 @@ static const char sccsid[] = "@(#)tr.c	8.2 (Berkeley) 5/4/95";
 #include "cset.h"
 #include "extern.h"
 // iOS changes:
-#include "ios_error.h"
+#include "a_shell_system.h"
 #include <errno.h>
 
 STR s1 = { STRING1, NORMAL, 0, OOBCH, 0, { 0, OOBCH }, NULL, NULL };

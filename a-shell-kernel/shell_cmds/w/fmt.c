@@ -45,7 +45,7 @@ static char sccsid[] = "@(#)fmt.c	8.4 (Berkeley) 4/15/94";
 #include <string.h>
 #include <unistd.h>
 #include <vis.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 //#include "ps.h"
 
 static char *cmdpart(char *);

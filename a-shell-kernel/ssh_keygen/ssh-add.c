@@ -69,7 +69,7 @@
 #include "ssh-sk.h"
 #include "sk-api.h"
 // iOS additions:
-#include "ios_error.h"
+#include "a_shell_system.h"
 #if TARGET_OS_IPHONE
 #define __progname ssh_progname
 #endif

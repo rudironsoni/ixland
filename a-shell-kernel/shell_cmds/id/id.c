@@ -62,7 +62,7 @@ __FBSDID("$FreeBSD: src/usr.bin/id/id.c,v 1.33 2006/12/29 12:28:34 stefanf Exp $
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static void	id_print(struct passwd *, int, int, int);
 static void	pline(struct passwd *);

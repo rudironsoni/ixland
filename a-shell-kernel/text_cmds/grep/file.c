@@ -57,7 +57,7 @@ __FBSDID("$FreeBSD: src/usr.bin/grep/file.c,v 1.7 2011/10/11 22:27:23 gabor Exp 
 #endif
 
 #include "grep.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #define	MAXBUFSIZ	(32 * 1024)
 #define	LNBUFBUMP	80

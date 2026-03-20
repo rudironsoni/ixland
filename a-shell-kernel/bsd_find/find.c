@@ -54,7 +54,7 @@ __FBSDID("$FreeBSD$");
 #include <string.h>
 
 #include "find.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 
 static int find_compare(const FTSENT **s1, const FTSENT **s2);

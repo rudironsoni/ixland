@@ -48,7 +48,7 @@ __FBSDID("$FreeBSD: src/bin/sleep/sleep.c,v 1.20 2005/08/07 09:11:38 stefanf Exp
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 void usage(void);
 

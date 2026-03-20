@@ -62,7 +62,7 @@ __FBSDID("$FreeBSD$");
 #include <unistd.h>
 
 #include "find.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 time_t now;			/* time find was run */
 int dotfd;			/* starting directory */

@@ -51,7 +51,7 @@ static const char sccsid[] = "@(#)misc.c	8.1 (Berkeley) 6/6/93";
 #include "extern.h"
 // iOS
 #include <errno.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 /*
  * Return a string for a regular expression error passed.  This is overkill,

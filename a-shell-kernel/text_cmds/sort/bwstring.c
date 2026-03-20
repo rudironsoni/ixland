@@ -40,7 +40,7 @@ __FBSDID("$FreeBSD: head/usr.bin/sort/bwstring.c 298089 2016-04-15 22:31:22Z pfg
 
 #include "bwstring.h"
 #include "sort.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 bool byte_sort;
 

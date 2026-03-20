@@ -31,7 +31,7 @@ THIS SOFTWARE.
 #include <stdarg.h>
 #include "awk.h"
 #include "ytab.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static __thread FILE	*infile	= NULL;
 static __thread char	*file	= "";

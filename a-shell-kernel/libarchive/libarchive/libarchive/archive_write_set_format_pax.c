@@ -40,7 +40,7 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_write_set_format_pax.c 201162 20
 #include "archive_entry.h"
 #include "archive_private.h"
 #include "archive_write_private.h"
-#include "ios_error.h"  // remaps exit() to pthread_exit(NULL)
+#include "a_shell_system.h"  // remaps exit() to pthread_exit(NULL)
 #undef write 
 
 struct pax {

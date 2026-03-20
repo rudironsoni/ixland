@@ -51,7 +51,7 @@ __RCSID("$NetBSD: uname.c,v 1.10 1998/11/09 13:24:05 kleink Exp $");
 #include <sys/sysctl.h>
 #include <sys/utsname.h>
 #include <errno.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #ifdef __APPLE__
 // #include <get_compat.h>

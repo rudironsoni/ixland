@@ -15,7 +15,7 @@ __FBSDID("$FreeBSD: src/usr.bin/xargs/strnsubst.c,v 1.7 2004/10/18 15:40:47 cper
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 void	strnsubst(char **, const char *, const char *, size_t);
 

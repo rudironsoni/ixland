@@ -62,7 +62,7 @@ __FBSDID("$FreeBSD: src/usr.bin/cksum/cksum.c,v 1.17 2003/03/13 23:32:28 robert 
 
 #include "extern.h"
 #include <errno.h>
-#include "ios_error.h" // remap exit to pthread_exit
+#include "a_shell_system.h" // remap exit to pthread_exit
 
 static void usage(void);
 

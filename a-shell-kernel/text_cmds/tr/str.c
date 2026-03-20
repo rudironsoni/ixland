@@ -54,7 +54,7 @@ static const char sccsid[] = "@(#)str.c	8.2 (Berkeley) 4/28/95";
 
 #include "extern.h"
 // iOS changes:
-#include "ios_error.h"
+#include "a_shell_system.h"
 #include <pthread.h>
 
 

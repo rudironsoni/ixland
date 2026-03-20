@@ -52,7 +52,7 @@ static char sccsid[] = "@(#)basename.c	8.4 (Berkeley) 5/4/95";
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 #define usage basename_usage
 
 void usage(void);

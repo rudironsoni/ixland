@@ -33,7 +33,7 @@ __FBSDID("$FreeBSD: src/usr.bin/tar/subst.c,v 1.4 2008/06/15 10:08:16 kientzle E
 #include <regex.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #ifndef REG_BASIC
 #define	REG_BASIC 0

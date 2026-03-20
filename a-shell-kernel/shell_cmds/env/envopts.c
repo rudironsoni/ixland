@@ -42,7 +42,7 @@ __FBSDID("$FreeBSD$");
 #include <unistd.h>
 
 #include "envopts.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static const char *
 		 expand_vars(int in_thisarg, char **thisarg_p, char **dest_p,

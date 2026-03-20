@@ -95,7 +95,7 @@ __FBSDID("$FreeBSD$");
 
 #include "diff.h"
 #include "xmalloc.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 
 // #define _PATH_PR "/usr/bin/pr"

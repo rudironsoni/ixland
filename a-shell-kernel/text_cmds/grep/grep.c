@@ -53,7 +53,7 @@ __FBSDID("$FreeBSD: src/usr.bin/grep/grep.c,v 1.16 2012/01/15 17:01:28 eadler Ex
 #include "fastmatch.h"
 #endif
 #include "grep.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #ifndef WITHOUT_NLS
 #include <nl_types.h>

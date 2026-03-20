@@ -48,7 +48,7 @@ static const char sccsid[] = "@(#)dirname.c	8.4 (Berkeley) 5/4/95";
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #define usage dirname_usage
 

@@ -13,7 +13,7 @@
 #include <signal.h>
 
 // This header sets up the macro redirects
-#include "a_shell_system.h"
+#include "include/a_shell_kernel.h"
 
 // Test 1: Verify fork() redirects to ios_fork()
 void test_fork_redirect() {

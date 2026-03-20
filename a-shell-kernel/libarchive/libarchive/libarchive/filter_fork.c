@@ -24,7 +24,7 @@
  */
 
 #include "archive_platform.h"
-#include "ios_error.h"  // remaps exit() to pthread_exit(NULL)
+#include "a_shell_system.h"  // remaps exit() to pthread_exit(NULL)
 
 /* This capability is only available on POSIX systems. */
 #if defined(HAVE_PIPE) && defined(HAVE_FCNTL) && \

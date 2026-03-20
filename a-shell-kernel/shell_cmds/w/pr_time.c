@@ -44,7 +44,7 @@ static const char sccsid[] = "@(#)pr_time.c	8.2 (Berkeley) 4/4/94";
 #include <string.h>
 
 #include "extern.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 /*
  * pr_attime --

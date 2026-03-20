@@ -62,7 +62,7 @@ __FBSDID("$FreeBSD: src/usr.bin/wc/wc.c,v 1.21 2004/12/27 22:27:56 josef Exp $")
 #include <unistd.h>
 #include <wchar.h>
 #include <wctype.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 /* We allocte this much memory statically, and use it as a fallback for
   malloc failure, or statfs failure.  So it should be small, but not

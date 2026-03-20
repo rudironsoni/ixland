@@ -58,7 +58,7 @@ static const char sccsid[] = "@(#)process.c	8.6 (Berkeley) 4/20/94";
 
 #include "defs.h"
 #include "extern.h"
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 static SPACE HS, PS, SS, YS;
 #define	pd		PS.deleted

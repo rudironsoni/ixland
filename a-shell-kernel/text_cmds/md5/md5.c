@@ -36,7 +36,7 @@ __FBSDID("$FreeBSD: src/sbin/md5/md5.c,v 1.34 2005/03/09 19:23:04 cperciva Exp $
 #include <time.h>
 #include <unistd.h>
 #include <sysexits.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #ifdef __APPLE__
 #include "commoncrypto.h"

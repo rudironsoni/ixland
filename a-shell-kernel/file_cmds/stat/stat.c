@@ -68,7 +68,7 @@ __FBSDID("$FreeBSD: src/usr.bin/stat/stat.c,v 1.6 2003/10/06 01:55:17 dougb Exp 
 #include <time.h>
 #include <unistd.h>
 #include <errno.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 #if HAVE_STRUCT_STAT_ST_FLAGS
 #define DEF_F "%#Xf "
