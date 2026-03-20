@@ -19,6 +19,9 @@ a_shell_pkg_configure() {
     export bash_cv_func_sigsetjmp=present
     export bash_cv_printf_a_format=yes
     
+    # iOS doesn't have getentropy
+    export ac_cv_func_getentropy=no
+    
     ./configure \
         --prefix="$A_SHELL_PREFIX" \
         --host="arm-apple-darwin" \
