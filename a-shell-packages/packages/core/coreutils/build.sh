@@ -1,27 +1,53 @@
 #!/bin/bash
-# build.sh - Build recipe for coreutils
+# build.sh - Build recipe for GNU coreutils
 
 A_SHELL_PKG_NAME="coreutils"
-A_SHELL_PKG_VERSION="9.4"
-A_SHELL_PKG_SRCURL="https://ftp.gnu.org/gnu/coreutils/coreutils-9.4.tar.xz"
-A_SHELL_PKG_SHA256="ea5fde12ed1e365c6970ef2c853a7a9e3088b73ce5567e99e7d0c36e6a7e0e72"
-A_SHELL_PKG_DEPENDS="libz"
-A_SHELL_PKG_DESCRIPTION="GNU core utilities (ls, cp, mv, cat, etc.)"
+A_SHELL_PKG_VERSION="9.5"
+A_SHELL_PKG_SRCURL="https://ftp.gnu.org/gnu/coreutils/coreutils-9.5.tar.gz"
+A_SHELL_PKG_SHA256=""
+A_SHELL_PKG_DEPENDS=""
+A_SHELL_PKG_DESCRIPTION="GNU Core Utilities (ls, cp, mv, cat, etc.)"
 
 a_shell_pkg_configure() {
-    # Disable features not needed or problematic on iOS
+    # Cache variables for cross-compilation
+    export ac_cv_sizeof_long=8
+    export ac_cv_sizeof_size_t=8
+    export ac_cv_sizeof_ssize_t=8
+    export ac_cv_sizeof_off_t=8
+    export ac_cv_sizeof_long_long=8
+    export ac_cv_sizeof_dev_t=4
+    export ac_cv_sizeof_ino_t=8
+    export ac_cv_func_getcwd_null=yes
+    export ac_cv_func_getgroups_works=yes
+    export ac_cv_func_memcmp_working=yes
+    export ac_cv_func_strtod_works=yes
+    export ac_cv_func_chown_works=yes
+    export ac_cv_func_fchmodat_works=yes
+    export ac_cv_func_fchownat_works=yes
+    export ac_cv_func_lchmod_works=no
+    export ac_cv_func_stat_empty_string_bug=no
+    export ac_cv_func_working_mktime=yes
+    export ac_cv_func_fnmatch_works=yes
+    export ac_cv_func_fnmatch_gnu=yes
+    export gl_cv_func_gettimeofday_clobber=no
+    export gl_cv_func_tzset_clobber=no
+    
+    # iOS doesn't have clock_settime
+    export ac_cv_func_clock_settime=no
+    export gl_cv_func_clock_settime=no
+    
+    # Disable programs that require root or special permissions
     ./configure \
         --prefix="$A_SHELL_PREFIX" \
         --host="arm-apple-darwin" \
         --disable-nls \
         --disable-rpath \
-        --disable-acl \
-        --disable-xattr \
         --disable-libcap \
+        --disable-xattr \
+        --disable-libsmack \
         --without-selinux \
-        --with-openssl=no \
-        --with-gnutls=no \
-        gl_cv_func_working_mkstemp=yes \
+        --without-gmp \
+        --enable-install-program="arch,hostname" \
         || a_shell_error "Configure failed"
 }
 
@@ -31,7 +57,4 @@ a_shell_pkg_make() {
 
 a_shell_pkg_install() {
     make install DESTDIR="$A_SHELL_PKG_STAGING" || a_shell_error "Install failed"
-    
-    # Ensure critical symlinks exist
-    ln -sf ln "$A_SHELL_PKG_STAGING$A_SHELL_PREFIX/bin/link" 2>/dev/null || true
 }
