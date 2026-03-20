@@ -14,7 +14,7 @@ A_SHELL_PKG_BUILDER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Default paths (can be overridden)
 A_SHELL_PKG_BUILD_DIR="${A_SHELL_PKG_BUILD_DIR:-$A_SHELL_PKG_BUILDER_DIR/.build}"
-A_SHELL_PREFIX="${A_SHELL_PREFIX:-/usr/local}"
+A_SHELL_PREFIX="/usr/local"  # Target prefix on iOS
 A_SHELL_PKG_TMPDIR="${A_SHELL_PKG_TMPDIR:-$A_SHELL_PKG_BUILD_DIR/tmp}"
 A_SHELL_PKG_STAGING="${A_SHELL_PKG_STAGING:-$A_SHELL_PKG_BUILD_DIR/staging}"
 
@@ -56,8 +56,8 @@ a_shell_step() {
 # =============================================================================
 
 a_shell_setup_directories() {
-    mkdir -p "$A_SHELL_PREFIX"/{bin,lib,include,etc,share,var}
-    mkdir -p "$A_SHELL_CONFIG"/{etc,var/log,tmp}
+    # Only create build directories, not target directories
+    # Target directories will be created during install
     mkdir -p "$A_SHELL_PKG_TMPDIR"
     mkdir -p "$A_SHELL_PKG_STAGING"
 }
