@@ -6,7 +6,7 @@
 	<integer>12</integer>
 	<key>logs</key>
 	<dict>
-		<key>1836FA8E-9CAC-40DD-AABD-9485AA63F85F</key>
+		<key>F2471018-F7B4-47C5-97D5-7BADDCCFE934</key>
 		<dict>
 			<key>className</key>
 			<string>IDECommandLineBuildLog</string>
@@ -15,49 +15,7 @@
 			<key>domainType</key>
 			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
 			<key>fileName</key>
-			<string>1836FA8E-9CAC-40DD-AABD-9485AA63F85F.xcactivitylog</string>
-			<key>hasPrimaryLog</key>
-			<true/>
-			<key>primaryObservable</key>
-			<dict>
-				<key>highLevelStatus</key>
-				<string>W</string>
-				<key>totalNumberOfAnalyzerIssues</key>
-				<integer>0</integer>
-				<key>totalNumberOfErrors</key>
-				<integer>0</integer>
-				<key>totalNumberOfTestFailures</key>
-				<integer>0</integer>
-				<key>totalNumberOfWarnings</key>
-				<integer>76</integer>
-			</dict>
-			<key>schemeIdentifier-containerName</key>
-			<string>a_shell_system project</string>
-			<key>schemeIdentifier-schemeName</key>
-			<string>a_shell_system</string>
-			<key>schemeIdentifier-sharedScheme</key>
-			<integer>1</integer>
-			<key>signature</key>
-			<string>Building project a_shell_system with scheme a_shell_system and configuration Release</string>
-			<key>timeStartedRecording</key>
-			<real>795636042.204126</real>
-			<key>timeStoppedRecording</key>
-			<real>795636045.24597299</real>
-			<key>title</key>
-			<string>Building project a_shell_system with scheme a_shell_system and configuration Release</string>
-			<key>uniqueIdentifier</key>
-			<string>1836FA8E-9CAC-40DD-AABD-9485AA63F85F</string>
-		</dict>
-		<key>70F4B924-5FDD-40D4-A863-C88726FD0BDA</key>
-		<dict>
-			<key>className</key>
-			<string>IDECommandLineBuildLog</string>
-			<key>documentTypeString</key>
-			<string>&lt;nil&gt;</string>
-			<key>domainType</key>
-			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
-			<key>fileName</key>
-			<string>70F4B924-5FDD-40D4-A863-C88726FD0BDA.xcactivitylog</string>
+			<string>F2471018-F7B4-47C5-97D5-7BADDCCFE934.xcactivitylog</string>
 			<key>hasPrimaryLog</key>
 			<true/>
 			<key>primaryObservable</key>
@@ -82,13 +40,13 @@
 			<key>signature</key>
 			<string>Cleaning project a_shell_system with scheme a_shell_system and configuration Release</string>
 			<key>timeStartedRecording</key>
-			<real>795636041.77084196</real>
+			<real>795647576.93013299</real>
 			<key>timeStoppedRecording</key>
-			<real>795636042.19991601</real>
+			<real>795647577.23488998</real>
 			<key>title</key>
 			<string>Cleaning project a_shell_system with scheme a_shell_system and configuration Release</string>
 			<key>uniqueIdentifier</key>
-			<string>70F4B924-5FDD-40D4-A863-C88726FD0BDA</string>
+			<string>F2471018-F7B4-47C5-97D5-7BADDCCFE934</string>
 		</dict>
 	</dict>
 </dict>

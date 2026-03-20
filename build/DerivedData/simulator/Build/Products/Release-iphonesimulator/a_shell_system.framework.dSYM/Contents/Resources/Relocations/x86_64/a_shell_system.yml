@@ -32,61 +32,61 @@ relocations:
   - { offset: 0xB282A, size: 0x8, addend: 0x0, symName: _parse_long_options, symObjAddr: 0x6A5, symBinAddr: 0x15C7, symSize: 0x39F }
   - { offset: 0xB2A2B, size: 0x8, addend: 0x0, symName: _getopt_long_only, symObjAddr: 0x5F7, symBinAddr: 0x1519, symSize: 0x10 }
   - { offset: 0xB2B9F, size: 0x8, addend: 0x0, symName: _startedPreparingWebAssemblyCommand, symObjAddr: 0x0, symBinAddr: 0x1970, symSize: 0x12 }
-  - { offset: 0xB2BB9, size: 0x8, addend: 0x0, symName: _preparingWebAssemblyCommands, symObjAddr: 0x8EF8, symBinAddr: 0x20B8E0, symSize: 0x0 }
-  - { offset: 0xB2BD6, size: 0x8, addend: 0x0, symName: _orderOfWebAssemblyCommands, symObjAddr: 0x8EFC, symBinAddr: 0x20B8E4, symSize: 0x0 }
+  - { offset: 0xB2BB9, size: 0x8, addend: 0x0, symName: _preparingWebAssemblyCommands, symObjAddr: 0x8F68, symBinAddr: 0x20B8E0, symSize: 0x0 }
+  - { offset: 0xB2BD6, size: 0x8, addend: 0x0, symName: _orderOfWebAssemblyCommands, symObjAddr: 0x8F6C, symBinAddr: 0x20B8E4, symSize: 0x0 }
   - { offset: 0xB2BEC, size: 0x8, addend: 0x0, symName: _pid_mtx, symObjAddr: 0x1BA8, symBinAddr: 0x1E7C0, symSize: 0x0 }
-  - { offset: 0xB2C02, size: 0x8, addend: 0x0, symName: _cleanup_counter, symObjAddr: 0x8F00, symBinAddr: 0x20B8E8, symSize: 0x0 }
-  - { offset: 0xB2C26, size: 0x8, addend: 0x0, symName: _thread_ids, symObjAddr: 0x9720, symBinAddr: 0x1F3C0, symSize: 0x0 }
-  - { offset: 0xB2C48, size: 0x8, addend: 0x0, symName: _numVariablesSet, symObjAddr: 0x29B20, symBinAddr: 0x3F7C0, symSize: 0x0 }
-  - { offset: 0xB2C6A, size: 0x8, addend: 0x0, symName: _environment, symObjAddr: 0x8F10, symBinAddr: 0x1EBB0, symSize: 0x0 }
-  - { offset: 0xB2C96, size: 0x8, addend: 0x0, symName: _copyEnvironment, symObjAddr: 0x9320, symBinAddr: 0x1EFC0, symSize: 0x0 }
-  - { offset: 0xB2CAC, size: 0x8, addend: 0x0, symName: _previousDirectory, symObjAddr: 0x9B20, symBinAddr: 0x1F7C0, symSize: 0x0 }
-  - { offset: 0xB2CD5, size: 0x8, addend: 0x0, symName: _previousPid, symObjAddr: 0x29D20, symBinAddr: 0x3F9C0, symSize: 0x0 }
-  - { offset: 0xB2CEB, size: 0x8, addend: 0x0, symName: _current_pid, symObjAddr: 0x9310, symBinAddr: 0x1EFB0, symSize: 0x0 }
-  - { offset: 0xB2D01, size: 0x8, addend: 0x0, symName: _pid_overflow, symObjAddr: 0x29F20, symBinAddr: 0x3FBC0, symSize: 0x0 }
-  - { offset: 0xB2D1E, size: 0x8, addend: 0x0, symName: _last_allocated_pid, symObjAddr: 0x29F24, symBinAddr: 0x3FBC4, symSize: 0x0 }
+  - { offset: 0xB2C02, size: 0x8, addend: 0x0, symName: _cleanup_counter, symObjAddr: 0x8F70, symBinAddr: 0x20B8E8, symSize: 0x0 }
+  - { offset: 0xB2C26, size: 0x8, addend: 0x0, symName: _thread_ids, symObjAddr: 0x9790, symBinAddr: 0x1F3C0, symSize: 0x0 }
+  - { offset: 0xB2C48, size: 0x8, addend: 0x0, symName: _numVariablesSet, symObjAddr: 0x29B90, symBinAddr: 0x3F7C0, symSize: 0x0 }
+  - { offset: 0xB2C6A, size: 0x8, addend: 0x0, symName: _environment, symObjAddr: 0x8F80, symBinAddr: 0x1EBB0, symSize: 0x0 }
+  - { offset: 0xB2C96, size: 0x8, addend: 0x0, symName: _copyEnvironment, symObjAddr: 0x9390, symBinAddr: 0x1EFC0, symSize: 0x0 }
+  - { offset: 0xB2CAC, size: 0x8, addend: 0x0, symName: _previousDirectory, symObjAddr: 0x9B90, symBinAddr: 0x1F7C0, symSize: 0x0 }
+  - { offset: 0xB2CD5, size: 0x8, addend: 0x0, symName: _previousPid, symObjAddr: 0x29D90, symBinAddr: 0x3F9C0, symSize: 0x0 }
+  - { offset: 0xB2CEB, size: 0x8, addend: 0x0, symName: _current_pid, symObjAddr: 0x9380, symBinAddr: 0x1EFB0, symSize: 0x0 }
+  - { offset: 0xB2D01, size: 0x8, addend: 0x0, symName: _pid_overflow, symObjAddr: 0x29F90, symBinAddr: 0x3FBC0, symSize: 0x0 }
+  - { offset: 0xB2D1E, size: 0x8, addend: 0x0, symName: _last_allocated_pid, symObjAddr: 0x29F94, symBinAddr: 0x3FBC4, symSize: 0x0 }
   - { offset: 0xB2D28, size: 0x8, addend: 0x0, symName: _executeWebAssemblyCommandsInOrder, symObjAddr: 0x134E, symBinAddr: 0x2CBE, symSize: 0xB2 }
-  - { offset: 0xB2D4A, size: 0x8, addend: 0x0, symName: _executeWebAssemblyCommandsInOrder.function, symObjAddr: 0x29F28, symBinAddr: 0x3FBC8, symSize: 0x0 }
+  - { offset: 0xB2D4A, size: 0x8, addend: 0x0, symName: _executeWebAssemblyCommandsInOrder.function, symObjAddr: 0x29F98, symBinAddr: 0x3FBC8, symSize: 0x0 }
   - { offset: 0xB2DE1, size: 0x8, addend: 0x0, symName: _startedPreparingWebAssemblyCommand, symObjAddr: 0x0, symBinAddr: 0x1970, symSize: 0x12 }
   - { offset: 0xB2DF7, size: 0x8, addend: 0x0, symName: _webAssemblyCommandOrder, symObjAddr: 0x12, symBinAddr: 0x1982, symSize: 0xC }
   - { offset: 0xB2E11, size: 0x8, addend: 0x0, symName: _finishedPreparingWebAssemblyCommand, symObjAddr: 0x1E, symBinAddr: 0x198E, symSize: 0x18 }
   - { offset: 0xB2E27, size: 0x8, addend: 0x0, symName: _printf, symObjAddr: 0x36, symBinAddr: 0x19A6, symSize: 0xB0 }
   - { offset: 0xB2F00, size: 0x8, addend: 0x0, symName: _fprintf, symObjAddr: 0xE6, symBinAddr: 0x1A56, symSize: 0x129 }
   - { offset: 0xB2FD6, size: 0x8, addend: 0x0, symName: _scanf, symObjAddr: 0x20F, symBinAddr: 0x1B7F, symSize: 0x132 }
-  - { offset: 0xB30AD, size: 0x8, addend: 0x0, symName: _ios_fflush, symObjAddr: 0x341, symBinAddr: 0x1CB1, symSize: 0x93 }
-  - { offset: 0xB312A, size: 0x8, addend: 0x0, symName: _ios_write, symObjAddr: 0x3D4, symBinAddr: 0x1D44, symSize: 0x73 }
-  - { offset: 0xB31DE, size: 0x8, addend: 0x0, symName: _ios_fwrite, symObjAddr: 0x447, symBinAddr: 0x1DB7, symSize: 0x9D }
-  - { offset: 0xB32B6, size: 0x8, addend: 0x0, symName: _ios_puts, symObjAddr: 0x4E4, symBinAddr: 0x1E54, symSize: 0x4B }
-  - { offset: 0xB3352, size: 0x8, addend: 0x0, symName: _ios_fputs, symObjAddr: 0x52F, symBinAddr: 0x1E9F, symSize: 0x86 }
-  - { offset: 0xB33DF, size: 0x8, addend: 0x0, symName: _ios_fputc, symObjAddr: 0x5B5, symBinAddr: 0x1F25, symSize: 0x84 }
-  - { offset: 0xB346C, size: 0x8, addend: 0x0, symName: _ios_putw, symObjAddr: 0x639, symBinAddr: 0x1FA9, symSize: 0x84 }
+  - { offset: 0xB30AD, size: 0x8, addend: 0x0, symName: _a_shell_fflush, symObjAddr: 0x341, symBinAddr: 0x1CB1, symSize: 0x93 }
+  - { offset: 0xB312A, size: 0x8, addend: 0x0, symName: _a_shell_write, symObjAddr: 0x3D4, symBinAddr: 0x1D44, symSize: 0x73 }
+  - { offset: 0xB31DE, size: 0x8, addend: 0x0, symName: _a_shell_fwrite, symObjAddr: 0x447, symBinAddr: 0x1DB7, symSize: 0x9D }
+  - { offset: 0xB32B6, size: 0x8, addend: 0x0, symName: _a_shell_puts, symObjAddr: 0x4E4, symBinAddr: 0x1E54, symSize: 0x4B }
+  - { offset: 0xB3352, size: 0x8, addend: 0x0, symName: _a_shell_fputs, symObjAddr: 0x52F, symBinAddr: 0x1E9F, symSize: 0x86 }
+  - { offset: 0xB33DF, size: 0x8, addend: 0x0, symName: _a_shell_fputc, symObjAddr: 0x5B5, symBinAddr: 0x1F25, symSize: 0x84 }
+  - { offset: 0xB346C, size: 0x8, addend: 0x0, symName: _a_shell_putw, symObjAddr: 0x639, symBinAddr: 0x1FA9, symSize: 0x84 }
   - { offset: 0xB3511, size: 0x8, addend: 0x0, symName: _makeGlobal, symObjAddr: 0x6BD, symBinAddr: 0x202D, symSize: 0x2B }
   - { offset: 0xB3527, size: 0x8, addend: 0x0, symName: _makeLocal, symObjAddr: 0x6E8, symBinAddr: 0x2058, symSize: 0x2B }
-  - { offset: 0xB353D, size: 0x8, addend: 0x0, symName: _ios_getThreadId, symObjAddr: 0x713, symBinAddr: 0x2083, symSize: 0x20 }
+  - { offset: 0xB353D, size: 0x8, addend: 0x0, symName: _a_shell_getThreadId, symObjAddr: 0x713, symBinAddr: 0x2083, symSize: 0x20 }
   - { offset: 0xB355A, size: 0x8, addend: 0x0, symName: _newPreviousDirectory, symObjAddr: 0x733, symBinAddr: 0x20A3, symSize: 0x1F }
-  - { offset: 0xB3592, size: 0x8, addend: 0x0, symName: _ios_storeThreadId, symObjAddr: 0x752, symBinAddr: 0x20C2, symSize: 0x2A }
+  - { offset: 0xB3592, size: 0x8, addend: 0x0, symName: _a_shell_storeThreadId, symObjAddr: 0x752, symBinAddr: 0x20C2, symSize: 0x2A }
   - { offset: 0xB35E1, size: 0x8, addend: 0x0, symName: _libc_getenv, symObjAddr: 0x77C, symBinAddr: 0x20EC, symSize: 0xCF }
-  - { offset: 0xB36EF, size: 0x8, addend: 0x0, symName: _ios_setenv_pid, symObjAddr: 0x84B, symBinAddr: 0x21BB, symSize: 0x1BA }
-  - { offset: 0xB392F, size: 0x8, addend: 0x0, symName: _ios_setenv_parent, symObjAddr: 0xA05, symBinAddr: 0x2375, symSize: 0x1B }
-  - { offset: 0xB399F, size: 0x8, addend: 0x0, symName: _ios_setenv, symObjAddr: 0xA20, symBinAddr: 0x2390, symSize: 0x10 }
-  - { offset: 0xB3A0F, size: 0x8, addend: 0x0, symName: _ios_putenv, symObjAddr: 0xA30, symBinAddr: 0x23A0, symSize: 0x14E }
-  - { offset: 0xB3B73, size: 0x8, addend: 0x0, symName: _ios_unsetenv_pid, symObjAddr: 0xB7E, symBinAddr: 0x24EE, symSize: 0x143 }
-  - { offset: 0xB3D04, size: 0x8, addend: 0x0, symName: _ios_unsetenv_parent, symObjAddr: 0xCC1, symBinAddr: 0x2631, symSize: 0x1B }
-  - { offset: 0xB3D46, size: 0x8, addend: 0x0, symName: _ios_unsetenv, symObjAddr: 0xCDC, symBinAddr: 0x264C, symSize: 0x10 }
+  - { offset: 0xB36EF, size: 0x8, addend: 0x0, symName: _a_shell_setenv_pid, symObjAddr: 0x84B, symBinAddr: 0x21BB, symSize: 0x1BA }
+  - { offset: 0xB392F, size: 0x8, addend: 0x0, symName: _a_shell_setenv_parent, symObjAddr: 0xA05, symBinAddr: 0x2375, symSize: 0x1B }
+  - { offset: 0xB399F, size: 0x8, addend: 0x0, symName: _a_shell_setenv, symObjAddr: 0xA20, symBinAddr: 0x2390, symSize: 0x10 }
+  - { offset: 0xB3A0F, size: 0x8, addend: 0x0, symName: _a_shell_putenv, symObjAddr: 0xA30, symBinAddr: 0x23A0, symSize: 0x14E }
+  - { offset: 0xB3B73, size: 0x8, addend: 0x0, symName: _a_shell_unsetenv_pid, symObjAddr: 0xB7E, symBinAddr: 0x24EE, symSize: 0x143 }
+  - { offset: 0xB3D04, size: 0x8, addend: 0x0, symName: _a_shell_unsetenv_parent, symObjAddr: 0xCC1, symBinAddr: 0x2631, symSize: 0x1B }
+  - { offset: 0xB3D46, size: 0x8, addend: 0x0, symName: _a_shell_unsetenv, symObjAddr: 0xCDC, symBinAddr: 0x264C, symSize: 0x10 }
   - { offset: 0xB3D88, size: 0x8, addend: 0x0, symName: _storeEnvironment, symObjAddr: 0xCEC, symBinAddr: 0x265C, symSize: 0xC0 }
   - { offset: 0xB3E0C, size: 0x8, addend: 0x0, symName: _resetEnvironment, symObjAddr: 0xDAC, symBinAddr: 0x271C, symSize: 0x80 }
   - { offset: 0xB3E8B, size: 0x8, addend: 0x0, symName: _clearEnvironment, symObjAddr: 0xE2C, symBinAddr: 0x279C, symSize: 0x69 }
   - { offset: 0xB3EE2, size: 0x8, addend: 0x0, symName: _environmentVariables, symObjAddr: 0xE95, symBinAddr: 0x2805, symSize: 0x23 }
-  - { offset: 0xB3EFF, size: 0x8, addend: 0x0, symName: _ios_releaseThread, symObjAddr: 0xEB8, symBinAddr: 0x2828, symSize: 0x58 }
-  - { offset: 0xB3F61, size: 0x8, addend: 0x0, symName: _ios_releaseBackgroundThread, symObjAddr: 0xF10, symBinAddr: 0x2880, symSize: 0x3E }
-  - { offset: 0xB3FA8, size: 0x8, addend: 0x0, symName: _ios_releaseThreadId, symObjAddr: 0xF4E, symBinAddr: 0x28BE, symSize: 0x4B }
-  - { offset: 0xB3FDF, size: 0x8, addend: 0x0, symName: _ios_currentPid, symObjAddr: 0xF99, symBinAddr: 0x2909, symSize: 0xC }
+  - { offset: 0xB3EFF, size: 0x8, addend: 0x0, symName: _a_shell_releaseThread, symObjAddr: 0xEB8, symBinAddr: 0x2828, symSize: 0x58 }
+  - { offset: 0xB3F61, size: 0x8, addend: 0x0, symName: _a_shell_releaseBackgroundThread, symObjAddr: 0xF10, symBinAddr: 0x2880, symSize: 0x3E }
+  - { offset: 0xB3FA8, size: 0x8, addend: 0x0, symName: _a_shell_releaseThreadId, symObjAddr: 0xF4E, symBinAddr: 0x28BE, symSize: 0x4B }
+  - { offset: 0xB3FDF, size: 0x8, addend: 0x0, symName: _a_shell_currentPid, symObjAddr: 0xF99, symBinAddr: 0x2909, symSize: 0xC }
   - { offset: 0xB406A, size: 0x8, addend: 0x0, symName: _fork, symObjAddr: 0xFA5, symBinAddr: 0x2915, symSize: 0x111 }
-  - { offset: 0xB411C, size: 0x8, addend: 0x0, symName: _ios_fork, symObjAddr: 0x10B6, symBinAddr: 0x2A26, symSize: 0x111 }
+  - { offset: 0xB411C, size: 0x8, addend: 0x0, symName: _a_shell_fork, symObjAddr: 0x10B6, symBinAddr: 0x2A26, symSize: 0x111 }
   - { offset: 0xB41BB, size: 0x8, addend: 0x0, symName: _vfork, symObjAddr: 0x11C7, symBinAddr: 0x2B37, symSize: 0x119 }
-  - { offset: 0xB425A, size: 0x8, addend: 0x0, symName: _ios_waitpid, symObjAddr: 0x12E0, symBinAddr: 0x2C50, symSize: 0x6E }
+  - { offset: 0xB425A, size: 0x8, addend: 0x0, symName: _a_shell_waitpid, symObjAddr: 0x12E0, symBinAddr: 0x2C50, symSize: 0x6E }
   - { offset: 0xB42FB, size: 0x8, addend: 0x0, symName: _waitpid, symObjAddr: 0x1400, symBinAddr: 0x2D70, symSize: 0xE0 }
-  - { offset: 0xB43FE, size: 0x8, addend: 0x0, symName: _ios_full_waitpid, symObjAddr: 0x14E0, symBinAddr: 0x2E50, symSize: 0xD3 }
+  - { offset: 0xB43FE, size: 0x8, addend: 0x0, symName: _a_shell_full_waitpid, symObjAddr: 0x14E0, symBinAddr: 0x2E50, symSize: 0xD3 }
   - { offset: 0xB44F1, size: 0x8, addend: 0x0, symName: _vwarn, symObjAddr: 0x15B3, symBinAddr: 0x167D3, symSize: 0x9C }
   - { offset: 0xB460F, size: 0x8, addend: 0x0, symName: _vwarnx, symObjAddr: 0x164F, symBinAddr: 0x1686F, symSize: 0x76 }
   - { offset: 0xB46AA, size: 0x8, addend: 0x0, symName: _err, symObjAddr: 0x16C5, symBinAddr: 0x168E5, symSize: 0x8F }
@@ -98,86 +98,86 @@ relocations:
   - { offset: 0xB48EB, size: 0x8, addend: 0x0, symName: _warn, symObjAddr: 0x18F4, symBinAddr: 0x16B14, symSize: 0xB4 }
   - { offset: 0xB494A, size: 0x8, addend: 0x0, symName: _warnx, symObjAddr: 0x19A8, symBinAddr: 0x16BC8, symSize: 0xB4 }
   - { offset: 0xB49A9, size: 0x8, addend: 0x0, symName: _warnc, symObjAddr: 0x1A5C, symBinAddr: 0x16C7C, symSize: 0x14A }
-  - { offset: 0xB4B66, size: 0x8, addend: 0x0, symName: _ios_stdin, symObjAddr: 0x0, symBinAddr: 0x2F23, symSize: 0x12 }
-  - { offset: 0xB4B80, size: 0x8, addend: 0x0, symName: _sideLoading, symObjAddr: 0x38C28, symBinAddr: 0x20B8F0, symSize: 0x0 }
+  - { offset: 0xB4B66, size: 0x8, addend: 0x0, symName: _a_shell_stdin, symObjAddr: 0x0, symBinAddr: 0x2F23, symSize: 0x12 }
+  - { offset: 0xB4B80, size: 0x8, addend: 0x0, symName: _sideLoading, symObjAddr: 0x38D58, symBinAddr: 0x20B8F0, symSize: 0x0 }
   - { offset: 0xB4B9D, size: 0x8, addend: 0x0, symName: _joinMainThread, symObjAddr: 0xF480, symBinAddr: 0x1E800, symSize: 0x0 }
-  - { offset: 0xB4BB3, size: 0x8, addend: 0x0, symName: _enableLLVMInterpreter, symObjAddr: 0x38C29, symBinAddr: 0x20B8F1, symSize: 0x0 }
-  - { offset: 0xB4BC9, size: 0x8, addend: 0x0, symName: _ios_bookmarkDictionaryName, symObjAddr: 0xF488, symBinAddr: 0x1E808, symSize: 0x0 }
-  - { offset: 0xB4C12, size: 0x8, addend: 0x0, symName: _currentSession, symObjAddr: 0x12EC8, symBinAddr: 0x1EAD0, symSize: 0x0 }
+  - { offset: 0xB4BB3, size: 0x8, addend: 0x0, symName: _enableLLVMInterpreter, symObjAddr: 0x38D59, symBinAddr: 0x20B8F1, symSize: 0x0 }
+  - { offset: 0xB4BC9, size: 0x8, addend: 0x0, symName: _a_shell_bookmarkDictionaryName, symObjAddr: 0xF488, symBinAddr: 0x1E808, symSize: 0x0 }
+  - { offset: 0xB4C12, size: 0x8, addend: 0x0, symName: _currentSession, symObjAddr: 0x12EE8, symBinAddr: 0x1EAD0, symSize: 0x0 }
   - { offset: 0xB4D7B, size: 0x8, addend: 0x0, symName: _numPythonInterpreters, symObjAddr: 0xF490, symBinAddr: 0x1E810, symSize: 0x0 }
   - { offset: 0xB4D91, size: 0x8, addend: 0x0, symName: _numPerlInterpreters, symObjAddr: 0xF494, symBinAddr: 0x1E814, symSize: 0x0 }
   - { offset: 0xB4DA7, size: 0x8, addend: 0x0, symName: _numTeXInterpreters, symObjAddr: 0xF498, symBinAddr: 0x1E818, symSize: 0x0 }
-  - { offset: 0xB4DBD, size: 0x8, addend: 0x0, symName: _TeXcommands, symObjAddr: 0x38C30, symBinAddr: 0x20B8F8, symSize: 0x0 }
+  - { offset: 0xB4DBD, size: 0x8, addend: 0x0, symName: _TeXcommands, symObjAddr: 0x38D60, symBinAddr: 0x20B8F8, symSize: 0x0 }
   - { offset: 0xB4DD8, size: 0x8, addend: 0x0, symName: _numDashCommands, symObjAddr: 0xF49C, symBinAddr: 0x1E81C, symSize: 0x0 }
   - { offset: 0xB4DEE, size: 0x8, addend: 0x0, symName: _numSshCommands, symObjAddr: 0xF4A0, symBinAddr: 0x1E820, symSize: 0x0 }
   - { offset: 0xB4E04, size: 0x8, addend: 0x0, symName: _numRsyncCommands, symObjAddr: 0xF4A4, symBinAddr: 0x1E824, symSize: 0x0 }
   - { offset: 0xB4E1A, size: 0x8, addend: 0x0, symName: _sh_session, symObjAddr: 0xF4A8, symBinAddr: 0x1E828, symSize: 0x0 }
-  - { offset: 0xB4E49, size: 0x8, addend: 0x0, symName: _miniRoot, symObjAddr: 0x38CA8, symBinAddr: 0x3FBE0, symSize: 0x0 }
-  - { offset: 0xB4E60, size: 0x8, addend: 0x0, symName: _allowedPaths, symObjAddr: 0x38CB0, symBinAddr: 0x3FBE8, symSize: 0x0 }
-  - { offset: 0xB4E77, size: 0x8, addend: 0x0, symName: _commandList, symObjAddr: 0x38CB8, symBinAddr: 0x3FBF0, symSize: 0x0 }
-  - { offset: 0xB4E93, size: 0x8, addend: 0x0, symName: _backgroundCommandList, symObjAddr: 0x38C38, symBinAddr: 0x20B900, symSize: 0x0 }
+  - { offset: 0xB4E49, size: 0x8, addend: 0x0, symName: _miniRoot, symObjAddr: 0x38DD8, symBinAddr: 0x3FBE0, symSize: 0x0 }
+  - { offset: 0xB4E60, size: 0x8, addend: 0x0, symName: _allowedPaths, symObjAddr: 0x38DE0, symBinAddr: 0x3FBE8, symSize: 0x0 }
+  - { offset: 0xB4E77, size: 0x8, addend: 0x0, symName: _commandList, symObjAddr: 0x38DE8, symBinAddr: 0x3FBF0, symSize: 0x0 }
+  - { offset: 0xB4E93, size: 0x8, addend: 0x0, symName: _backgroundCommandList, symObjAddr: 0x38D68, symBinAddr: 0x20B900, symSize: 0x0 }
   - { offset: 0xB4EAA, size: 0x8, addend: 0x0, symName: _fullCommandPath, symObjAddr: 0xF4B0, symBinAddr: 0x1E830, symSize: 0x0 }
-  - { offset: 0xB4EEC, size: 0x8, addend: 0x0, symName: _parentSession, symObjAddr: 0x38C40, symBinAddr: 0x20B908, symSize: 0x0 }
-  - { offset: 0xB4F13, size: 0x8, addend: 0x0, symName: _limitFilesOpen, symObjAddr: 0x38CD8, symBinAddr: 0x3FC10, symSize: 0x0 }
-  - { offset: 0xB4F29, size: 0x8, addend: 0x0, symName: _thread_stdin, symObjAddr: 0x12E68, symBinAddr: 0x1EA70, symSize: 0x0 }
-  - { offset: 0xB4F40, size: 0x8, addend: 0x0, symName: _thread_stdout, symObjAddr: 0x12E80, symBinAddr: 0x1EA88, symSize: 0x0 }
-  - { offset: 0xB4F57, size: 0x8, addend: 0x0, symName: _thread_stderr, symObjAddr: 0x12E98, symBinAddr: 0x1EAA0, symSize: 0x0 }
-  - { offset: 0xB4F6E, size: 0x8, addend: 0x0, symName: _thread_context, symObjAddr: 0x12EB0, symBinAddr: 0x1EAB8, symSize: 0x0 }
-  - { offset: 0xB4F86, size: 0x8, addend: 0x0, symName: _sessionList, symObjAddr: 0x38C98, symBinAddr: 0x3FBD0, symSize: 0x0 }
-  - { offset: 0xB4FA1, size: 0x8, addend: 0x0, symName: _aliasDictionary, symObjAddr: 0x38CE8, symBinAddr: 0x3FC20, symSize: 0x0 }
-  - { offset: 0xB4FB7, size: 0x8, addend: 0x0, symName: _PythonIsRunning, symObjAddr: 0x38CC8, symBinAddr: 0x3FC00, symSize: 0x0 }
-  - { offset: 0xB4FD9, size: 0x8, addend: 0x0, symName: _PerlIsRunning, symObjAddr: 0x38CD0, symBinAddr: 0x3FC08, symSize: 0x0 }
-  - { offset: 0xB4FFB, size: 0x8, addend: 0x0, symName: _TeXIsRunning, symObjAddr: 0x38D00, symBinAddr: 0x3FC38, symSize: 0x0 }
-  - { offset: 0xB501D, size: 0x8, addend: 0x0, symName: _dashIsRunning, symObjAddr: 0x38D08, symBinAddr: 0x3FC40, symSize: 0x0 }
-  - { offset: 0xB5033, size: 0x8, addend: 0x0, symName: _sshIsRunning, symObjAddr: 0x38D14, symBinAddr: 0x3FC4C, symSize: 0x0 }
-  - { offset: 0xB5049, size: 0x8, addend: 0x0, symName: _rsyncIsRunning, symObjAddr: 0x38D1C, symBinAddr: 0x3FC54, symSize: 0x0 }
-  - { offset: 0xB5060, size: 0x8, addend: 0x0, symName: _randomValue, symObjAddr: 0x38CA0, symBinAddr: 0x3FBD8, symSize: 0x0 }
-  - { offset: 0xB5077, size: 0x8, addend: 0x0, symName: _directoriesInPath, symObjAddr: 0x38CC0, symBinAddr: 0x3FBF8, symSize: 0x0 }
-  - { offset: 0xB508E, size: 0x8, addend: 0x0, symName: _parentDir, symObjAddr: 0x38C48, symBinAddr: 0x20B910, symSize: 0x0 }
-  - { offset: 0xB50A5, size: 0x8, addend: 0x0, symName: _crash_handler_called, symObjAddr: 0x12EE0, symBinAddr: 0x1EAE8, symSize: 0x0 }
-  - { offset: 0xB50BD, size: 0x8, addend: 0x0, symName: _child_stdin, symObjAddr: 0x12EF8, symBinAddr: 0x1EB00, symSize: 0x0 }
-  - { offset: 0xB50D5, size: 0x8, addend: 0x0, symName: _child_stdout, symObjAddr: 0x12F10, symBinAddr: 0x1EB18, symSize: 0x0 }
-  - { offset: 0xB50ED, size: 0x8, addend: 0x0, symName: _child_stderr, symObjAddr: 0x12F28, symBinAddr: 0x1EB30, symSize: 0x0 }
-  - { offset: 0xB5104, size: 0x8, addend: 0x0, symName: _currentPythonInterpreter, symObjAddr: 0x38CF0, symBinAddr: 0x3FC28, symSize: 0x0 }
-  - { offset: 0xB511A, size: 0x8, addend: 0x0, symName: _showPythonInterpreterAlert, symObjAddr: 0x38CF4, symBinAddr: 0x3FC2C, symSize: 0x0 }
-  - { offset: 0xB5138, size: 0x8, addend: 0x0, symName: _currentPerlInterpreter, symObjAddr: 0x38CF8, symBinAddr: 0x3FC30, symSize: 0x0 }
-  - { offset: 0xB514E, size: 0x8, addend: 0x0, symName: _currentTeXInterpreter, symObjAddr: 0x38CFC, symBinAddr: 0x3FC34, symSize: 0x0 }
-  - { offset: 0xB5164, size: 0x8, addend: 0x0, symName: _currentDashCommand, symObjAddr: 0x38D04, symBinAddr: 0x3FC3C, symSize: 0x0 }
-  - { offset: 0xB517A, size: 0x8, addend: 0x0, symName: _currentSshCommand, symObjAddr: 0x38D10, symBinAddr: 0x3FC48, symSize: 0x0 }
-  - { offset: 0xB5190, size: 0x8, addend: 0x0, symName: _curlIsRunning, symObjAddr: 0x38D16, symBinAddr: 0x3FC4E, symSize: 0x0 }
-  - { offset: 0xB51AD, size: 0x8, addend: 0x0, symName: _scpIsRunning, symObjAddr: 0x38D17, symBinAddr: 0x3FC4F, symSize: 0x0 }
-  - { offset: 0xB51CA, size: 0x8, addend: 0x0, symName: _currentRsyncCommand, symObjAddr: 0x38D18, symBinAddr: 0x3FC50, symSize: 0x0 }
-  - { offset: 0xB52EC, size: 0x8, addend: 0x0, symName: _ios_stdin, symObjAddr: 0x0, symBinAddr: 0x2F23, symSize: 0x12 }
-  - { offset: 0xB5313, size: 0x8, addend: 0x0, symName: _ios_stdout, symObjAddr: 0x12, symBinAddr: 0x2F35, symSize: 0x12 }
-  - { offset: 0xB533A, size: 0x8, addend: 0x0, symName: _ios_stderr, symObjAddr: 0x24, symBinAddr: 0x2F47, symSize: 0x12 }
-  - { offset: 0xB5361, size: 0x8, addend: 0x0, symName: _ios_context, symObjAddr: 0x36, symBinAddr: 0x2F59, symSize: 0x12 }
-  - { offset: 0xB5388, size: 0x8, addend: 0x0, symName: _ios_setBookmarkDictionaryName, symObjAddr: 0x48, symBinAddr: 0x2F6B, symSize: 0x14 }
-  - { offset: 0xB53AF, size: 0x8, addend: 0x0, symName: _ios_getBookmarkedVersion, symObjAddr: 0x5C, symBinAddr: 0x2F7F, symSize: 0x5BC }
-  - { offset: 0xB57AA, size: 0x8, addend: 0x0, symName: _ios_exit, symObjAddr: 0x618, symBinAddr: 0x353B, symSize: 0x24 }
+  - { offset: 0xB4EEC, size: 0x8, addend: 0x0, symName: _parentSession, symObjAddr: 0x38D70, symBinAddr: 0x20B908, symSize: 0x0 }
+  - { offset: 0xB4F13, size: 0x8, addend: 0x0, symName: _limitFilesOpen, symObjAddr: 0x38E08, symBinAddr: 0x3FC10, symSize: 0x0 }
+  - { offset: 0xB4F29, size: 0x8, addend: 0x0, symName: _thread_stdin, symObjAddr: 0x12E88, symBinAddr: 0x1EA70, symSize: 0x0 }
+  - { offset: 0xB4F40, size: 0x8, addend: 0x0, symName: _thread_stdout, symObjAddr: 0x12EA0, symBinAddr: 0x1EA88, symSize: 0x0 }
+  - { offset: 0xB4F57, size: 0x8, addend: 0x0, symName: _thread_stderr, symObjAddr: 0x12EB8, symBinAddr: 0x1EAA0, symSize: 0x0 }
+  - { offset: 0xB4F6E, size: 0x8, addend: 0x0, symName: _thread_context, symObjAddr: 0x12ED0, symBinAddr: 0x1EAB8, symSize: 0x0 }
+  - { offset: 0xB4F86, size: 0x8, addend: 0x0, symName: _sessionList, symObjAddr: 0x38DC8, symBinAddr: 0x3FBD0, symSize: 0x0 }
+  - { offset: 0xB4FA1, size: 0x8, addend: 0x0, symName: _aliasDictionary, symObjAddr: 0x38E18, symBinAddr: 0x3FC20, symSize: 0x0 }
+  - { offset: 0xB4FB7, size: 0x8, addend: 0x0, symName: _PythonIsRunning, symObjAddr: 0x38DF8, symBinAddr: 0x3FC00, symSize: 0x0 }
+  - { offset: 0xB4FD9, size: 0x8, addend: 0x0, symName: _PerlIsRunning, symObjAddr: 0x38E00, symBinAddr: 0x3FC08, symSize: 0x0 }
+  - { offset: 0xB4FFB, size: 0x8, addend: 0x0, symName: _TeXIsRunning, symObjAddr: 0x38E30, symBinAddr: 0x3FC38, symSize: 0x0 }
+  - { offset: 0xB501D, size: 0x8, addend: 0x0, symName: _dashIsRunning, symObjAddr: 0x38E38, symBinAddr: 0x3FC40, symSize: 0x0 }
+  - { offset: 0xB5033, size: 0x8, addend: 0x0, symName: _sshIsRunning, symObjAddr: 0x38E44, symBinAddr: 0x3FC4C, symSize: 0x0 }
+  - { offset: 0xB5049, size: 0x8, addend: 0x0, symName: _rsyncIsRunning, symObjAddr: 0x38E4C, symBinAddr: 0x3FC54, symSize: 0x0 }
+  - { offset: 0xB5060, size: 0x8, addend: 0x0, symName: _randomValue, symObjAddr: 0x38DD0, symBinAddr: 0x3FBD8, symSize: 0x0 }
+  - { offset: 0xB5077, size: 0x8, addend: 0x0, symName: _directoriesInPath, symObjAddr: 0x38DF0, symBinAddr: 0x3FBF8, symSize: 0x0 }
+  - { offset: 0xB508E, size: 0x8, addend: 0x0, symName: _parentDir, symObjAddr: 0x38D78, symBinAddr: 0x20B910, symSize: 0x0 }
+  - { offset: 0xB50A5, size: 0x8, addend: 0x0, symName: _crash_handler_called, symObjAddr: 0x12F00, symBinAddr: 0x1EAE8, symSize: 0x0 }
+  - { offset: 0xB50BD, size: 0x8, addend: 0x0, symName: _child_stdin, symObjAddr: 0x12F18, symBinAddr: 0x1EB00, symSize: 0x0 }
+  - { offset: 0xB50D5, size: 0x8, addend: 0x0, symName: _child_stdout, symObjAddr: 0x12F30, symBinAddr: 0x1EB18, symSize: 0x0 }
+  - { offset: 0xB50ED, size: 0x8, addend: 0x0, symName: _child_stderr, symObjAddr: 0x12F48, symBinAddr: 0x1EB30, symSize: 0x0 }
+  - { offset: 0xB5104, size: 0x8, addend: 0x0, symName: _currentPythonInterpreter, symObjAddr: 0x38E20, symBinAddr: 0x3FC28, symSize: 0x0 }
+  - { offset: 0xB511A, size: 0x8, addend: 0x0, symName: _showPythonInterpreterAlert, symObjAddr: 0x38E24, symBinAddr: 0x3FC2C, symSize: 0x0 }
+  - { offset: 0xB5138, size: 0x8, addend: 0x0, symName: _currentPerlInterpreter, symObjAddr: 0x38E28, symBinAddr: 0x3FC30, symSize: 0x0 }
+  - { offset: 0xB514E, size: 0x8, addend: 0x0, symName: _currentTeXInterpreter, symObjAddr: 0x38E2C, symBinAddr: 0x3FC34, symSize: 0x0 }
+  - { offset: 0xB5164, size: 0x8, addend: 0x0, symName: _currentDashCommand, symObjAddr: 0x38E34, symBinAddr: 0x3FC3C, symSize: 0x0 }
+  - { offset: 0xB517A, size: 0x8, addend: 0x0, symName: _currentSshCommand, symObjAddr: 0x38E40, symBinAddr: 0x3FC48, symSize: 0x0 }
+  - { offset: 0xB5190, size: 0x8, addend: 0x0, symName: _curlIsRunning, symObjAddr: 0x38E46, symBinAddr: 0x3FC4E, symSize: 0x0 }
+  - { offset: 0xB51AD, size: 0x8, addend: 0x0, symName: _scpIsRunning, symObjAddr: 0x38E47, symBinAddr: 0x3FC4F, symSize: 0x0 }
+  - { offset: 0xB51CA, size: 0x8, addend: 0x0, symName: _currentRsyncCommand, symObjAddr: 0x38E48, symBinAddr: 0x3FC50, symSize: 0x0 }
+  - { offset: 0xB52EC, size: 0x8, addend: 0x0, symName: _a_shell_stdin, symObjAddr: 0x0, symBinAddr: 0x2F23, symSize: 0x12 }
+  - { offset: 0xB5313, size: 0x8, addend: 0x0, symName: _a_shell_stdout, symObjAddr: 0x12, symBinAddr: 0x2F35, symSize: 0x12 }
+  - { offset: 0xB533A, size: 0x8, addend: 0x0, symName: _a_shell_stderr, symObjAddr: 0x24, symBinAddr: 0x2F47, symSize: 0x12 }
+  - { offset: 0xB5361, size: 0x8, addend: 0x0, symName: _a_shell_context, symObjAddr: 0x36, symBinAddr: 0x2F59, symSize: 0x12 }
+  - { offset: 0xB5388, size: 0x8, addend: 0x0, symName: _a_shell_setBookmarkDictionaryName, symObjAddr: 0x48, symBinAddr: 0x2F6B, symSize: 0x14 }
+  - { offset: 0xB53AF, size: 0x8, addend: 0x0, symName: _a_shell_getBookmarkedVersion, symObjAddr: 0x5C, symBinAddr: 0x2F7F, symSize: 0x5BC }
+  - { offset: 0xB57AA, size: 0x8, addend: 0x0, symName: _a_shell_exit, symObjAddr: 0x618, symBinAddr: 0x353B, symSize: 0x24 }
   - { offset: 0xB57E0, size: 0x8, addend: 0x0, symName: _set_session_errno, symObjAddr: 0x63C, symBinAddr: 0x355F, symSize: 0x1F }
   - { offset: 0xB5801, size: 0x8, addend: 0x0, symName: _set_session_errno, symObjAddr: 0x63C, symBinAddr: 0x355F, symSize: 0x1F }
   - { offset: 0xB5834, size: 0x8, addend: 0x0, symName: _abort, symObjAddr: 0x65B, symBinAddr: 0x16DC6, symSize: 0xC }
   - { offset: 0xB584E, size: 0x8, addend: 0x0, symName: _canSetSignal, symObjAddr: 0x667, symBinAddr: 0x357E, symSize: 0x3D }
   - { offset: 0xB5859, size: 0x8, addend: 0x0, symName: _canSetSignal, symObjAddr: 0x667, symBinAddr: 0x357E, symSize: 0x3D }
-  - { offset: 0xB58BA, size: 0x8, addend: 0x0, symName: _ios_signal, symObjAddr: 0x6A4, symBinAddr: 0x35BB, symSize: 0x2C }
-  - { offset: 0xB5929, size: 0x8, addend: 0x0, symName: _ios_getLogicalPWD, symObjAddr: 0x6D0, symBinAddr: 0x35E7, symSize: 0xBA }
-  - { offset: 0xB59CC, size: 0x8, addend: 0x0, symName: _ios_setWindowSize, symObjAddr: 0x78A, symBinAddr: 0x36A1, symSize: 0x132 }
-  - { offset: 0xB5BA6, size: 0x8, addend: 0x0, symName: _ios_getenv, symObjAddr: 0x8BC, symBinAddr: 0x37D3, symSize: 0xDD }
-  - { offset: 0xB5CC3, size: 0x8, addend: 0x0, symName: _ios_IsMainThread, symObjAddr: 0x999, symBinAddr: 0x38B0, symSize: 0x16 }
-  - { offset: 0xB5CF6, size: 0x8, addend: 0x0, symName: _ios_getCommandStatus, symObjAddr: 0x9AF, symBinAddr: 0x38C6, symSize: 0x21 }
-  - { offset: 0xB5D1E, size: 0x8, addend: 0x0, symName: _ios_progname, symObjAddr: 0x9D0, symBinAddr: 0x38E7, symSize: 0x3A }
-  - { offset: 0xB5D5A, size: 0x8, addend: 0x0, symName: _ios_expandtilde, symObjAddr: 0xA0A, symBinAddr: 0x3921, symSize: 0xE9 }
+  - { offset: 0xB58BA, size: 0x8, addend: 0x0, symName: _a_shell_signal, symObjAddr: 0x6A4, symBinAddr: 0x35BB, symSize: 0x2C }
+  - { offset: 0xB5929, size: 0x8, addend: 0x0, symName: _a_shell_getLogicalPWD, symObjAddr: 0x6D0, symBinAddr: 0x35E7, symSize: 0xBA }
+  - { offset: 0xB59CC, size: 0x8, addend: 0x0, symName: _a_shell_setWindowSize, symObjAddr: 0x78A, symBinAddr: 0x36A1, symSize: 0x132 }
+  - { offset: 0xB5BA6, size: 0x8, addend: 0x0, symName: _a_shell_getenv, symObjAddr: 0x8BC, symBinAddr: 0x37D3, symSize: 0xDD }
+  - { offset: 0xB5CC3, size: 0x8, addend: 0x0, symName: _a_shell_IsMainThread, symObjAddr: 0x999, symBinAddr: 0x38B0, symSize: 0x16 }
+  - { offset: 0xB5CF6, size: 0x8, addend: 0x0, symName: _a_shell_getCommandStatus, symObjAddr: 0x9AF, symBinAddr: 0x38C6, symSize: 0x21 }
+  - { offset: 0xB5D1E, size: 0x8, addend: 0x0, symName: _a_shell_progname, symObjAddr: 0x9D0, symBinAddr: 0x38E7, symSize: 0x3A }
+  - { offset: 0xB5D5A, size: 0x8, addend: 0x0, symName: _a_shell_expandtilde, symObjAddr: 0xA0A, symBinAddr: 0x3921, symSize: 0xE9 }
   - { offset: 0xB5E55, size: 0x8, addend: 0x0, symName: _crash_handler, symObjAddr: 0xAF3, symBinAddr: 0x3A0A, symSize: 0x72 }
   - { offset: 0xB5EB5, size: 0x8, addend: 0x0, symName: _initializeEnvironment, symObjAddr: 0xB65, symBinAddr: 0x3A7C, symSize: 0x96D }
   - { offset: 0xB5EDE, size: 0x8, addend: 0x0, symName: _initializeEnvironment, symObjAddr: 0xB65, symBinAddr: 0x3A7C, symSize: 0x96D }
-  - { offset: 0xB680E, size: 0x8, addend: 0x0, symName: _ios_setMiniRoot, symObjAddr: 0x14D2, symBinAddr: 0x43E9, symSize: 0x203 }
-  - { offset: 0xB6A21, size: 0x8, addend: 0x0, symName: _ios_setMiniRootURL, symObjAddr: 0x16D5, symBinAddr: 0x45EC, symSize: 0x165 }
+  - { offset: 0xB680E, size: 0x8, addend: 0x0, symName: _a_shell_setMiniRoot, symObjAddr: 0x14D2, symBinAddr: 0x43E9, symSize: 0x203 }
+  - { offset: 0xB6A21, size: 0x8, addend: 0x0, symName: _a_shell_setMiniRootURL, symObjAddr: 0x16D5, symBinAddr: 0x45EC, symSize: 0x165 }
   - { offset: 0xB6BB9, size: 0x8, addend: 0x0, symName: _initSessionParameters, symObjAddr: 0x183A, symBinAddr: 0x4751, symSize: 0x1AB }
-  - { offset: 0xB6CC6, size: 0x8, addend: 0x0, symName: _ios_setAllowedPaths, symObjAddr: 0x19E5, symBinAddr: 0x48FC, symSize: 0x1A }
+  - { offset: 0xB6CC6, size: 0x8, addend: 0x0, symName: _a_shell_setAllowedPaths, symObjAddr: 0x19E5, symBinAddr: 0x48FC, symSize: 0x1A }
   - { offset: 0xB6CF3, size: 0x8, addend: 0x0, symName: ___allowed_cd_to_path, symObjAddr: 0x19FF, symBinAddr: 0x4916, symSize: 0x1FD }
   - { offset: 0xB6E6C, size: 0x8, addend: 0x0, symName: ___cd_to_dir, symObjAddr: 0x1BFC, symBinAddr: 0x4B13, symSize: 0x2DF }
-  - { offset: 0xB7144, size: 0x8, addend: 0x0, symName: _ios_fchdir, symObjAddr: 0x1EDB, symBinAddr: 0x4DF2, symSize: 0x225 }
-  - { offset: 0xB73CA, size: 0x8, addend: 0x0, symName: _ios_fchdir_nolock, symObjAddr: 0x2100, symBinAddr: 0x5017, symSize: 0x1FD }
+  - { offset: 0xB7144, size: 0x8, addend: 0x0, symName: _a_shell_fchdir, symObjAddr: 0x1EDB, symBinAddr: 0x4DF2, symSize: 0x225 }
+  - { offset: 0xB73CA, size: 0x8, addend: 0x0, symName: _a_shell_fchdir_nolock, symObjAddr: 0x2100, symBinAddr: 0x5017, symSize: 0x1FD }
   - { offset: 0xB75CF, size: 0x8, addend: 0x0, symName: _chdir_nolock, symObjAddr: 0x22FD, symBinAddr: 0x5214, symSize: 0x31E }
   - { offset: 0xB78F3, size: 0x8, addend: 0x0, symName: _chdir, symObjAddr: 0x261B, symBinAddr: 0x5532, symSize: 0x352 }
   - { offset: 0xB7C09, size: 0x8, addend: 0x0, symName: _too_many_scripts, symObjAddr: 0x296D, symBinAddr: 0x5884, symSize: 0x67 }
@@ -190,22 +190,22 @@ relocations:
   - { offset: 0xB83FD, size: 0x8, addend: 0x0, symName: _getoptString, symObjAddr: 0x2EF6, symBinAddr: 0x5E0D, symSize: 0x98 }
   - { offset: 0xB849E, size: 0x8, addend: 0x0, symName: _initializeCommandList, symObjAddr: 0x2F8E, symBinAddr: 0x5EA5, symSize: 0x4FB }
   - { offset: 0xB8870, size: 0x8, addend: 0x0, symName: _operatesOn, symObjAddr: 0x3489, symBinAddr: 0x63A0, symSize: 0x98 }
-  - { offset: 0xB8911, size: 0x8, addend: 0x0, symName: _ios_executable, symObjAddr: 0x3521, symBinAddr: 0x6438, symSize: 0xA0 }
-  - { offset: 0xB89C5, size: 0x8, addend: 0x0, symName: _ios_popen, symObjAddr: 0x35C1, symBinAddr: 0x64D8, symSize: 0x124 }
-  - { offset: 0xB8B75, size: 0x8, addend: 0x0, symName: _ios_system, symObjAddr: 0x36E5, symBinAddr: 0x65FC, symSize: 0x5D1D }
+  - { offset: 0xB8911, size: 0x8, addend: 0x0, symName: _a_shell_executable, symObjAddr: 0x3521, symBinAddr: 0x6438, symSize: 0xA0 }
+  - { offset: 0xB89C5, size: 0x8, addend: 0x0, symName: _a_shell_popen, symObjAddr: 0x35C1, symBinAddr: 0x64D8, symSize: 0x124 }
+  - { offset: 0xB8B75, size: 0x8, addend: 0x0, symName: _a_shell_system, symObjAddr: 0x36E5, symBinAddr: 0x65FC, symSize: 0x5D1D }
   - { offset: 0xBD152, size: 0x8, addend: 0x0, symName: _strstrquoted, symObjAddr: 0x9402, symBinAddr: 0xC319, symSize: 0xE0 }
-  - { offset: 0xBD292, size: 0x8, addend: 0x0, symName: _ios_startInteractive, symObjAddr: 0xCA31, symBinAddr: 0xF948, symSize: 0x4C }
+  - { offset: 0xBD292, size: 0x8, addend: 0x0, symName: _a_shell_startInteractive, symObjAddr: 0xCA31, symBinAddr: 0xF948, symSize: 0x4C }
   - { offset: 0xBD313, size: 0x8, addend: 0x0, symName: _getLastCharacterOfArgument, symObjAddr: 0xD5D5, symBinAddr: 0x104EC, symSize: 0x145 }
   - { offset: 0xBD4AC, size: 0x8, addend: 0x0, symName: _unquoteArgument, symObjAddr: 0xD71A, symBinAddr: 0x10631, symSize: 0xB5 }
   - { offset: 0xBD614, size: 0x8, addend: 0x0, symName: _isRealCommand, symObjAddr: 0xD554, symBinAddr: 0x1046B, symSize: 0x81 }
   - { offset: 0xBD720, size: 0x8, addend: 0x0, symName: _beforeScriptCommandName, symObjAddr: 0xCE55, symBinAddr: 0xFD6C, symSize: 0x6FF }
-  - { offset: 0xBDC05, size: 0x8, addend: 0x0, symName: _ios_expandFilename, symObjAddr: 0xD7CF, symBinAddr: 0x106E6, symSize: 0x534 }
-  - { offset: 0xBE1DF, size: 0x8, addend: 0x0, symName: _ios_system.cold.5, symObjAddr: 0xF3BC, symBinAddr: 0x16E5E, symSize: 0x23 }
-  - { offset: 0xBE1F7, size: 0x8, addend: 0x0, symName: _ios_system.cold.1, symObjAddr: 0xF330, symBinAddr: 0x16DD2, symSize: 0x23 }
-  - { offset: 0xBE20F, size: 0x8, addend: 0x0, symName: _ios_system.cold.2, symObjAddr: 0xF353, symBinAddr: 0x16DF5, symSize: 0x23 }
-  - { offset: 0xBE227, size: 0x8, addend: 0x0, symName: _ios_system.cold.4, symObjAddr: 0xF399, symBinAddr: 0x16E3B, symSize: 0x23 }
-  - { offset: 0xBE23F, size: 0x8, addend: 0x0, symName: _ios_system.cold.3, symObjAddr: 0xF376, symBinAddr: 0x16E18, symSize: 0x23 }
-  - { offset: 0xBE257, size: 0x8, addend: 0x0, symName: _ios_system.cold.6, symObjAddr: 0xF3DF, symBinAddr: 0x16E81, symSize: 0x23 }
+  - { offset: 0xBDC05, size: 0x8, addend: 0x0, symName: _a_shell_expandFilename, symObjAddr: 0xD7CF, symBinAddr: 0x106E6, symSize: 0x534 }
+  - { offset: 0xBE1DF, size: 0x8, addend: 0x0, symName: _a_shell_system.cold.5, symObjAddr: 0xF3BC, symBinAddr: 0x16E5E, symSize: 0x23 }
+  - { offset: 0xBE1F7, size: 0x8, addend: 0x0, symName: _a_shell_system.cold.1, symObjAddr: 0xF330, symBinAddr: 0x16DD2, symSize: 0x23 }
+  - { offset: 0xBE20F, size: 0x8, addend: 0x0, symName: _a_shell_system.cold.2, symObjAddr: 0xF353, symBinAddr: 0x16DF5, symSize: 0x23 }
+  - { offset: 0xBE227, size: 0x8, addend: 0x0, symName: _a_shell_system.cold.4, symObjAddr: 0xF399, symBinAddr: 0x16E3B, symSize: 0x23 }
+  - { offset: 0xBE23F, size: 0x8, addend: 0x0, symName: _a_shell_system.cold.3, symObjAddr: 0xF376, symBinAddr: 0x16E18, symSize: 0x23 }
+  - { offset: 0xBE257, size: 0x8, addend: 0x0, symName: _a_shell_system.cold.6, symObjAddr: 0xF3DF, symBinAddr: 0x16E81, symSize: 0x23 }
   - { offset: 0xBE26F, size: 0x8, addend: 0x0, symName: _pbpaste, symObjAddr: 0x94E2, symBinAddr: 0xC3F9, symSize: 0x259 }
   - { offset: 0xBE445, size: 0x8, addend: 0x0, symName: _pbcopy, symObjAddr: 0x973B, symBinAddr: 0xC652, symSize: 0x230 }
   - { offset: 0xBE6B3, size: 0x8, addend: 0x0, symName: _concatenateArgv, symObjAddr: 0x996B, symBinAddr: 0xC882, symSize: 0x1C6 }
@@ -215,40 +215,40 @@ relocations:
   - { offset: 0xBF4F8, size: 0x8, addend: 0x0, symName: _aliasedCommand, symObjAddr: 0xAED3, symBinAddr: 0xDDEA, symSize: 0x21D }
   - { offset: 0xBF684, size: 0x8, addend: 0x0, symName: _unalias_main, symObjAddr: 0xB0F0, symBinAddr: 0xE007, symSize: 0x119 }
   - { offset: 0xBF783, size: 0x8, addend: 0x0, symName: _sh_main, symObjAddr: 0xB209, symBinAddr: 0xE120, symSize: 0x6F3 }
-  - { offset: 0xBFD39, size: 0x8, addend: 0x0, symName: _ios_switchSession, symObjAddr: 0xB8FC, symBinAddr: 0xE813, symSize: 0x2F4 }
+  - { offset: 0xBFD39, size: 0x8, addend: 0x0, symName: _a_shell_switchSession, symObjAddr: 0xB8FC, symBinAddr: 0xE813, symSize: 0x2F4 }
   - { offset: 0xBFF7B, size: 0x8, addend: 0x0, symName: _splitCommandAndExecute, symObjAddr: 0xBBF0, symBinAddr: 0xEB07, symSize: 0x165 }
-  - { offset: 0xC0126, size: 0x8, addend: 0x0, symName: _ios_closeSession, symObjAddr: 0xBD55, symBinAddr: 0xEC6C, symSize: 0x6D }
-  - { offset: 0xC0190, size: 0x8, addend: 0x0, symName: _ios_execv, symObjAddr: 0xBDC2, symBinAddr: 0xECD9, symSize: 0x2D }
-  - { offset: 0xC0255, size: 0x8, addend: 0x0, symName: _ios_execve, symObjAddr: 0xBDEF, symBinAddr: 0xED06, symSize: 0x38 }
+  - { offset: 0xC0126, size: 0x8, addend: 0x0, symName: _a_shell_closeSession, symObjAddr: 0xBD55, symBinAddr: 0xEC6C, symSize: 0x6D }
+  - { offset: 0xC0190, size: 0x8, addend: 0x0, symName: _a_shell_execv, symObjAddr: 0xBDC2, symBinAddr: 0xECD9, symSize: 0x2D }
+  - { offset: 0xC0255, size: 0x8, addend: 0x0, symName: _a_shell_execve, symObjAddr: 0xBDEF, symBinAddr: 0xED06, symSize: 0x38 }
   - { offset: 0xC0349, size: 0x8, addend: 0x0, symName: _environmentAsArray, symObjAddr: 0xBE27, symBinAddr: 0xED3E, symSize: 0x21C }
-  - { offset: 0xC059D, size: 0x8, addend: 0x0, symName: _ios_getLastThreadId, symObjAddr: 0xC043, symBinAddr: 0xEF5A, symSize: 0x22 }
-  - { offset: 0xC05C5, size: 0x8, addend: 0x0, symName: _ios_dup2, symObjAddr: 0xC065, symBinAddr: 0xEF7C, symSize: 0x27F }
-  - { offset: 0xC0808, size: 0x8, addend: 0x0, symName: _ios_activateChildStreams, symObjAddr: 0xC2E4, symBinAddr: 0xF1FB, symSize: 0x90 }
-  - { offset: 0xC08A7, size: 0x8, addend: 0x0, symName: _ios_kill, symObjAddr: 0xC374, symBinAddr: 0xF28B, symSize: 0x193 }
-  - { offset: 0xC0A71, size: 0x8, addend: 0x0, symName: _ios_killpid, symObjAddr: 0xC507, symBinAddr: 0xF41E, symSize: 0x33 }
-  - { offset: 0xC0AFD, size: 0x8, addend: 0x0, symName: _ios_setDirectoryURL, symObjAddr: 0xC53A, symBinAddr: 0xF451, symSize: 0x1AA }
-  - { offset: 0xC0C9E, size: 0x8, addend: 0x0, symName: _ios_isatty, symObjAddr: 0xC6E4, symBinAddr: 0xF5FB, symSize: 0x142 }
-  - { offset: 0xC0D6B, size: 0x8, addend: 0x0, symName: _ios_setStreams, symObjAddr: 0xC826, symBinAddr: 0xF73D, symSize: 0x2F }
-  - { offset: 0xC0DBE, size: 0x8, addend: 0x0, symName: _ios_settty, symObjAddr: 0xC855, symBinAddr: 0xF76C, symSize: 0x21 }
-  - { offset: 0xC0DF3, size: 0x8, addend: 0x0, symName: _ios_gettty, symObjAddr: 0xC876, symBinAddr: 0xF78D, symSize: 0x2E }
-  - { offset: 0xC0E29, size: 0x8, addend: 0x0, symName: _ios_getstdin, symObjAddr: 0xC8A4, symBinAddr: 0xF7BB, symSize: 0x2E }
-  - { offset: 0xC0E5F, size: 0x8, addend: 0x0, symName: _ios_opentty, symObjAddr: 0xC8D2, symBinAddr: 0xF7E9, symSize: 0x35 }
-  - { offset: 0xC0E95, size: 0x8, addend: 0x0, symName: _ios_closetty, symObjAddr: 0xC907, symBinAddr: 0xF81E, symSize: 0x1E }
-  - { offset: 0xC0EB9, size: 0x8, addend: 0x0, symName: _ios_activePager, symObjAddr: 0xC925, symBinAddr: 0xF83C, symSize: 0x7C }
-  - { offset: 0xC0F1E, size: 0x8, addend: 0x0, symName: _ios_stopInteractive, symObjAddr: 0xC9A1, symBinAddr: 0xF8B8, symSize: 0x47 }
-  - { offset: 0xC0F9F, size: 0x8, addend: 0x0, symName: _ios_storeInteractive, symObjAddr: 0xC9E8, symBinAddr: 0xF8FF, symSize: 0x49 }
-  - { offset: 0xC1024, size: 0x8, addend: 0x0, symName: _ios_setContext, symObjAddr: 0xCA7D, symBinAddr: 0xF994, symSize: 0x21 }
-  - { offset: 0xC1059, size: 0x8, addend: 0x0, symName: _ios_getContext, symObjAddr: 0xCA9E, symBinAddr: 0xF9B5, symSize: 0x39 }
+  - { offset: 0xC059D, size: 0x8, addend: 0x0, symName: _a_shell_getLastThreadId, symObjAddr: 0xC043, symBinAddr: 0xEF5A, symSize: 0x22 }
+  - { offset: 0xC05C5, size: 0x8, addend: 0x0, symName: _a_shell_dup2, symObjAddr: 0xC065, symBinAddr: 0xEF7C, symSize: 0x27F }
+  - { offset: 0xC0808, size: 0x8, addend: 0x0, symName: _a_shell_activateChildStreams, symObjAddr: 0xC2E4, symBinAddr: 0xF1FB, symSize: 0x90 }
+  - { offset: 0xC08A7, size: 0x8, addend: 0x0, symName: _a_shell_kill, symObjAddr: 0xC374, symBinAddr: 0xF28B, symSize: 0x193 }
+  - { offset: 0xC0A71, size: 0x8, addend: 0x0, symName: _a_shell_killpid, symObjAddr: 0xC507, symBinAddr: 0xF41E, symSize: 0x33 }
+  - { offset: 0xC0AFD, size: 0x8, addend: 0x0, symName: _a_shell_setDirectoryURL, symObjAddr: 0xC53A, symBinAddr: 0xF451, symSize: 0x1AA }
+  - { offset: 0xC0C9E, size: 0x8, addend: 0x0, symName: _a_shell_isatty, symObjAddr: 0xC6E4, symBinAddr: 0xF5FB, symSize: 0x142 }
+  - { offset: 0xC0D6B, size: 0x8, addend: 0x0, symName: _a_shell_setStreams, symObjAddr: 0xC826, symBinAddr: 0xF73D, symSize: 0x2F }
+  - { offset: 0xC0DBE, size: 0x8, addend: 0x0, symName: _a_shell_settty, symObjAddr: 0xC855, symBinAddr: 0xF76C, symSize: 0x21 }
+  - { offset: 0xC0DF3, size: 0x8, addend: 0x0, symName: _a_shell_gettty, symObjAddr: 0xC876, symBinAddr: 0xF78D, symSize: 0x2E }
+  - { offset: 0xC0E29, size: 0x8, addend: 0x0, symName: _a_shell_getstdin, symObjAddr: 0xC8A4, symBinAddr: 0xF7BB, symSize: 0x2E }
+  - { offset: 0xC0E5F, size: 0x8, addend: 0x0, symName: _a_shell_opentty, symObjAddr: 0xC8D2, symBinAddr: 0xF7E9, symSize: 0x35 }
+  - { offset: 0xC0E95, size: 0x8, addend: 0x0, symName: _a_shell_closetty, symObjAddr: 0xC907, symBinAddr: 0xF81E, symSize: 0x1E }
+  - { offset: 0xC0EB9, size: 0x8, addend: 0x0, symName: _a_shell_activePager, symObjAddr: 0xC925, symBinAddr: 0xF83C, symSize: 0x7C }
+  - { offset: 0xC0F1E, size: 0x8, addend: 0x0, symName: _a_shell_stopInteractive, symObjAddr: 0xC9A1, symBinAddr: 0xF8B8, symSize: 0x47 }
+  - { offset: 0xC0F9F, size: 0x8, addend: 0x0, symName: _a_shell_storeInteractive, symObjAddr: 0xC9E8, symBinAddr: 0xF8FF, symSize: 0x49 }
+  - { offset: 0xC1024, size: 0x8, addend: 0x0, symName: _a_shell_setContext, symObjAddr: 0xCA7D, symBinAddr: 0xF994, symSize: 0x21 }
+  - { offset: 0xC1059, size: 0x8, addend: 0x0, symName: _a_shell_getContext, symObjAddr: 0xCA9E, symBinAddr: 0xF9B5, symSize: 0x39 }
   - { offset: 0xC1081, size: 0x8, addend: 0x0, symName: _addCommandList, symObjAddr: 0xCAD7, symBinAddr: 0xF9EE, symSize: 0x23C }
   - { offset: 0xC12BA, size: 0x8, addend: 0x0, symName: _commandsAsString, symObjAddr: 0xCD13, symBinAddr: 0xFC2A, symSize: 0xD3 }
   - { offset: 0xC1391, size: 0x8, addend: 0x0, symName: _commandsAsArray, symObjAddr: 0xCDE6, symBinAddr: 0xFCFD, symSize: 0x2A }
   - { offset: 0xC13C7, size: 0x8, addend: 0x0, symName: _aliasesAsArray, symObjAddr: 0xCE10, symBinAddr: 0xFD27, symSize: 0x45 }
   - { offset: 0xC1418, size: 0x8, addend: 0x0, symName: _nextUnescapedCharacter, symObjAddr: 0xE714, symBinAddr: 0x1162B, symSize: 0x86 }
-  - { offset: 0xC14E2, size: 0x8, addend: 0x0, symName: ___ios_system_block_invoke, symObjAddr: 0xDD03, symBinAddr: 0x10C1A, symSize: 0xA2 }
+  - { offset: 0xC14E2, size: 0x8, addend: 0x0, symName: ___a_shell_system_block_invoke, symObjAddr: 0xDD03, symBinAddr: 0x10C1A, symSize: 0xA2 }
   - { offset: 0xC15AC, size: 0x8, addend: 0x0, symName: _run_function, symObjAddr: 0xDDA5, symBinAddr: 0x10CBC, symSize: 0x414 }
   - { offset: 0xC1941, size: 0x8, addend: 0x0, symName: _pathNormalizeArray, symObjAddr: 0xE1B9, symBinAddr: 0x110D0, symSize: 0x2AA }
-  - { offset: 0xC1AAF, size: 0x8, addend: 0x0, symName: _ios_getPythonLibraryName, symObjAddr: 0xE5E7, symBinAddr: 0x114FE, symSize: 0xD1 }
-  - { offset: 0xC1B2D, size: 0x8, addend: 0x0, symName: _ios_releasePythonLibraryName, symObjAddr: 0xE6B8, symBinAddr: 0x115CF, symSize: 0x5C }
+  - { offset: 0xC1AAF, size: 0x8, addend: 0x0, symName: _a_shell_getPythonLibraryName, symObjAddr: 0xE5E7, symBinAddr: 0x114FE, symSize: 0xD1 }
+  - { offset: 0xC1B2D, size: 0x8, addend: 0x0, symName: _a_shell_releasePythonLibraryName, symObjAddr: 0xE6B8, symBinAddr: 0x115CF, symSize: 0x5C }
   - { offset: 0xC1BB0, size: 0x8, addend: 0x0, symName: _cleanup_function, symObjAddr: 0xE79A, symBinAddr: 0x116B1, symSize: 0xB96 }
   - { offset: 0xC27EB, size: 0x8, addend: 0x0, symName: ___known_browsers, symObjAddr: 0x0, symBinAddr: 0x12247, symSize: 0xD }
   - { offset: 0xC2808, size: 0x8, addend: 0x0, symName: ___known_browsers, symObjAddr: 0x0, symBinAddr: 0x12247, symSize: 0xD }
@@ -265,10 +265,10 @@ relocations:
   - { offset: 0xC36A7, size: 0x8, addend: 0x0, symName: ___copy_helper_block_e8_32s40s, symObjAddr: 0xF4A, symBinAddr: 0x13191, symSize: 0x25 }
   - { offset: 0xC36E8, size: 0x8, addend: 0x0, symName: ___destroy_helper_block_e8_32s40s, symObjAddr: 0xF6F, symBinAddr: 0x131B6, symSize: 0x25 }
   - { offset: 0xC39AF, size: 0x8, addend: 0x0, symName: _ashell_register_command, symObjAddr: 0x0, symBinAddr: 0x131DB, symSize: 0x1FC }
-  - { offset: 0xC39D7, size: 0x8, addend: 0x0, symName: _g_command_registry, symObjAddr: 0x4D20, symBinAddr: 0x3FC60, symSize: 0x0 }
-  - { offset: 0xC3AE9, size: 0x8, addend: 0x0, symName: _g_registry_initialized, symObjAddr: 0x1CED24, symBinAddr: 0x209C64, symSize: 0x0 }
+  - { offset: 0xC39D7, size: 0x8, addend: 0x0, symName: _g_command_registry, symObjAddr: 0x4D30, symBinAddr: 0x3FC60, symSize: 0x0 }
+  - { offset: 0xC3AE9, size: 0x8, addend: 0x0, symName: _g_registry_initialized, symObjAddr: 0x1CED34, symBinAddr: 0x209C64, symSize: 0x0 }
   - { offset: 0xC3B06, size: 0x8, addend: 0x0, symName: _g_cmd_mutex, symObjAddr: 0xD08, symBinAddr: 0x1E838, symSize: 0x0 }
-  - { offset: 0xC3B1C, size: 0x8, addend: 0x0, symName: _g_num_commands, symObjAddr: 0x1CED20, symBinAddr: 0x209C60, symSize: 0x0 }
+  - { offset: 0xC3B1C, size: 0x8, addend: 0x0, symName: _g_num_commands, symObjAddr: 0x1CED30, symBinAddr: 0x209C60, symSize: 0x0 }
   - { offset: 0xC3B71, size: 0x8, addend: 0x0, symName: _ashell_register_command, symObjAddr: 0x0, symBinAddr: 0x131DB, symSize: 0x1FC }
   - { offset: 0xC3CE2, size: 0x8, addend: 0x0, symName: _init_registry, symObjAddr: 0x1FC, symBinAddr: 0x133D7, symSize: 0x5D }
   - { offset: 0xC3D42, size: 0x8, addend: 0x0, symName: _find_command_index, symObjAddr: 0x259, symBinAddr: 0x13434, symSize: 0x6A }
@@ -315,19 +315,19 @@ relocations:
   - { offset: 0xC6F65, size: 0x8, addend: 0x0, symName: _ashell_session_stats, symObjAddr: 0x769, symBinAddr: 0x15AEE, symSize: 0xAC }
   - { offset: 0xC701E, size: 0x8, addend: 0x0, symName: _ashell_session_cleanup_stale, symObjAddr: 0x815, symBinAddr: 0x15B9A, symSize: 0xF9 }
   - { offset: 0xC7189, size: 0x8, addend: 0x0, symName: _ashell_session_validate, symObjAddr: 0x90E, symBinAddr: 0x15C93, symSize: 0xBF }
-  - { offset: 0xC733B, size: 0x8, addend: 0x0, symName: _ios_getsys_info, symObjAddr: 0x0, symBinAddr: 0x15D52, symSize: 0x253 }
-  - { offset: 0xC737C, size: 0x8, addend: 0x0, symName: _g_sysinfo_cache, symObjAddr: 0x45F0, symBinAddr: 0x20B880, symSize: 0x0 }
+  - { offset: 0xC733B, size: 0x8, addend: 0x0, symName: _a_shell_getsys_info, symObjAddr: 0x0, symBinAddr: 0x15D52, symSize: 0x253 }
+  - { offset: 0xC737C, size: 0x8, addend: 0x0, symName: _g_sysinfo_cache, symObjAddr: 0x4628, symBinAddr: 0x20B880, symSize: 0x0 }
   - { offset: 0xC740B, size: 0x8, addend: 0x0, symName: _g_sysinfo_mutex, symObjAddr: 0x650, symBinAddr: 0x1E9C0, symSize: 0x0 }
-  - { offset: 0xC7421, size: 0x8, addend: 0x0, symName: _g_sysinfo_cache_time, symObjAddr: 0x45E8, symBinAddr: 0x20B878, symSize: 0x0 }
-  - { offset: 0xC7433, size: 0x8, addend: 0x0, symName: _ios_getsys_info, symObjAddr: 0x0, symBinAddr: 0x15D52, symSize: 0x253 }
-  - { offset: 0xC7758, size: 0x8, addend: 0x0, symName: _ios_sysinfo_format, symObjAddr: 0x253, symBinAddr: 0x15FA5, symSize: 0xA7 }
-  - { offset: 0xC77EC, size: 0x8, addend: 0x0, symName: _ios_getproc_info, symObjAddr: 0x2FA, symBinAddr: 0x1604C, symSize: 0x4C }
-  - { offset: 0xC7827, size: 0x8, addend: 0x0, symName: _ios_freeproc_info, symObjAddr: 0x346, symBinAddr: 0x16098, symSize: 0xA }
-  - { offset: 0xC7869, size: 0x8, addend: 0x0, symName: _ios_list_processes, symObjAddr: 0x350, symBinAddr: 0x160A2, symSize: 0x143 }
-  - { offset: 0xC79CB, size: 0x8, addend: 0x0, symName: _ios_getproc_self, symObjAddr: 0x493, symBinAddr: 0x161E5, symSize: 0x11 }
-  - { offset: 0xC7A0F, size: 0x8, addend: 0x0, symName: _ios_procinfo_format, symObjAddr: 0x4A4, symBinAddr: 0x161F6, symSize: 0x82 }
-  - { offset: 0xC7A86, size: 0x8, addend: 0x0, symName: _ios_print_sysinfo, symObjAddr: 0x526, symBinAddr: 0x16278, symSize: 0x67 }
-  - { offset: 0xC7BE9, size: 0x8, addend: 0x0, symName: _ios_print_procinfo, symObjAddr: 0x58D, symBinAddr: 0x162DF, symSize: 0x68 }
+  - { offset: 0xC7421, size: 0x8, addend: 0x0, symName: _g_sysinfo_cache_time, symObjAddr: 0x4620, symBinAddr: 0x20B878, symSize: 0x0 }
+  - { offset: 0xC7433, size: 0x8, addend: 0x0, symName: _a_shell_getsys_info, symObjAddr: 0x0, symBinAddr: 0x15D52, symSize: 0x253 }
+  - { offset: 0xC7758, size: 0x8, addend: 0x0, symName: _a_shell_sysinfo_format, symObjAddr: 0x253, symBinAddr: 0x15FA5, symSize: 0xA7 }
+  - { offset: 0xC77EC, size: 0x8, addend: 0x0, symName: _a_shell_getproc_info, symObjAddr: 0x2FA, symBinAddr: 0x1604C, symSize: 0x4C }
+  - { offset: 0xC7827, size: 0x8, addend: 0x0, symName: _a_shell_freeproc_info, symObjAddr: 0x346, symBinAddr: 0x16098, symSize: 0xA }
+  - { offset: 0xC7869, size: 0x8, addend: 0x0, symName: _a_shell_list_processes, symObjAddr: 0x350, symBinAddr: 0x160A2, symSize: 0x143 }
+  - { offset: 0xC79CB, size: 0x8, addend: 0x0, symName: _a_shell_getproc_self, symObjAddr: 0x493, symBinAddr: 0x161E5, symSize: 0x11 }
+  - { offset: 0xC7A0F, size: 0x8, addend: 0x0, symName: _a_shell_procinfo_format, symObjAddr: 0x4A4, symBinAddr: 0x161F6, symSize: 0x82 }
+  - { offset: 0xC7A86, size: 0x8, addend: 0x0, symName: _a_shell_print_sysinfo, symObjAddr: 0x526, symBinAddr: 0x16278, symSize: 0x67 }
+  - { offset: 0xC7BE9, size: 0x8, addend: 0x0, symName: _a_shell_print_procinfo, symObjAddr: 0x58D, symBinAddr: 0x162DF, symSize: 0x68 }
   - { offset: 0xC7DC2, size: 0x8, addend: 0x0, symName: _ashell_set_trace_level, symObjAddr: 0x0, symBinAddr: 0x16347, symSize: 0x2A }
   - { offset: 0xC7DEA, size: 0x8, addend: 0x0, symName: _g_trace_mutex, symObjAddr: 0x480, symBinAddr: 0x1EA00, symSize: 0x0 }
   - { offset: 0xC7E00, size: 0x8, addend: 0x0, symName: _g_trace_level, symObjAddr: 0x4C0, symBinAddr: 0x1EA40, symSize: 0x0 }
