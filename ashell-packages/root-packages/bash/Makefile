@@ -1,4 +1,4 @@
-# libcurl XCFramework Build
+# bash XCFramework Build
 # iOS cross-compilation with proper architecture support
 
 .ONESHELL:
@@ -8,12 +8,12 @@ SHELL := /bin/bash
 # Configuration
 # =============================================================================
 
-PKG_NAME := libcurl
-PKG_VERSION := 8.5.0
+PKG_NAME := bash
+PKG_VERSION := 5.2.21
 
 # Build directories (relative to this Makefile)
 BUILD_ROOT := $(CURDIR)/.build
-SRC_DIR := $(BUILD_ROOT)/curl-$(PKG_VERSION)
+SRC_DIR := $(BUILD_ROOT)/bash-$(PKG_VERSION)
 BUILD_DIR := $(BUILD_ROOT)/build
 OUTPUT_DIR := $(CURDIR)/.dist
 
@@ -30,11 +30,10 @@ SIM_SDK := iphonesimulator
 DEPLOYMENT_TARGET := 16.0
 
 # Source URL
-SRC_URL := https://curl.se/download/curl-$(PKG_VERSION).tar.gz
+SRC_URL := https://ftp.gnu.org/gnu/bash/bash-$(PKG_VERSION).tar.gz
 
 # Dependencies
 LIBZ_XCFRAMEWORK := $(CURDIR)/../libz/.dist/libz.xcframework
-LIBSSL_XCFRAMEWORK := $(CURDIR)/../libssl/.dist/libssl.xcframework
 
 # =============================================================================
 # Phony Targets
@@ -56,12 +55,6 @@ check-deps:
 		exit 1; \
 	fi
 	@echo "✓ libz found"
-	@if [ ! -d "$(LIBSSL_XCFRAMEWORK)" ]; then \
-		echo "Error: libssl XCFramework not found at $(LIBSSL_XCFRAMEWORK)"; \
-		echo "Please build libssl first: cd ../libssl && make"; \
-		exit 1; \
-	fi
-	@echo "✓ libssl found"
 
 # =============================================================================
 # Download and Extract
@@ -70,24 +63,24 @@ check-deps:
 download: $(SRC_DIR)/configure
 
 $(SRC_DIR)/configure: check-deps
-	@echo "Downloading curl $(PKG_VERSION)..."
+	@echo "Downloading bash $(PKG_VERSION)..."
 	@mkdir -p $(BUILD_ROOT)
-	@if [ ! -f $(BUILD_ROOT)/curl-$(PKG_VERSION).tar.gz ]; then \
-		cd $(BUILD_ROOT) && curl -L -o curl-$(PKG_VERSION).tar.gz "$(SRC_URL)"; \
+	@if [ ! -f $(BUILD_ROOT)/bash-$(PKG_VERSION).tar.gz ]; then \
+		cd $(BUILD_ROOT) && curl -L -o bash-$(PKG_VERSION).tar.gz "$(SRC_URL)"; \
 	fi
 	@echo "Extracting..."
-	@cd $(BUILD_ROOT) && tar -xzf curl-$(PKG_VERSION).tar.gz
+	@cd $(BUILD_ROOT) && tar -xzf bash-$(PKG_VERSION).tar.gz
 	@touch $(SRC_DIR)/configure
 
 # =============================================================================
 # iOS Device Build (arm64)
 # =============================================================================
 
-build-ios: $(BUILD_DIR)/ios/libcurl.a
+build-ios: $(BUILD_DIR)/ios/bin/bash
 
-$(BUILD_DIR)/ios/libcurl.a: $(SRC_DIR)/configure
+$(BUILD_DIR)/ios/bin/bash: $(SRC_DIR)/configure
 	@echo "========================================"
-	@echo "Building curl for iOS (arm64)"
+	@echo "Building bash for iOS (arm64)"
 	@echo "========================================"
 	@mkdir -p $(BUILD_DIR)/ios
 
@@ -96,34 +89,20 @@ $(BUILD_DIR)/ios/libcurl.a: $(SRC_DIR)/configure
 	cd $(SRC_DIR) && \
 	$(MAKE) clean 2>/dev/null || true && \
 	CC="$$CC" \
-	CFLAGS="-arch $(IOS_ARCH) -isysroot $$SDK_PATH -mios-version-min=$(DEPLOYMENT_TARGET) -fembed-bitcode -O3 -I$(LIBZ_XCFRAMEWORK)/ios-arm64/include -I$(LIBSSL_XCFRAMEWORK)/ios-arm64/include" \
-	LDFLAGS="-arch $(IOS_ARCH) -isysroot $$SDK_PATH -mios-version-min=$(DEPLOYMENT_TARGET)" \
+	CFLAGS="-arch $(IOS_ARCH) -isysroot $$SDK_PATH -mios-version-min=$(DEPLOYMENT_TARGET) -fembed-bitcode -O2 -I$(LIBZ_XCFRAMEWORK)/ios-arm64/include" \
+	LDFLAGS="-arch $(IOS_ARCH) -isysroot $$SDK_PATH -mios-version-min=$(DEPLOYMENT_TARGET) -L$(LIBZ_XCFRAMEWORK)/ios-arm64" \
 	./configure \
 		--host=arm-apple-darwin \
 		--prefix=$(BUILD_DIR)/ios/install \
-		--enable-static \
-		--disable-shared \
-		--disable-ldap \
-		--disable-ldaps \
-		--with-zlib=$(LIBZ_XCFRAMEWORK)/ios-arm64 \
-		--with-ssl=$(LIBSSL_XCFRAMEWORK)/ios-arm64 \
-		--without-libpsl \
-		--without-librtmp \
-		--without-libidn2 \
-		--without-nghttp2 \
-		--without-ngtcp2 \
-		--without-nghttp3 \
-		--disable-rtsp \
-		--disable-dict \
-		--disable-file \
-		--disable-ftp \
-		--disable-gopher \
-		--disable-imap \
-		--disable-mqtt \
-		--disable-pop3 \
-		--disable-smtp \
-		--disable-telnet \
-		--disable-tftp \
+		--without-bash-malloc \
+		--with-installed-readline=no \
+		--with-libz \
+		--disable-nls \
+		--disable-rpath \
+		bash_cv_getcwd_malloc=yes \
+		bash_cv_job_control_missing=present \
+		bash_cv_sys_named_pipes=present \
+		bash_cv_func_sigsetjmp=present \
 		&& \
 	$(MAKE) -j$$(sysctl -n hw.ncpu) && \
 	$(MAKE) install
@@ -134,11 +113,11 @@ $(BUILD_DIR)/ios/libcurl.a: $(SRC_DIR)/configure
 # iOS Simulator Build (arm64 + x86_64)
 # =============================================================================
 
-build-simulator: $(BUILD_DIR)/simulator/libcurl.a
+build-simulator: $(BUILD_DIR)/simulator/bin/bash
 
-$(BUILD_DIR)/simulator/libcurl.a: $(SRC_DIR)/configure
+$(BUILD_DIR)/simulator/bin/bash: $(SRC_DIR)/configure
 	@echo "========================================"
-	@echo "Building curl for iOS Simulator"
+	@echo "Building bash for iOS Simulator"
 	@echo "========================================"
 	@mkdir -p $(BUILD_DIR)/simulator
 
@@ -149,23 +128,20 @@ $(BUILD_DIR)/simulator/libcurl.a: $(SRC_DIR)/configure
 	cd $(SRC_DIR) && \
 	$(MAKE) clean 2>/dev/null || true && \
 	CC="$$CC" \
-	CFLAGS="-arch arm64 -isysroot $$SDK_PATH -mios-version-min=$(DEPLOYMENT_TARGET) -O3 -I$(LIBZ_XCFRAMEWORK)/ios-arm64_x86_64-simulator/include -I$(LIBSSL_XCFRAMEWORK)/ios-arm64_x86_64-simulator/include" \
-	LDFLAGS="-arch arm64 -isysroot $$SDK_PATH -mios-version-min=$(DEPLOYMENT_TARGET)" \
+	CFLAGS="-arch arm64 -isysroot $$SDK_PATH -mios-version-min=$(DEPLOYMENT_TARGET) -O2 -I$(LIBZ_XCFRAMEWORK)/ios-arm64_x86_64-simulator/include" \
+	LDFLAGS="-arch arm64 -isysroot $$SDK_PATH -mios-version-min=$(DEPLOYMENT_TARGET) -L$(LIBZ_XCFRAMEWORK)/ios-arm64_x86_64-simulator" \
 	./configure \
 		--host=arm-apple-darwin \
 		--prefix=$(BUILD_DIR)/simulator/install_arm64 \
-		--enable-static \
-		--disable-shared \
-		--disable-ldap \
-		--disable-ldaps \
-		--with-zlib=$(LIBZ_XCFRAMEWORK)/ios-arm64_x86_64-simulator \
-		--with-ssl=$(LIBSSL_XCFRAMEWORK)/ios-arm64_x86_64-simulator \
-		--without-libpsl \
-		--without-librtmp \
-		--without-libidn2 \
-		--without-nghttp2 \
-		--without-ngtcp2 \
-		--without-nghttp3 \
+		--without-bash-malloc \
+		--with-installed-readline=no \
+		--with-libz \
+		--disable-nls \
+		--disable-rpath \
+		bash_cv_getcwd_malloc=yes \
+		bash_cv_job_control_missing=present \
+		bash_cv_sys_named_pipes=present \
+		bash_cv_func_sigsetjmp=present \
 		&& \
 	$(MAKE) -j$$(sysctl -n hw.ncpu) && \
 	$(MAKE) install
@@ -177,59 +153,55 @@ $(BUILD_DIR)/simulator/libcurl.a: $(SRC_DIR)/configure
 	cd $(SRC_DIR) && \
 	$(MAKE) clean 2>/dev/null || true && \
 	CC="$$CC" \
-	CFLAGS="-arch x86_64 -isysroot $$SDK_PATH -mios-version-min=$(DEPLOYMENT_TARGET) -O3 -I$(LIBZ_XCFRAMEWORK)/ios-arm64_x86_64-simulator/include -I$(LIBSSL_XCFRAMEWORK)/ios-arm64_x86_64-simulator/include" \
-	LDFLAGS="-arch x86_64 -isysroot $$SDK_PATH -mios-version-min=$(DEPLOYMENT_TARGET)" \
+	CFLAGS="-arch x86_64 -isysroot $$SDK_PATH -mios-version-min=$(DEPLOYMENT_TARGET) -O2 -I$(LIBZ_XCFRAMEWORK)/ios-arm64_x86_64-simulator/include" \
+	LDFLAGS="-arch x86_64 -isysroot $$SDK_PATH -mios-version-min=$(DEPLOYMENT_TARGET) -L$(LIBZ_XCFRAMEWORK)/ios-arm64_x86_64-simulator" \
 	./configure \
 		--host=x86_64-apple-darwin \
 		--prefix=$(BUILD_DIR)/simulator/install_x86_64 \
-		--enable-static \
-		--disable-shared \
-		--disable-ldap \
-		--disable-ldaps \
-		--with-zlib=$(LIBZ_XCFRAMEWORK)/ios-arm64_x86_64-simulator \
-		--with-ssl=$(LIBSSL_XCFRAMEWORK)/ios-arm64_x86_64-simulator \
-		--without-libpsl \
-		--without-librtmp \
-		--without-libidn2 \
-		--without-nghttp2 \
-		--without-ngtcp2 \
-		--without-nghttp3 \
+		--without-bash-malloc \
+		--with-installed-readline=no \
+		--with-libz \
+		--disable-nls \
+		--disable-rpath \
+		bash_cv_getcwd_malloc=yes \
+		bash_cv_job_control_missing=present \
+		bash_cv_sys_named_pipes=present \
+		bash_cv_func_sigsetjmp=present \
 		&& \
 	$(MAKE) -j$$(sysctl -n hw.ncpu) && \
 	$(MAKE) install
 
-	# Create universal library
-	@echo "Creating universal simulator library..."
-	@mkdir -p $(BUILD_DIR)/simulator/install/lib $(BUILD_DIR)/simulator/install/include && \
+	# Create universal binary
+	@echo "Creating universal simulator binary..."
+	@mkdir -p $(BUILD_DIR)/simulator/install/bin $(BUILD_DIR)/simulator/install/lib && \
 	lipo -create \
-		$(BUILD_DIR)/simulator/install_arm64/lib/libcurl.a \
-		$(BUILD_DIR)/simulator/install_x86_64/lib/libcurl.a \
-		-output $(BUILD_DIR)/simulator/install/lib/libcurl.a && \
-	cp $(BUILD_DIR)/simulator/install_arm64/include/curl/*.h $(BUILD_DIR)/simulator/install/include/
+		$(BUILD_DIR)/simulator/install_arm64/bin/bash \
+		$(BUILD_DIR)/simulator/install_x86_64/bin/bash \
+		-output $(BUILD_DIR)/simulator/install/bin/bash && \
+	cp -r $(BUILD_DIR)/simulator/install_arm64/lib/* $(BUILD_DIR)/simulator/install/lib/ 2>/dev/null || true && \
+	cp -r $(BUILD_DIR)/simulator/install_arm64/share $(BUILD_DIR)/simulator/install/ 2>/dev/null || true
 
 	@echo "Simulator build complete"
 
 # =============================================================================
-# XCFramework Creation
+# XCFramework Creation (for command binaries)
 # =============================================================================
 
 xcframework: $(XCFRAMEWORK)
 
 $(XCFRAMEWORK): build-ios build-simulator
 	@echo "========================================"
-	@echo "Creating XCFramework"
+	@echo "Creating XCFramework for bash"
 	@echo "========================================"
 	@mkdir -p $(OUTPUT_DIR)
 	@rm -rf $@
 
 	# Create XCFramework structure manually
-	@mkdir -p $@/ios-arm64 $@/ios-arm64_x86_64-simulator
-	@cp $(BUILD_DIR)/ios/install/lib/libcurl.a $@/ios-arm64/
-	@cp $(BUILD_DIR)/simulator/install/lib/libcurl.a $@/ios-arm64_x86_64-simulator/
-	@cp -r $(BUILD_DIR)/ios/install/include $@/ios-arm64/
-	@cp -r $(BUILD_DIR)/simulator/install/include $@/ios-arm64_x86_64-simulator/
+	@mkdir -p $@/ios-arm64/bin $@/ios-arm64_x86_64-simulator/bin
+	@cp $(BUILD_DIR)/ios/install/bin/bash $@/ios-arm64/bin/
+	@cp $(BUILD_DIR)/simulator/install/bin/bash $@/ios-arm64_x86_64-simulator/bin/
 
-	# Create Info.plist using echo commands
+	# Create Info.plist
 	@echo "Creating Info.plist..."
 	@echo '<?xml version="1.0" encoding="UTF-8"?>' > $@/Info.plist
 	@echo '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' >> $@/Info.plist
@@ -245,9 +217,7 @@ $(XCFRAMEWORK): build-ios build-simulator
 	@echo '            <key>LibraryIdentifier</key>' >> $@/Info.plist
 	@echo '            <string>ios-arm64</string>' >> $@/Info.plist
 	@echo '            <key>LibraryPath</key>' >> $@/Info.plist
-	@echo '            <string>libcurl.a</string>' >> $@/Info.plist
-	@echo '            <key>HeadersPath</key>' >> $@/Info.plist
-	@echo '            <string>include</string>' >> $@/Info.plist
+	@echo '            <string>bin/bash</string>' >> $@/Info.plist
 	@echo '            <key>SupportedArchitectures</key>' >> $@/Info.plist
 	@echo '            <array>' >> $@/Info.plist
 	@echo '                <string>arm64</string>' >> $@/Info.plist
@@ -259,9 +229,7 @@ $(XCFRAMEWORK): build-ios build-simulator
 	@echo '            <key>LibraryIdentifier</key>' >> $@/Info.plist
 	@echo '            <string>ios-arm64_x86_64-simulator</string>' >> $@/Info.plist
 	@echo '            <key>LibraryPath</key>' >> $@/Info.plist
-	@echo '            <string>libcurl.a</string>' >> $@/Info.plist
-	@echo '            <key>HeadersPath</key>' >> $@/Info.plist
-	@echo '            <string>include</string>' >> $@/Info.plist
+	@echo '            <string>bin/bash</string>' >> $@/Info.plist
 	@echo '            <key>SupportedArchitectures</key>' >> $@/Info.plist
 	@echo '            <array>' >> $@/Info.plist
 	@echo '                <string>arm64</string>' >> $@/Info.plist
@@ -290,7 +258,7 @@ clean:
 info: $(XCFRAMEWORK)
 	@echo "XCFramework Info:"
 	@echo "Location: $(XCFRAMEWORK)"
-	@echo "iOS Device:"
-	@file $(XCFRAMEWORK)/ios-arm64/libcurl.a
-	@echo "iOS Simulator:"
-	@file $(XCFRAMEWORK)/ios-arm64_x86_64-simulator/libcurl.a
+	@echo "iOS Device binary:"
+	@file $(XCFRAMEWORK)/ios-arm64/bin/bash
+	@echo "iOS Simulator binary:"
+	@file $(XCFRAMEWORK)/ios-arm64_x86_64-simulator/bin/bash
