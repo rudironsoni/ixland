@@ -4,7 +4,7 @@
 A_SHELL_PKG_NAME="libz"
 A_SHELL_PKG_VERSION="1.3.2"
 A_SHELL_PKG_SRCURL="https://github.com/madler/zlib/releases/download/v1.3.2/zlib-1.3.2.tar.gz"
-A_SHELL_PKG_SHA256="b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30"
+A_SHELL_PKG_SHA256="bb329a0a2cd0274d05519d61c667c062e06990d72e125ee2dfa8de64f0119d16"
 A_SHELL_PKG_DEPENDS=""
 A_SHELL_PKG_DESCRIPTION="zlib compression library"
 

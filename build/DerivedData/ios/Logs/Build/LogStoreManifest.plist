@@ -6,7 +6,7 @@
 	<integer>12</integer>
 	<key>logs</key>
 	<dict>
-		<key>2D96136D-617F-4B72-925D-4F1DFA2F0CBC</key>
+		<key>FE557731-3EBF-484B-9B70-A176D4EC33CE</key>
 		<dict>
 			<key>className</key>
 			<string>IDECommandLineBuildLog</string>
@@ -15,7 +15,7 @@
 			<key>domainType</key>
 			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
 			<key>fileName</key>
-			<string>2D96136D-617F-4B72-925D-4F1DFA2F0CBC.xcactivitylog</string>
+			<string>FE557731-3EBF-484B-9B70-A176D4EC33CE.xcactivitylog</string>
 			<key>hasPrimaryLog</key>
 			<true/>
 			<key>primaryObservable</key>
@@ -40,55 +40,13 @@
 			<key>signature</key>
 			<string>Cleaning project a_shell_system with scheme a_shell_system and configuration Release</string>
 			<key>timeStartedRecording</key>
-			<real>795734906.54576099</real>
+			<real>795735778.89566004</real>
 			<key>timeStoppedRecording</key>
-			<real>795734907.84154606</real>
+			<real>795735779.26087296</real>
 			<key>title</key>
 			<string>Cleaning project a_shell_system with scheme a_shell_system and configuration Release</string>
 			<key>uniqueIdentifier</key>
-			<string>2D96136D-617F-4B72-925D-4F1DFA2F0CBC</string>
-		</dict>
-		<key>556A11AC-BABA-4E5C-95AA-EED19A1B6FEE</key>
-		<dict>
-			<key>className</key>
-			<string>IDECommandLineBuildLog</string>
-			<key>documentTypeString</key>
-			<string>&lt;nil&gt;</string>
-			<key>domainType</key>
-			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
-			<key>fileName</key>
-			<string>556A11AC-BABA-4E5C-95AA-EED19A1B6FEE.xcactivitylog</string>
-			<key>hasPrimaryLog</key>
-			<true/>
-			<key>primaryObservable</key>
-			<dict>
-				<key>highLevelStatus</key>
-				<string>W</string>
-				<key>totalNumberOfAnalyzerIssues</key>
-				<integer>0</integer>
-				<key>totalNumberOfErrors</key>
-				<integer>0</integer>
-				<key>totalNumberOfTestFailures</key>
-				<integer>0</integer>
-				<key>totalNumberOfWarnings</key>
-				<integer>81</integer>
-			</dict>
-			<key>schemeIdentifier-containerName</key>
-			<string>a_shell_system project</string>
-			<key>schemeIdentifier-schemeName</key>
-			<string>a_shell_system</string>
-			<key>schemeIdentifier-sharedScheme</key>
-			<integer>1</integer>
-			<key>signature</key>
-			<string>Building project a_shell_system with scheme a_shell_system and configuration Release</string>
-			<key>timeStartedRecording</key>
-			<real>795734907.86065197</real>
-			<key>timeStoppedRecording</key>
-			<real>795734913.57082295</real>
-			<key>title</key>
-			<string>Building project a_shell_system with scheme a_shell_system and configuration Release</string>
-			<key>uniqueIdentifier</key>
-			<string>556A11AC-BABA-4E5C-95AA-EED19A1B6FEE</string>
+			<string>FE557731-3EBF-484B-9B70-A176D4EC33CE</string>
 		</dict>
 	</dict>
 </dict>
