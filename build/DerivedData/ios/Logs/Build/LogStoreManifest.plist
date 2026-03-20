@@ -6,7 +6,7 @@
 	<integer>12</integer>
 	<key>logs</key>
 	<dict>
-		<key>DF481193-0FAB-497E-B6B3-B7A47DE7C102</key>
+		<key>2D96136D-617F-4B72-925D-4F1DFA2F0CBC</key>
 		<dict>
 			<key>className</key>
 			<string>IDECommandLineBuildLog</string>
@@ -15,7 +15,7 @@
 			<key>domainType</key>
 			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
 			<key>fileName</key>
-			<string>DF481193-0FAB-497E-B6B3-B7A47DE7C102.xcactivitylog</string>
+			<string>2D96136D-617F-4B72-925D-4F1DFA2F0CBC.xcactivitylog</string>
 			<key>hasPrimaryLog</key>
 			<true/>
 			<key>primaryObservable</key>
@@ -40,15 +40,15 @@
 			<key>signature</key>
 			<string>Cleaning project a_shell_system with scheme a_shell_system and configuration Release</string>
 			<key>timeStartedRecording</key>
-			<real>795715811.91959596</real>
+			<real>795734906.54576099</real>
 			<key>timeStoppedRecording</key>
-			<real>795715812.87055695</real>
+			<real>795734907.84154606</real>
 			<key>title</key>
 			<string>Cleaning project a_shell_system with scheme a_shell_system and configuration Release</string>
 			<key>uniqueIdentifier</key>
-			<string>DF481193-0FAB-497E-B6B3-B7A47DE7C102</string>
+			<string>2D96136D-617F-4B72-925D-4F1DFA2F0CBC</string>
 		</dict>
-		<key>E7FEB368-7945-46D2-9973-65E0C2966186</key>
+		<key>556A11AC-BABA-4E5C-95AA-EED19A1B6FEE</key>
 		<dict>
 			<key>className</key>
 			<string>IDECommandLineBuildLog</string>
@@ -57,21 +57,21 @@
 			<key>domainType</key>
 			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
 			<key>fileName</key>
-			<string>E7FEB368-7945-46D2-9973-65E0C2966186.xcactivitylog</string>
+			<string>556A11AC-BABA-4E5C-95AA-EED19A1B6FEE.xcactivitylog</string>
 			<key>hasPrimaryLog</key>
 			<true/>
 			<key>primaryObservable</key>
 			<dict>
 				<key>highLevelStatus</key>
-				<string>E</string>
+				<string>W</string>
 				<key>totalNumberOfAnalyzerIssues</key>
 				<integer>0</integer>
 				<key>totalNumberOfErrors</key>
-				<integer>12</integer>
+				<integer>0</integer>
 				<key>totalNumberOfTestFailures</key>
 				<integer>0</integer>
 				<key>totalNumberOfWarnings</key>
-				<integer>0</integer>
+				<integer>81</integer>
 			</dict>
 			<key>schemeIdentifier-containerName</key>
 			<string>a_shell_system project</string>
@@ -82,13 +82,13 @@
 			<key>signature</key>
 			<string>Building project a_shell_system with scheme a_shell_system and configuration Release</string>
 			<key>timeStartedRecording</key>
-			<real>795715812.87980199</real>
+			<real>795734907.86065197</real>
 			<key>timeStoppedRecording</key>
-			<real>795715814.73461401</real>
+			<real>795734913.57082295</real>
 			<key>title</key>
 			<string>Building project a_shell_system with scheme a_shell_system and configuration Release</string>
 			<key>uniqueIdentifier</key>
-			<string>E7FEB368-7945-46D2-9973-65E0C2966186</string>
+			<string>556A11AC-BABA-4E5C-95AA-EED19A1B6FEE</string>
 		</dict>
 	</dict>
 </dict>
