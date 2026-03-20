@@ -15,7 +15,7 @@
 #include <sys/param.h>
 #include <dlfcn.h>  // for dlopen()/dlsym()/dlclose()
 
-#include "ios_error.h"
+#include "a_shell_system.h"
 #undef write
 #undef fwrite
 #undef puts

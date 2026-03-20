@@ -45,7 +45,7 @@ all: xcframework
 # Build iOS device framework (arm64)
 ios: $(IOS_FRAMEWORK)
 
-$(IOS_FRAMEWORK): $(PROJECT_FILE) $(wildcard a_shell_system/*.m) $(wildcard a_shell_system/*.h) a_shell_system.m a_shell_system.h ios_error.h
+$(IOS_FRAMEWORK): $(PROJECT_FILE) $(wildcard a_shell_system/*.m) $(wildcard a_shell_system/*.h) a_shell_system.m a_shell_system.h
 	@echo "=========================================="
 	@echo "Building iOS Device Framework (arm64)"
 	@echo "=========================================="
@@ -62,7 +62,7 @@ $(IOS_FRAMEWORK): $(PROJECT_FILE) $(wildcard a_shell_system/*.m) $(wildcard a_sh
 # Build iOS Simulator framework (arm64, x86_64)
 simulator: $(SIM_FRAMEWORK)
 
-$(SIM_FRAMEWORK): $(PROJECT_FILE) $(wildcard a_shell_system/*.m) $(wildcard a_shell_system/*.h) a_shell_system.m a_shell_system.h ios_error.h
+$(SIM_FRAMEWORK): $(PROJECT_FILE) $(wildcard a_shell_system/*.m) $(wildcard a_shell_system/*.h) a_shell_system.m a_shell_system.h
 	@echo "=========================================="
 	@echo "Building iOS Simulator Framework"
 	@echo "=========================================="

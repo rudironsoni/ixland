@@ -47,7 +47,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "ios_error.h"
+#include "a_shell_system.h"
 
 __thread int    __db_getopt_reset;    /* global reset for VxWorks. */
 

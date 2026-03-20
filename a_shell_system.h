@@ -7,10 +7,10 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+// Include new kernel headers
+#include "include/a_shell_kernel.h"
+
 // Include the main implementation header from a_shell_system directory
 #include "a_shell_system/a_shell_system.h"
-
-// Include error handling
-#include "ios_error.h"
 
 #endif
