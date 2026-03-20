@@ -28,3 +28,4 @@ ashell-packages/root-packages/*/*.o
 ashell-packages/root-packages/*/*.a
 ashell-packages/root-packages/*/zconf.h
 ashell-packages/root-packages/*/zlib.pc
+zlib-1.3.2/
