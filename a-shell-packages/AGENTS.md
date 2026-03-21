@@ -511,3 +511,215 @@ file .build/simulator/staging/usr/local/lib/libz.a
 **Last Updated**: 2026-03-21
 **Status**: iOS-native build system (no Debian)
 **Next Steps**: Create missing package build.sh files, add patches as needed
+
+## Testing Strategy
+
+### Overview
+
+Tests are executed **inside the a-shell iOS app** rather than on iOS Simulator directly. This provides the strongest validation that packages work in the actual iOS environment.
+
+### Test Architecture
+
+```
+Build System                    a-Shell App                    Results
+     │                               │                            │
+     ├─→ Build test binaries ─────→│                            │
+     │   (example, minigzip)       │                            │
+     │                               │                            │
+     ├─→ Copy to a-shell/ ─────────→│                            │
+     │   project resources/          │                            │
+     │                               │                            │
+     │                          ┌────┴────────────────┐           │
+     │                          │ TestRunner.swift   │           │
+     │                          │ - Spawns test      │           │
+     │                          │ - Captures stdout  │           │
+     │                          │ - Writes JSON      │           │
+     │                          │   results          │           │
+     │                          └────┬────────────────┘           │
+     │                               │                            │
+     │                          ┌────┴────────────────┐           │
+     │                          │ Documents/test/    │◄───────────┤
+     │                          │ results/           │  Read JSON │
+     │                          └────────────────────┘            │
+     │                               │                            │
+```
+
+### Why This Approach?
+
+**iOS Simulator Limitations:**
+- ❌ Cannot spawn raw command-line binaries
+- ❌ Requires app bundles for execution
+- ❌ Complex app packaging for each test
+
+**a-Shell Testing Advantages:**
+- ✅ Runs in actual iOS environment
+- ✅ Uses kernel syscall layer
+- ✅ Real sandbox constraints
+- ✅ Simple file I/O for results
+- ✅ Validates complete integration
+
+### Implementation Plan
+
+#### Phase 1: Test Binary Integration
+
+**Add to a-shell Xcode project:**
+```
+a-shell/
+└── Resources/
+    └── Tests/
+        ├── libz/
+        │   ├── example
+        │   ├── minigzip
+        │   └── manifest.json
+        ├── libssl/
+        │   └── ...
+        └── ...
+```
+
+**manifest.json format:**
+```json
+{
+  "package": "libz",
+  "version": "1.3.2",
+  "tests": [
+    {
+      "name": "example",
+      "binary": "example",
+      "args": ["/tmp/testfile"]
+    },
+    {
+      "name": "minigzip",
+      "binary": "minigzip",
+      "args": ["-h"]
+    }
+  ]
+}
+```
+
+#### Phase 2: Test Runner (Swift)
+
+**TestRunner.swift:**
+```swift
+import Foundation
+
+class TestRunner {
+    func runTest(_ test: TestConfig) -> TestResult {
+        // Spawn test process via kernel
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: test.binaryPath)
+        process.arguments = test.args
+        
+        // Capture output
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = pipe
+        
+        // Run with timeout
+        process.launch()
+        process.waitUntilExit()
+        
+        // Parse result
+        return TestResult(
+            name: test.name,
+            status: process.terminationStatus == 0 ? .passed : .failed,
+            output: String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+        )
+    }
+}
+```
+
+#### Phase 3: Result Export
+
+**Write to Documents:**
+```swift
+let resultsDir = FileManager.default
+    .urls(for: .documentDirectory, in: .userDomainMask)[0]
+    .appendingPathComponent("test-results")
+
+let resultFile = resultsDir.appendingPathComponent("\(package)-\(timestamp).json")
+// Write JSON results
+```
+
+**JSON Format:**
+```json
+{
+  "package": "libz",
+  "timestamp": "2026-03-21T15:00:00Z",
+  "target": "ios",
+  "results": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0
+  },
+  "tests": [
+    {
+      "name": "example",
+      "status": "passed",
+      "duration_ms": 150,
+      "stdout": "zlib version 1.3.2..."
+    }
+  ]
+}
+```
+
+#### Phase 4: Build System Integration
+
+**scripts/run-tests-in-app.sh:**
+```bash
+#!/bin/bash
+# Build a-shell with tests
+# Launch in Simulator
+# Wait for results
+# Copy results back
+```
+
+**Build Phase:**
+1. Build test binaries for iOS
+2. Copy to a-shell/Resources/Tests/
+3. Build a-shell
+4. Install to Simulator
+5. Launch test runner
+6. Wait for completion
+7. Pull results from Documents
+8. Validate JSON output
+
+### Testing Workflow
+
+**Development:**
+```bash
+# Build tests
+./scripts/build-package.sh libz --target ios
+
+# Copy to a-shell
+./scripts/install-tests-in-app.sh libz
+
+# Build and test
+./scripts/run-tests-in-app.sh libz
+
+# View results
+cat .build/test-results/libz-*.json
+```
+
+**CI/CD:**
+```bash
+# Build and test all packages
+./scripts/run-all-tests-in-app.sh
+
+# Generate report
+./scripts/generate-test-report.sh
+```
+
+### Security
+
+- Tests run in a-shell sandbox
+- Cannot escape app container
+- No special entitlements needed
+- Standard iOS file system access
+
+### Next Steps
+
+1. Create TestRunner.swift in a-shell
+2. Add "Run Tests" menu item
+3. Create result export functionality
+4. Integrate with build system scripts
+

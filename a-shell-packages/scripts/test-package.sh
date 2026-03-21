@@ -293,17 +293,68 @@ for binary_path in "$TEST_DIR"/*; do
         cp "$binary_path" "$SIGNED_BINARY"
         chmod +x "$SIGNED_BINARY"
         
-        # Sign the binary with ad-hoc signature for iOS Simulator
-        codesign --force --sign - --timestamp=none "$SIGNED_BINARY" 2>/dev/null || true
+        # Sign the binary with Apple Development certificate
+        log_step "Signing test binary..."
+        log_info "Using Apple Development certificate"
+        log_info "IMPORTANT: If prompted, click 'Always Allow' in System Preferences"
+        
+        SIGN_OUTPUT=$(codesign --force --sign "Apple Development: rudironsonijr@icloud.com" --timestamp=none "$SIGNED_BINARY" 2>&1)
+        SIGN_EXIT_CODE=$?
+        
+        if [ $SIGN_EXIT_CODE -ne 0 ]; then
+            if echo "$SIGN_OUTPUT" | grep -q "errSecInternalComponent"; then
+                log_error "Keychain is locked. Please unlock it first:"
+                log_error ""
+                log_error "Option 1: Unlock via Terminal (you'll be prompted for password):"
+                log_error "  security unlock-keychain ~/Library/Keychains/login.keychain-db"
+                log_error ""
+                log_error "Option 2: Unlock via Keychain Access app:"
+                log_error "  1. Open 'Keychain Access' (Applications > Utilities)"
+                log_error "  2. Select 'login' keychain"
+                log_error "  3. File > Unlock Keychain 'login'"
+                log_error "  4. Enter your password"
+                log_error ""
+                log_error "Option 3: Test without signing (limited):"
+                log_error "  Using unsigned binary - may not work on iOS Simulator"
+                log_warn "Attempting to run without code signing..."
+                
+                # Fallback: try to run without signing
+                USE_UNSIGNED=true
+                rm -f "$SIGNED_BINARY"
+                SIGNED_BINARY="$binary_path"
+            else
+                log_error "Code signing failed: $SIGN_OUTPUT"
+                rm -f "$SIGNED_BINARY"
+                exit 1
+            fi
+        else
+            USE_UNSIGNED=false
+            # Verify signature
+            if ! codesign -v "$SIGNED_BINARY" 2>/dev/null; then
+                log_warn "Binary signature verification failed, continuing anyway"
+            else
+                log_info "Binary signed successfully"
+            fi
+        fi
+        
+        # Determine which binary to run
+        if [ "$USE_UNSIGNED" = "true" ]; then
+            TEST_BINARY="$binary_name"
+            log_warn "Running unsigned binary (may fail on iOS Simulator)"
+        else
+            TEST_BINARY="${binary_name}_signed"
+        fi
         
         # Run the test binary using simctl spawn
         test_start=$(date +%s)
-        TEST_OUTPUT=$(cd "$TEST_DIR" && timeout $TIMEOUT xcrun simctl spawn "$SIMULATOR_ID" "./${binary_name}_signed" $test_args 2>&1) || TEST_EXIT_CODE=$?
+        TEST_OUTPUT=$(cd "$TEST_DIR" && timeout $TIMEOUT xcrun simctl spawn "$SIMULATOR_ID" "./$TEST_BINARY" $test_args 2>&1) || TEST_EXIT_CODE=$?
         test_end=$(date +%s)
         duration=$(( (test_end - test_start) * 1000 ))
         
         # Cleanup signed binary
-        rm -f "$SIGNED_BINARY"
+        if [ "$USE_UNSIGNED" != "true" ]; then
+            rm -f "$SIGNED_BINARY"
+        fi
         
         # Determine test status based on exit code and output
         if [ -z "$TEST_EXIT_CODE" ] || [ "$TEST_EXIT_CODE" -eq 0 ]; then
