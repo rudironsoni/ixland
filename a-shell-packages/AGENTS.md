@@ -161,20 +161,39 @@ xcode-select --install
 xcrun --show-sdk-path
 ```
 
+### Build Targets
+
+The build system supports three targets:
+
+| Target | SDK | Use Case | Output |
+|--------|-----|----------|--------|
+| `ios` | iphoneos | App Store submission | `.build/ios/` |
+| `simulator` | iphonesimulator | Testing on Simulator | `.build/simulator/` |
+| `universal` | Both combined | Development (default) | `.build/universal/` |
+| `both` | ios + simulator | Build both separately | `.build/ios/` + `.build/simulator/` |
+
 ### Building Core Packages
 
 ```bash
 cd a-shell-packages/
 
-# Build all core packages
-./scripts/build-core.sh
+# Build all core packages (default: universal)
+./scripts/build-all.sh
 
-# Or build individual package
+# Build for specific target
+./scripts/build-all.sh --target ios
+./scripts/build-all.sh --target simulator
+./scripts/build-all.sh --target universal
+./scripts/build-all.sh --target both
+
+# Build individual package
 cd packages/core/bash
 ./build.sh
 
-# Output goes to .build/
-ls ../.build/
+# Output goes to .build/<target>/
+ls .build/universal/staging/usr/local/
+ls .build/ios/staging/usr/local/
+ls .build/simulator/staging/usr/local/
 ```
 
 ### Build Order (Dependencies)
@@ -198,14 +217,12 @@ A_SHELL_PKG_SHA256="<checksum>"
 A_SHELL_PKG_DEPENDS="<space-separated deps>"
 
 a_shell_pkg_configure() {
-    export CC="xcrun -sdk iphoneos clang -arch arm64"
-    export CFLAGS="-arch arm64 -mios-version-min=16.0"
-    export LDFLAGS="-arch arm64 -mios-version-min=16.0"
-    export CPPFLAGS="-I$A_SHELL_PREFIX/include"
+    # Target is automatically set via A_SHELL_BUILD_TARGET
+    # SDK and flags are configured by the build system
     
     ./configure \
         --prefix="$A_SHELL_PREFIX" \
-        --host=arm-apple-darwin \
+        --host="arm-apple-darwin" \
         || a_shell_error "Configure failed"
 }
 
@@ -217,6 +234,22 @@ a_shell_pkg_install() {
     make DESTDIR="$A_SHELL_PKG_STAGING" install \
         || a_shell_error "Install failed"
 }
+```
+
+### Universal Binary Creation
+
+For `universal` target, the build system:
+1. Builds for iOS device
+2. Builds for iOS Simulator
+3. Combines with `lipo -create` into fat binary
+
+```bash
+# The build system handles this automatically
+./scripts/build-package.sh libz --target universal
+
+# Verify universal binary
+lipo -info .build/universal/staging/usr/local/lib/libz.a
+# Output: Architectures in the fat file: libz.a are: arm64 (for device), arm64 (for simulator)
 ```
 
 ## Package Manager
@@ -302,6 +335,15 @@ https://github.com/rudironsoni/a-shell-packages/releases
    make -j$(sysctl -n hw.ncpu)
    ```
 
+5. **Test on iOS Simulator**
+   ```bash
+   # Build with universal target (includes simulator)
+   ./scripts/build-package.sh libz --target universal
+   
+   # Run tests
+   ./ios-test-framework/run-tests.sh libz
+   ```
+
 ### Common Tasks
 
 **Creating a new package:**
@@ -310,21 +352,50 @@ https://github.com/rudironsoni/a-shell-packages/releases
 3. Download source, verify checksum
 4. Add dependencies to A_SHELL_PKG_DEPENDS
 5. Configure with iOS flags
-6. Build and test
-7. Commit with message: "feat(packages): add <name> <version>"
+6. Build: `./scripts/build-package.sh <name> --target universal`
+7. Test: `./ios-test-framework/run-tests.sh <name>`
+8. Commit with message: "feat(packages): add <name> <version>"
 
 **Building a package:**
 ```bash
-cd packages/core/<name>
-./build.sh
-# Check output in .build/
+cd a-shell-packages/
+
+# Build for development (universal - works on device + simulator)
+./scripts/build-package.sh libz
+./scripts/build-package.sh libz --target universal
+
+# Build for production (device only, smaller)
+./scripts/build-package.sh libz --target ios
+
+# Build for testing (simulator only, faster)
+./scripts/build-package.sh libz --target simulator
+
+# Build both ios + simulator separately
+./scripts/build-package.sh libz --target both
+
+# Check output
+ls .build/universal/staging/usr/local/lib/
+ls .build/ios/staging/usr/local/lib/
+ls .build/simulator/staging/usr/local/lib/
+```
+
+**Testing packages:**
+```bash
+# Auto-detect and run tests (prefers universal build)
+./ios-test-framework/run-tests.sh libz
+
+# Build test app only
+./ios-test-framework/build-test.sh libz
 ```
 
 **Troubleshooting:**
 - Check configure.log for errors
 - Verify dependencies built first
-- Ensure iOS SDK path correct
+- Ensure iOS SDK path correct: `xcrun --show-sdk-path`
+- Check architecture: `lipo -info .build/universal/staging/usr/local/lib/lib*.a`
 - Check for hardcoded /etc or /usr paths
+- Missing simulator build? Use `--target universal` or `--target simulator`
+- Tests failing to link? Ensure library supports simulator architecture
 
 ## Integration Points
 
@@ -358,11 +429,30 @@ cd packages/core/<name>
 
 - **Build scripts**: `packages/core/*/build.sh`
 - **Build library**: `scripts/a_shell_package.sh`
+- **Package builder**: `scripts/build-package.sh --target ios|simulator|universal|both`
 - **Package manager**: `pkg/pkg.c`
+- **Test framework**: `ios-test-framework/README.md`
 - **This guide**: `AGENTS.md`
+
+### Testing
+
+**iOS Simulator Testing:**
+```bash
+# Build universal (includes simulator support)
+./scripts/build-package.sh libz --target universal
+
+# Run tests on iOS Simulator
+./ios-test-framework/run-tests.sh libz
+```
+
+**Test Framework Features:**
+- Auto-detects universal or simulator builds
+- Builds test app for iOS Simulator
+- Runs tests and reports pass/fail
+- Works with all three build targets
 
 ---
 
-**Last Updated**: 2026-03-20
-**Status**: Core packages building, WASM system planned
-**Next Steps**: Build all core packages, create WASM toolchain
+**Last Updated**: 2026-03-21
+**Status**: Multi-target build system complete (ios, simulator, universal)
+**Next Steps**: Build and validate all packages with iOS Simulator testing

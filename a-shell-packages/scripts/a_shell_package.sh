@@ -1,6 +1,7 @@
 #!/bin/bash
 # a_shell_package.sh - Build library for a-Shell packages
-# Termux-style build system for iOS
+# Termux-style build system for iOS with multi-target support
+# Supports: ios, simulator, universal, both
 
 set -e
 set -o pipefail
@@ -12,14 +13,19 @@ set -o pipefail
 A_SHELL_PKG_VERSION="1.0.0"
 A_SHELL_PKG_BUILDER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Default paths (can be overridden)
-A_SHELL_PKG_BUILD_DIR="${A_SHELL_PKG_BUILD_DIR:-$A_SHELL_PKG_BUILDER_DIR/.build}"
-A_SHELL_PREFIX="/usr/local"  # Target prefix on iOS
-A_SHELL_PKG_TMPDIR="${A_SHELL_PKG_TMPDIR:-$A_SHELL_PKG_BUILD_DIR/tmp}"
-A_SHELL_PKG_STAGING="${A_SHELL_PKG_STAGING:-$A_SHELL_PKG_BUILD_DIR/staging}"
+# Build target: ios, simulator, universal, both
+# Default: universal (for development)
+A_SHELL_BUILD_TARGET="${A_SHELL_BUILD_TARGET:-universal}"
 
-# iOS SDK settings
-IOS_SDK="${IOS_SDK:-iphoneos}"
+# Target-specific paths
+# Paths are set based on target in a_shell_set_target_paths()
+A_SHELL_PREFIX="/usr/local"  # Target prefix on iOS
+A_SHELL_PKG_BUILD_DIR=""
+A_SHELL_PKG_TMPDIR=""
+A_SHELL_PKG_STAGING=""
+
+# iOS SDK settings (set per target)
+IOS_SDK=""
 IOS_ARCH="${IOS_ARCH:-arm64}"
 IOS_VERSION="${IOS_VERSION:-16.0}"
 
@@ -52,6 +58,55 @@ a_shell_step() {
 }
 
 # =============================================================================
+# TARGET CONFIGURATION
+# =============================================================================
+
+a_shell_validate_target() {
+    case "$A_SHELL_BUILD_TARGET" in
+        ios|simulator|universal|both)
+            return 0
+            ;;
+        *)
+            a_shell_error "Invalid target: $A_SHELL_BUILD_TARGET"
+            echo "Valid targets: ios, simulator, universal, both" >&2
+            exit 1
+            ;;
+    esac
+}
+
+a_shell_set_target_paths() {
+    local target="$1"
+    
+    case "$target" in
+        ios)
+            A_SHELL_PKG_BUILD_DIR="${A_SHELL_PKG_BUILDER_DIR}/.build/ios"
+            IOS_SDK="iphoneos"
+            ;;
+        simulator)
+            A_SHELL_PKG_BUILD_DIR="${A_SHELL_PKG_BUILDER_DIR}/.build/simulator"
+            IOS_SDK="iphonesimulator"
+            ;;
+        universal)
+            A_SHELL_PKG_BUILD_DIR="${A_SHELL_PKG_BUILDER_DIR}/.build/universal"
+            # Universal uses ios settings by default, combines later
+            IOS_SDK="iphoneos"
+            ;;
+        both)
+            # Both is handled separately - shouldn't reach here
+            a_shell_error "'both' target should be handled by build-package.sh"
+            ;;
+    esac
+    
+    # Set derived paths
+    A_SHELL_PKG_TMPDIR="${A_SHELL_PKG_BUILD_DIR}/tmp"
+    A_SHELL_PKG_STAGING="${A_SHELL_PKG_BUILD_DIR}/staging"
+}
+
+a_shell_get_sdk_path() {
+    xcrun -sdk "$IOS_SDK" --show-sdk-path
+}
+
+# =============================================================================
 # SETUP FUNCTIONS
 # =============================================================================
 
@@ -63,7 +118,7 @@ a_shell_setup_directories() {
 }
 
 a_shell_setup_toolchain() {
-    a_shell_step "Setting up iOS toolchain..."
+    a_shell_step "Setting up iOS toolchain for target: $A_SHELL_BUILD_TARGET"
     
     # Detect Xcode path
     if [ -z "$XCODE_PATH" ]; then
@@ -71,7 +126,13 @@ a_shell_setup_toolchain() {
     fi
     
     # Get SDK path
-    export SDK_PATH=$(xcrun -sdk $IOS_SDK --show-sdk-path)
+    export SDK_PATH=$(a_shell_get_sdk_path)
+    
+    # Determine minimum version flag based on SDK
+    local min_version_flag="-mios-version-min"
+    if [ "$IOS_SDK" = "iphonesimulator" ]; then
+        min_version_flag="-mios-simulator-version-min"
+    fi
     
     # Set compiler with sysroot
     export CC="xcrun -sdk $IOS_SDK clang -arch $IOS_ARCH"
@@ -81,9 +142,9 @@ a_shell_setup_toolchain() {
     export LD="xcrun -sdk $IOS_SDK ld"
     
     # Compiler flags with proper sysroot
-    export CFLAGS="-arch $IOS_ARCH -mios-version-min=$IOS_VERSION -isysroot $SDK_PATH -fembed-bitcode -O2"
+    export CFLAGS="-arch $IOS_ARCH ${min_version_flag}=$IOS_VERSION -isysroot $SDK_PATH -fembed-bitcode -O2"
     export CXXFLAGS="$CFLAGS"
-    export LDFLAGS="-arch $IOS_ARCH -mios-version-min=$IOS_VERSION -isysroot $SDK_PATH"
+    export LDFLAGS="-arch $IOS_ARCH ${min_version_flag}=$IOS_VERSION -isysroot $SDK_PATH"
     
     # Include paths (only if directories exist)
     if [ -d "$A_SHELL_PREFIX/include" ]; then
@@ -99,6 +160,7 @@ a_shell_setup_toolchain() {
     export PREFIX="$A_SHELL_PREFIX"
     export PKG_CONFIG_PATH="$A_SHELL_PREFIX/lib/pkgconfig:$A_SHELL_PREFIX/share/pkgconfig"
     
+    a_shell_info "Target: $A_SHELL_BUILD_TARGET"
     a_shell_info "Toolchain: $CC"
     a_shell_info "SDK: $SDK_PATH"
     a_shell_info "Prefix: $A_SHELL_PREFIX"
@@ -117,6 +179,87 @@ a_shell_setup_cache_variables() {
     export ac_cv_func_vfork=yes
     export ac_cv_func_execve=yes
     export ac_cv_func_waitpid=yes
+}
+
+# =============================================================================
+# UNIVERSAL BINARY CREATION
+# =============================================================================
+
+a_shell_create_universal_binary() {
+    a_shell_step "Creating universal binary..."
+    
+    local pkg_name="$A_SHELL_PKG_NAME"
+    local ios_build_dir="${A_SHELL_PKG_BUILDER_DIR}/.build/ios"
+    local simulator_build_dir="${A_SHELL_PKG_BUILDER_DIR}/.build/simulator"
+    local universal_build_dir="${A_SHELL_PKG_BUILDER_DIR}/.build/universal"
+    
+    # Check that both builds exist
+    if [ ! -d "$ios_build_dir/staging" ]; then
+        a_shell_error "iOS build not found. Build ios target first."
+    fi
+    
+    if [ ! -d "$simulator_build_dir/staging" ]; then
+        a_shell_error "Simulator build not found. Build simulator target first."
+    fi
+    
+    # Create universal directories
+    mkdir -p "$universal_build_dir/staging"
+    
+    # Combine static libraries using lipo
+    a_shell_info "Combining libraries with lipo..."
+    
+    # Find all .a files in ios build
+    find "$ios_build_dir/staging" -name "*.a" -type f | while read ios_lib; do
+        # Get relative path
+        local rel_path="${ios_lib#$ios_build_dir/staging/}"
+        local sim_lib="$simulator_build_dir/staging/$rel_path"
+        local universal_lib="$universal_build_dir/staging/$rel_path"
+        
+        # Create directory for universal library
+        mkdir -p "$(dirname "$universal_lib")"
+        
+        if [ -f "$sim_lib" ]; then
+            # Combine with lipo
+            a_shell_info "Creating universal: $rel_path"
+            lipo -create "$ios_lib" "$sim_lib" -output "$universal_lib" || \
+                a_shell_warn "Failed to create universal library: $rel_path"
+        else
+            # Copy iOS version if simulator version missing
+            a_shell_warn "Simulator version missing for $rel_path, using iOS version"
+            cp "$ios_lib" "$universal_lib"
+        fi
+    done
+    
+    # Copy headers from iOS build (same for both)
+    if [ -d "$ios_build_dir/staging/$A_SHELL_PREFIX/include" ]; then
+        cp -r "$ios_build_dir/staging/$A_SHELL_PREFIX/include" "$universal_build_dir/staging/$A_SHELL_PREFIX/"
+    fi
+    
+    # Copy binaries (prefer iOS, but check both)
+    if [ -d "$ios_build_dir/staging/$A_SHELL_PREFIX/bin" ]; then
+        mkdir -p "$universal_build_dir/staging/$A_SHELL_PREFIX/bin"
+        find "$ios_build_dir/staging/$A_SHELL_PREFIX/bin" -type f | while read ios_bin; do
+            local bin_name=$(basename "$ios_bin")
+            local sim_bin="$simulator_build_dir/staging/$A_SHELL_PREFIX/bin/$bin_name"
+            local universal_bin="$universal_build_dir/staging/$A_SHELL_PREFIX/bin/$bin_name"
+            
+            if [ -f "$sim_bin" ]; then
+                # Combine binary
+                lipo -create "$ios_bin" "$sim_bin" -output "$universal_bin" || \
+                    cp "$ios_bin" "$universal_bin"
+            else
+                cp "$ios_bin" "$universal_bin"
+            fi
+        done
+    fi
+    
+    # Copy other files (pkgconfig, share, etc.)
+    if [ -d "$ios_build_dir/staging/$A_SHELL_PREFIX/lib/pkgconfig" ]; then
+        mkdir -p "$universal_build_dir/staging/$A_SHELL_PREFIX/lib/pkgconfig"
+        cp -r "$ios_build_dir/staging/$A_SHELL_PREFIX/lib/pkgconfig/"* "$universal_build_dir/staging/$A_SHELL_PREFIX/lib/pkgconfig/" 2>/dev/null || true
+    fi
+    
+    a_shell_info "Universal binary created in $universal_build_dir/staging/"
 }
 
 # =============================================================================
@@ -269,7 +412,16 @@ a_shell_step_install() {
 }
 
 a_shell_step_package() {
+    # Skip packaging for simulator-only builds (used for testing)
+    if [ "$A_SHELL_BUILD_TARGET" = "simulator" ]; then
+        a_shell_info "Skipping .deb package creation for simulator build"
+        return 0
+    fi
+    
     a_shell_step "Creating package..."
+    
+    # Create repos directory if needed
+    mkdir -p "$A_SHELL_PKG_BUILDER_DIR/repos/pool"
     
     # Create control file
     cat > "$A_SHELL_PKG_STAGING/DEBIAN/control" <<EOF
@@ -297,7 +449,13 @@ EOF
 # =============================================================================
 
 a_shell_build_package() {
-    a_shell_step "Building $A_SHELL_PKG_NAME $A_SHELL_PKG_VERSION"
+    # Validate target
+    a_shell_validate_target
+    
+    # Set paths based on target
+    a_shell_set_target_paths "$A_SHELL_BUILD_TARGET"
+    
+    a_shell_step "Building $A_SHELL_PKG_NAME $A_SHELL_PKG_VERSION (target: $A_SHELL_BUILD_TARGET)"
     
     # Load package configuration
     if [ -f "$A_SHELL_PKG_BUILDER_DIR/packages/core/$A_SHELL_PKG_NAME/build.sh" ]; then
@@ -322,7 +480,8 @@ a_shell_build_package() {
     a_shell_step_install
     a_shell_step_package
     
-    a_shell_info "Build complete: $A_SHELL_PKG_NAME $A_SHELL_PKG_VERSION"
+    a_shell_info "Build complete: $A_SHELL_PKG_NAME $A_SHELL_PKG_VERSION (target: $A_SHELL_BUILD_TARGET)"
+    a_shell_info "Output: $A_SHELL_PKG_STAGING"
 }
 
 # =============================================================================
