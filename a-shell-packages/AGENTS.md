@@ -2,16 +2,28 @@
 
 ## Overview
 
-**a-shell-packages** is the package build system. It compiles open-source Linux tools (bash, vim, git, python, etc.) for iOS and creates WebAssembly packages for user installation.
+**a-shell-packages** is the iOS package build system. It compiles open-source Linux tools (bash, vim, git, python, etc.) for iOS native execution using the a-shell-kernel syscall layer.
+
+## Key Principle: No Debian Infrastructure
+
+**This is NOT a Debian system.** There is no:
+- ❌ dpkg
+- ❌ apt
+- ❌ .deb packages
+- ❌ DEBIAN/ directories
+- ❌ Debian package management
+
+**Instead:** We build native iOS binaries that link against a-shell-kernel, producing static libraries and executables for direct inclusion in the iOS app bundle.
 
 ## Responsibilities
 
 ### What This Layer DOES
 
-1. **Build Core Tools**
-   - Compile bash, coreutils, vim, git, python
-   - Target: iOS arm64, static/dynamic libraries
-   - Output: Binaries and libraries for app bundle
+1. **Build Core iOS Tools**
+   - Compile bash, coreutils, vim, git, python for iOS arm64
+   - Target: iOS device and Simulator (universal binaries)
+   - Output: Static libraries and binaries in staging directories
+   - Link against a-shell-kernel XCFramework
 
 2. **Build System Libraries**
    - libz (compression)
@@ -20,189 +32,336 @@
    - ncurses (terminal UI)
    - readline (line editing)
 
-3. **Create WebAssembly Packages**
-   - Compile tools to WASM (node, ripgrep, fd, etc.)
-   - Host on GitHub releases
-   - Managed by pkg command
-
-4. **Package Management**
-   - Download packages from GitHub releases
-   - Install/remove user packages
-   - Track dependencies
-   - Verify checksums
+3. **Create WebAssembly Packages** (separate system)
+   - WASM packages use different build process
+   - See `packages/wasm/` for WASM-specific builds
 
 ### What This Layer DOES NOT DO
 
+- ❌ NOT create .deb packages (we're iOS, not Debian)
+- ❌ NOT use dpkg or apt (removed from all packages)
 - ❌ NOT a syscall layer (that's a-shell-kernel/)
 - ❌ NOT a terminal emulator (that's a-shell/)
 - ❌ NOT the iOS app (that's a-shell/)
-- ❌ NOT execute code (just builds it)
 
 ## Architecture
 
 ```
 a-shell-packages/
-├── packages/core/          # Core tools (in app bundle)
-│   ├── libz/
-│   ├── libssl/
-│   ├── ncurses/
-│   ├── readline/
-│   ├── libcurl/
-│   ├── bash/
-│   ├── coreutils/
-│   ├── python/
-│   ├── git/
-│   └── vim/
+├── packages/core/          # Core iOS tools (in app bundle)
+│   ├── libz/              # Compression library
+│   ├── libssl/            # Cryptography
+│   ├── ncurses/           # Terminal handling
+│   ├── readline/          # Line editing
+│   ├── libcurl/           # HTTP client
+│   ├── bash/              # Shell
+│   ├── coreutils/         # ls, cp, mv, cat, etc.
+│   ├── python/            # Python interpreter
+│   ├── git/               # Version control
+│   └── vim/               # Editor
 │
-├── packages/wasm/          # WASM packages (user-installed)
-│   ├── node/
-│   ├── ripgrep/
-│   └── ...
+├── packages/wasm/          # WASM packages (separate build system)
+│   └── ...                # See WASM documentation
 │
 ├── scripts/                # Build scripts
-│   ├── a_shell_package.sh  # Build library
-│   └── build-core.sh       # Build all core packages
+│   ├── a_shell_package.sh # Main build library
+│   ├── build-package.sh   # Single package builder
+│   └── build-all.sh       # Build all packages
 │
-└── pkg/                    # Package manager
-    └── pkg.c               # Compiled to binary
-```
-
-## Two-Tier System
-
-### Tier 1: Core Native Tools (Built-in)
-
-**Location**: `packages/core/`
-
-**Included in app bundle**:
-- libz, libssl, ncurses, readline (libraries)
-- bash (shell)
-- coreutils (ls, cp, mv, cat, grep, etc.)
-- python (interpreter)
-- git (version control)
-- vim (editor)
-- curl, ssh (network tools)
-
-**Size**: ~25-30MB
-
-**Update**: Via App Store only
-
-### Tier 2: WASM Packages (User-installed)
-
-**Location**: `packages/wasm/`
-
-**Downloaded by user**:
-- node (JavaScript runtime)
-- ripgrep (fast grep)
-- fd (fast find)
-- Other tools
-
-**Format**: `.wasm` files
-
-**Size**: ~500KB-5MB each
-
-**Update**: Via `pkg install` command
-
-## Package Format
-
-### Native Package (Core)
-
-**Output**: Binaries + libraries
-
-**Layout**:
-```
-build/
-├── bin/
-│   ├── bash
-│   ├── ls
-│   └── ...
-├── lib/
-│   ├── libz.dylib
-│   ├── libssl.dylib
-│   └── ...
-└── share/
-    └── ...
-```
-
-### WASM Package (User)
-
-**File**: `.pkg.tar.xz`
-
-**Contents**:
-```
-<name>-<version>.pkg.tar.xz
-├── PKG-INFO          # JSON metadata
-├── bin/
-│   └── <name>.wasm   # WebAssembly binary
-└── share/
-    └── ...           # Data files
-```
-
-**PKG-INFO format**:
-```json
-{
-  "name": "node",
-  "version": "20.0.0",
-  "architecture": "wasm32",
-  "dependencies": {},
-  "files": ["bin/node.wasm"],
-  "checksum": "sha256:..."
-}
+└── ios-test-framework/     # iOS Simulator testing
+    ├── run-tests.sh
+    └── build-test.sh
 ```
 
 ## Build System
 
+### Output Format
+
+**Native packages produce:**
+```
+.build/<target>/staging/usr/local/
+├── bin/
+│   ├── bash              # iOS executable
+│   ├── ls
+│   └── ...
+├── lib/
+│   ├── libz.a            # Static library
+│   ├── libssl.a
+│   └── ...
+├── include/
+│   ├── zlib.h
+│   └── ...
+└── share/
+    └── terminfo/         # Data files
+```
+
+**No .deb, no dpkg, no Debian.** Just raw binaries in staging directories.
+
+### Build Targets
+
+| Target | SDK | Output | Use Case |
+|--------|-----|--------|----------|
+| `ios` | iphoneos | `.build/ios/` | App Store submission |
+| `simulator` | iphonesimulator | `.build/simulator/` | Testing |
+| `universal` | Both | `.build/universal/` | Development (default) |
+| `both` | Separate | `.build/ios/` + `.build/simulator/` | CI/CD |
+
 ### Prerequisites
 
 ```bash
-# macOS with Xcode
+# macOS with Xcode (only requirement)
 xcode-select --install
 
 # Verify
 xcrun --show-sdk-path
 ```
 
-### Build Targets
+**No dpkg-dev, no apt, no Debian tools required.**
 
-The build system supports three targets:
-
-| Target | SDK | Use Case | Output |
-|--------|-----|----------|--------|
-| `ios` | iphoneos | App Store submission | `.build/ios/` |
-| `simulator` | iphonesimulator | Testing on Simulator | `.build/simulator/` |
-| `universal` | Both combined | Development (default) | `.build/universal/` |
-| `both` | ios + simulator | Build both separately | `.build/ios/` + `.build/simulator/` |
-
-### Building Core Packages
+### Building Packages
 
 ```bash
 cd a-shell-packages/
 
-# Build all core packages (default: universal)
-./scripts/build-all.sh
+# Build single package (universal is default)
+./scripts/build-package.sh libz
 
-# Build for specific target
-./scripts/build-all.sh --target ios
-./scripts/build-all.sh --target simulator
+# Build for specific targets
+./scripts/build-package.sh libz --target ios
+./scripts/build-package.sh libz --target simulator
+./scripts/build-package.sh libz --target universal
+./scripts/build-package.sh libz --target both
+
+# Build all packages
 ./scripts/build-all.sh --target universal
-./scripts/build-all.sh --target both
 
-# Build individual package
-cd packages/core/bash
-./build.sh
+# Output is in staging directories
+ls .build/universal/staging/usr/local/bin/
+ls .build/universal/staging/usr/local/lib/
+```
 
-# Output goes to .build/<target>/
-ls .build/universal/staging/usr/local/
-ls .build/ios/staging/usr/local/
-ls .build/simulator/staging/usr/local/
+## Package Patching Guide
+
+### Why Patches Are Needed
+
+Linux packages assume:
+- Standard Linux syscalls (fork, exec, wait) - **Handled by kernel**
+- Standard paths (/etc, /usr, /var) - **Need patches**
+- Standard functions (getentropy) - **Need patches for missing iOS functions**
+
+### What Kernel Handles (NO PATCHES NEEDED)
+
+**The a-shell-kernel provides syscall wrappers via compile-time macros:**
+
+```c
+// In your code:
+pid_t pid = fork();
+
+// Kernel header automatically converts to:
+pid_t pid = a_shell_fork();
+```
+
+**No patches needed for:**
+- fork, exec, wait, waitpid
+- open, read, write, close
+- signal handling
+- File operations
+- Standard POSIX functions
+
+**Just include kernel headers:**
+```bash
+export CPPFLAGS="-I../../a-shell-kernel/include"
+```
+
+### What Needs Patches
+
+**Three categories require patches:**
+
+#### 1. Missing iOS Functions
+Functions iOS doesn't provide, need alternatives:
+
+| Function | iOS Replacement | Package Example |
+|----------|----------------|-----------------|
+| `getentropy()` | `arc4random()` | bash-minimal |
+| `gethostbyname_r()` | `getaddrinfo()` | libcurl (if used) |
+| `clock_settime()` | Not available | coreutils (configure disables) |
+
+**Patch pattern:**
+```c
+#if defined(__APPLE__) && defined(__MACH__)
+  /* iOS: use arc4random instead of getentropy */
+  ret = arc4random();
+#else
+  ret = getentropy(&buf, sizeof(buf));
+#endif
+```
+
+#### 2. Hardcoded Paths
+Unix paths that need sandbox locations:
+
+| Hardcoded Path | iOS Location | Patch Type |
+|----------------|--------------|------------|
+| `/etc/` | `@A_SHELL_PREFIX@/etc/` | configure-time substitution |
+| `/tmp/` | `$TMPDIR` or app temp | Environment variable |
+| `/var/` | `~/Library/Caches/` | Runtime detection |
+| `/usr/share/` | `@A_SHELL_PREFIX@/share/` | configure-time substitution |
+
+**Patch pattern (configure.ac):**
+```autoconf
+- sysconfdir=/etc
++ sysconfdir=@A_SHELL_PREFIX@/etc
+```
+
+#### 3. Platform Detection
+Code that checks `__linux__` but not `__APPLE__`:
+
+**Patch pattern:**
+```c
+- #ifdef __linux__
++ #if defined(__linux__) || defined(__APPLE__)
+    /* Linux-specific code */
+  #endif
+```
+
+### Patch Discovery Process
+
+When adding a new package, follow this workflow:
+
+**Step 1: Create initial build.sh**
+```bash
+A_SHELL_PKG_NAME="mypackage"
+A_SHELL_PKG_VERSION="1.0.0"
+A_SHELL_PKG_SRCURL="https://..."
+A_SHELL_PKG_DEPENDS="libz"
+
+a_shell_pkg_configure() {
+    ./configure \
+        --prefix="$A_SHELL_PREFIX" \
+        --host="arm-apple-darwin" \
+        || a_shell_error "Configure failed"
+}
+
+a_shell_pkg_make() {
+    make -j$(sysctl -n hw.ncpu)
+}
+
+a_shell_pkg_install() {
+    make DESTDIR="$A_SHELL_PKG_STAGING" install
+}
+```
+
+**Step 2: Attempt build**
+```bash
+./scripts/build-package.sh mypackage --target universal 2>&1 | tee build.log
+```
+
+**Step 3: Analyze errors**
+
+**Error types and solutions:**
+
+| Error | Category | Solution |
+|-------|----------|----------|
+| `implicit declaration of function 'getentropy'` | Missing Function | Patch to use arc4random() |
+| `error: '/etc' is not writable` | Hardcoded Path | Patch path to use @A_SHELL_PREFIX@ |
+| `undefined reference to fork` | Include Missing | Check CPPFLAGS includes kernel headers |
+| `__linux__ not defined` | Platform Detection | Add __APPLE__ to #ifdef |
+
+**Step 4: Create patch**
+
+See `PATCH_TEMPLATE.md` for patch format and examples.
+
+**Step 5: Test**
+```bash
+# Clean and rebuild
+rm -rf .build/
+./scripts/build-package.sh mypackage --target universal
+
+# Run tests if available
+./ios-test-framework/run-tests.sh mypackage
+```
+
+### Patch Organization
+
+```
+packages/core/<package>/
+├── build.sh
+├── patches/
+│   ├── 01-ios-functions.patch    # Missing function replacements
+│   ├── 02-ios-paths.patch        # Path substitutions
+│   ├── 03-ios-platform.patch     # Platform detection
+│   └── README.md                 # Patch documentation
+```
+
+**Naming convention:**
+- `XX-ios-<category>.patch` - XX is order (01, 02, 03...)
+- Apply in numerical order
+- Categories: functions, paths, platform, config
+
+### Removing Debian Dependencies
+
+**If a package has Debian dependencies (dpkg, apt, deb), you MUST:**
+
+1. **Remove configure options:**
+   ```bash
+   # BAD - Debian-specific
+   ./configure --with-dpkg ...
+   
+   # GOOD - iOS-compatible
+   ./configure --without-dpkg --without-apt ...
+   ```
+
+2. **Create patches to remove Debian code:**
+   - Comment out dpkg feature checks
+   - Remove apt dependency initialization
+   - Replace deb-specific paths with @A_SHELL_PREFIX@
+
+3. **Use cache variables to skip detection:**
+   ```bash
+   export ac_cv_path_DPKG=/bin/false
+   export ac_cv_path_APTGET=/bin/false
+   export ac_cv_func_dpkg_parse=no
+   ```
+
+**Example - Removing dpkg from a package:**
+
+```patch
+--- a/configure.ac
++++ b/configure.ac
+@@ -50,7 +50,10 @@
+ AC_CHECK_FUNCS([getentropy])
+ 
+ # Check for dpkg (DEBIAN-SPECIFIC - REMOVE FOR iOS)
+-AC_PATH_PROG([DPKG], [dpkg], [no])
++# iOS: No dpkg, skip this check
++# AC_PATH_PROG([DPKG], [dpkg], [no])
++DPKG=no
++
+ if test "x$DPKG" != "xno"; then
+   AC_DEFINE([HAVE_DPKG], [1], [Define if dpkg is available])
+ fi
 ```
 
 ### Build Order (Dependencies)
 
-**Wave 1**: libz
-**Wave 2**: libssl (needs libz)
-**Wave 3**: ncurses, readline (parallel, needs libz)
-**Wave 4**: libcurl, bash, coreutils (parallel)
-**Wave 5**: python, git, vim (parallel)
+**Wave 1 - Foundation (no deps):**
+- libz
+
+**Wave 2 - Crypto (needs libz):**
+- libssl
+
+**Wave 3 - Terminal (needs libz):**
+- ncurses
+- readline
+
+**Wave 4 - Tools (parallel):**
+- libcurl
+- bash
+- coreutils
+
+**Wave 5 - High-level (parallel):**
+- python
+- git
+- vim
 
 ### Build Script Template
 
@@ -214,15 +373,23 @@ A_SHELL_PKG_NAME="<name>"
 A_SHELL_PKG_VERSION="<version>"
 A_SHELL_PKG_SRCURL="<url>"
 A_SHELL_PKG_SHA256="<checksum>"
-A_SHELL_PKG_DEPENDS="<space-separated deps>"
+A_SHELL_PKG_DEPENDS="libz"
 
 a_shell_pkg_configure() {
-    # Target is automatically set via A_SHELL_BUILD_TARGET
-    # SDK and flags are configured by the build system
+    # iOS-specific cache variables
+    export ac_cv_func_<missing_func>=no
+    
+    # Remove any Debian dependencies
+    export ac_cv_path_DPKG=/bin/false
+    export ac_cv_path_APTGET=/bin/false
     
     ./configure \
         --prefix="$A_SHELL_PREFIX" \
         --host="arm-apple-darwin" \
+        --disable-shared \
+        --enable-static \
+        --without-dpkg \
+        --without-apt \
         || a_shell_error "Configure failed"
 }
 
@@ -236,223 +403,111 @@ a_shell_pkg_install() {
 }
 ```
 
-### Universal Binary Creation
+## Testing
 
-For `universal` target, the build system:
-1. Builds for iOS device
-2. Builds for iOS Simulator
-3. Combines with `lipo -create` into fat binary
+### iOS Simulator Testing
 
 ```bash
-# The build system handles this automatically
-./scripts/build-package.sh libz --target universal
-
-# Verify universal binary
-lipo -info .build/universal/staging/usr/local/lib/libz.a
-# Output: Architectures in the fat file: libz.a are: arm64 (for device), arm64 (for simulator)
-```
-
-## Package Manager
-
-### pkg Command
-
-**Location**: `pkg/pkg.c` → compiled to `bin/pkg`
-
-**Usage**:
-```bash
-pkg search <name>        # Search repository
-pkg install <name>       # Download & install WASM package
-pkg remove <name>        # Uninstall package
-pkg list                 # Show installed
-pkg upgrade              # Update all packages
-```
-
-### Implementation
-
-**Language**: C (small, fast)
-
-**Communication**: IPC to Swift PackageManager in app
-
-**Process**:
-1. User types `pkg install node`
-2. Shell forks, execs `bin/pkg`
-3. pkg sends message to app via XPC
-4. App downloads node.wasm from GitHub
-5. Extracts to ~/Documents/.a-shell/wasm/bin/
-6. Records metadata in ~/Documents/.a-shell/pkg/installed/
-
-## Repository
-
-**GitHub Releases**:
-```
-https://github.com/rudironsoni/a-shell-packages/releases
-├── index.json              # Package catalog
-└── v1.0.0/
-    ├── node-20.0.0.wasm
-    └── ...
-```
-
-**index.json**:
-```json
-{
-  "schema_version": "1.0",
-  "packages": {
-    "node": {
-      "latest": "20.0.0",
-      "versions": {
-        "20.0.0": {
-          "url": "https://github.com/.../node-20.0.0.wasm",
-          "size": 5242880,
-          "checksum": "sha256:..."
-        }
-      }
-    }
-  }
-}
-```
-
-## Agent Instructions
-
-### When Building Packages
-
-1. **Always use cross-compilation**
-   ```bash
-   export CC="xcrun -sdk iphoneos clang -arch arm64"
-   ```
-
-2. **Include kernel headers**
-   ```bash
-   export CPPFLAGS="-I../../a-shell-kernel/include"
-   ```
-
-3. **Static libraries preferred**
-   ```bash
-   ./configure --disable-shared --enable-static
-   ```
-
-4. **Test compilation**
-   ```bash
-   make -j$(sysctl -n hw.ncpu)
-   ```
-
-5. **Test on iOS Simulator**
-   ```bash
-   # Build with universal target (includes simulator)
-   ./scripts/build-package.sh libz --target universal
-   
-   # Run tests
-   ./ios-test-framework/run-tests.sh libz
-   ```
-
-### Common Tasks
-
-**Creating a new package:**
-1. Create `packages/core/<name>/` directory
-2. Write `build.sh` script
-3. Download source, verify checksum
-4. Add dependencies to A_SHELL_PKG_DEPENDS
-5. Configure with iOS flags
-6. Build: `./scripts/build-package.sh <name> --target universal`
-7. Test: `./ios-test-framework/run-tests.sh <name>`
-8. Commit with message: "feat(packages): add <name> <version>"
-
-**Building a package:**
-```bash
-cd a-shell-packages/
-
-# Build for development (universal - works on device + simulator)
-./scripts/build-package.sh libz
-./scripts/build-package.sh libz --target universal
-
-# Build for production (device only, smaller)
-./scripts/build-package.sh libz --target ios
-
-# Build for testing (simulator only, faster)
-./scripts/build-package.sh libz --target simulator
-
-# Build both ios + simulator separately
-./scripts/build-package.sh libz --target both
-
-# Check output
-ls .build/universal/staging/usr/local/lib/
-ls .build/ios/staging/usr/local/lib/
-ls .build/simulator/staging/usr/local/lib/
-```
-
-**Testing packages:**
-```bash
-# Auto-detect and run tests (prefers universal build)
-./ios-test-framework/run-tests.sh libz
-
-# Build test app only
-./ios-test-framework/build-test.sh libz
-```
-
-**Troubleshooting:**
-- Check configure.log for errors
-- Verify dependencies built first
-- Ensure iOS SDK path correct: `xcrun --show-sdk-path`
-- Check architecture: `lipo -info .build/universal/staging/usr/local/lib/lib*.a`
-- Check for hardcoded /etc or /usr paths
-- Missing simulator build? Use `--target universal` or `--target simulator`
-- Tests failing to link? Ensure library supports simulator architecture
-
-## Integration Points
-
-### a-shell/ (App)
-- Uses built binaries from core packages
-- Packages linked during Xcode build
-- pkg binary manages WASM downloads
-
-### a-shell-kernel/ (Kernel)
-- Provides syscall headers
-- Packages link against kernel syscalls
-- No kernel modifications needed for packages
-
-## Constraints
-
-- **iOS 16.0+** minimum deployment target
-- **arm64** only
-- **No fork/exec** - use threads
-- **Sandbox paths only** - ~/Documents/, ~/Library/
-- **Static libraries preferred** - easier distribution
-- **GitHub releases** - for WASM distribution
-
-## Security
-
-- Verify all downloads with SHA256
-- Check package signatures (if implemented)
-- Sandboxed WASM execution
-- No native code execution from user space
-
-## Documentation
-
-- **Build scripts**: `packages/core/*/build.sh`
-- **Build library**: `scripts/a_shell_package.sh`
-- **Package builder**: `scripts/build-package.sh --target ios|simulator|universal|both`
-- **Package manager**: `pkg/pkg.c`
-- **Test framework**: `ios-test-framework/README.md`
-- **This guide**: `AGENTS.md`
-
-### Testing
-
-**iOS Simulator Testing:**
-```bash
-# Build universal (includes simulator support)
+# Build universal (includes simulator)
 ./scripts/build-package.sh libz --target universal
 
 # Run tests on iOS Simulator
 ./ios-test-framework/run-tests.sh libz
 ```
 
-**Test Framework Features:**
-- Auto-detects universal or simulator builds
-- Builds test app for iOS Simulator
-- Runs tests and reports pass/fail
-- Works with all three build targets
+### Manual Testing
+
+```bash
+# Build for simulator
+./scripts/build-package.sh libz --target simulator
+
+# Check architecture
+lipo -info .build/simulator/staging/usr/local/lib/libz.a
+# Expected: arm64 (for simulator)
+
+# Check it links
+file .build/simulator/staging/usr/local/lib/libz.a
+# Expected: archive with arm64 objects
+```
+
+## Common Tasks
+
+**Creating a new package:**
+1. Create `packages/core/<name>/` directory
+2. Write `build.sh` following template
+3. **Remove any Debian dependencies**
+4. Download source, verify checksum
+5. Add dependencies to A_SHELL_PKG_DEPENDS
+6. Attempt build, identify errors
+7. Create patches in `patches/` directory
+8. Test with `./scripts/build-package.sh <name> --target universal`
+9. Run tests: `./ios-test-framework/run-tests.sh <name>`
+10. Commit with message: "feat(packages): add <name> <version>"
+
+**Adding patches to existing package:**
+1. Identify the error (function missing, path issue, etc.)
+2. See `PATCH_TEMPLATE.md` for patch format
+3. Create patch: `packages/core/<name>/patches/XX-ios-<category>.patch`
+4. Document in patches/README.md
+5. Test rebuild
+
+**Removing Debian code from package:**
+1. Search for dpkg, apt, deb references in source
+2. Create patch to disable/remove Debian-specific code
+3. Use cache variables to skip detection
+4. Test that package builds without Debian tools
+
+## Integration Points
+
+### a-shell-kernel/ (Kernel)
+- Provides syscall headers with automatic redirection
+- Include with: `CPPFLAGS="-I../../a-shell-kernel/include"`
+- No patches needed for standard syscalls
+- Kernel macros handle: fork, exec, wait, signals, file I/O
+
+### a-shell/ (App)
+- Uses built binaries from staging directories
+- Links against kernel XCFramework
+- Packages linked during Xcode build
+- No .deb installation step needed
+
+## Constraints
+
+- **iOS 16.0+** minimum deployment target
+- **arm64** only (device and simulator)
+- **No fork/exec** - kernel provides thread-based simulation
+- **Sandbox paths only** - ~/Documents/, ~/Library/
+- **Static libraries preferred** - easier distribution
+- **NO Debian infrastructure** - no dpkg, apt, .deb
+
+## Security
+
+- Verify all downloads with SHA256
+- Sandboxed execution (iOS sandbox)
+- Static linking preferred
+- No executable stack (W^X policy)
+
+## Documentation
+
+- **Build scripts**: `packages/core/*/build.sh`
+- **Build library**: `scripts/a_shell_package.sh`
+- **Package builder**: `scripts/build-package.sh`
+- **Test framework**: `ios-test-framework/`
+- **Patch template**: `PATCH_TEMPLATE.md`
+- **This guide**: `AGENTS.md`
+
+## Files to Check
+
+**Before committing a new package, verify:**
+- [ ] No dpkg/apt references in build.sh
+- [ ] No DEBIAN directory creation
+- [ ] CPPFLAGS includes kernel headers (if using syscalls)
+- [ ] Patches documented in patches/README.md
+- [ ] Builds successfully with `--target universal`
+- [ ] Tests pass (if test framework exists for package)
 
 ---
 
 **Last Updated**: 2026-03-21
-**Status**: Multi-target build system complete (ios, simulator, universal)
-**Next Steps**: Build and validate all packages with iOS Simulator testing
+**Status**: iOS-native build system (no Debian)
+**Next Steps**: Create missing package build.sh files, add patches as needed

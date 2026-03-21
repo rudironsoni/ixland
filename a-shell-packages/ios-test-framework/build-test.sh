@@ -20,16 +20,22 @@ SPECIFIED_BUILD_DIR="$2"
 auto_detect_build_dir() {
     local pkg="$1"
     
+    # Strip 'lib' prefix if present to get library name
+    local lib_name="$pkg"
+    if [[ "$pkg" == lib* ]]; then
+        lib_name="${pkg#lib}"
+    fi
+    
     # Priority 1: Universal build (preferred for testing)
     local universal_dir="$SCRIPT_DIR/../.build/universal/staging/usr/local"
-    if [ -f "$universal_dir/lib/lib${pkg}.a" ]; then
+    if [ -f "$universal_dir/lib/lib${lib_name}.a" ]; then
         echo "$universal_dir"
         return 0
     fi
     
     # Priority 2: Simulator build
     local simulator_dir="$SCRIPT_DIR/../.build/simulator/staging/usr/local"
-    if [ -f "$simulator_dir/lib/lib${pkg}.a" ]; then
+    if [ -f "$simulator_dir/lib/lib${lib_name}.a" ]; then
         echo "$simulator_dir"
         return 0
     fi
@@ -38,7 +44,7 @@ auto_detect_build_dir() {
     local tmp_dir="$SCRIPT_DIR/../.build/tmp"
     # Try to find the package in tmp directory
     for dir in "$tmp_dir"/*; do
-        if [ -d "$dir" ] && [ -f "$dir/lib${pkg}.a" ]; then
+        if [ -d "$dir" ] && [ -f "$dir/lib${lib_name}.a" ]; then
             echo "$dir"
             return 0
         fi
@@ -68,15 +74,16 @@ else
 fi
 
 # Verify library exists
-LIBRARY_PATH="$BUILD_DIR/lib/lib${PACKAGE_NAME}.a"
+# Strip 'lib' prefix if present
+LIB_BASE_NAME="$PACKAGE_NAME"
+if [[ "$PACKAGE_NAME" == lib* ]]; then
+    LIB_BASE_NAME="${PACKAGE_NAME#lib}"
+fi
+
+LIBRARY_PATH="$BUILD_DIR/lib/lib${LIB_BASE_NAME}.a"
 if [ ! -f "$LIBRARY_PATH" ]; then
-    # Try alternative naming
-    if [ -f "$BUILD_DIR/lib/libz.a" ] && [ "$PACKAGE_NAME" = "libz" ]; then
-        LIBRARY_PATH="$BUILD_DIR/lib/libz.a"
-    else
-        echo "Error: Library not found at $LIBRARY_PATH"
-        exit 1
-    fi
+    echo "Error: Library not found at $LIBRARY_PATH"
+    exit 1
 fi
 
 echo "========================================"

@@ -411,39 +411,6 @@ a_shell_step_install() {
     fi
 }
 
-a_shell_step_package() {
-    # Skip packaging for simulator-only builds (used for testing)
-    if [ "$A_SHELL_BUILD_TARGET" = "simulator" ]; then
-        a_shell_info "Skipping .deb package creation for simulator build"
-        return 0
-    fi
-    
-    a_shell_step "Creating package..."
-    
-    # Create repos directory if needed
-    mkdir -p "$A_SHELL_PKG_BUILDER_DIR/repos/pool"
-    
-    # Create control file
-    cat > "$A_SHELL_PKG_STAGING/DEBIAN/control" <<EOF
-Package: $A_SHELL_PKG_NAME
-Version: $A_SHELL_PKG_VERSION
-Architecture: ios-arm64
-Maintainer: a-Shell Team
-Depends: ${A_SHELL_PKG_DEPENDS:-}
-Section: ${A_SHELL_PKG_SECTION:-base}
-Priority: ${A_SHELL_PKG_PRIORITY:-optional}
-Homepage: ${A_SHELL_PKG_HOMEPAGE:-}
-Description: ${A_SHELL_PKG_DESCRIPTION:-$A_SHELL_PKG_NAME package}
-EOF
-    
-    # Build .deb
-    local deb_file="${A_SHELL_PKG_NAME}_${A_SHELL_PKG_VERSION}_ios-arm64.deb"
-    dpkg-deb --build "$A_SHELL_PKG_STAGING" "$A_SHELL_PKG_BUILDER_DIR/repos/pool/$deb_file" \
-        || a_shell_error "Package creation failed"
-    
-    a_shell_info "Package created: $deb_file"
-}
-
 # =============================================================================
 # MAIN BUILD FUNCTION
 # =============================================================================
@@ -478,44 +445,10 @@ a_shell_build_package() {
     a_shell_step_configure
     a_shell_step_make
     a_shell_step_install
-    a_shell_step_package
     
+    # Build complete - output is in staging directory
     a_shell_info "Build complete: $A_SHELL_PKG_NAME $A_SHELL_PKG_VERSION (target: $A_SHELL_BUILD_TARGET)"
     a_shell_info "Output: $A_SHELL_PKG_STAGING"
-}
-
-# =============================================================================
-# UTILITY FUNCTIONS
-# =============================================================================
-
-a_shell_download_package() {
-    local pkg_name="$1"
-    local version="$2"
-    
-    a_shell_step "Downloading $pkg_name $version..."
-    
-    # Download from repo
-    local deb_url="https://packages.a-shell.dev/pool/main/${pkg_name:0:1}/$pkg_name/${pkg_name}_${version}_ios-arm64.deb"
-    local target="$A_SHELL_PREFIX"
-    
-    curl -L "$deb_url" -o "$A_SHELL_TMPDIR/$pkg_name.deb" || a_shell_error "Download failed"
-    
-    # Extract
-    dpkg-deb -x "$A_SHELL_TMPDIR/$pkg_name.deb" "$target" || a_shell_error "Extraction failed"
-    
-    a_shell_info "$pkg_name installed"
-}
-
-a_shell_update_packages() {
-    a_shell_step "Updating package lists..."
-    
-    curl -L "https://packages.a-shell.dev/dists/stable/main/binary-ios-arm64/Packages.gz" \
-        -o "$A_SHELL_CONFIG/var/cache/apt/Packages.gz" \
-        || a_shell_error "Failed to update package list"
-    
-    gunzip -c "$A_SHELL_CONFIG/var/cache/apt/Packages.gz" > "$A_SHELL_CONFIG/var/cache/apt/Packages"
-    
-    a_shell_info "Package list updated"
 }
 
 # Run if executed directly
