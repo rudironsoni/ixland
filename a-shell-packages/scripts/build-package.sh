@@ -158,11 +158,6 @@ build_single_target() {
     a_shell_step "Installing..."
     a_shell_pkg_install
     
-    # Package (only for non-simulator)
-    if [ "$target" != "simulator" ]; then
-        a_shell_step_package
-    fi
-    
     a_shell_info "Build complete: $PKG_NAME (target: $target)"
     a_shell_info "Output: $A_SHELL_PKG_STAGING"
 }
