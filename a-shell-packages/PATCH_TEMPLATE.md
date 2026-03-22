@@ -2,6 +2,81 @@
 
 This guide provides templates and examples for creating iOS compatibility patches.
 
+## API Reference
+
+When patching packages for iOS, you'll need to use the a-Shell kernel APIs. Include the kernel header and use the `a_shell_*` prefixed functions:
+
+```c
+// Include the a-Shell kernel header
+extern "C" {
+    #include "a_shell_system.h"  // or <a_shell_system.h> if installed
+}
+```
+
+### Core Syscalls (Process Management)
+
+```c
+// Process management
+pid_t a_shell_fork(void);
+void a_shell_waitpid(pid_t pid);
+pid_t a_shell_full_waitpid(pid_t pid, int *stat_loc, int options);
+int a_shell_execv(const char *path, char* const argv[]);
+int a_shell_execve(const char *path, char* const argv[], char** envlist);
+void a_shell_exit(int errorCode);
+
+// Signal handling
+sig_t a_shell_signal(int signal, sig_t function);
+int a_shell_killpid(pid_t pid, int sig);
+```
+
+### I/O Functions
+
+```c
+// Stream operations
+FILE *a_shell_popen(const char *command, const char *type);
+FILE* a_shell_stdin(void);
+FILE* a_shell_stdout(void);
+FILE* a_shell_stderr(void);
+
+// I/O redirection
+int a_shell_dup2(int fd1, int fd2);
+int a_shell_isatty(int fd);
+int a_shell_getstdin(void);
+int a_shell_gettty(void);
+int a_shell_opentty(void);
+void a_shell_closetty(void);
+
+// I/O functions (for #defines)
+ssize_t a_shell_write(int fildes, const void *buf, size_t nbyte);
+size_t a_shell_fwrite(const void *ptr, size_t size, size_t nitems, FILE *stream);
+int a_shell_puts(const char *s);
+int a_shell_fputs(const char* s, FILE *stream);
+int a_shell_fputc(int c, FILE *stream);
+int a_shell_fflush(FILE *stream);
+```
+
+### Environment
+
+```c
+char *a_shell_getenv(const char *name);
+int a_shell_setenv(const char* variableName, const char* value, int overwrite);
+int a_shell_unsetenv(const char* variableName);
+int a_shell_putenv(char *string);
+int a_shell_fchdir(const int fd);
+```
+
+### Session Management
+
+```c
+void a_shell_switchSession(const void* sessionid);
+void a_shell_closeSession(const void* sessionid);
+void a_shell_setStreams(FILE* _stdin, FILE* _stdout, FILE* _stderr);
+void a_shell_setContext(const void *context);
+const void* a_shell_getContext(void);
+const char* a_shell_progname(void);
+int a_shell_getCommandStatus(void);
+```
+
 ## Patch File Format
 
 All patches use **unified diff format** (`diff -u`):
