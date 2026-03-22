@@ -11,3 +11,6 @@
 [submodule "a-shell-kernel"]
 	path = a-shell-kernel
 	url = https://github.com/rudironsoni/a-shell-kernel.git
+[submodule "a-shell-app"]
+	path = a-shell-app
+	url = https://github.com/rudironsoni/a-shell-app.git
