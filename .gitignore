@@ -62,3 +62,7 @@ dkms.conf
 xcuserdata/
 .build
 .DS_Store
+
+# Build artifacts
+build/
+
