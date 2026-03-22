@@ -8,3 +8,6 @@
 [submodule "a-shell-packages"]
 	path = a-shell-packages
 	url = git@github.com:rudironsoni/a-shell-packages.git
+[submodule "a-shell-kernel"]
+	path = a-shell-kernel
+	url = https://github.com/rudironsoni/a-shell-kernel.git
