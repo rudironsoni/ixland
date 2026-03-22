@@ -15,6 +15,23 @@
 
 **Instead:** We build native iOS binaries that link against a-shell-kernel, producing static libraries and executables for direct inclusion in the iOS app bundle.
 
+## Quick Start
+
+```bash
+# Build the reference libz package
+cd a-shell-packages
+./scripts/build-package.sh libz
+
+# List available packages
+ls packages/core/
+
+# Clean build artifacts
+./scripts/build-package.sh libz --clean
+
+# Build all packages
+./scripts/build-all.sh --target universal
+```
+
 ## Responsibilities
 
 ### What This Layer DOES
