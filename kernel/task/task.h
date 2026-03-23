@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <stdatomic.h>
+#include <stdbool.h>
 #include <pthread.h>
 #include <signal.h>
 #include <sys/resource.h>
@@ -28,18 +29,16 @@ typedef struct iox_task iox_task_t;
 typedef struct iox_files iox_files_t;
 typedef struct iox_fs iox_fs_t;
 typedef struct iox_sighand iox_sighand_t;
-typedef struct iox_tty iox_tty_t;
-typedef struct iox_mm_emu iox_mm_emu_t;
-typedef struct iox_exec_image iox_exec_image_t;
+typedef struct iox_tty {
+    int tty_id;
+    pid_t foreground_pgrp;
+    atomic_int refs;
+} iox_tty_t;
 
-typedef enum {
-    IOX_TASK_RUNNING = 0,
-    IOX_TASK_INTERRUPTIBLE,
-    IOX_TASK_UNINTERRUPTIBLE,
-    IOX_TASK_STOPPED,
-    IOX_TASK_ZOMBIE,
-    IOX_TASK_DEAD
-} iox_task_state_t;
+typedef struct iox_mm_emu {
+    void *exec_image_base;
+    size_t exec_image_size;
+} iox_mm_emu_t;
 
 typedef enum {
     IOX_IMAGE_NONE = 0,
@@ -48,9 +47,9 @@ typedef enum {
     IOX_IMAGE_SCRIPT
 } iox_image_type_t;
 
-typedef int (*iox_native_entry_t)(iox_task_t *task, int argc, char **argv, char **envp);
+typedef int (*iox_native_entry_t)(struct iox_task *task, int argc, char **argv, char **envp);
 
-struct iox_exec_image {
+typedef struct iox_exec_image {
     iox_image_type_t type;
     char path[IOX_MAX_PATH];
     char interpreter[IOX_MAX_PATH];
@@ -68,7 +67,7 @@ struct iox_exec_image {
             int interp_argc;
         } script;
     } u;
-};
+} iox_exec_image_t;
 
 struct iox_task {
     pid_t pid;
@@ -97,6 +96,7 @@ struct iox_task {
     struct iox_task *parent;
     struct iox_task *children;
     struct iox_task *next_sibling;
+    struct iox_task *hash_next;
     
     pthread_cond_t wait_cond;
     pthread_mutex_t wait_lock;
