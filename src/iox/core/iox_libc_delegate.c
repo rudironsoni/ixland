@@ -1,7 +1,12 @@
-/* iOS Subsystem for Linux - Stub Functions
+/* iOS Subsystem for Linux - libc Delegate Layer
  *
- * Placeholder implementations for unimplemented syscalls
- * These return ENOSYS (function not implemented)
+ * Provides safe access to original libc functions when libiox interposes on them.
+ * Uses dlsym(RTLD_NEXT, ...) to bypass the interposition layer and call real
+ * system functions without triggering infinite recursion.
+ *
+ * Purpose: When we override open(), close(), etc., we still need to call the
+ * real underlying libc functions. This file provides orig_* function pointers
+ * that delegate directly to libc.
  */
 
 #include "../internal/iox_internal.h"
@@ -25,72 +30,86 @@ typedef void (*sighandler_t)(int);
 #endif
 
 /* Original libc function pointers for interposition safety */
-static int (*orig_chdir)(const char *path) = NULL;
-static int (*orig_fchdir)(int fd) = NULL;
-static char *(*orig_getcwd)(char *buf, size_t size) = NULL;
+static int (*libc_chdir)(const char *path) = NULL;
+static int (*libc_fchdir)(int fd) = NULL;
+static char *(*libc_getcwd)(char *buf, size_t size) = NULL;
 
 /* Environment */
-static char *(*orig_getenv)(const char *) = NULL;
-static int (*orig_setenv)(const char *, const char *, int) = NULL;
-static int (*orig_unsetenv)(const char *) = NULL;
+static char *(*libc_getenv)(const char *) = NULL;
+static int (*libc_setenv)(const char *, const char *, int) = NULL;
+static int (*libc_unsetenv)(const char *) = NULL;
 
 /* Filesystem */
-static int (*orig_stat)(const char *, struct stat *) = NULL;
-static int (*orig_fstat)(int, struct stat *) = NULL;
-static int (*orig_lstat)(const char *, struct stat *) = NULL;
-static int (*orig_mkdir)(const char *, mode_t) = NULL;
-static int (*orig_rmdir)(const char *) = NULL;
-static int (*orig_unlink)(const char *) = NULL;
-static int (*orig_chmod)(const char *, mode_t) = NULL;
-static int (*orig_fchmod)(int, mode_t) = NULL;
-static int (*orig_chown)(const char *, uid_t, gid_t) = NULL;
-static int (*orig_fchown)(int, uid_t, gid_t) = NULL;
-static int (*orig_lchown)(const char *, uid_t, gid_t) = NULL;
+static int (*libc_stat)(const char *, struct stat *) = NULL;
+static int (*libc_fstat)(int, struct stat *) = NULL;
+static int (*libc_lstat)(const char *, struct stat *) = NULL;
+static int (*libc_mkdir)(const char *, mode_t) = NULL;
+static int (*libc_rmdir)(const char *) = NULL;
+static int (*libc_unlink)(const char *) = NULL;
+static int (*libc_chmod)(const char *, mode_t) = NULL;
+static int (*libc_fchmod)(int, mode_t) = NULL;
+static int (*libc_chown)(const char *, uid_t, gid_t) = NULL;
+static int (*libc_fchown)(int, uid_t, gid_t) = NULL;
+static int (*libc_lchown)(const char *, uid_t, gid_t) = NULL;
+
+/* File operations - exported for use in other modules */
+int (*libc_open)(const char *, int, mode_t) = NULL;
+int (*libc_close)(int) = NULL;
+ssize_t (*libc_read)(int, void *, size_t) = NULL;
+ssize_t (*libc_write)(int, const void *, size_t) = NULL;
+off_t (*libc_lseek)(int, off_t, int) = NULL;
 
 /* Time */
-static unsigned int (*orig_alarm)(unsigned int) = NULL;
-static unsigned int (*orig_sleep)(unsigned int) = NULL;
-static int (*orig_usleep)(useconds_t) = NULL;
-static int (*orig_nanosleep)(const struct timespec *, struct timespec *) = NULL;
+static unsigned int (*libc_alarm)(unsigned int) = NULL;
+static unsigned int (*libc_sleep)(unsigned int) = NULL;
+static int (*libc_usleep)(useconds_t) = NULL;
+static int (*libc_nanosleep)(const struct timespec *, struct timespec *) = NULL;
 
 /* Memory */
-static void *(*orig_mmap)(void *, size_t, int, int, int, off_t) = NULL;
-static int (*orig_munmap)(void *, size_t) = NULL;
-static int (*orig_mprotect)(void *, size_t, int) = NULL;
+static void *(*libc_mmap)(void *, size_t, int, int, int, off_t) = NULL;
+static int (*libc_munmap)(void *, size_t) = NULL;
+static int (*libc_mprotect)(void *, size_t, int) = NULL;
 
-static void init_orig_funcs(void) {
+void init_orig_funcs(void) {
     static int initialized = 0;
     if (initialized) return;
     initialized = 1;
     
     /* Directory */
-    orig_chdir = (int (*)(const char *))dlsym(RTLD_NEXT, "chdir");
-    orig_fchdir = (int (*)(int))dlsym(RTLD_NEXT, "fchdir");
-    orig_getcwd = (char *(*)(char *, size_t))dlsym(RTLD_NEXT, "getcwd");
+    libc_chdir = (int (*)(const char *))dlsym(RTLD_NEXT, "chdir");
+    libc_fchdir = (int (*)(int))dlsym(RTLD_NEXT, "fchdir");
+    libc_getcwd = (char *(*)(char *, size_t))dlsym(RTLD_NEXT, "getcwd");
     
     /* Filesystem */
-    orig_stat = (int (*)(const char *, struct stat *))dlsym(RTLD_NEXT, "stat");
-    orig_fstat = (int (*)(int, struct stat *))dlsym(RTLD_NEXT, "fstat");
-    orig_lstat = (int (*)(const char *, struct stat *))dlsym(RTLD_NEXT, "lstat");
-    orig_mkdir = (int (*)(const char *, mode_t))dlsym(RTLD_NEXT, "mkdir");
-    orig_rmdir = (int (*)(const char *))dlsym(RTLD_NEXT, "rmdir");
-    orig_unlink = (int (*)(const char *))dlsym(RTLD_NEXT, "unlink");
-    orig_chmod = (int (*)(const char *, mode_t))dlsym(RTLD_NEXT, "chmod");
-    orig_fchmod = (int (*)(int, mode_t))dlsym(RTLD_NEXT, "fchmod");
-    orig_chown = (int (*)(const char *, uid_t, gid_t))dlsym(RTLD_NEXT, "chown");
-    orig_fchown = (int (*)(int, uid_t, gid_t))dlsym(RTLD_NEXT, "fchown");
-    orig_lchown = (int (*)(const char *, uid_t, gid_t))dlsym(RTLD_NEXT, "lchown");
+    libc_stat = (int (*)(const char *, struct stat *))dlsym(RTLD_NEXT, "stat");
+    libc_fstat = (int (*)(int, struct stat *))dlsym(RTLD_NEXT, "fstat");
+    libc_lstat = (int (*)(const char *, struct stat *))dlsym(RTLD_NEXT, "lstat");
+    libc_mkdir = (int (*)(const char *, mode_t))dlsym(RTLD_NEXT, "mkdir");
+    libc_rmdir = (int (*)(const char *))dlsym(RTLD_NEXT, "rmdir");
+    libc_unlink = (int (*)(const char *))dlsym(RTLD_NEXT, "unlink");
+    libc_chmod = (int (*)(const char *, mode_t))dlsym(RTLD_NEXT, "chmod");
+    libc_fchmod = (int (*)(int, mode_t))dlsym(RTLD_NEXT, "fchmod");
+    libc_chown = (int (*)(const char *, uid_t, gid_t))dlsym(RTLD_NEXT, "chown");
+    libc_fchown = (int (*)(int, uid_t, gid_t))dlsym(RTLD_NEXT, "fchown");
+    libc_lchown = (int (*)(const char *, uid_t, gid_t))dlsym(RTLD_NEXT, "lchown");
     
     /* Time */
-    orig_alarm = (unsigned int (*)(unsigned int))dlsym(RTLD_NEXT, "alarm");
-    orig_sleep = (unsigned int (*)(unsigned int))dlsym(RTLD_NEXT, "sleep");
-    orig_usleep = (int (*)(useconds_t))dlsym(RTLD_NEXT, "usleep");
-    orig_nanosleep = (int (*)(const struct timespec *, struct timespec *))dlsym(RTLD_NEXT, "nanosleep");
+    libc_alarm = (unsigned int (*)(unsigned int))dlsym(RTLD_NEXT, "alarm");
+    libc_sleep = (unsigned int (*)(unsigned int))dlsym(RTLD_NEXT, "sleep");
+    libc_usleep = (int (*)(useconds_t))dlsym(RTLD_NEXT, "usleep");
+    libc_nanosleep = (int (*)(const struct timespec *, struct timespec *))dlsym(RTLD_NEXT, "nanosleep");
     
     /* Memory */
-    orig_mmap = (void *(*)(void *, size_t, int, int, int, off_t))dlsym(RTLD_NEXT, "mmap");
-    orig_munmap = (int (*)(void *, size_t))dlsym(RTLD_NEXT, "munmap");
-    orig_mprotect = (int (*)(void *, size_t, int))dlsym(RTLD_NEXT, "mprotect");
+    libc_mmap = (void *(*)(void *, size_t, int, int, int, off_t))dlsym(RTLD_NEXT, "mmap");
+    libc_munmap = (int (*)(void *, size_t))dlsym(RTLD_NEXT, "munmap");
+    libc_mprotect = (int (*)(void *, size_t, int))dlsym(RTLD_NEXT, "mprotect");
+    
+    /* File operations */
+    libc_open = (int (*)(const char *, int, mode_t))dlsym(RTLD_NEXT, "open");
+    libc_close = (int (*)(int))dlsym(RTLD_NEXT, "close");
+    libc_read = (ssize_t (*)(int, void *, size_t))dlsym(RTLD_NEXT, "read");
+    libc_write = (ssize_t (*)(int, const void *, size_t))dlsym(RTLD_NEXT, "write");
+    libc_lseek = (off_t (*)(int, off_t, int))dlsym(RTLD_NEXT, "lseek");
 }
 
 /* ============================================================================
@@ -99,32 +118,32 @@ static void init_orig_funcs(void) {
 
 int __iox_stat_impl(const char *pathname, struct stat *statbuf) {
     init_orig_funcs();
-    return orig_stat ? orig_stat(pathname, statbuf) : -1;
+    return libc_stat ? libc_stat(pathname, statbuf) : -1;
 }
 
 int __iox_fstat_impl(int fd, struct stat *statbuf) {
     init_orig_funcs();
-    return orig_fstat ? orig_fstat(fd, statbuf) : -1;
+    return libc_fstat ? libc_fstat(fd, statbuf) : -1;
 }
 
 int __iox_lstat_impl(const char *pathname, struct stat *statbuf) {
     init_orig_funcs();
-    return orig_lstat ? orig_lstat(pathname, statbuf) : -1;
+    return libc_lstat ? libc_lstat(pathname, statbuf) : -1;
 }
 
 int __iox_mkdir_impl(const char *pathname, mode_t mode) {
     init_orig_funcs();
-    return orig_mkdir ? orig_mkdir(pathname, mode) : -1;
+    return libc_mkdir ? libc_mkdir(pathname, mode) : -1;
 }
 
 int __iox_rmdir_impl(const char *pathname) {
     init_orig_funcs();
-    return orig_rmdir ? orig_rmdir(pathname) : -1;
+    return libc_rmdir ? libc_rmdir(pathname) : -1;
 }
 
 int __iox_unlink_impl(const char *pathname) {
     init_orig_funcs();
-    return orig_unlink ? orig_unlink(pathname) : -1;
+    return libc_unlink ? libc_unlink(pathname) : -1;
 }
 
 int __iox_link_impl(const char *oldpath, const char *newpath) {
@@ -141,27 +160,27 @@ ssize_t __iox_readlink_impl(const char *pathname, char *buf, size_t bufsiz) {
 
 int __iox_chmod_impl(const char *pathname, mode_t mode) {
     init_orig_funcs();
-    return orig_chmod ? orig_chmod(pathname, mode) : -1;
+    return libc_chmod ? libc_chmod(pathname, mode) : -1;
 }
 
 int __iox_fchmod_impl(int fd, mode_t mode) {
     init_orig_funcs();
-    return orig_fchmod ? orig_fchmod(fd, mode) : -1;
+    return libc_fchmod ? libc_fchmod(fd, mode) : -1;
 }
 
 int __iox_chown_impl(const char *pathname, uid_t owner, gid_t group) {
     init_orig_funcs();
-    return orig_chown ? orig_chown(pathname, owner, group) : -1;
+    return libc_chown ? libc_chown(pathname, owner, group) : -1;
 }
 
 int __iox_fchown_impl(int fd, uid_t owner, gid_t group) {
     init_orig_funcs();
-    return orig_fchown ? orig_fchown(fd, owner, group) : -1;
+    return libc_fchown ? libc_fchown(fd, owner, group) : -1;
 }
 
 int __iox_lchown_impl(const char *pathname, uid_t owner, gid_t group) {
     init_orig_funcs();
-    return orig_lchown ? orig_lchown(pathname, owner, group) : -1;
+    return libc_lchown ? libc_lchown(pathname, owner, group) : -1;
 }
 
 int __iox_chroot_impl(const char *path) {
@@ -211,7 +230,7 @@ int __iox_sigismember_impl(const sigset_t *set, int signum) {
 
 unsigned int __iox_alarm_impl(unsigned int seconds) {
     init_orig_funcs();
-    return orig_alarm ? orig_alarm(seconds) : 0;
+    return libc_alarm ? libc_alarm(seconds) : 0;
 }
 
 int __iox_setitimer_impl(int which, const struct itimerval *new_value, struct itimerval *old_value) {
@@ -232,17 +251,17 @@ int __iox_pause_impl(void) {
 
 unsigned int __iox_sleep_impl(unsigned int seconds) {
     init_orig_funcs();
-    return orig_sleep ? orig_sleep(seconds) : 0;
+    return libc_sleep ? libc_sleep(seconds) : 0;
 }
 
 int __iox_usleep_impl(useconds_t usec) {
     init_orig_funcs();
-    return orig_usleep ? orig_usleep(usec) : -1;
+    return libc_usleep ? libc_usleep(usec) : -1;
 }
 
 int __iox_nanosleep_impl(const struct timespec *req, struct timespec *rem) {
     init_orig_funcs();
-    return orig_nanosleep ? orig_nanosleep(req, rem) : -1;
+    return libc_nanosleep ? libc_nanosleep(req, rem) : -1;
 }
 
 int __iox_gettimeofday_impl(struct timeval *tv, struct timezone *tz) {
@@ -269,17 +288,17 @@ time_t __iox_time_impl(time_t *tloc) {
 
 char *__iox_getenv_impl(const char *name) {
     init_orig_funcs();
-    return orig_getenv ? orig_getenv(name) : NULL;
+    return libc_getenv ? libc_getenv(name) : NULL;
 }
 
 int __iox_setenv_impl(const char *name, const char *value, int overwrite) {
     init_orig_funcs();
-    return orig_setenv ? orig_setenv(name, value, overwrite) : -1;
+    return libc_setenv ? libc_setenv(name, value, overwrite) : -1;
 }
 
 int __iox_unsetenv_impl(const char *name) {
     init_orig_funcs();
-    return orig_unsetenv ? orig_unsetenv(name) : -1;
+    return libc_unsetenv ? libc_unsetenv(name) : -1;
 }
 
 int __iox_clearenv_impl(void) {
@@ -295,17 +314,17 @@ int __iox_clearenv_impl(void) {
 
 void *__iox_mmap_impl(void *addr, size_t length, int prot, int flags, int fd, off_t offset) {
     init_orig_funcs();
-    return orig_mmap ? orig_mmap(addr, length, prot, flags, fd, offset) : MAP_FAILED;
+    return libc_mmap ? libc_mmap(addr, length, prot, flags, fd, offset) : MAP_FAILED;
 }
 
 int __iox_munmap_impl(void *addr, size_t length) {
     init_orig_funcs();
-    return orig_munmap ? orig_munmap(addr, length) : -1;
+    return libc_munmap ? libc_munmap(addr, length) : -1;
 }
 
 int __iox_mprotect_impl(void *addr, size_t len, int prot) {
     init_orig_funcs();
-    return orig_mprotect ? orig_mprotect(addr, len, prot) : -1;
+    return libc_mprotect ? libc_mprotect(addr, len, prot) : -1;
 }
 
 /* ============================================================================
@@ -404,29 +423,29 @@ int iox_tcsetattr(int fd, int optional_actions, const struct termios *termios_p)
 
 int __iox_chdir_impl(const char *path) {
     init_orig_funcs();
-    if (!orig_chdir) {
+    if (!libc_chdir) {
         errno = ENOSYS;
         return -1;
     }
-    return orig_chdir(path);
+    return libc_chdir(path);
 }
 
 int __iox_fchdir_impl(int fd) {
     init_orig_funcs();
-    if (!orig_fchdir) {
+    if (!libc_fchdir) {
         errno = ENOSYS;
         return -1;
     }
-    return orig_fchdir(fd);
+    return libc_fchdir(fd);
 }
 
 char *__iox_getcwd_impl(char *buf, size_t size) {
     init_orig_funcs();
-    if (!orig_getcwd) {
+    if (!libc_getcwd) {
         errno = ENOSYS;
         return NULL;
     }
-    return orig_getcwd(buf, size);
+    return libc_getcwd(buf, size);
 }
 
 /* ============================================================================
@@ -441,16 +460,16 @@ char *iox_getcwd(char *buf, size_t size) { return __iox_getcwd_impl(buf, size); 
  * PUBLIC API - USER/GROUP
  * ============================================================================ */
 
-static uid_t (*orig_getuid)(void) = NULL;
-static gid_t (*orig_getgid)(void) = NULL;
+static uid_t (*libc_getuid)(void) = NULL;
+static gid_t (*libc_getgid)(void) = NULL;
 
 uid_t iox_getuid(void) {
     static int initialized = 0;
     if (!initialized) {
         initialized = 1;
-        orig_getuid = (uid_t (*)(void))dlsym(RTLD_NEXT, "getuid");
+        libc_getuid = (uid_t (*)(void))dlsym(RTLD_NEXT, "getuid");
     }
-    if (orig_getuid) return orig_getuid();
+    if (libc_getuid) return libc_getuid();
     /* Return iOS default uid */
     return 501;
 }
@@ -459,9 +478,9 @@ gid_t iox_getgid(void) {
     static int initialized = 0;
     if (!initialized) {
         initialized = 1;
-        orig_getgid = (gid_t (*)(void))dlsym(RTLD_NEXT, "getgid");
+        libc_getgid = (gid_t (*)(void))dlsym(RTLD_NEXT, "getgid");
     }
-    if (orig_getgid) return orig_getgid();
+    if (libc_getgid) return libc_getgid();
     /* Return iOS default gid */
     return 501;
 }

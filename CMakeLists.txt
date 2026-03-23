@@ -35,7 +35,7 @@ set(IOX_SOURCES
     src/iox/core/iox_file_v2.c
     src/iox/core/iox_vfs.c
     src/iox/core/iox_context.c
-    src/iox/core/iox_stubs.c
+    src/iox/core/iox_libc_delegate.c
     src/iox/util/iox_path.c
     src/iox/interpose/iox_interpose.c
 )

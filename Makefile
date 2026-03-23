@@ -28,7 +28,7 @@ WAMR_INCLUDE_DIR := ./deps/wamr/core/iwasm/include
 
 IOX_SOURCES := \
 	src/iox/core/iox_init.c \
-	src/iox/core/iox_stubs.c \
+	src/iox/core/iox_libc_delegate.c \
 	src/iox/util/iox_path.c \
 	src/iox/core/iox_vfs.c \
 	src/iox/core/iox_process.c \

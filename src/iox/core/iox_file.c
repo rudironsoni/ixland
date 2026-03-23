@@ -80,6 +80,13 @@ void __iox_file_init_impl(void) {
     fd_table[IOX_FD_STDERR].real_fd = IOX_FD_STDERR;
     strcpy(fd_table[IOX_FD_STDERR].path, "/dev/stderr");
     
+    /* Verify initialization */
+    int used_after_init = 0;
+    for (int i = 0; i < IOX_MAX_FD; i++) {
+        if (fd_table[i].used) used_after_init++;
+    }
+    fprintf(stderr, "[DEBUG] FD table init complete: %d/%d entries used (should be 3)\n", used_after_init, IOX_MAX_FD);
+    
     atomic_store(&fd_table_initialized, 1);
     pthread_mutex_unlock(&fd_table_lock);
 }
@@ -143,11 +150,17 @@ static int __iox_alloc_fd(void) {
     return -1;
 }
 
+static int free_count = 0;
+
 static void __iox_free_fd(int fd) {
     if (fd < 0 || fd >= IOX_MAX_FD) return;
     
     pthread_mutex_lock(&fd_table_lock);
     if (fd_table[fd].used) {
+        free_count++;
+        if (free_count <= 10 || free_count % 50 == 0) {
+            fprintf(stderr, "[DEBUG] __iox_free_fd called (count=%d) for fd=%d\n", free_count, fd);
+        }
         memset(&fd_table[fd], 0, sizeof(iox_fd_entry_t));
     }
     pthread_mutex_unlock(&fd_table_lock);
@@ -173,9 +186,17 @@ int __iox_open_impl(const char *pathname, int flags, mode_t mode) {
         return -1;
     }
     
+    /* Debug: Log what file is being opened */
+    static int open_count = 0;
+    open_count++;
+    if (open_count <= 20 || open_count % 50 == 0) {
+        fprintf(stderr, "[DEBUG] __iox_open_impl: opening '%s' (count=%d)\n", pathname, open_count);
+    }
+    
     /* Allocate file descriptor */
     int fd = __iox_alloc_fd();
     if (fd < 0) {
+        fprintf(stderr, "[DEBUG] __iox_open_impl: failed to alloc fd for '%s'\n", pathname);
         return -1;
     }
     
@@ -194,8 +215,9 @@ int __iox_open_impl(const char *pathname, int flags, mode_t mode) {
         return -1;
     }
     
-    /* For now, use real open (will be replaced with VFS later) */
-    int real_fd = open(resolved_path, flags, mode);
+    /* Use original open to avoid recursion through interposition */
+    init_orig_funcs();
+    int real_fd = libc_open ? libc_open(resolved_path, flags, mode) : open(resolved_path, flags, mode);
     if (real_fd < 0) {
         __iox_free_fd(fd);
         return -1;

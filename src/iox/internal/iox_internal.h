@@ -544,6 +544,18 @@ int __iox_mlock_impl(const void *addr, size_t len);
 int __iox_munlock_impl(const void *addr, size_t len);
 
 /* ============================================================================
+ * ORIGINAL LIBC FUNCTION POINTERS (for internal use to avoid recursion)
+ * ============================================================================ */
+
+void init_orig_funcs(void);
+
+extern int (*libc_open)(const char *, int, mode_t);
+extern int (*libc_close)(int);
+extern ssize_t (*libc_read)(int, void *, size_t);
+extern ssize_t (*libc_write)(int, const void *, size_t);
+extern off_t (*libc_lseek)(int, off_t, int);
+
+/* ============================================================================
  * FUNCTION DECLARATIONS - Pipes (Internal)
  * ============================================================================ */
 
