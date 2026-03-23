@@ -1,117 +1,208 @@
-# Agent Guide: a-shell-kernel
+# Agent Guide: libiox
 
 ## Overview
 
-**a-shell-kernel** is the syscall simulation layer that provides Linux-compatible system calls on iOS. It allows native Linux tools (bash, coreutils, git, vim, python) to run without modification by intercepting syscalls and redirecting them to iOS-safe implementations.
+**libiox** is the iOS eXtension subsystem - a complete Linux syscall compatibility layer for iOS. Unlike the previous a-shell-kernel, libiox provides clean symbol interposition without macro pollution.
 
-## Responsibilities
+### Key Changes from a-shell-kernel
 
-### What This Layer DOES
-
-1. **Process Simulation**
-   - Virtual PIDs (1024 max processes)
-   - `fork()`, `vfork()` - Returns ENOSYS (iOS forbids real fork)
-   - `execve()` - Thread-based execution simulation
-   - `waitpid()`, `wait3()`, `wait4()` - Virtual process management
-   - `getpid()`, `getppid()`, `getpgrp()` - Virtual PID tracking
-
-2. **Signal Handling**
-   - Signal delivery to threads (not real processes)
-   - `signal()`, `sigaction()`, `kill()`
-   - Signal masking: `sigprocmask()`, `sigpending()`
-   - Alarm: `alarm()`, `setitimer()`
-
-3. **File I/O**
-   - Standard file operations: `open()`, `read()`, `write()`, `close()`
-   - Directory operations: `mkdir()`, `rmdir()`, `chdir()`, `getcwd()`
-   - File metadata: `stat()`, `fstat()`, `lstat()`, `chmod()`, `chown()`
-   - Links: `link()`, `symlink()`, `readlink()`, `unlink()`
-
-4. **Memory Management**
-   - `mmap()`, `munmap()`, `mprotect()`
-   - iOS-specific restrictions (no executable stack, etc.)
-
-5. **TTY/Terminal**
-   - `tcgetattr()`, `tcsetattr()`
-   - `ioctl()` for terminal window size
-
-6. **Time**
-   - `nanosleep()`, `usleep()`, `alarm()`
-   - `gettimeofday()`, `clock_gettime()`
-
-### What This Layer DOES NOT DO
-
-- ❌ NOT a terminal emulator (that's a-shell/)
-- ❌ NOT a package manager (that's a-shell-packages/pkg/)
-- ❌ NOT a shell (bash lives in a-Shell.app/bin/)
-- ❌ NOT a build system (that's a-shell-packages/scripts/)
+| Old | New |
+|-----|-----|
+| `a_shell_fork()` | `__iox_fork_impl()` (internal) |
+| | `iox_fork()` (public) |
+| `a_shell_system.m` | `src/iox/core/*.c` |
+| `libc_replacement.c` | `src/iox/runtime/*.c` |
+| `#define fork a_shell_fork` | Strong symbol: `pid_t fork(void) { return iox_fork(); }` |
+| `include/linux/` | `include/iox/sys/` |
 
 ## Architecture
 
 ```
-Linux Tool (bash)
-    ↓ calls
-a-shell-kernel (syscalls)
-    ↓ translates to
-iOS APIs (threads, files)
+┌─────────────────────────────────────────────────────────────┐
+│                    Linux Application                        │
+│                    (unmodified source)                      │
+├─────────────────────────────────────────────────────────────┤
+│  #include <unistd.h>                                       │
+│  fork(); execve();                                          │
+├─────────────────────────────────────────────────────────────┤
+│                    libiox.a                                 │
+│  Strong symbol: fork() ──► iox_fork()                       │
+│  Strong symbol: execve() ──► iox_execve()                   │
+│  ...                                                        │
+├─────────────────────────────────────────────────────────────┤
+│                    iOS Kernel APIs                          │
+│  Thread-based process simulation                            │
+│  Virtual PIDs                                               │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Key Files
+## Naming Convention
 
-| File | Purpose |
-|------|---------|
-| `include/linux/unistd.h` | Process, file, time syscalls |
-| `include/linux/signal.h` | Signal handling |
-| `include/linux/fcntl.h` | File operations |
-| `include/linux/stat.h` | File metadata |
-| `include/linux/sys/wait.h` | Process waiting |
-| `a_shell_system.m` | Main implementation |
-| `libc_replacement.c` | libc function replacements |
+### Three-Level Naming
+
+| Level | Pattern | Purpose | Example |
+|-------|---------|---------|---------|
+| **Internal** | `__iox_*_impl()` | Implementation details | `__iox_fork_impl()` |
+| **Public** | `iox_*()` | Public C API | `iox_fork()` |
+| **Linux** | Standard names | Symbol interposition | `fork()` (via strong symbol) |
+
+### File Naming
+
+| Type | Pattern | Example |
+|------|---------|---------|
+| Core syscalls | `iox_<category>.c` | `iox_process.c` |
+| Interposition | `iox_interpose.c` | All 300+ wrappers |
+| Runtime | `iox_<func>.c` | `iox_stdio.c` |
+| WAMR | `iox_wamr_*.c` | `iox_wamr_wasi.c` |
+
+## Directory Structure
+
+```
+a-shell-kernel/
+├── include/iox/              # Public headers
+│   ├── iox.h                 # Master umbrella
+│   ├── iox_syscalls.h        # Public API declarations
+│   ├── iox_wamr.h           # WAMR API
+│   └── sys/                  # Linux-compatible
+│       ├── unistd.h
+│       ├── wait.h
+│       └── ...
+│
+├── src/iox/                  # ALL implementations
+│   ├── core/                 # Syscall implementations
+│   │   ├── iox_process.c
+│   │   ├── iox_file.c
+│   │   └── ...
+│   ├── interpose/            # Symbol interposition
+│   │   └── iox_interpose.c   # 300+ wrappers
+│   ├── runtime/              # C runtime
+│   │   ├── iox_stdio.c
+│   │   ├── iox_env.c
+│   │   └── ...
+│   ├── wamr/                 # WAMR integration
+│   │   ├── iox_wamr_runtime.c
+│   │   ├── iox_wamr_wasi.c
+│   │   └── ...
+│   └── internal/             # Private headers
+│       └── iox_internal.h
+│
+├── lib/                      # Build outputs
+│   ├── libiox.a
+│   └── libiox.dylib
+│
+├── bin/                      # Tools
+│   └── iox-cc                # Compiler wrapper
+│
+└── deps/wamr/                # WAMR submodule
+```
+
+## Responsibilities
+
+### What libiox DOES
+
+1. **Process Simulation**
+   - Virtual PIDs (1024 max processes)
+   - `iox_fork()` - Thread-based fork simulation
+   - `iox_execve()` - Thread-based execution
+   - `iox_waitpid()` - Virtual process management
+   - `iox_getpid()`, `iox_getppid()` - Virtual PID tracking
+
+2. **Symbol Interposition**
+   - Strong symbols: `fork()`, `execve()`, `open()`, etc.
+   - Zero macro pollution
+   - Compile-time interception
+
+3. **Signal Handling**
+   - Thread-based signal delivery
+   - `iox_signal()`, `iox_sigaction()`, `iox_kill()`
+   - Signal masking: `iox_sigprocmask()`, `iox_sigpending()`
+
+4. **File I/O**
+   - Standard operations: `iox_open()`, `iox_read()`, `iox_write()`, `iox_close()`
+   - Directory operations: `iox_mkdir()`, `iox_rmdir()`, `iox_chdir()`, `iox_getcwd()`
+   - Metadata: `iox_stat()`, `iox_fstat()`, `iox_lstat()`
+   - Links: `iox_link()`, `iox_symlink()`, `iox_readlink()`
+
+5. **Memory Management**
+   - `iox_mmap()`, `iox_munmap()`, `iox_mprotect()`
+   - iOS-specific restrictions
+
+6. **WAMR Integration**
+   - WASI syscall bridge
+   - AoT module loading
+   - WebAssembly execution
+
+### What libiox DOES NOT DO
+
+- ❌ NOT a terminal emulator (that's a-shell/)
+- ❌ NOT a package manager (separate repo: iox-packages)
+- ❌ NOT a shell (bash compiled with iox-cc)
+- ❌ NOT a build system (use iox-cc or CMake)
 
 ## Build System
 
-### Building the XCFramework
+### Building libiox
 
 ```bash
-cd a-shell-kernel/
-make clean
-make              # Build iOS + Simulator
-make xcframework  # Create XCFramework
+mkdir build && cd build
+cmake ..
+make
+
+# Create XCFramework
+make xcframework
 ```
 
 ### Output
 
-- `build/a-shell-kernel.xcframework/` - Universal framework
-- Headers included: `include/` copied into XCFramework
+- `build/libiox.a` - Static library
+- `build/libiox.dylib` - Dynamic library (optional)
+- `build/libiox.xcframework/` - Universal framework
+- Headers included: `include/iox/` copied into XCFramework
 
 ## How to Add New Syscalls
 
-1. **Declare in header** (`include/linux/<category>.h`)
-   ```c
-   extern int a_shell_<syscall>(...);
-   #define <syscall> a_shell_<syscall>
-   ```
+### Step 1: Declare Public API
 
-2. **Implement** (in `src/syscalls/` or `a_shell_system.m`)
-   ```c
-   int a_shell_<syscall>(...) {
-       // iOS-safe implementation
-       return result;
-   }
-   ```
+```c
+// include/iox/iox_syscalls.h
 
-3. **Test** (`tests/test_<category>.c`)
-   ```c
-   void test_<syscall>() {
-       // Test cases
-   }
-   ```
+pid_t iox_newsyscall(int arg);
+```
 
-## Testing
+### Step 2: Implement
 
-```bash
-cd a-shell-kernel/
-make test-compile  # Compile all tests
+```c
+// src/iox/core/iox_<category>.c
+
+int __iox_newsyscall_impl(int arg) {
+    // iOS-safe implementation
+    return result;
+}
+
+pid_t iox_newsyscall(int arg) {
+    return __iox_newsyscall_impl(arg);
+}
+```
+
+### Step 3: Add Interposition
+
+```c
+// src/iox/interpose/iox_interpose.c
+
+pid_t newsyscall(int arg) __attribute__((visibility("default"))) {
+    return iox_newsyscall(arg);
+}
+```
+
+### Step 4: Test
+
+```c
+// tests/unit/test_<category>.c
+
+void test_newsyscall() {
+    pid_t result = newsyscall(42);
+    assert(result == expected);
+}
 ```
 
 ## Agent Instructions
@@ -120,66 +211,66 @@ make test-compile  # Compile all tests
 
 1. **Test compilation frequently**
    ```bash
-   make clean && make
+   cd build && make clean && make
    ```
 
 2. **Run test suite**
    ```bash
-   make test-compile
+   cd build && make test
    ```
 
-3. **Verify XCFramework creation**
+3. **Verify library creation**
    ```bash
-   ls -la build/a-shell-kernel.xcframework/
+   ls -la build/libiox.a
+   nm build/libiox.a | grep " T " | head -20
    ```
 
-4. **Check kernel integration**
-   - Verify app still builds with updated kernel
-   - Test basic commands work
+4. **Check integration**
+   - Verify app builds with updated library
+   - Test basic syscalls work
 
 ### Common Tasks
 
 **Adding a new syscall:**
-1. Check if it exists in headers
-2. If not, add to appropriate header in `include/linux/`
-3. Implement in `src/syscalls/` or `a_shell_system.m`
-4. Update umbrella header `include/a_shell_kernel.h`
-5. Test compilation
-6. Commit with message: "feat(kernel): add <syscall> syscall"
+1. Add declaration to `include/iox/iox_syscalls.h`
+2. Implement in `src/iox/core/iox_<category>.c`
+3. Add interposition in `src/iox/interpose/iox_interpose.c`
+4. Test compilation
+5. Commit: `feat(syscall): add iox_newsyscall`
 
 **Fixing a syscall:**
 1. Identify the issue
-2. Check implementation in `a_shell_system.m`
+2. Check implementation in `src/iox/core/iox_<category>.c`
 3. Look for iOS-specific workarounds
 4. Test the fix
-5. Commit with message: "fix(kernel): <syscall> <description>"
+5. Commit: `fix(syscall): iox_<syscall> <description>`
 
-**Updating headers:**
-1. Headers are in `include/linux/` (Linux-compatible)
-2. Follow Linux header structure
-3. Use `#include <...>` for system headers
-4. Use `#include "..."` for project headers
-5. Keep macros at end of headers
+**Adding WAMR support:**
+1. Add WASI bridge function in `src/iox/wamr/iox_wamr_wasi.c`
+2. Register in native symbol table
+3. Test with WASM binary
+4. Commit: `feat(wamr): add <syscall> WASI bridge`
 
 ## Integration Points
 
 ### a-shell/ (App)
-- Uses `a-shell-kernel.xcframework`
-- Links against kernel syscalls
-- Shell binaries run on top of kernel
+- Links with `libiox.a` or `libiox.xcframework`
+- Shell binaries compiled with iox-cc
+- WASM binaries run via iox-wamr
 
-### a-shell-packages/ (Build System)
-- Compiles packages with kernel headers
-- Uses `-I../../a-shell-kernel/include`
-- Packages link against kernel syscalls
+### iox-packages/ (Package Manager)
+- Compiles packages with iox-cc
+- Uses `include/iox/` headers
+- Links against libiox syscalls
 
 ## Constraints
 
 - **iOS 16.0+** minimum deployment target
 - **arm64** only (device and simulator)
-- **No fork/exec** - use threads
+- **No real fork/exec** - use threads
 - **No setuid** - iOS sandbox restrictions
 - **File paths** - must use app sandbox paths
+- **App Store compliance** - no JIT, no dynamic code generation
 
 ## Security Considerations
 
@@ -187,15 +278,17 @@ make test-compile  # Compile all tests
 - Always validate paths
 - Use thread-local storage for per-process data
 - No executable memory (W^X policy)
+- WASI syscalls validated before execution
 
 ## Documentation
 
-- **Kernel headers**: `include/linux/*.h`
-- **Test suite**: `tests/`
-- **Main build**: `Makefile`
+- **Architecture**: `docs/LIBIOX_ARCHITECTURE.md`
+- **Syscalls**: `docs/SYSCALLS.md`
+- **WAMR**: `docs/WAMR.md`
+- **Porting**: `docs/PORTING.md`
 
 ---
 
-**Last Updated**: 2026-03-20
-**Status**: Kernel build working, XCFramework ready
-**Next Steps**: Continue building packages, integrate with app
+**Last Updated**: 2025-01-XX  
+**Status**: Foundation Complete, Implementation In Progress  
+**Next Steps**: Implement core syscalls, integrate WAMR, create packages

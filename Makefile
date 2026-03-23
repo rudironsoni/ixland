@@ -1,236 +1,139 @@
-# a-shell-kernel Makefile
-# Proper build system for iOS framework
-# Following Linux kernel engineering principles
+# libiox - iOS Subsystem for Linux
+# Makefile with iOS target support
+#
+# IMPORTANT: This library is designed for iOS only.
+# Running on macOS will cause failures due to iOS-specific APIs and constraints.
+#
+# Build targets:
+#   make ios-device    - Build for iOS device (arm64)
+#   make ios-sim       - Build for iOS Simulator (arm64/x86_64)
+#
+# iOS Deployment Target: 16.0+
 
-# ==============================================================================
-# Configuration
-# ==============================================================================
+# Detect iOS SDK
+IOS_SDK_PATH := $(shell xcrun --sdk iphoneos --show-sdk-path 2>/dev/null)
+SIM_SDK_PATH := $(shell xcrun --sdk iphonesimulator --show-sdk-path 2>/dev/null)
 
-# Project settings
-PROJECT_NAME := a_shell_system
-SCHEME := a_shell_system
-PROJECT_FILE := $(PROJECT_NAME).xcodeproj
+# Architecture detection
+UNAME_M := $(shell uname -m)
+ifeq ($(UNAME_M),arm64)
+  SIM_ARCH := arm64
+else
+  SIM_ARCH := x86_64
+endif
 
-# Build directories
-BUILD_ROOT := ../build
-DERIVED_DATA_IOS := $(BUILD_ROOT)/DerivedData/ios
-DERIVED_DATA_SIM := $(BUILD_ROOT)/DerivedData/simulator
-OUTPUT_DIR := $(BUILD_ROOT)
+# iOS Target Settings
+IOS_TARGET := arm64-apple-ios16.0
+SIM_TARGET := $(SIM_ARCH)-apple-ios16.0-simulator
 
-# Framework paths
-IOS_FRAMEWORK := $(DERIVED_DATA_IOS)/Build/Products/Release-iphoneos/$(PROJECT_NAME).framework
-SIM_FRAMEWORK := $(DERIVED_DATA_SIM)/Build/Products/Release-iphonesimulator/$(PROJECT_NAME).framework
-XCFRAMEWORK := $(OUTPUT_DIR)/a-shell-kernel.xcframework
+# Compiler
+CC := clang
 
-# Xcode settings
-XCODEBUILD := xcodebuild
-CONFIGURATION := Release
+# Source files - in dependency order
+SOURCES := \
+	src/iox/core/iox_init.c \
+	src/iox/core/iox_stubs.c \
+	src/iox/util/iox_path.c \
+	src/iox/core/iox_vfs.c \
+	src/iox/core/iox_process.c \
+	src/iox/core/iox_context.c \
+	src/iox/core/iox_file.c \
+	src/iox/core/iox_network.c \
+	src/iox/interpose/iox_interpose.c \
+	src/iox/wamr/iox_wamr_simple.c
 
-# Architectures
-IOS_DESTINATION := generic/platform=iOS
-SIM_DESTINATION := generic/platform=iOS Simulator
+# Default target
+.DEFAULT_GOAL := help
 
-# ==============================================================================
-# Phony Targets
-# ==============================================================================
-.PHONY: all clean ios simulator xcframework install help test test-check check-tests
+.PHONY: all ios-device ios-sim clean check-sdk info help libiox-sim.a libiox-device.a
 
-# Default target: build everything
-all: xcframework
-
-# ==============================================================================
-# Main Build Targets
-# ==============================================================================
-
-# Build iOS device framework (arm64)
-ios: $(IOS_FRAMEWORK)
-
-$(IOS_FRAMEWORK): $(PROJECT_FILE) $(wildcard a_shell_system/*.m) $(wildcard a_shell_system/*.h) a_shell_system.m a_shell_system.h
-	@echo "=========================================="
-	@echo "Building iOS Device Framework (arm64)"
-	@echo "=========================================="
-	@mkdir -p $(DERIVED_DATA_IOS)
-	$(XCODEBUILD) -project $(PROJECT_FILE) \
-		-scheme $(SCHEME) \
-		-destination '$(IOS_DESTINATION)' \
-		-configuration $(CONFIGURATION) \
-		-derivedDataPath $(DERIVED_DATA_IOS) \
-		clean build \
-		|| (echo "iOS build failed - check signing settings" && exit 1)
-	@echo "iOS framework built: $@"
-
-# Build iOS Simulator framework (arm64, x86_64)
-simulator: $(SIM_FRAMEWORK)
-
-$(SIM_FRAMEWORK): $(PROJECT_FILE) $(wildcard a_shell_system/*.m) $(wildcard a_shell_system/*.h) a_shell_system.m a_shell_system.h
-	@echo "=========================================="
-	@echo "Building iOS Simulator Framework"
-	@echo "=========================================="
-	@mkdir -p $(DERIVED_DATA_SIM)
-	$(XCODEBUILD) -project $(PROJECT_FILE) \
-		-scheme $(SCHEME) \
-		-destination '$(SIM_DESTINATION)' \
-		-configuration $(CONFIGURATION) \
-		-derivedDataPath $(DERIVED_DATA_SIM) \
-		clean build \
-		|| (echo "Simulator build failed - check signing settings" && exit 1)
-	@echo "Simulator framework built: $@"
-
-# Create universal XCFramework
-xcframework: $(XCFRAMEWORK)
-
-$(XCFRAMEWORK): $(IOS_FRAMEWORK) $(SIM_FRAMEWORK)
-	@echo "=========================================="
-	@echo "Creating XCFramework"
-	@echo "=========================================="
-	@mkdir -p $(OUTPUT_DIR)
-	$(XCODEBUILD) -create-xcframework \
-		-framework $(IOS_FRAMEWORK) \
-		-framework $(SIM_FRAMEWORK) \
-		-output $@
-	@echo "Copying kernel headers to XCFramework..."
-	@cp -r include $@/
-	@echo "XCFramework created: $@"
-
-# ==============================================================================
-# Utility Targets
-# ==============================================================================
-
-# Clean all build artifacts
-clean:
-	@echo "Cleaning build artifacts..."
-	@rm -rf $(BUILD_ROOT)
-	@$(XCODEBUILD) -project $(PROJECT_FILE) clean
-	@echo "Clean complete"
-
-# Clean only derived data
-clean-derived:
-	@echo "Cleaning derived data..."
-	@rm -rf $(DERIVED_DATA_IOS) $(DERIVED_DATA_SIM)
-
-# Install framework to system (for development)
-install: $(XCFRAMEWORK)
-	@echo "Installing XCFramework to $(OUTPUT_DIR)"
-	@cp -R $(XCFRAMEWORK) $(OUTPUT_DIR)/
-
-# Show help
-help:
-	@echo "a-shell-kernel Makefile"
-	@echo ""
-	@echo "Targets:"
-	@echo "  all          - Build XCFramework (default)"
-	@echo "  ios          - Build iOS device framework (arm64)"
-	@echo "  simulator    - Build iOS Simulator framework"
-	@echo "  xcframework  - Create universal XCFramework"
-	@echo "  clean        - Remove all build artifacts"
-	@echo "  clean-derived- Clean only derived data"
-	@echo "  install      - Install XCFramework to output directory"
-	@echo "  test         - Run tests (requires test target in Xcode)"
-	@echo "  test-check   - Check if test target exists"
-	@echo "  check-tests  - Check test file syntax"
-	@echo "  help         - Show this help message"
-	@echo ""
-	@echo "Variables:"
-	@echo "  CONFIGURATION=Release  - Build configuration (Debug/Release)"
-	@echo "  BUILD_ROOT=../build    - Output directory"
-
-# ==============================================================================
-# Test Targets
-# ==============================================================================
-
-# Test scheme (must be created in Xcode)
-TEST_SCHEME := a_shell_systemTests
-
-# Check if test scheme exists
-test-check:
-	@echo "Checking for test target..."
-	@if $(XCODEBUILD) -project $(PROJECT_FILE) -list 2>/dev/null | grep -q "$(TEST_SCHEME)"; then \
-		echo "Test target found: $(TEST_SCHEME)"; \
-	else \
-		echo "Test target NOT found: $(TEST_SCHEME)"; \
-		echo ""; \
-		echo "To create test target:"; \
-		echo "  1. Open a_shell_system.xcodeproj in Xcode"; \
-		echo "  2. File > New > Target > iOS Unit Testing Bundle"; \
-		echo "  3. Name it '$(TEST_SCHEME)'"; \
-		echo "  4. Add test .m files to the test target"; \
-		echo ""; \
-		echo "Then run: make test"; \
+# Check iOS SDK availability
+check-sdk:
+	@if [ -z "$(IOS_SDK_PATH)" ]; then \
+		echo "ERROR: iOS SDK not found. Install Xcode and iOS SDK."; \
+		exit 1; \
+	fi
+	@if [ -z "$(SIM_SDK_PATH)" ]; then \
+		echo "ERROR: iOS Simulator SDK not found. Install Xcode."; \
 		exit 1; \
 	fi
 
-# Run tests (requires test target in Xcode project)
-test: ios simulator test-check
-	@echo "=========================================="
-	@echo "Running Tests"
-	@echo "=========================================="
-	$(XCODEBUILD) -project $(PROJECT_FILE) \
-		-scheme $(TEST_SCHEME) \
-		-destination 'platform=iOS Simulator,name=iPhone 17' \
-		test 2>&1 | tail -100
+# Build for iOS Simulator (arm64 or x86_64)
+iox-sim: check-sdk libiox-sim.a
 
-# Compile test files syntax check (does not run tests)
-check-tests:
-	@echo "=========================================="
-	@echo "Checking Test File Syntax"
-	@echo "=========================================="
-	@for test in tests/*.c; do \
-		echo "  Checking $$test"; \
-		cc -c $$test -o /tmp/test.o 2>&1 | grep -E "(error:|warning:)" | head -5 || true; \
+libiox-sim.a: $(SOURCES) build/wamr-simulator/libiwasm.a
+	@echo "Building for iOS Simulator ($(SIM_TARGET))..."
+	@for src in $(SOURCES); do \
+		obj=$${src%.c}.o; \
+		$(CC) -Wall -Wextra -g -O0 \
+			-target $(SIM_TARGET) \
+			-isysroot $(SIM_SDK_PATH) \
+			-I./include -I./src/iox/internal \
+			-DIOX_IOS_BUILD -DIOX_SIMULATOR_BUILD \
+			-c $$src -o $$obj; \
 	done
-	@echo "Syntax check complete"
+	# Create combined library - extract WAMR objects first
+	@mkdir -p build/wamr-objs-sim
+	@cd build/wamr-objs-sim && ar x ../wamr-simulator/libiwasm.a
+	@ar rcs libiox-sim.a $(SOURCES:.c=.o) build/wamr-objs-sim/*.o
+	@rm -rf build/wamr-objs-sim
+	@echo "Created libiox-sim.a ($(shell ar -t libiox-sim.a | wc -l) objects) for iOS Simulator ($(SIM_TARGET))"
 
-# Compile all test files (using system headers, not our Linux headers)
-test-compile:
-	@echo "=========================================="
-	@echo "Compiling All Test Files"
-	@echo "=========================================="
-	@for test in tests/*.c; do \
-		name=$$(basename $$test .c); \
-		echo "  Compiling $$name.c"; \
-		cc -c $$test -o /tmp/$$name.o || exit 1; \
+wamr-sim:
+	@if [ ! -f build/wamr-simulator/libiwasm.a ]; then \
+		echo "Building WAMR for iOS Simulator..."; \
+		./build_wamr_ios_static.sh; \
+	fi
+
+# Build for iOS device (arm64)
+iox-device: check-sdk libiox-device.a
+
+libiox-device.a: $(SOURCES) build/wamr-device/libiwasm.a
+	@echo "Building for iOS Device ($(IOS_TARGET))..."
+	@for src in $(SOURCES); do \
+		obj=$${src%.c}.o; \
+		$(CC) -Wall -Wextra -g -O0 \
+			-target $(IOS_TARGET) \
+			-isysroot $(IOS_SDK_PATH) \
+			-I./include -I./src/iox/internal \
+			-DIOX_IOS_BUILD \
+			-c $$src -o $$obj; \
 	done
-	@echo "All tests compiled successfully"
+	@ar rcs libiox-device.a $(SOURCES:.c=.o) build/wamr-device/libiwasm.a
+	@echo "Created libiox-device.a for iOS Device ($(IOS_TARGET))"
 
-# ==============================================================================
-# Debug/Development Targets
-# ==============================================================================
+wamr-device:
+	@if [ ! -f build/wamr-device/libiwasm.a ]; then \
+		echo "Building WAMR for iOS Device..."; \
+		./build_wamr_ios_static.sh; \
+	fi
 
-# Show build settings
-settings:
-	$(XCODEBUILD) -project $(PROJECT_FILE) -scheme $(SCHEME) -showBuildSettings
+all: ios-sim
 
-# List available destinations
-destinations:
-	$(XCODEBUILD) -project $(PROJECT_FILE) -scheme $(SCHEME) -showdestinations
+clean:
+	@rm -f $(SOURCES:.c=.o)
+	@rm -f libiox*.a
+	@rm -rf test_* tests/test_* *.dSYM tests/*.dSYM
+	@echo "Cleaned build artifacts"
 
-# Dry run - show what would be built
-dry-run:
-	@echo "Would build:"
-	@echo "  iOS Framework: $(IOS_FRAMEWORK)"
-	@echo "  Simulator Framework: $(SIM_FRAMEWORK)"
-	@echo "  XCFramework: $(XCFRAMEWORK)"
+help:
+	@echo "========================================"
+	@echo "libiox - iOS Subsystem for Linux"
+	@echo "========================================"
+	@echo ""
+	@echo "iOS SDK:      $(IOS_SDK_PATH)"
+	@echo "Sim SDK:      $(SIM_SDK_PATH)"
+	@echo "Device Arch:  $(IOS_TARGET)"
+	@echo "Sim Arch:     $(SIM_TARGET)"
+	@echo ""
+	@echo "Available targets:"
+	@echo "  make ios-device   - Build for iOS device (arm64)"
+	@echo "  make ios-sim      - Build for iOS Simulator"
+	@echo "  make clean        - Clean all build artifacts"
+	@echo "  make info         - Show build configuration"
+	@echo ""
+	@echo "IMPORTANT: This library is for iOS only!"
+	@echo "           macOS builds will fail at runtime."
+	@echo "========================================"
 
-# Verbose build (for debugging)
-ios-verbose: CONFIGURATION=Release
-ios-verbose:
-	$(XCODEBUILD) -project $(PROJECT_FILE) \
-		-scheme $(SCHEME) \
-		-destination '$(IOS_DESTINATION)' \
-		-configuration $(CONFIGURATION) \
-		-derivedDataPath $(DERIVED_DATA_IOS) \
-		clean build -verbose
-
-# ==============================================================================
-# Dependencies
-# ==============================================================================
-
-# Ensure build directories exist
-$(BUILD_ROOT):
-	@mkdir -p $@
-
-$(DERIVED_DATA_IOS): | $(BUILD_ROOT)
-	@mkdir -p $@
-
-$(DERIVED_DATA_SIM): | $(BUILD_ROOT)
-	@mkdir -p $@
+info: help
