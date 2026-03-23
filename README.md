@@ -2,280 +2,226 @@
 
 <p align="center">
 <img src="https://img.shields.io/badge/Platform-iOS%2016.0+-lightgrey.svg" alt="Platform: iOS">
-<img src="https://img.shields.io/badge/arch-arm64-blue.svg" alt="Architecture: arm64">
-<a href="https://github.com/yourusername/a-shell-kernel/actions"><img src="https://github.com/yourusername/a-shell-kernel/workflows/CI/badge.svg" alt="Build Status"/></a>
+<img src="https://img.shields.io/badge/arch-arm64%20device%20%7C%20arm64%2Fx86__64%20sim-blue.svg" alt="Architecture: iOS only">
 </p>
 
-**libiox** is a Linux syscall compatibility layer for iOS that enables unmodified Linux binaries to run natively on iOS devices. It provides complete Linux syscall simulation through static symbol interposition and optional WebAssembly (WAMR) support.
+**libiox** is an iOS-only Linux syscall compatibility layer. It provides symbol interposition, virtual process behavior, sandbox-aware filesystem handling, and an iOS-facing runtime surface for Linux-oriented software.
+
+It also integrates **WAMR** as an external WebAssembly runtime, but with a strict SDK boundary:
+
+- `libiox` and `libiwasm` are built as separate iOS artifacts
+- `deps/wamr/` is upstream source and must remain untouched
+- iOS toolchain and build configuration for WAMR are owned outside `deps/wamr`
+- app customers must use **`iox_wamr_*` only** and must not integrate against raw WAMR APIs
 
 ## Overview
 
-libiox allows Linux applications (bash, git, vim, python, etc.) to run on iOS without source code modifications:
+libiox allows Linux-oriented code to target iOS while preserving standard syscall-facing source patterns:
 
-```bash
-# Compile Linux source for iOS
-iox-cc program.c -o program_ios
+```c
+#include <unistd.h>
 
-# Run natively at full speed
-./program_ios
-
-# Or run prebuilt WASM binaries
-iox-wamr program.wasm
+pid_t pid = fork();
 ```
 
-## Key Features
+Under libiox, those calls are interposed onto iOS-safe implementations.
 
-- **Native Performance**: Linux binaries compiled with `iox-cc` run at 100% native speed
-- **Zero Source Changes**: Standard Linux programs compile and run unmodified
-- **Complete Syscall Support**: 300+ Linux syscalls simulated
-- **WAMR Integration**: Run WebAssembly binaries with WASI support
-- **App Store Compliant**: No JIT, no dynamic code generation
-- **Thread-Based Processes**: Virtual PIDs without real fork()
+For WebAssembly support, applications do not talk to WAMR directly. They use the public adapter surface in `include/iox/iox_wamr.h`.
+
+## Platform Policy
+
+- **Platform**: iOS only
+- **Minimum deployment target**: iOS 16.0+
+- **Supported architectures**:
+  - arm64 device
+  - arm64/x86_64 simulator
+- **Not authoritative for validation**: macOS runtime behavior
 
 ## Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
-│                    Linux Application                        │
-│                    (unmodified source)                      │
+│                        iOS App                              │
 ├─────────────────────────────────────────────────────────────┤
-│  #include <unistd.h>  // Standard Linux headers            │
-│  fork(); execve();  // Standard syscalls                   │
+│                App-visible supported surface                │
+│            iox_* syscalls + iox_wamr_* adapter              │
 ├─────────────────────────────────────────────────────────────┤
-│                    libiox.a (static library)                │
-│  fork() ──► iox_fork() ──► __iox_fork_impl()               │
-│  execve() ──► iox_execve() ──► thread creation            │
-│  ... 300+ syscalls ...                                     │
+│                         libiox                              │
+│  interpose | process | vfs | env | signal | file | net     │
+│                 WASI/libiox bridge logic                    │
 ├─────────────────────────────────────────────────────────────┤
-│                    iOS APIs                                 │
-│  Thread-based process simulation                            │
-│  Virtual PID management                                       │
-│  Signal delivery                                              │
-│  File I/O (sandboxed)                                         │
+│                        libiwasm                             │
+│             upstream WAMR runtime (external)                │
+├─────────────────────────────────────────────────────────────┤
+│                         iOS APIs                            │
 └─────────────────────────────────────────────────────────────┘
 ```
 
+## Ownership Boundary
+
+### libiox owns
+
+- syscall interposition and public `iox_*` APIs
+- process/thread simulation
+- VFS, file descriptor, environment, signal, and network layers
+- public WAMR adapter API: `iox_wamr_*`
+- any WASI-to-libiox bridge code
+
+### WAMR owns
+
+- upstream runtime implementation
+- upstream internal/runtime headers
+- upstream platform/runtime source in `deps/wamr/`
+
+### Customer-facing rule
+
+- supported: `iox_*`, `iox_wamr_*`
+- unsupported: raw WAMR APIs and direct dependence on `deps/wamr/`
+
+## Build Model
+
+WAMR is an **external dependency** built out-of-tree.
+
+The correct artifact model is:
+
+- `lib/libiox-sim.a`
+- `lib/libiox-device.a`
+- `build/wamr-simulator/libiwasm.a`
+- `build/wamr-device/libiwasm.a`
+
+`libiox` must not embed or archive `libiwasm.a` into its own archive. App and test targets must link both libraries explicitly.
+
 ## Quick Start
 
-### Building libiox
+### Clone
 
 ```bash
-# Clone with submodules
 git clone --recursive https://github.com/yourusername/a-shell-kernel.git
 cd a-shell-kernel
-
-# Build
-mkdir build && cd build
-cmake ..
-make
-
-# Install
-sudo make install
 ```
 
-### Compiling Linux Programs
+### Build libiox only
 
 ```bash
-# Use iox compiler wrapper
-iox-cc hello.c -o hello
-
-# Or manually
-clang -target arm64-apple-ios16.0 \
-    -isystem /usr/local/include/iox \
-    -L/usr/local/lib -liox \
-    hello.c -o hello
+make iox-sim
+make iox-device
 ```
 
-### Running WASM Binaries
+### Build WAMR only
 
 ```bash
-# Build with WASI SDK
-wasi-sdk/bin/clang -o program.wasm program.c
+./build_wamr_ios_static.sh simulator
+./build_wamr_ios_static.sh device
+```
 
-# Convert to AoT (optional, for better performance)
-wamrc --target=aarch64 -o program.aot program.wasm
+### Build the full iOS SDK artifact set
 
-# Run with iox-wamr
-iox-wamr program.aot
+```bash
+make sdk-sim
+make sdk-device
+make sdk
+```
+
+## App Integration
+
+### Static library integration
+
+Link both artifacts explicitly:
+
+```text
+lib/libiox-<variant>.a
+build/wamr-<variant>/libiwasm.a
+```
+
+Use libiox public headers only:
+
+```c
+#include <iox/iox.h>
+#include <iox/iox_wamr.h>
+```
+
+Do not include or expose raw WAMR headers in app integration code.
+
+## WAMR Integration Policy
+
+libiox provides WebAssembly support through an adapter layer owned in this repository.
+
+### Publicly supported API
+
+- `iox_wamr_init()`
+- `iox_wamr_deinit()`
+- `iox_wamr_load_module()`
+- `iox_wamr_unload_module()`
+- `iox_wamr_call_function()`
+- `iox_wamr_function_exists()`
+- `iox_wamr_validate_wasm()`
+- `iox_wamr_memory_read()`
+- `iox_wamr_memory_write()`
+- `iox_wamr_get_error()`
+
+### Not part of the app-facing contract
+
+- direct `wasm_runtime_*` calls
+- raw WAMR headers as public SDK surface
+- edits inside `deps/wamr/`
+
+## Project Structure
+
+```text
+a-shell-kernel/
+├── include/iox/                 # Public libiox headers
+├── src/iox/core/                # Syscall implementations
+├── src/iox/interpose/           # Strong-symbol interposition
+├── src/iox/wamr/                # libiox-owned WAMR adapter layer
+├── src/iox/internal/            # Private headers
+├── deps/wamr/                   # Upstream WAMR source (read-only)
+├── build/wamr-device/           # Out-of-tree WAMR device output
+├── build/wamr-simulator/        # Out-of-tree WAMR simulator output
+├── lib/                         # libiox build outputs
+├── ios-test-app/                # iOS validation app and tests
+└── tests/                       # Additional test assets
 ```
 
 ## Syscall Coverage
 
-### Process Management
-- fork, vfork, execve, execv, exit
-- getpid, getppid, waitpid, wait, wait3, wait4
-- system
+Implemented coverage includes process, file I/O, filesystem, environment, signal, memory, time, TTY, and network layers, plus the `iox_wamr_*` adapter surface.
 
-### File Operations
-- open, openat, creat, read, write, close
-- lseek, pread, pwrite, dup, dup2, fcntl
-- stat, fstat, lstat, mkdir, rmdir
-- link, symlink, readlink, unlink
-- chmod, chown, access
-- chdir, getcwd, chroot
+See `docs/SYSCALLS.md` and `TEST_COVERAGE.md` for detailed coverage.
 
-### Signal Handling
-- signal, kill, raise, sigaction
-- sigprocmask, sigpending, sigsuspend
-- alarm, setitimer, pause
+## Packaging Model
 
-### Memory Management
-- mmap, munmap, mprotect
-- mlock, munlock
+Recommended distribution model:
 
-### Time
-- sleep, usleep, nanosleep
-- gettimeofday, clock_gettime, time
+- `LibIOX.xcframework`
+- `LibIWasm.xcframework`
+- one top-level SDK bundle containing both artifacts and libiox public headers
 
-### Network (Passthrough)
-- socket, bind, connect, listen, accept
-- send, sendto, recv, recvfrom
-- shutdown, getsockopt, setsockopt
+This preserves architecture boundaries while still shipping one iOS SDK to consumers.
 
-### And 200+ more...
+## Constraints
 
-See [docs/SYSCALLS.md](docs/SYSCALLS.md) for complete list.
-
-## Project Structure
-
-```
-a-shell-kernel/
-├── include/iox/           # Public headers
-│   ├── iox.h              # Master header
-│   └── sys/               # Linux-compatible headers
-├── src/iox/               # Implementation
-│   ├── core/              # Syscall implementations
-│   ├── interpose/         # Symbol interposition
-│   ├── runtime/           # C runtime
-│   └── wamr/              # WAMR integration
-├── lib/                   # Build outputs
-├── bin/                   # Tools (iox-cc, iox-wamr)
-├── deps/wamr/             # WAMR submodule
-└── tests/                 # Test suite
-```
-
-## Integration
-
-### As Static Library
-
-```c
-// Your iOS app
-dylibimport("libiox.a");
-
-// Now Linux syscalls work
-pid_t pid = fork();  // Thread-based simulation
-```
-
-### As XCFramework
-
-```bash
-make xcframework
-# Generates: build/libiox.xcframework/
-```
-
-Then in Xcode:
-1. Add `libiox.xcframework` to your project
-2. Link against it
-3. Include `<iox/iox.h>`
-
-## WAMR Integration
-
-libiox includes full WAMR (WebAssembly Micro Runtime) integration for running WASM binaries:
-
-- **WASI Support**: Complete WASI syscall bridge
-- **AoT Compilation**: 90-95% native performance
-- **App Store Compliant**: No JIT, no runtime code generation
-
-### Building WAMR
-
-```bash
-cd deps/wamr/product-mini/platforms/ios
-mkdir build && cd build
-cmake .. -DWAMR_BUILD_AOT=1 -DWAMR_BUILD_LIBC_WASI=1
-make
-```
-
-## Package Management
-
-### iox-pkg
-
-Install Linux tools on iOS:
-
-```bash
-# Install native-compiled bash
-iox-pkg install bash
-
-# Install WASM version of ffmpeg
-iox-pkg install ffmpeg
-
-# List installed packages
-iox-pkg list
-
-# Search available packages
-iox-pkg search editor
-```
-
-Packages are hosted on GitHub Releases.
-
-## Compatibility
-
-### Requirements
-- iOS 16.0+
-- arm64 (device and simulator)
-- Xcode 14.0+
-
-### Limitations
-- **No real fork()**: Thread-based simulation
-- **No setuid**: iOS sandbox restrictions
-- **Sandboxed paths**: Must stay within app container
-- **No root**: Cannot run privileged commands
-
-### Tested Programs
-- ✅ bash
-- ✅ coreutils (ls, cp, mv, rm, etc.)
-- ✅ git
-- ✅ vim
-- ✅ python3 (via WASM)
-- ✅ ffmpeg (via WASM)
+- no real `fork()` or `execve()`
+- no setuid
+- no sandbox bypass
+- no JIT or dynamic code generation
+- no executable writable memory
+- all WASI/libiox crossings must be validated
 
 ## Documentation
 
-- [Architecture](docs/LIBIOX_ARCHITECTURE.md) - Complete system architecture
-- [Syscalls](docs/SYSCALLS.md) - Full syscall reference
-- [Porting Guide](docs/PORTING.md) - How to port Linux programs
-- [WAMR Setup](docs/WAMR.md) - WebAssembly integration
-- [Package Creation](docs/PACKAGES.md) - Creating packages
+- `AGENTS.md`
+- `BUILD.md`
+- `WAMR_INTEGRATION.md`
+- `docs/LIBIOX_ARCHITECTURE.md`
+- `docs/SYSCALLS.md`
+- `docs/PORTING.md`
 
-## Contributing
+## Status
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-### Development Setup
-
-```bash
-# Install dependencies
-brew install cmake llvm
-
-# Build with debug symbols
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-make
-
-# Run tests
-make test
-```
-
-## License
-
-BSD 3-Clause License. See [LICENSE](LICENSE) for details.
-
-## Acknowledgments
-
-- Based on a-Shell and ios_system by Nicolas Holzschuch
-- WAMR integration by Bytecode Alliance
-- WASI SDK by WebAssembly Community
+- iOS-only architecture established
+- libiox/WAMR separation being standardized
+- external WAMR build model in progress
 
 ---
 
-**Version**: 1.0.0  
-**Status**: Foundation Complete  
-**Last Updated**: 2025-01-XX
+**Primary Rule**: `deps/wamr/` stays external, and app customers access WAMR only through `iox_wamr_*`.

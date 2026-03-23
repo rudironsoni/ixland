@@ -87,7 +87,12 @@ void __iox_process_init_once(void) {
     }
     
     init->pid = IOX_MIN_PID;
-    init->ppid = 0;
+    /*
+     * The first simulated process is the root of the libiox process tree.
+     * Exposing PPID 0 breaks common userspace expectations on iOS test apps,
+     * so model it as self-parented within the virtual process namespace.
+     */
+    init->ppid = IOX_MIN_PID;
     init->pgid = IOX_MIN_PID;
     init->sid = IOX_MIN_PID;
     init->thread = pthread_self();
@@ -1461,11 +1466,21 @@ void iox__exit(int status) {
 
 pid_t iox_getpid(void) {
     __iox_process_t *proc = __iox_current_process;
+    if (!proc) {
+        /* Debug: current process is NULL, try to initialize */
+        __iox_init();
+        proc = __iox_current_process;
+    }
     return proc ? proc->pid : 0;
 }
 
 pid_t iox_getppid(void) {
     __iox_process_t *proc = __iox_current_process;
+    if (!proc) {
+        /* Debug: current process is NULL, try to initialize */
+        __iox_init();
+        proc = __iox_current_process;
+    }
     return proc ? proc->ppid : 0;
 }
 

@@ -212,13 +212,17 @@ int __iox_connect_impl(int sockfd, const struct sockaddr *addr, socklen_t addrle
         if (addr->sa_family == AF_INET) {
             struct sockaddr_in *sin = (struct sockaddr_in *)addr;
             char addr_str[INET_ADDRSTRLEN];
+            char port_str[6];
             inet_ntop(AF_INET, &sin->sin_addr, addr_str, sizeof(addr_str));
-            endpoint = nw_endpoint_create_host(addr_str, NULL);
+            snprintf(port_str, sizeof(port_str), "%u", ntohs(sin->sin_port));
+            endpoint = nw_endpoint_create_host(addr_str, port_str);
         } else if (addr->sa_family == AF_INET6) {
             struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)addr;
             char addr_str[INET6_ADDRSTRLEN];
+            char port_str[6];
             inet_ntop(AF_INET6, &sin6->sin6_addr, addr_str, sizeof(addr_str));
-            endpoint = nw_endpoint_create_host(addr_str, NULL);
+            snprintf(port_str, sizeof(port_str), "%u", ntohs(sin6->sin6_port));
+            endpoint = nw_endpoint_create_host(addr_str, port_str);
         }
         
         if (!endpoint) {
@@ -249,6 +253,7 @@ int __iox_connect_impl(int sockfd, const struct sockaddr *addr, socklen_t addrle
         __block int connect_error = 0;
         
         nw_connection_set_state_changed_handler(sock->connection, ^(nw_connection_state_t state, nw_error_t error) {
+            (void)error;
             if (state == nw_connection_state_ready) {
                 connect_error = 0;
             } else if (state == nw_connection_state_failed || state == nw_connection_state_cancelled) {
@@ -349,6 +354,9 @@ int __iox_accept_impl(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
     if (!sock) {
         return -1;
     }
+
+    (void)addr;
+    (void)addrlen;
     
     if (!sock->listener) {
         errno = EINVAL;
@@ -442,6 +450,8 @@ ssize_t __iox_recv_impl(int sockfd, void *buf, size_t len, int flags) {
     
     nw_connection_receive(sock->connection, 1, len, 
         ^(dispatch_data_t content, nw_content_context_t context, bool is_complete, nw_error_t error) {
+            (void)context;
+            (void)is_complete;
             if (content) {
                 const void *data_ptr = NULL;
                 size_t data_len = 0;

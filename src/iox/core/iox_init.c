@@ -45,6 +45,13 @@ void iox_library_init(void) {
         /* This allows the library to work even if HOME is not set */
     }
     
+    /* Initialize process simulation state before exposing process APIs */
+    int proc_result = __iox_init();
+    if (proc_result != 0) {
+        pthread_mutex_unlock(&iox_init_lock);
+        return;
+    }
+
     /* Initialize context system */
     int ctx_result = iox_context_init();
     if (ctx_result != 0) {
@@ -52,6 +59,10 @@ void iox_library_init(void) {
         pthread_mutex_unlock(&iox_init_lock);
         return;
     }
+    
+    /* Initialize file descriptor table */
+    extern void __iox_file_init_impl(void);
+    __iox_file_init_impl();
     
     /* Set initialized flag */
     atomic_store(&iox_initialized, 1);

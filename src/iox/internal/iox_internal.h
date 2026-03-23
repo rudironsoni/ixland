@@ -432,6 +432,21 @@ void __iox_path_normalize(char *path);
 void __iox_path_join(const char *base, const char *rel, char *result, size_t result_len);
 bool __iox_path_in_sandbox(const char *path);
 
+/* Path classification for hybrid iOS/Linux architecture */
+typedef enum {
+    IOX_PATH_INVALID = 0,
+    IOX_PATH_VIRTUAL_LINUX,    /* /home, /tmp, /etc - needs VFS translation */
+    IOX_PATH_OWN_SANDBOX,      /* Within app container - direct access */
+    IOX_PATH_EXTERNAL          /* Security-scoped external paths */
+} iox_path_type_t;
+
+bool __iox_path_is_virtual_linux(const char *path);
+bool __iox_path_is_own_sandbox(const char *path);
+bool __iox_path_is_external(const char *path);
+iox_path_type_t __iox_path_classify(const char *path);
+int __iox_path_virtual_to_ios(const char *vpath, char *ios_path, size_t ios_path_len);
+bool __iox_path_is_direct(const char *path);
+
 /* ============================================================================
  * FUNCTION DECLARATIONS - File Operations (Internal)
  * ============================================================================ */
@@ -452,6 +467,9 @@ int __iox_ioctl_impl(int fd, unsigned long request, ...);
 int __iox_access_impl(const char *pathname, int mode);
 int __iox_faccessat_impl(int dirfd, const char *pathname, int mode, int flags);
 int __iox_creat_impl(const char *pathname, mode_t mode);
+
+/* File descriptor table initialization */
+void __iox_file_init_impl(void);
 
 /* ============================================================================
  * FUNCTION DECLARATIONS - Filesystem (Internal)

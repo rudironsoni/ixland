@@ -19,7 +19,8 @@
 #define IOX_MAX_FD 256
 
 typedef struct {
-    int fd;                     /* File descriptor */
+    int fd;                     /* Virtual file descriptor (index in table) */
+    int real_fd;                /* Real OS file descriptor */
     int flags;                  /* Open flags */
     int mode;                   /* File mode */
     off_t offset;               /* Current offset */
@@ -30,6 +31,7 @@ typedef struct {
 
 static iox_fd_entry_t fd_table[IOX_MAX_FD];
 static pthread_mutex_t fd_table_lock = PTHREAD_MUTEX_INITIALIZER;
+static atomic_int fd_table_initialized = 0;
 
 /* Standard FDs */
 #define IOX_FD_STDIN  0
@@ -40,42 +42,90 @@ static pthread_mutex_t fd_table_lock = PTHREAD_MUTEX_INITIALIZER;
  * INITIALIZATION
  * ============================================================================ */
 
-static void __iox_file_init(void) __attribute__((constructor));
-
-static void __iox_file_init(void) {
+/* File descriptor table initialization - not static so it can be called from iox_init.c */
+void __iox_file_init_impl(void) {
     pthread_mutex_lock(&fd_table_lock);
+    
+    fprintf(stderr, "[DEBUG] __iox_file_init_impl: initializing fd table\n");
     
     /* Clear table */
     memset(fd_table, 0, sizeof(fd_table));
+    
+    /* Verify table is cleared */
+    int used_after_clear = 0;
+    for (int i = 0; i < IOX_MAX_FD; i++) {
+        if (fd_table[i].used) used_after_clear++;
+    }
+    fprintf(stderr, "[DEBUG] After memset: %d entries marked as used\n", used_after_clear);
     
     /* Initialize standard file descriptors */
     fd_table[IOX_FD_STDIN].fd = IOX_FD_STDIN;
     fd_table[IOX_FD_STDIN].flags = O_RDONLY;
     fd_table[IOX_FD_STDIN].used = true;
     fd_table[IOX_FD_STDIN].offset = 0;
+    fd_table[IOX_FD_STDIN].real_fd = IOX_FD_STDIN;
     strcpy(fd_table[IOX_FD_STDIN].path, "/dev/stdin");
     
     fd_table[IOX_FD_STDOUT].fd = IOX_FD_STDOUT;
     fd_table[IOX_FD_STDOUT].flags = O_WRONLY;
     fd_table[IOX_FD_STDOUT].used = true;
     fd_table[IOX_FD_STDOUT].offset = 0;
+    fd_table[IOX_FD_STDOUT].real_fd = IOX_FD_STDOUT;
     strcpy(fd_table[IOX_FD_STDOUT].path, "/dev/stdout");
     
     fd_table[IOX_FD_STDERR].fd = IOX_FD_STDERR;
     fd_table[IOX_FD_STDERR].flags = O_WRONLY;
     fd_table[IOX_FD_STDERR].used = true;
     fd_table[IOX_FD_STDERR].offset = 0;
+    fd_table[IOX_FD_STDERR].real_fd = IOX_FD_STDERR;
     strcpy(fd_table[IOX_FD_STDERR].path, "/dev/stderr");
     
+    atomic_store(&fd_table_initialized, 1);
     pthread_mutex_unlock(&fd_table_lock);
+}
+
+static void __iox_file_init(void) __attribute__((constructor(100))) __attribute__((used));
+
+static void __iox_file_init(void) {
+    __iox_file_init_impl();
+}
+
+static void __iox_ensure_file_init(void) {
+    if (!atomic_load(&fd_table_initialized)) {
+        __iox_file_init_impl();
+    }
 }
 
 /* ============================================================================
  * INTERNAL HELPERS
  * ============================================================================ */
 
+static int alloc_count = 0;
+
 static int __iox_alloc_fd(void) {
+    /* Ensure file descriptor table is initialized */
+    __iox_ensure_file_init();
+    
     pthread_mutex_lock(&fd_table_lock);
+    
+    /* Debug: Track allocation count */
+    alloc_count++;
+    if (alloc_count <= 10 || alloc_count % 50 == 0) {
+        fprintf(stderr, "[DEBUG] __iox_alloc_fd called (count=%d)\n", alloc_count);
+    }
+    
+    /* Debug: Check how many fds are used */
+    int used_count = 0;
+    int first_free = -1;
+    for (int i = 0; i < IOX_MAX_FD; i++) {
+        if (fd_table[i].used) used_count++;
+        else if (first_free == -1 && i >= 3) first_free = i;
+    }
+    
+    if (used_count >= IOX_MAX_FD - 5) {
+        fprintf(stderr, "[DEBUG] FD table almost full: %d/%d used, first free=%d\n", used_count, IOX_MAX_FD, first_free);
+        fprintf(stderr, "[DEBUG] Total allocations so far: %d\n", alloc_count);
+    }
     
     for (int i = 3; i < IOX_MAX_FD; i++) {
         if (!fd_table[i].used) {
@@ -88,6 +138,7 @@ static int __iox_alloc_fd(void) {
     }
     
     pthread_mutex_unlock(&fd_table_lock);
+    fprintf(stderr, "[DEBUG] FD table full: %d/%d used, cannot allocate\n", used_count, IOX_MAX_FD);
     errno = EMFILE;
     return -1;
 }
@@ -153,6 +204,7 @@ int __iox_open_impl(const char *pathname, int flags, mode_t mode) {
     /* Store in table */
     pthread_mutex_lock(&fd_table_lock);
     fd_table[fd].fd = fd;
+    fd_table[fd].real_fd = real_fd;
     fd_table[fd].flags = flags;
     fd_table[fd].mode = mode;
     fd_table[fd].offset = 0;
@@ -194,7 +246,7 @@ ssize_t __iox_read_impl(int fd, void *buf, size_t count) {
     
     /* For now, passthrough to real read */
     /* TODO: Implement with VFS */
-    ssize_t bytes = read(fd, buf, count);
+    ssize_t bytes = read(entry->real_fd, buf, count);
     if (bytes > 0) {
         pthread_mutex_lock(&fd_table_lock);
         fd_table[fd].offset += bytes;
@@ -222,7 +274,7 @@ ssize_t __iox_write_impl(int fd, const void *buf, size_t count) {
     }
     
     /* For now, passthrough to real write */
-    ssize_t bytes = write(fd, buf, count);
+    ssize_t bytes = write(entry->real_fd, buf, count);
     if (bytes > 0) {
         pthread_mutex_lock(&fd_table_lock);
         fd_table[fd].offset += bytes;
@@ -250,9 +302,9 @@ int __iox_close_impl(int fd) {
     }
     
     /* Close real FD */
-    /* For now, just free the table entry */
-    /* TODO: Implement with VFS */
-    close(fd);
+    if (entry->real_fd >= 0) {
+        close(entry->real_fd);
+    }
     
     __iox_free_fd(fd);
     return 0;
@@ -344,10 +396,17 @@ int __iox_dup2_impl(int oldfd, int newfd) {
         __iox_close_impl(newfd);
     }
     
+    /* Duplicate the real OS fd */
+    int new_real_fd = dup(fd_table[oldfd].real_fd);
+    if (new_real_fd < 0) {
+        return -1;
+    }
+    
     /* Copy entry */
     pthread_mutex_lock(&fd_table_lock);
     memcpy(&fd_table[newfd], &fd_table[oldfd], sizeof(iox_fd_entry_t));
     fd_table[newfd].fd = newfd;
+    fd_table[newfd].real_fd = new_real_fd;
     pthread_mutex_unlock(&fd_table_lock);
     
     return newfd;

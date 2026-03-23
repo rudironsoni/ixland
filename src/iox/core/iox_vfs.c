@@ -30,6 +30,37 @@ char ios_tmp_dir[IOX_MAX_PATH] = "";
 iox_vfs_mount_t vfs_mount_table[VFS_MAX_MOUNTS];
 int vfs_mount_count = 0;
 
+static int iox_vfs_mount_unlocked(const char *source, const char *target,
+                                  unsigned long flags) {
+    if (!source || !target) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if (vfs_mount_count >= VFS_MAX_MOUNTS) {
+        errno = ENOMEM;
+        return -1;
+    }
+
+    for (int i = 0; i < vfs_mount_count; i++) {
+        if (vfs_mount_table[i].active &&
+            strcmp(vfs_mount_table[i].mountpoint, target) == 0) {
+            errno = EBUSY;
+            return -1;
+        }
+    }
+
+    iox_vfs_mount_t *mnt = &vfs_mount_table[vfs_mount_count++];
+    mnt->active = true;
+    mnt->flags = flags;
+    strncpy(mnt->mountpoint, target, IOX_MAX_PATH - 1);
+    strncpy(mnt->target, source, IOX_MAX_PATH - 1);
+    mnt->mountpoint[IOX_MAX_PATH - 1] = '\0';
+    mnt->target[IOX_MAX_PATH - 1] = '\0';
+
+    return 0;
+}
+
 /* ============================================================================
  * PATH TRANSLATION
  * ============================================================================ */
@@ -52,17 +83,17 @@ int iox_vfs_init(void) {
         snprintf(ios_tmp_dir, IOX_MAX_PATH, "%s/tmp", home);
         
         /* Set up default mounts - don't fail if mkdir fails */
-        iox_vfs_mount("/home/user", ios_home_dir, IOX_VFS_BIND);
-        iox_vfs_mount("/tmp", ios_tmp_dir, IOX_VFS_BIND);
+        iox_vfs_mount_unlocked("/home/user", ios_home_dir, IOX_VFS_BIND);
+        iox_vfs_mount_unlocked("/tmp", ios_tmp_dir, IOX_VFS_BIND);
         
         /* /etc -> ~/Library/etc (config files) - optional */
         char etc_path[IOX_MAX_PATH];
         snprintf(etc_path, IOX_MAX_PATH, "%s/Library/etc", home);
         /* Don't call mkdir here - might fail in restricted contexts */
-        iox_vfs_mount("/etc", etc_path, IOX_VFS_BIND);
+        iox_vfs_mount_unlocked("/etc", etc_path, IOX_VFS_BIND);
         
         /* /var/tmp -> ~/tmp */
-        iox_vfs_mount("/var/tmp", ios_tmp_dir, IOX_VFS_BIND);
+        iox_vfs_mount_unlocked("/var/tmp", ios_tmp_dir, IOX_VFS_BIND);
     } else {
         /* No HOME set - use default paths */
         strncpy(ios_sandbox_root, "/", IOX_MAX_PATH - 1);
@@ -73,8 +104,8 @@ int iox_vfs_init(void) {
         ios_tmp_dir[IOX_MAX_PATH - 1] = '\0';
         
         /* Set up minimal mounts */
-        iox_vfs_mount("/home/user", ios_home_dir, IOX_VFS_BIND);
-        iox_vfs_mount("/tmp", ios_tmp_dir, IOX_VFS_BIND);
+        iox_vfs_mount_unlocked("/home/user", ios_home_dir, IOX_VFS_BIND);
+        iox_vfs_mount_unlocked("/tmp", ios_tmp_dir, IOX_VFS_BIND);
     }
     
     pthread_mutex_unlock(&vfs_lock);
@@ -213,40 +244,10 @@ int iox_vfs_reverse_translate(const char *ios_path, char *vpath, size_t vpath_le
  * ============================================================================ */
 
 int iox_vfs_mount(const char *source, const char *target, unsigned long flags) {
-    if (!source || !target) {
-        errno = EINVAL;
-        return -1;
-    }
-    
     pthread_mutex_lock(&vfs_lock);
-    
-    if (vfs_mount_count >= VFS_MAX_MOUNTS) {
-        pthread_mutex_unlock(&vfs_lock);
-        errno = ENOMEM;
-        return -1;
-    }
-    
-    /* Check if mount point already exists */
-    for (int i = 0; i < vfs_mount_count; i++) {
-        if (vfs_mount_table[i].active &&
-            strcmp(vfs_mount_table[i].mountpoint, target) == 0) {
-            pthread_mutex_unlock(&vfs_lock);
-            errno = EBUSY;
-            return -1;
-        }
-    }
-    
-    /* Add new mount */
-    iox_vfs_mount_t *mnt = &vfs_mount_table[vfs_mount_count++];
-    mnt->active = true;
-    mnt->flags = flags;
-    strncpy(mnt->mountpoint, target, IOX_MAX_PATH - 1);
-    strncpy(mnt->target, source, IOX_MAX_PATH - 1);
-    mnt->mountpoint[IOX_MAX_PATH - 1] = '\0';
-    mnt->target[IOX_MAX_PATH - 1] = '\0';
-    
+    int result = iox_vfs_mount_unlocked(source, target, flags);
     pthread_mutex_unlock(&vfs_lock);
-    return 0;
+    return result;
 }
 
 int iox_vfs_umount(const char *target) {

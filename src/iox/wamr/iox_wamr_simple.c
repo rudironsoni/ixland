@@ -12,7 +12,7 @@
 #include <stdint.h>
 
 /* WAMR includes */
-#include <wamr/wasm_export.h>
+#include <wasm_export.h>
 
 /* iox includes */
 #include <iox/iox_wamr.h>
@@ -117,7 +117,8 @@ int iox_wamr_load_module(const uint8_t *wasm_buf, uint32_t wasm_size) {
     }
     
     /* Load WASM module */
-    g_wamr_state.module = wasm_runtime_load(wasm_buf, wasm_size, g_error_buf, sizeof(g_error_buf));
+    g_wamr_state.module = wasm_runtime_load((uint8_t *)wasm_buf, wasm_size,
+                                            g_error_buf, sizeof(g_error_buf));
     
     if (!g_wamr_state.module) {
         return -1;

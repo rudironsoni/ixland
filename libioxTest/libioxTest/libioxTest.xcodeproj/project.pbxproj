@@ -10,6 +10,9 @@
 		A00100001D4B5C0000F1A2B3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A00100001D4B5C0000F1A2B0 /* main.m */; };
 		A00100001D4B5C0000F1A2B5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A00100001D4B5C0000F1A2B2 /* LaunchScreen.storyboard */; };
 		A00100001D4B5C0000F1A2B6 /* libiox-sim.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A00100001D4B5C0000F1A2B7 /* libiox-sim.a */; };
+		A00100001D4B5C0000F1A2BA /* libiwasm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A00100001D4B5C0000F1A2BB /* libiwasm.a */; };
+		A00100001D4B5C0000F1A2C1 /* ComprehensiveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A00100001D4B5C0000F1A2C2 /* ComprehensiveTests.m */; };
+		A00100001D4B5C0000F1A2C3 /* Network.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A00100001D4B5C0000F1A2C4 /* Network.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -17,8 +20,11 @@
 		A00100001D4B5C0000F1A2B0 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		A00100001D4B5C0000F1A2B1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A00100001D4B5C0000F1A2B2 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
-		A00100001D4B5C0000F1A2B7 /* libiox-sim.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libiox-sim.a"; path = "../../libiox-sim.a"; sourceTree = "<group>"; };
+		A00100001D4B5C0000F1A2B7 /* libiox-sim.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libiox-sim.a"; path = "../../lib/libiox-sim.a"; sourceTree = "<group>"; };
 		A00100001D4B5C0000F1A2B8 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = ../../include; sourceTree = "<group>"; };
+		A00100001D4B5C0000F1A2BB /* libiwasm.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libiwasm.a"; path = "../../build/wamr-simulator/libiwasm.a"; sourceTree = "<group>"; };
+		A00100001D4B5C0000F1A2C2 /* ComprehensiveTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ComprehensiveTests.m; sourceTree = "<group>"; };
+		A00100001D4B5C0000F1A2C4 /* Network.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Network.framework; path = System/Library/Frameworks/Network.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -27,6 +33,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				A00100001D4B5C0000F1A2B6 /* libiox-sim.a in Frameworks */,
+				A00100001D4B5C0000F1A2BA /* libiwasm.a in Frameworks */,
+				A00100001D4B5C0000F1A2C3 /* Network.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -54,6 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				A00100001D4B5C0000F1A2B0 /* main.m */,
+				A00100001D4B5C0000F1A2C2 /* ComprehensiveTests.m */,
 				A00100001D4B5C0000F1A2B1 /* Info.plist */,
 				A00100001D4B5C0000F1A2B2 /* LaunchScreen.storyboard */,
 			);
@@ -64,7 +73,9 @@
 			isa = PBXGroup;
 			children = (
 				A00100001D4B5C0000F1A2B7 /* libiox-sim.a */,
+				A00100001D4B5C0000F1A2BB /* libiwasm.a */,
 				A00100001D4B5C0000F1A2B8 /* include */,
+				A00100001D4B5C0000F1A2C4 /* Network.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -138,6 +149,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A00100001D4B5C0000F1A2B3 /* main.m in Sources */,
+				A00100001D4B5C0000F1A2C1 /* ComprehensiveTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -200,6 +212,8 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				ARCHS = arm64;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -266,9 +280,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development: Rudimar Luis Ronsoni Junior (A9C4N82KYY)";
+				DEVELOPMENT_TEAM = A9C4N82KYY;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = libioxTest/Info.plist;
@@ -284,11 +299,13 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/../..",
+					"$(PROJECT_DIR)/../../lib",
+					"$(PROJECT_DIR)/../../build/wamr-simulator",
 				);
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-liox-sim",
+					"-liwasm",
 					"-lpthread",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.libiox.test;
@@ -303,9 +320,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development: Rudimar Luis Ronsoni Junior (A9C4N82KYY)";
+				DEVELOPMENT_TEAM = A9C4N82KYY;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = libioxTest/Info.plist;
@@ -321,11 +339,13 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/../..",
+					"$(PROJECT_DIR)/../../lib",
+					"$(PROJECT_DIR)/../../build/wamr-simulator",
 				);
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-liox-sim",
+					"-liwasm",
 					"-lpthread",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.libiox.test;

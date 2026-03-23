@@ -62,7 +62,7 @@ iox_context_t *iox_ctx_alloc(pid_t pid, iox_context_t *parent) {
     }
     
     ctx->pid = pid;
-    ctx->ppid = parent ? parent->pid : 0;
+    ctx->ppid = parent ? parent->pid : pid;
     ctx->pgid = parent ? parent->pgid : pid;
     ctx->sid = parent ? parent->sid : pid;
     
