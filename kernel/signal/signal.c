@@ -1,4 +1,4 @@
-#include "signal.h"
+#include "iox_signal.h"
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -163,7 +163,11 @@ int iox_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
     if (set) {
         switch (how) {
         case SIG_BLOCK:
-            sigorset(&task->sighand->blocked, &task->sighand->blocked, set);
+            for (int i = 1; i < IOX_NSIG; i++) {
+                if (sigismember(set, i)) {
+                    sigaddset(&task->sighand->blocked, i);
+                }
+            }
             break;
         case SIG_UNBLOCK:
             for (int i = 1; i < IOX_NSIG; i++) {

@@ -5,6 +5,9 @@
 #include <sys/stat.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <stdint.h>
+#include <stdatomic.h>
+#include "iox/iox_types.h"
 
 #ifdef __cplusplus
 extern "C" {

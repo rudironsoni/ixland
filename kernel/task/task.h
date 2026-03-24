@@ -13,7 +13,8 @@
 extern "C" {
 #endif
 
-#define IOX_MAX_PATH 1024
+#include "iox/iox_types.h"
+
 #define IOX_MAX_NAME 256
 #define IOX_NSIG 64
 #define IOX_MAX_FD 256
@@ -69,6 +70,15 @@ typedef struct iox_exec_image {
     } u;
 } iox_exec_image_t;
 
+typedef enum {
+    IOX_TASK_RUNNING = 0,
+    IOX_TASK_INTERRUPTIBLE,
+    IOX_TASK_UNINTERRUPTIBLE,
+    IOX_TASK_STOPPED,
+    IOX_TASK_ZOMBIE,
+    IOX_TASK_DEAD
+} iox_task_state_t;
+
 struct iox_task {
     pid_t pid;
     pid_t ppid;
@@ -120,6 +130,8 @@ void iox_free_pid(pid_t pid);
 
 int iox_task_init(void);
 void iox_task_deinit(void);
+
+iox_task_t *iox_task_lookup(pid_t pid);
 
 #ifdef __cplusplus
 }

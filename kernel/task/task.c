@@ -98,25 +98,27 @@ iox_task_t *iox_task_lookup(pid_t pid) {
     return task;
 }
 
+static void iox_task_init_once(void) {
+    init_task = iox_task_alloc();
+    if (!init_task) return;
+    
+    init_task->ppid = init_task->pid;
+    strncpy(init_task->comm, "init", sizeof(init_task->comm));
+    
+    init_task->files = iox_files_alloc(IOX_MAX_FD);
+    if (!init_task->files) {
+        iox_task_free(init_task);
+        init_task = NULL;
+        return;
+    }
+    
+    current_task = init_task;
+}
+
 int iox_task_init(void) {
     static pthread_once_t once = PTHREAD_ONCE_INIT;
     
-    pthread_once(&once, ^{  
-        init_task = iox_task_alloc();
-        if (!init_task) return;
-        
-        init_task->ppid = init_task->pid;
-        strncpy(init_task->comm, "init", sizeof(init_task->comm));
-        
-        init_task->files = iox_files_alloc(IOX_MAX_FD);
-        if (!init_task->files) {
-            iox_task_free(init_task);
-            init_task = NULL;
-            return;
-        }
-        
-        current_task = init_task;
-    });
+    pthread_once(&once, iox_task_init_once);
     
     return init_task ? 0 : -1;
 }

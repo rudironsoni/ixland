@@ -1,5 +1,6 @@
 #include "exec.h"
 #include "../../fs/fdtable.h"
+#include "../signal/iox_signal.h"
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>

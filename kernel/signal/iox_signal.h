@@ -1,8 +1,13 @@
 #ifndef IOX_SIGNAL_H
 #define IOX_SIGNAL_H
 
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include <signal.h>
 #include <stdbool.h>
+#include <time.h>
 #include "../task/task.h"
 
 #ifdef __cplusplus
