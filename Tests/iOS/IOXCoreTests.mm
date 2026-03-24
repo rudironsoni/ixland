@@ -88,4 +88,14 @@ extern "C" {
     XCTAssertEqual(result, 0, @"iox wait multiple children tests failed");
 }
 
+- (void)testProcessGroups {
+    int result = iox_test_run_all("pgrp_initial|pgrp_fork|pgrp_multiple|pgrp_child_lookup");
+    XCTAssertEqual(result, 0, @"iox process group tests failed");
+}
+
+- (void)testSessions {
+    int result = iox_test_run_all("pgrp_session|pgrp_zombie|pgrp_refcount");
+    XCTAssertEqual(result, 0, @"iox session tests failed");
+}
+
 @end
