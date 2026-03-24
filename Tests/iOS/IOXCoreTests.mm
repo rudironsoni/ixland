@@ -63,4 +63,29 @@ extern "C" {
     XCTAssertEqual(result, 0, @"iox task lifecycle tests failed");
 }
 
+- (void)testWaitBasic {
+    int result = iox_test_run_all("wait_parent");
+    XCTAssertEqual(result, 0, @"iox wait basic tests failed");
+}
+
+- (void)testWaitErrors {
+    int result = iox_test_run_all("wait_no_children|wait_wrong|wait_second_reap");
+    XCTAssertEqual(result, 0, @"iox wait error tests failed");
+}
+
+- (void)testWaitSignaled {
+    int result = iox_test_run_all("wait_signaled");
+    XCTAssertEqual(result, 0, @"iox wait signaled tests failed");
+}
+
+- (void)testWaitNoHang {
+    int result = iox_test_run_all("wnohang");
+    XCTAssertEqual(result, 0, @"iox wait WNOHANG tests failed");
+}
+
+- (void)testWaitMultiple {
+    int result = iox_test_run_all("wait_child_list|wait_refcount|wait_multiple");
+    XCTAssertEqual(result, 0, @"iox wait multiple children tests failed");
+}
+
 @end
