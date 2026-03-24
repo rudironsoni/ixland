@@ -48,4 +48,19 @@ extern "C" {
     XCTAssertEqual(result, 0, @"iox exec classification tests failed");
 }
 
+- (void)testSignalMask {
+    int result = iox_test_run_all("sigprocmask");
+    XCTAssertEqual(result, 0, @"iox signal mask tests failed");
+}
+
+- (void)testSignalExecReset {
+    int result = iox_test_run_all("signal_reset_on_exec");
+    XCTAssertEqual(result, 0, @"iox signal exec reset tests failed");
+}
+
+- (void)testTaskLifecycle {
+    int result = iox_test_run_all("task_init_state|task_pid|task_refs|task_lookup|task_exit|task_sighand");
+    XCTAssertEqual(result, 0, @"iox task lifecycle tests failed");
+}
+
 @end

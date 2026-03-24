@@ -1,5 +1,7 @@
 #include "task.h"
 #include "../../fs/fdtable.h"
+#include "../../fs/vfs.h"
+#include "../signal/iox_signal.h"
 #include <stdlib.h>
 #include <string.h>
 #include <setjmp.h>
@@ -107,6 +109,20 @@ static void iox_task_init_once(void) {
     
     init_task->files = iox_files_alloc(IOX_MAX_FD);
     if (!init_task->files) {
+        iox_task_free(init_task);
+        init_task = NULL;
+        return;
+    }
+    
+    init_task->fs = iox_fs_alloc();
+    if (!init_task->fs) {
+        iox_task_free(init_task);
+        init_task = NULL;
+        return;
+    }
+    
+    init_task->sighand = iox_sighand_alloc();
+    if (!init_task->sighand) {
         iox_task_free(init_task);
         init_task = NULL;
         return;

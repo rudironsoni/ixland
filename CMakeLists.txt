@@ -136,6 +136,8 @@ if(IOX_BUILD_TESTS)
         Tests/unit/test_pid.c
         Tests/unit/test_fd.c
         Tests/unit/test_exec.c
+        Tests/unit/test_signal.c
+        Tests/unit/test_task_lifecycle.c
     )
     
     # XCTest bundle as MODULE (dylib)
