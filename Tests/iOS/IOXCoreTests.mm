@@ -123,4 +123,14 @@ extern "C" {
     XCTAssertEqual(result, 0, @"iox signal wait tests failed");
 }
 
+- (void)testSignalPending {
+    int result = iox_test_run_all("pending_mask_basic|pending_delivery|pending_multiple|pending_ignored");
+    XCTAssertEqual(result, 0, @"iox signal pending tests failed");
+}
+
+- (void)testSignalPendingErrors {
+    int result = iox_test_run_all("pending_null|pending_invalid");
+    XCTAssertEqual(result, 0, @"iox signal pending error tests failed");
+}
+
 @end
