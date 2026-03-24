@@ -98,4 +98,29 @@ extern "C" {
     XCTAssertEqual(result, 0, @"iox session tests failed");
 }
 
+- (void)testSignalDelivery {
+    int result = iox_test_run_all("signal_kill|signal_int|signal_ign|signal_forbidden");
+    XCTAssertEqual(result, 0, @"iox signal delivery tests failed");
+}
+
+- (void)testSignalProcessGroups {
+    int result = iox_test_run_all("signal_group");
+    XCTAssertEqual(result, 0, @"iox signal process group tests failed");
+}
+
+- (void)testSignalForeground {
+    int result = iox_test_run_all("signal_shell");
+    XCTAssertEqual(result, 0, @"iox signal foreground tests failed");
+}
+
+- (void)testSignalErrors {
+    int result = iox_test_run_all("signal_invalid|signal_null|signal_invalid_pid");
+    XCTAssertEqual(result, 0, @"iox signal error tests failed");
+}
+
+- (void)testSignalWait {
+    int result = iox_test_run_all("signal_pending|signal_disposition|signal_zero");
+    XCTAssertEqual(result, 0, @"iox signal wait tests failed");
+}
+
 @end

@@ -140,6 +140,7 @@ if(IOX_BUILD_TESTS)
         Tests/unit/test_task_lifecycle.c
         Tests/unit/test_wait.c
         Tests/unit/test_pgrp_session.c
+        Tests/unit/test_signal_process.c
     )
     
     # XCTest bundle as MODULE (dylib)
