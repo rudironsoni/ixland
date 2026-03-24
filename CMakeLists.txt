@@ -42,6 +42,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/kernel/exec
     ${CMAKE_CURRENT_SOURCE_DIR}/fs
     ${CMAKE_CURRENT_SOURCE_DIR}/fs/vfs
+    ${CMAKE_CURRENT_SOURCE_DIR}/runtime/native
     ${CMAKE_CURRENT_SOURCE_DIR}/drivers/tty
 )
 
@@ -62,10 +63,16 @@ set(IOX_FS_SOURCES
     fs/vfs.c
 )
 
+# Runtime sources
+set(IOX_RUNTIME_SOURCES
+    runtime/native/registry.c
+)
+
 # Combined sources
 set(IOX_CORE_SOURCES
     ${IOX_KERNEL_SOURCES}
     ${IOX_FS_SOURCES}
+    ${IOX_RUNTIME_SOURCES}
 )
 
 # Create core library
@@ -128,6 +135,7 @@ if(IOX_BUILD_TESTS)
         Tests/harness/harness.c
         Tests/unit/test_pid.c
         Tests/unit/test_fd.c
+        Tests/unit/test_exec.c
     )
     
     # XCTest bundle as MODULE (dylib)
