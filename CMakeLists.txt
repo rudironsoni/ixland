@@ -14,7 +14,7 @@ if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
     message(FATAL_ERROR "iox only supports iOS builds")
 endif()
 
-project(iox VERSION 1.0.0 LANGUAGES C)
+project(iox VERSION 1.0.0 LANGUAGES C OBJCXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -122,19 +122,38 @@ endif()
 if(IOX_BUILD_TESTS)
     enable_testing()
     
-    # Unit test executable
+    # XCTest bundle target
     set(IOX_TEST_SOURCES
-        tests/harness/harness.c
-        tests/unit/test_pid.c
-        tests/unit/test_fd.c
+        Tests/iOS/IOXCoreTests.mm
+        Tests/harness/harness.c
+        Tests/unit/test_pid.c
+        Tests/unit/test_fd.c
     )
     
-    add_executable(iox-unit-tests ${IOX_TEST_SOURCES})
-    target_link_libraries(iox-unit-tests PRIVATE iox-core pthread)
+    # XCTest bundle as MODULE (dylib)
+    add_library(iox-core-tests MODULE ${IOX_TEST_SOURCES})
     
-    add_test(NAME unit-pid COMMAND iox-unit-tests pid)
-    add_test(NAME unit-fd COMMAND iox-unit-tests fd)
-    add_test(NAME unit-all COMMAND iox-unit-tests)
+    target_link_libraries(iox-core-tests PRIVATE 
+        iox-core 
+        pthread
+        "-framework XCTest"
+    )
+    
+    set_target_properties(iox-core-tests PROPERTIES
+        BUNDLE YES
+        XCODE_ATTRIBUTE_GENERATE_INFOPLIST_FILE YES
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "iox.core.tests"
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
+        XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED NO
+        XCODE_ATTRIBUTE_OTHER_LDFLAGS "-framework XCTest"
+        XCODE_PRODUCT_TYPE "com.apple.product-type.bundle.unit-test"
+    )
+    
+    target_include_directories(iox-core-tests PRIVATE
+        "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks/XCTest.framework/Headers"
+    )
+    
+    add_test(NAME core-tests COMMAND iox-core-tests)
 endif()
 
 # Print configuration

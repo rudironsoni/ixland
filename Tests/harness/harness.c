@@ -1,21 +1,40 @@
 #include "iox_test.h"
 #include <stdio.h>
 #include <string.h>
+#include <mach-o/getsect.h>
+#include <mach-o/dyld.h>
 
 void iox_test_fail(const char *file, int line, const char *expr) {
     fprintf(stderr, "  FAIL: %s:%d: %s\n", file, line, expr);
 }
 
 int iox_test_run_all(const char *filter) {
-    iox_test_case_t *start = IOX_TEST_CASE_START;
-    iox_test_case_t *stop = IOX_TEST_CASE_STOP;
+    uint32_t image_count = _dyld_image_count();
+    iox_test_case_t *tests = NULL;
+    unsigned long size = 0;
     
+    // Iterate all loaded images to find the one with our section
+    for (uint32_t i = 0; i < image_count; i++) {
+        const struct mach_header *mh = _dyld_get_image_header(i);
+        tests = (iox_test_case_t *)getsectiondata(mh, "__DATA", "iox_test_cases", &size);
+        if (tests && size > 0) {
+            break;
+        }
+    }
+    
+    if (!tests || size == 0) {
+        printf("No tests found\n");
+        return 1;
+    }
+    
+    int count = size / sizeof(iox_test_case_t);
     int tests_run = 0;
     int tests_passed = 0;
     
     printf("Running iox tests...\n\n");
     
-    for (iox_test_case_t *tc = start; tc < stop; tc++) {
+    for (int i = 0; i < count; i++) {
+        iox_test_case_t *tc = &tests[i];
         if (filter && strstr(tc->name, filter) == NULL)
             continue;
         

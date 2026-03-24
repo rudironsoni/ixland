@@ -27,8 +27,8 @@ typedef struct {
 #define IOX_TEST(name) \
     static bool test_##name(void); \
     static const iox_test_case_t test_case_##name IOX_SECTION = { \
-        .name = #name, \
-        .fn = test_##name \
+        #name, \
+        test_##name \
     }; \
     static bool test_##name(void)
 

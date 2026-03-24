@@ -2,65 +2,14 @@
     "version": 3,
     "configurePresets": [
         {
-            "name": "ios-simulator-base",
-            "hidden": true,
+            "name": "ios-simulator-debug",
             "generator": "Xcode",
-            "architecture": "arm64",
+            "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
                 "CMAKE_SYSTEM_NAME": "iOS",
                 "CMAKE_OSX_SYSROOT": "iphonesimulator",
                 "CMAKE_OSX_DEPLOYMENT_TARGET": "16.0",
-                "CMAKE_OSX_ARCHITECTURES": "arm64",
-                "IOX_BUILD_TESTS": "ON"
-            }
-        },
-        {
-            "name": "ios-device-base",
-            "hidden": true,
-            "generator": "Xcode",
-            "architecture": "arm64",
-            "cacheVariables": {
-                "CMAKE_SYSTEM_NAME": "iOS",
-                "CMAKE_OSX_SYSROOT": "iphoneos",
-                "CMAKE_OSX_DEPLOYMENT_TARGET": "16.0",
-                "CMAKE_OSX_ARCHITECTURES": "arm64",
-                "IOX_BUILD_TESTS": "ON"
-            }
-        },
-        {
-            "name": "ios-simulator-debug",
-            "inherits": "ios-simulator-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "ios-simulator-release",
-            "inherits": "ios-simulator-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "ios-simulator-asan",
-            "inherits": "ios-simulator-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_C_FLAGS": "-fsanitize=address"
-            }
-        },
-        {
-            "name": "ios-device-debug",
-            "inherits": "ios-device-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "ios-device-release",
-            "inherits": "ios-device-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_OSX_ARCHITECTURES": "arm64"
             }
         }
     ],
@@ -69,28 +18,6 @@
             "name": "ios-simulator-debug",
             "configurePreset": "ios-simulator-debug",
             "configuration": "Debug"
-        },
-        {
-            "name": "ios-simulator-release",
-            "configurePreset": "ios-simulator-release",
-            "configuration": "Release"
-        },
-        {
-            "name": "ios-device-debug",
-            "configurePreset": "ios-device-debug",
-            "configuration": "Debug"
-        }
-    ],
-    "testPresets": [
-        {
-            "name": "ios-simulator-test",
-            "configurePreset": "ios-simulator-debug",
-            "output": {
-                "outputOnFailure": true
-            },
-            "execution": {
-                "timeout": 300
-            }
         }
     ]
 }
