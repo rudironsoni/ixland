@@ -33,18 +33,19 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -DNDEBUG")
 
-# Include directories
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/kernel/task
-    ${CMAKE_CURRENT_SOURCE_DIR}/kernel/signal
-    ${CMAKE_CURRENT_SOURCE_DIR}/kernel/exec
-    ${CMAKE_CURRENT_SOURCE_DIR}/fs
-    ${CMAKE_CURRENT_SOURCE_DIR}/fs/vfs
-    ${CMAKE_CURRENT_SOURCE_DIR}/runtime/native
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/tty
-)
+    # Include directories
+    include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/kernel/task
+        ${CMAKE_CURRENT_SOURCE_DIR}/kernel/signal
+        ${CMAKE_CURRENT_SOURCE_DIR}/kernel/exec
+        ${CMAKE_CURRENT_SOURCE_DIR}/fs
+        ${CMAKE_CURRENT_SOURCE_DIR}/fs/vfs
+        ${CMAKE_CURRENT_SOURCE_DIR}/runtime/native
+        ${CMAKE_CURRENT_SOURCE_DIR}/drivers/tty
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/iox/internal
+    )
 
 # Core kernel sources
 set(IOX_KERNEL_SOURCES
@@ -61,6 +62,8 @@ set(IOX_KERNEL_SOURCES
 set(IOX_FS_SOURCES
     fs/fdtable.c
     fs/vfs.c
+    fs/iox_path.c
+    Tests/unit/stub_vfs_translate.c
 )
 
 # Runtime sources
@@ -142,6 +145,7 @@ if(IOX_BUILD_TESTS)
         Tests/unit/test_pgrp_session.c
         Tests/unit/test_signal_process.c
         Tests/unit/test_tty.c
+        Tests/unit/test_vfs_path.c
     )
     
     # XCTest bundle as MODULE (dylib)

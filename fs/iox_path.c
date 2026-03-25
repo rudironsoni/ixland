@@ -102,14 +102,15 @@ void __iox_path_normalize(char *path) {
     char *src = path;
     char *dst = path;
     
-    /* Skip leading slashes */
-    while (*src == '/') {
-        src++;
-    }
-    
-    /* Handle root case */
-    if (src == path) {
+    /* Check if path is absolute (starts with /) */
+    if (*src == '/') {
+        /* Preserve leading slash for absolute paths */
         *dst++ = '/';
+        src++;
+        /* Skip any additional leading slashes */
+        while (*src == '/') {
+            src++;
+        }
     }
     
     while (*src) {
