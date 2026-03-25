@@ -8,7 +8,7 @@ set -e
 
 PROJECT_NAME="IOSTestApp"
 SCHEME_NAME="IOSTestApp"
-DESTINATION="platform=iOS Simulator,name=iPhone 16,OS=18.2"
+DESTINATION="platform=iOS Simulator,name=iPhone 17 Pro"
 
 cd "$(dirname "$0")"
 

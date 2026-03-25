@@ -17,7 +17,7 @@ if xcodebuild -project a_shell_system.xcodeproj -list 2>/dev/null | grep -q "Tes
     xcodebuild test \
         -project a_shell_system.xcodeproj \
         -scheme a_shell_system \
-        -destination 'platform=iOS Simulator,name=iPhone 15' \
+        -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
         2>&1 | tail -50
 else
     echo "WARNING: No test target found in Xcode project"

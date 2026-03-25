@@ -79,7 +79,7 @@ This creates:
 
 ### Step 4: Run Tests
 
-1. Select iOS Simulator target (e.g., iPhone 15 Pro)
+1. Select iOS Simulator target (iPhone 17 Pro)
 2. Build and run (Cmd+R)
 3. Check console output for test results:
 

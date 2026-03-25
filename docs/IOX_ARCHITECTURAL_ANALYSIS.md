@@ -1045,7 +1045,7 @@ tools/
 set -e
 
 PRESET="ios-simulator-debug"
-DESTINATION="platform=iOS Simulator,name=iPhone 15,OS=17.0"
+DESTINATION="platform=iOS Simulator,name=iPhone 17 Pro"
 
 # Configure
 cmake --preset=$PRESET

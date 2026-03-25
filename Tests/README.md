@@ -33,7 +33,7 @@ cd a-shell-kernel
 xcodebuild test \
   -project a_shell_system.xcodeproj \
   -scheme a_shell_systemTests \
-  -destination 'platform=iOS Simulator,name=iPhone 15'
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 ```
 
 ### Option 3: Makefile
