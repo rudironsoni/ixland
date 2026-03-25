@@ -133,9 +133,9 @@ extern "C" {
     XCTAssertEqual(result, 0, @"iox signal pending error tests failed");
 }
 
-- (void)testVfsPath {
-    int result = iox_test_run_all("vfs_path");
-    XCTAssertEqual(result, 0, @"iox VFS path resolution tests failed");
+- (void)testPathNormalization {
+    int result = iox_test_run_all("path_normalize");
+    XCTAssertEqual(result, 0, @"iox path normalization tests failed");
 }
 
 @end
