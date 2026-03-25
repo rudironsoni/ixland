@@ -138,4 +138,9 @@ extern "C" {
     XCTAssertEqual(result, 0, @"iox path normalization tests failed");
 }
 
+- (void)testFDTable {
+    int result = iox_test_run_all("fdtable");
+    XCTAssertEqual(result, 0, @"iox FD table tests failed");
+}
+
 @end
