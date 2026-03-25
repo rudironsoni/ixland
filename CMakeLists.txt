@@ -137,9 +137,9 @@ if(IOX_BUILD_TESTS)
         Tests/iOS/IOXCoreTests.mm
         Tests/harness/harness.c
         Tests/unit/test_pid.c
-        Tests/unit/test_fd.c
         Tests/unit/test_exec.c
         Tests/unit/test_signal.c
+        Tests/unit/test_signal_pending.c
         Tests/unit/test_task_lifecycle.c
         Tests/unit/test_wait.c
         Tests/unit/test_pgrp_session.c
