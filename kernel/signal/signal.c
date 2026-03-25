@@ -141,11 +141,85 @@ int iox_kill(pid_t pid, int sig) {
 }
 
 int iox_killpg(pid_t pgrp, int sig) {
-    /* Find all tasks in process group and send signal */
-    /* Simplified: iterate through all tasks */
-    /* In production: maintain per-pgrp hash table */
-    (void)pgrp;
-    (void)sig;
+    /* Contract:
+     * - pgrp <= 0: return -1, errno = EINVAL
+     * - no matching tasks: return -1, errno = ESRCH
+     * - valid PGID with matches: deliver to all, return 0
+     */
+    
+    /* Validate signal number */
+    if (sig < 0 || sig >= IOX_NSIG) {
+        errno = EINVAL;
+        return -1;
+    }
+    
+    /* Validate process group ID (must be positive) */
+    if (pgrp <= 0) {
+        errno = EINVAL;
+        return -1;
+    }
+    
+    /* Signal 0 is used to check if process group exists */
+    int check_only = (sig == 0);
+    
+    /* Collect matching tasks under lock */
+    #define IOX_KILLPG_MAX_MATCHES 256
+    iox_task_t *matches[IOX_KILLPG_MAX_MATCHES];
+    int match_count = 0;
+    
+    extern pthread_mutex_t task_table_lock;
+    extern iox_task_t *task_table[];
+    extern size_t task_hash(pid_t pid);
+    
+    pthread_mutex_lock(&task_table_lock);
+    
+    /* Iterate all buckets in task table */
+    for (int i = 0; i < IOX_MAX_TASKS; i++) {
+        iox_task_t *task = task_table[i];
+        while (task) {
+            if (task->pgid == pgrp) {
+                if (match_count < IOX_KILLPG_MAX_MATCHES) {
+                    atomic_fetch_add(&task->refs, 1);
+                    matches[match_count++] = task;
+                }
+                /* If we hit the limit, continue counting but don't store */
+            }
+            task = task->hash_next;
+        }
+    }
+    
+    pthread_mutex_unlock(&task_table_lock);
+    
+    /* No matching tasks found */
+    if (match_count == 0) {
+        errno = ESRCH;
+        return -1;
+    }
+    
+    /* Signal 0: just checking existence, don't actually deliver */
+    if (check_only) {
+        for (int i = 0; i < match_count; i++) {
+            iox_task_free(matches[i]);
+        }
+        return 0;
+    }
+    
+    /* Deliver signal to each matched task */
+    for (int i = 0; i < match_count; i++) {
+        iox_task_t *task = matches[i];
+        
+        pthread_mutex_lock(&task->lock);
+        sigaddset(&task->sighand->pending, sig);
+        
+        /* Wake up if waiting */
+        if (task->waiters > 0) {
+            pthread_cond_broadcast(&task->wait_cond);
+        }
+        pthread_mutex_unlock(&task->lock);
+        
+        iox_task_free(matches[i]);
+    }
+    
     return 0;
 }
 

@@ -482,3 +482,230 @@ IOX_TEST(signal_signal_zero_check_exists) {
     
     return true;
 }
+
+IOX_TEST(signal_killpg_basic_delivery) {
+    IOX_ASSERT(iox_task_init() == 0);
+    
+    iox_task_t *parent = iox_current_task();
+    
+    /* Target PGID for this test */
+    pid_t target_pgid = parent->pgid;
+    
+    /* Create two tasks in target PGID */
+    iox_task_t *task1 = iox_task_alloc();
+    IOX_ASSERT_NOT_NULL(task1);
+    task1->ppid = parent->pid;
+    task1->pgid = target_pgid;  /* Same as target group */
+    task1->sid = parent->sid;
+    task1->files = iox_files_alloc(IOX_MAX_FD);
+    task1->fs = iox_fs_alloc();
+    task1->sighand = iox_sighand_alloc();
+    
+    iox_task_t *task2 = iox_task_alloc();
+    IOX_ASSERT_NOT_NULL(task2);
+    task2->ppid = parent->pid;
+    task2->pgid = target_pgid;  /* Same as target group */
+    task2->sid = parent->sid;
+    task2->files = iox_files_alloc(IOX_MAX_FD);
+    task2->fs = iox_fs_alloc();
+    task2->sighand = iox_sighand_alloc();
+    
+    /* Create task in different PGID */
+    iox_task_t *task3 = iox_task_alloc();
+    IOX_ASSERT_NOT_NULL(task3);
+    task3->ppid = parent->pid;
+    task3->pgid = task3->pid;  /* Different PGID - its own group */
+    task3->sid = parent->sid;
+    task3->files = iox_files_alloc(IOX_MAX_FD);
+    task3->fs = iox_fs_alloc();
+    task3->sighand = iox_sighand_alloc();
+    
+    /* Clear pending signals on target tasks */
+    sigemptyset(&task1->sighand->pending);
+    sigemptyset(&task2->sighand->pending);
+    sigemptyset(&task3->sighand->pending);
+    
+    /* Deliver signal to target process group */
+    int ret = iox_killpg(target_pgid, SIGUSR1);
+    IOX_ASSERT_EQ(ret, 0);
+    
+    /* Verify both target-group tasks received the signal */
+    IOX_ASSERT(sigismember(&task1->sighand->pending, SIGUSR1));
+    IOX_ASSERT(sigismember(&task2->sighand->pending, SIGUSR1));
+    
+    /* Verify out-of-group task did NOT receive the signal */
+    IOX_ASSERT(!sigismember(&task3->sighand->pending, SIGUSR1));
+    
+    /* Cleanup */
+    iox_task_free(task1);
+    iox_task_free(task2);
+    iox_task_free(task3);
+    
+    return true;
+}
+
+IOX_TEST(signal_killpg_single_member) {
+    IOX_ASSERT(iox_task_init() == 0);
+    
+    iox_task_t *parent = iox_current_task();
+    pid_t target_pgid = parent->pgid;
+    
+    /* Create single task in target PGID */
+    iox_task_t *task = iox_task_alloc();
+    IOX_ASSERT_NOT_NULL(task);
+    task->ppid = parent->pid;
+    task->pgid = target_pgid;
+    task->sid = parent->sid;
+    task->files = iox_files_alloc(IOX_MAX_FD);
+    task->fs = iox_fs_alloc();
+    task->sighand = iox_sighand_alloc();
+    
+    sigemptyset(&task->sighand->pending);
+    
+    /* Deliver signal - should work with single member */
+    int ret = iox_killpg(target_pgid, SIGTERM);
+    IOX_ASSERT_EQ(ret, 0);
+    IOX_ASSERT(sigismember(&task->sighand->pending, SIGTERM));
+    
+    iox_task_free(task);
+    return true;
+}
+
+IOX_TEST(signal_killpg_empty_group) {
+    IOX_ASSERT(iox_task_init() == 0);
+    
+    /* Use a PGID that doesn't exist */
+    pid_t nonexistent_pgid = 999999;
+    
+    /* Try to signal empty/nonexistent group */
+    int ret = iox_killpg(nonexistent_pgid, SIGTERM);
+    IOX_ASSERT_EQ(ret, -1);
+    IOX_ASSERT_EQ(errno, ESRCH);
+    
+    return true;
+}
+
+IOX_TEST(signal_killpg_invalid_pgid) {
+    IOX_ASSERT(iox_task_init() == 0);
+    
+    /* pgrp <= 0 should return EINVAL */
+    int ret = iox_killpg(0, SIGTERM);
+    IOX_ASSERT_EQ(ret, -1);
+    IOX_ASSERT_EQ(errno, EINVAL);
+    
+    ret = iox_killpg(-1, SIGTERM);
+    IOX_ASSERT_EQ(ret, -1);
+    IOX_ASSERT_EQ(errno, EINVAL);
+    
+    ret = iox_killpg(-100, SIGTERM);
+    IOX_ASSERT_EQ(ret, -1);
+    IOX_ASSERT_EQ(errno, EINVAL);
+    
+    return true;
+}
+
+IOX_TEST(signal_killpg_invalid_signal) {
+    IOX_ASSERT(iox_task_init() == 0);
+    
+    iox_task_t *parent = iox_current_task();
+    
+    /* Invalid signal number should fail with EINVAL */
+    int ret = iox_killpg(parent->pgid, -1);
+    IOX_ASSERT_EQ(ret, -1);
+    IOX_ASSERT_EQ(errno, EINVAL);
+    
+    ret = iox_killpg(parent->pgid, 100);
+    IOX_ASSERT_EQ(ret, -1);
+    IOX_ASSERT_EQ(errno, EINVAL);
+    
+    return true;
+}
+
+IOX_TEST(signal_killpg_refcount_coherent) {
+    IOX_ASSERT(iox_task_init() == 0);
+    
+    iox_task_t *parent = iox_current_task();
+    pid_t target_pgid = parent->pgid;
+    
+    /* Create task in target PGID */
+    iox_task_t *task = iox_task_alloc();
+    IOX_ASSERT_NOT_NULL(task);
+    task->ppid = parent->pid;
+    task->pgid = target_pgid;
+    task->sid = parent->sid;
+    task->files = iox_files_alloc(IOX_MAX_FD);
+    task->fs = iox_fs_alloc();
+    task->sighand = iox_sighand_alloc();
+    
+    /* Record initial refcount (should be 1 from alloc) */
+    int initial_refs = atomic_load(&task->refs);
+    IOX_ASSERT_EQ(initial_refs, 1);
+    
+    sigemptyset(&task->sighand->pending);
+    
+    /* Deliver signal - internal implementation should refcount during collection */
+    int ret = iox_killpg(target_pgid, SIGUSR1);
+    IOX_ASSERT_EQ(ret, 0);
+    
+    /* Refcount should be back to original value */
+    int final_refs = atomic_load(&task->refs);
+    IOX_ASSERT_EQ(final_refs, 1);
+    
+    IOX_ASSERT(sigismember(&task->sighand->pending, SIGUSR1));
+    
+    iox_task_free(task);
+    return true;
+}
+
+IOX_TEST(signal_killpg_does_not_cross_groups) {
+    IOX_ASSERT(iox_task_init() == 0);
+    
+    iox_task_t *parent = iox_current_task();
+    
+    /* Create three tasks in three different process groups */
+    iox_task_t *task1 = iox_task_alloc();
+    IOX_ASSERT_NOT_NULL(task1);
+    task1->ppid = parent->pid;
+    task1->pgid = task1->pid;  /* Own group */
+    task1->sid = parent->sid;
+    task1->files = iox_files_alloc(IOX_MAX_FD);
+    task1->fs = iox_fs_alloc();
+    task1->sighand = iox_sighand_alloc();
+    
+    iox_task_t *task2 = iox_task_alloc();
+    IOX_ASSERT_NOT_NULL(task2);
+    task2->ppid = parent->pid;
+    task2->pgid = task2->pid;  /* Own group */
+    task2->sid = parent->sid;
+    task2->files = iox_files_alloc(IOX_MAX_FD);
+    task2->fs = iox_fs_alloc();
+    task2->sighand = iox_sighand_alloc();
+    
+    iox_task_t *task3 = iox_task_alloc();
+    IOX_ASSERT_NOT_NULL(task3);
+    task3->ppid = parent->pid;
+    task3->pgid = task3->pid;  /* Own group */
+    task3->sid = parent->sid;
+    task3->files = iox_files_alloc(IOX_MAX_FD);
+    task3->fs = iox_fs_alloc();
+    task3->sighand = iox_sighand_alloc();
+    
+    sigemptyset(&task1->sighand->pending);
+    sigemptyset(&task2->sighand->pending);
+    sigemptyset(&task3->sighand->pending);
+    
+    /* Signal only task2's PGID */
+    int ret = iox_killpg(task2->pgid, SIGUSR2);
+    IOX_ASSERT_EQ(ret, 0);
+    
+    /* Only task2 should have the signal */
+    IOX_ASSERT(!sigismember(&task1->sighand->pending, SIGUSR2));
+    IOX_ASSERT(sigismember(&task2->sighand->pending, SIGUSR2));
+    IOX_ASSERT(!sigismember(&task3->sighand->pending, SIGUSR2));
+    
+    iox_task_free(task1);
+    iox_task_free(task2);
+    iox_task_free(task3);
+    
+    return true;
+}

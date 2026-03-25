@@ -108,6 +108,11 @@ extern "C" {
     XCTAssertEqual(result, 0, @"iox signal process group tests failed");
 }
 
+- (void)testSignalKillpg {
+    int result = iox_test_run_all("signal_killpg");
+    XCTAssertEqual(result, 0, @"iox killpg tests failed");
+}
+
 - (void)testSignalForeground {
     int result = iox_test_run_all("signal_shell");
     XCTAssertEqual(result, 0, @"iox signal foreground tests failed");

@@ -19,6 +19,7 @@ extern "C" {
 #define IOX_NSIG 64
 #define IOX_MAX_FD 256
 #define IOX_MAX_ARGS 256
+#define IOX_MAX_TASKS 1024
 
 #ifndef RLIMIT_NLIMITS
 #define RLIMIT_NLIMITS 16

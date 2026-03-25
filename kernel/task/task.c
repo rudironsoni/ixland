@@ -7,14 +7,16 @@
 #include <setjmp.h>
 #include <pthread.h>
 
-#define IOX_MAX_TASKS 1024
+/* Note: IOX_MAX_TASKS defined in task.h for cross-module access */
 
 static __thread iox_task_t *current_task = NULL;
-static pthread_mutex_t task_table_lock = PTHREAD_MUTEX_INITIALIZER;
-static iox_task_t *task_table[IOX_MAX_TASKS] = {NULL};
-static iox_task_t *init_task = NULL;
+iox_task_t *init_task = NULL;
 
-static inline size_t task_hash(pid_t pid) {
+/* Task table - accessible to signal.c for iox_killpg */
+pthread_mutex_t task_table_lock = PTHREAD_MUTEX_INITIALIZER;
+iox_task_t *task_table[IOX_MAX_TASKS] = {NULL};
+
+size_t task_hash(pid_t pid) {
     return (size_t)(pid % IOX_MAX_TASKS);
 }
 
