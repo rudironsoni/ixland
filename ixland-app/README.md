@@ -1,3 +1,9 @@
+> [!IMPORTANT]
+> This component now lives inside the `a-shell-next` monorepo.
+> Do not run `git submodule update --init --recursive`.
+> Use the monorepo root checkout and see the root `README.md` for current setup and build instructions.
+> Historical instructions below may be outdated.
+
 # a-shell: A terminal for iOS, with multiple windows
 
 <p align="center">
@@ -25,7 +31,8 @@ a-Shell is now <a href="https://holzschu.github.io/a-Shell_iOS/">available on th
 ## How to compile it?
 
 If you want to compile the project yourself, you will need the following steps: 
-* download the entire project and its sub-modules: `git submodule update --init --recursive`
+* download the entire project: `git clone git@github.com:rudironsoni/a-shell-next.git`
+* No submodule initialization is required. This code is now part of the monorepo.
 * download all the xcFrameworks: `downloadFrameworks.sh`
     * this will download the standard Apple frameworks (in `xcfs/.build/artefacts/xcfs`, with checksum control).
     * There are too many Python frameworks (more than 2000) for automatic download. You can either remove them from the "Embed" step in the project, or compile them: 

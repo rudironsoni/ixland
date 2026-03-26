@@ -1,3 +1,9 @@
+> [!IMPORTANT]
+> This component now lives inside the `a-shell-next` monorepo.
+> Do not run `git submodule update --init --recursive`.
+> Use the monorepo root checkout and see the root `README.md` for current setup and build instructions.
+> Historical instructions below may be outdated.
+
 # iox: iOS Linux-Like Virtual Subsystem
 
 <p align="center">
