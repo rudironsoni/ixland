@@ -1,0 +1,120 @@
+"0MCBCc" = "${message}";
+
+"0ltuRO-Ev6eBG" = "There are ${count} options matching ‘default (depends on commands)’.";
+
+"0ltuRO-EzhjO7" = "There are ${count} options matching ‘yes’.";
+
+"0ltuRO-N556Rd" = "There are ${count} options matching ‘default (depend on commands)’.";
+
+"0ltuRO-i2Vf9p" = "There are ${count} options matching ‘no (run in extension)’.";
+
+"2PGaCe" = "Continuer après une erreur";
+
+"2fJ9cq" = "vrai";
+
+"2iOcKE" = "Fichier";
+
+"41sJlD" = "Exécuter une commande";
+
+"4yCt8L-Ev6eBG" = "Just to confirm, you wanted ‘default (depends on commands)’?";
+
+"4yCt8L-EzhjO7" = "Just to confirm, you wanted ‘yes’?";
+
+"4yCt8L-N556Rd" = "Just to confirm, you wanted ‘default (depend on commands)’?";
+
+"4yCt8L-i2Vf9p" = "Just to confirm, you wanted ‘no (run in extension)’?";
+
+"58h7pK" = "${file}";
+
+"7wS9Ta" = "Déposer un fichier";
+
+"8AtaM0" = "Récupérer un fichier depuis a-Shell";
+
+"8PiF49" = "${property}";
+
+"8eLC56" = "${property}";
+
+"94QBWm" = "Le fichier a été créé";
+
+"9n3JUI" = "faux";
+
+"BKUcxZ" = "Récupérer ${fileName} depuis a-Shell";
+
+"BxvHYF" = "Code d'erreur";
+
+"CQUSHQ" = "nom du fichier ? ";
+
+"ClThF5" = "sortie";
+
+"Ev6eBG" = "si nécessaire (dépend des commandes)";
+
+"EzhjO7" = "oui";
+
+"J7zfzK" = "Le fichier a été créé";
+
+"JJgpB5" = "Ouvrir l'application ?";
+
+"KqS0gJ" = "Lancer une commande";
+
+"N556Rd" = "si nécessaire (dépend des commandes)";
+
+"NJGW0j" = "La commande a échoué avec le code d'erreur ${property1}. La sortie était: ${property}";
+
+"OmjmQg" = "fichier";
+
+"PJgP7x" = "Erreur";
+
+"SMk14K" = "Code d'erreur ${property1}. ${property}";
+
+"UvKwrp" = "Créer un fichier dans a-Shell";
+
+"W4gWBJ" = "Impossible de créer le fichier : ${error}";
+
+"Y7KKwU" = "commande(s)";
+
+"YxbbRt" = "Exécuter ${command}";
+
+"a2n63A-epnx1H" = "Copier ${file} dans a-Shell (sans écraser)";
+
+"a2n63A-xYZuUZ" = "Copier ${file} dans a-Shell (en écrasant)";
+
+"aRe2H0" = "Écraser un fichier existant ?";
+
+"cELXqS" = "Écraser le fichier existant ${file} ?";
+
+"d8qG96" = "Faut-il continuer après qu'une commande ait renvoyé une erreur ?";
+
+"epnx1H" = "faux";
+
+"fyMs4g" = "${message}";
+
+"i2Vf9p" = "non (lancer dans l'extension)";
+
+"iokfkK" = "Copier un fichier dans a-Shell";
+
+"isZTIL" = "Copier ${file} dans a-Shell";
+
+"mT8e9Y" = "nom du fichier";
+
+"n11Zfh" = "Récupérer ${fileName} depuis a-Shell";
+
+"pHBUcg" = "Impossible de créer le fichier : ${error}";
+
+"qDIloo" = "openWindow";
+
+"rz0Hmn" = "Exécuter une commande";
+
+"tIMaMc" = "Copier ${file} dans a-Shell";
+
+"uW0NxR" = "Message";
+
+"umwm1q" = "Exécuter ${command}";
+
+"vk5k4v" = "Exécuter les commandes dans a-Shell";
+
+"wXdWw9" = "${file}";
+
+"xYZuUZ" = "vrai";
+
+"xrhJta" = "Récupérer un fichier";
+

@@ -1,0 +1,117 @@
+"0MCBCc" = "${message}";
+
+"0ltuRO-Ev6eBG" = "There are ${count} options matching ‘default (depends on commands)’.";
+
+"0ltuRO-EzhjO7" = "There are ${count} options matching ‘yes’.";
+
+"0ltuRO-N556Rd" = "There are ${count} options matching ‘default (depend on commands)’.";
+
+"0ltuRO-i2Vf9p" = "There are ${count} options matching ‘no (run in extension)’.";
+
+"2PGaCe" = "エラー後も処理を続行する";
+
+"2fJ9cq" = "真";
+
+"2iOcKE" = "ファイル";
+
+"41sJlD" = "シェルコマンドを実行";
+
+"4yCt8L-Ev6eBG" = "Just to confirm, you wanted ‘default (depends on commands)’?";
+
+"4yCt8L-EzhjO7" = "Just to confirm, you wanted ‘yes’?";
+
+"4yCt8L-N556Rd" = "Just to confirm, you wanted ‘default (depend on commands)’?";
+
+"4yCt8L-i2Vf9p" = "Just to confirm, you wanted ‘no (run in extension)’?";
+
+"58h7pK" = "${file}";
+
+"7wS9Ta" = "ファイルを置く";
+
+"8AtaM0" = "a-Shellからファイルをゲット";
+
+"8PiF49" = "${property}";
+
+"8eLC56" = "${property}";
+
+"94QBWm" = "ファイルの生成に成功しました";
+
+"9n3JUI" = "偽";
+
+"BKUcxZ" = "a-shellから${fileName}をゲット";
+
+"BxvHYF" = "エラーコード";
+
+"CQUSHQ" = "ファイルネームは? ";
+
+"ClThF5" = "アウトプット";
+
+"Ev6eBG" = "デフォルト (コマンドに依ります)";
+
+"EzhjO7" = "はい";
+
+"J7zfzK" = "ファイルの生成に成功しました";
+
+"JJgpB5" = "コマンド実行のためにアプリを開きますか？";
+
+"KqS0gJ" = "シェルコマンドの実行";
+
+"N556Rd" = "デフォルト (コマンドに依ります)";
+
+"NJGW0j" = "コマンドはエラーコード ${property1}で終了しました。アウトプットは ${property}です";
+
+"OmjmQg" = "ファイル";
+
+"PJgP7x" = "エラー";
+
+"SMk14K" = "エラーコードは${property1}です。 ${property}";
+
+"UvKwrp" = "a-Shell サンドボックスでファイルを生成";
+
+"W4gWBJ" = "ファイルを生成できません: ${error}";
+
+"Y7KKwU" = "シェルコマンド";
+
+"YxbbRt" = "コマンドを実行 ${command}";
+
+"a2n63A" = "${file} を a-Shell にコピー";
+
+"aRe2H0" = "既存のファイルを上書きしますか?";
+
+"cELXqS" = "既存のファイル${file}を上書きしますか?";
+
+"d8qG96" = "一つのコマンドがエラーを返しても処理を続行しますか?";
+
+"epnx1H" = "偽";
+
+"fyMs4g" = "${message}";
+
+"i2Vf9p" = "いいえ (エクステンション内で実行)";
+
+"iokfkK" = "a-Shellにファイルをコピー";
+
+"isZTIL" = "${file} を a-Shellにコピー";
+
+"mT8e9Y" = "ファイル名";
+
+"n11Zfh" = "${fileName} を a-Shell からゲット";
+
+"pHBUcg" = "ファイルを生成できません: ${error}";
+
+"qDIloo" = "openWindow";
+
+"rz0Hmn" = "コマンドを実行";
+
+"tIMaMc" = "${file} を a-Shel にコピーl";
+
+"uW0NxR" = "メッセージ";
+
+"umwm1q" = "${command}を実行";
+
+"vk5k4v" = "以下のコマンドをa-Shellで実行";
+
+"wXdWw9" = "${file}";
+
+"xYZuUZ" = "真";
+
+"xrhJta" = "ファイルをゲット";
