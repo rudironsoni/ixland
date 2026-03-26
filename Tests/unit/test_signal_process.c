@@ -54,11 +54,12 @@ IOX_TEST(signal_kill_delivers_termination) {
     atomic_store(&child->state, IOX_TASK_ZOMBIE);
     pthread_mutex_unlock(&child->lock);
     
-    /* Parent should see terminated child via wait */
+    /* Parent should see terminated child via wait - save PID before reap */
     int status;
-    pid_t result = iox_waitpid(child->pid, &status, 0);
+    pid_t child_pid = child->pid;
+    pid_t result = iox_waitpid(child_pid, &status, 0);
     
-    IOX_ASSERT_EQ(result, child->pid);
+    IOX_ASSERT_EQ(result, child_pid);
     IOX_ASSERT(WIFSIGNALED(status));
     IOX_ASSERT_EQ(WTERMSIG(status), SIGTERM);
     
@@ -95,10 +96,12 @@ IOX_TEST(signal_int_delivers_interrupt) {
     atomic_store(&child->state, IOX_TASK_ZOMBIE);
     pthread_mutex_unlock(&child->lock);
     
+    /* Save child PID before wait (child will be reaped) */
     int status;
-    pid_t result = iox_waitpid(child->pid, &status, 0);
+    pid_t child_pid = child->pid;
+    pid_t result = iox_waitpid(child_pid, &status, 0);
     
-    IOX_ASSERT_EQ(result, child->pid);
+    IOX_ASSERT_EQ(result, child_pid);
     IOX_ASSERT(WIFSIGNALED(status));
     IOX_ASSERT_EQ(WTERMSIG(status), SIGINT);
     
@@ -205,11 +208,17 @@ IOX_TEST(signal_group_delivery_simulation) {
         pthread_mutex_unlock(&children[i]->lock);
     }
     
+    /* Save child PIDs before wait (children will be reaped) */
+    pid_t child_pids[3];
+    for (int i = 0; i < 3; i++) {
+        child_pids[i] = children[i]->pid;
+    }
+    
     /* Wait for all children - verify group members affected */
     for (int i = 0; i < 3; i++) {
         int status;
-        pid_t result = iox_waitpid(children[i]->pid, &status, 0);
-        IOX_ASSERT_EQ(result, children[i]->pid);
+        pid_t result = iox_waitpid(child_pids[i], &status, 0);
+        IOX_ASSERT_EQ(result, child_pids[i]);
         IOX_ASSERT(WIFSIGNALED(status));
         IOX_ASSERT_EQ(WTERMSIG(status), SIGTERM);
     }
@@ -276,6 +285,9 @@ IOX_TEST(signal_shell_foreground_child_terminates) {
     atomic_store(&child->state, IOX_TASK_ZOMBIE);
     pthread_mutex_unlock(&child->lock);
     
+    /* Save child PID before wait (child will be reaped) */
+    pid_t child_pid = child->pid;
+    
     /* Save original current task */
     iox_task_t *original = iox_current_task();
     
@@ -284,8 +296,8 @@ IOX_TEST(signal_shell_foreground_child_terminates) {
     
     /* Verify child was signaled - shell is now the caller */
     int status;
-    pid_t result = iox_waitpid(child->pid, &status, 0);
-    IOX_ASSERT_EQ(result, child->pid);
+    pid_t result = iox_waitpid(child_pid, &status, 0);
+    IOX_ASSERT_EQ(result, child_pid);
     IOX_ASSERT(WIFSIGNALED(status));
     IOX_ASSERT_EQ(WTERMSIG(status), SIGINT);
     
@@ -488,8 +500,18 @@ IOX_TEST(signal_killpg_basic_delivery) {
     
     iox_task_t *parent = iox_current_task();
     
-    /* Target PGID for this test */
-    pid_t target_pgid = parent->pgid;
+    /* Create a group leader with its own PGID to avoid contaminating current task */
+    iox_task_t *group_leader = iox_task_alloc();
+    IOX_ASSERT_NOT_NULL(group_leader);
+    group_leader->ppid = parent->pid;
+    group_leader->pgid = group_leader->pid;  /* Its own group */
+    group_leader->sid = parent->sid;
+    group_leader->files = iox_files_alloc(IOX_MAX_FD);
+    group_leader->fs = iox_fs_alloc();
+    group_leader->sighand = iox_sighand_alloc();
+    
+    /* Target PGID is the group leader's PID */
+    pid_t target_pgid = group_leader->pid;
     
     /* Create two tasks in target PGID */
     iox_task_t *task1 = iox_task_alloc();
@@ -537,6 +559,7 @@ IOX_TEST(signal_killpg_basic_delivery) {
     IOX_ASSERT(!sigismember(&task3->sighand->pending, SIGUSR1));
     
     /* Cleanup */
+    iox_task_free(group_leader);
     iox_task_free(task1);
     iox_task_free(task2);
     iox_task_free(task3);
@@ -548,7 +571,18 @@ IOX_TEST(signal_killpg_single_member) {
     IOX_ASSERT(iox_task_init() == 0);
     
     iox_task_t *parent = iox_current_task();
-    pid_t target_pgid = parent->pgid;
+    
+    /* Create a group leader with its own PGID to avoid contaminating current task */
+    iox_task_t *group_leader = iox_task_alloc();
+    IOX_ASSERT_NOT_NULL(group_leader);
+    group_leader->ppid = parent->pid;
+    group_leader->pgid = group_leader->pid;  /* Its own group */
+    group_leader->sid = parent->sid;
+    group_leader->files = iox_files_alloc(IOX_MAX_FD);
+    group_leader->fs = iox_fs_alloc();
+    group_leader->sighand = iox_sighand_alloc();
+    
+    pid_t target_pgid = group_leader->pid;
     
     /* Create single task in target PGID */
     iox_task_t *task = iox_task_alloc();
@@ -568,6 +602,7 @@ IOX_TEST(signal_killpg_single_member) {
     IOX_ASSERT(sigismember(&task->sighand->pending, SIGTERM));
     
     iox_task_free(task);
+    iox_task_free(group_leader);
     return true;
 }
 
@@ -625,7 +660,18 @@ IOX_TEST(signal_killpg_refcount_coherent) {
     IOX_ASSERT(iox_task_init() == 0);
     
     iox_task_t *parent = iox_current_task();
-    pid_t target_pgid = parent->pgid;
+    
+    /* Create a group leader with its own PGID to avoid contaminating current task */
+    iox_task_t *group_leader = iox_task_alloc();
+    IOX_ASSERT_NOT_NULL(group_leader);
+    group_leader->ppid = parent->pid;
+    group_leader->pgid = group_leader->pid;  /* Its own group */
+    group_leader->sid = parent->sid;
+    group_leader->files = iox_files_alloc(IOX_MAX_FD);
+    group_leader->fs = iox_fs_alloc();
+    group_leader->sighand = iox_sighand_alloc();
+    
+    pid_t target_pgid = group_leader->pid;
     
     /* Create task in target PGID */
     iox_task_t *task = iox_task_alloc();
@@ -654,6 +700,7 @@ IOX_TEST(signal_killpg_refcount_coherent) {
     IOX_ASSERT(sigismember(&task->sighand->pending, SIGUSR1));
     
     iox_task_free(task);
+    iox_task_free(group_leader);
     return true;
 }
 

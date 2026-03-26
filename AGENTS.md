@@ -21,6 +21,7 @@ Transform the current project from a fragmented compatibility layer into one coh
 - **Supported SDKs**: `iphonesimulator` and `iphoneos` only
 - **Validation authority**: iOS Simulator and Device tests only
 - **macOS builds**: Not authoritative for correctness
+- **Simulator**: iPhone 17 Pro only (no other simulator types allowed)
 
 **Hard constraint**: Configure must hard-fail if not targeting iOS.
 

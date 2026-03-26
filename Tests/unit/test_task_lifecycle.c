@@ -139,6 +139,11 @@ IOX_TEST(task_exit_signaled_flag) {
     
     iox_task_t *task = iox_current_task();
     
+    /* Save original state to restore after test */
+    bool orig_signaled = atomic_load(&task->signaled);
+    int orig_termsig = atomic_load(&task->termsig);
+    bool orig_exited = atomic_load(&task->exited);
+    
     /* Simulate signaled exit */
     atomic_store(&task->signaled, true);
     atomic_store(&task->termsig, SIGTERM);
@@ -147,6 +152,11 @@ IOX_TEST(task_exit_signaled_flag) {
     IOX_ASSERT(atomic_load(&task->signaled));
     IOX_ASSERT_EQ(atomic_load(&task->termsig), SIGTERM);
     IOX_ASSERT(atomic_load(&task->exited));
+    
+    /* Restore original state to prevent test contamination */
+    atomic_store(&task->signaled, orig_signaled);
+    atomic_store(&task->termsig, orig_termsig);
+    atomic_store(&task->exited, orig_exited);
     
     return true;
 }

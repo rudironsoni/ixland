@@ -1,19 +1,32 @@
 #include "task.h"
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <signal.h>
 #include <errno.h>
 
 static int task_to_status(iox_task_t *task) {
     int status = 0;
     
     if (atomic_load(&task->signaled)) {
+        /* Child was terminated by signal */
         status = task->termsig;
+    } else if (atomic_load(&task->stopped)) {
+        /* Child is stopped */
+        status = (task->stopsig << 8) | 0x7f;
+    } else if (atomic_load(&task->continued)) {
+        /* Child continued (reported via wait with WCONTINUED) */
+        status = (SIGCONT << 8) | 0x7f;
     } else {
+        /* Normal exit */
         status = (task->exit_status & 0xFF) << 8;
     }
     
     return status;
 }
+
+/* Status check helpers */
+#define W_STOPPED(status) (((status) & 0xff) == 0x7f)
+#define W_CONTINUED(status) ((status) == 0xffff)
 
 pid_t iox_waitpid(pid_t pid, int *wstatus, int options) {
     iox_task_t *parent = iox_current_task();
@@ -53,9 +66,22 @@ pid_t iox_waitpid(pid_t pid, int *wstatus, int options) {
             }
         }
         
-        if (child && atomic_load(&child->exited)) {
-            /* Found exited child */
-            break;
+        /* Check for children based on options */
+        if (child) {
+            /* Check for exited child */
+            if (atomic_load(&child->exited)) {
+                break;
+            }
+            
+            /* Check for stopped child (WUNTRACED) */
+            if ((options & WUNTRACED) && atomic_load(&child->stopped) && !atomic_load(&child->exited)) {
+                break;
+            }
+            
+            /* Check for continued child (WCONTINUED) */
+            if ((options & WCONTINUED) && atomic_load(&child->continued) && !atomic_load(&child->exited) && !atomic_load(&child->stopped)) {
+                break;
+            }
         }
         
         /* No matching exited child */
@@ -86,13 +112,18 @@ pid_t iox_waitpid(pid_t pid, int *wstatus, int options) {
         pthread_cond_wait(&parent->wait_cond, &parent->lock);
     }
     
-    /* Remove child from parent's list */
-    iox_task_t **pp = &parent->children;
-    while (*pp && *pp != child) {
-        pp = &(*pp)->next_sibling;
-    }
-    if (*pp) {
-        *pp = child->next_sibling;
+    /* Determine if child should be reaped (exited/signaled) or just reported (stopped/continued) */
+    int should_reap = atomic_load(&child->exited) || atomic_load(&child->signaled);
+    
+    /* Only unlink and free terminated children */
+    if (should_reap) {
+        iox_task_t **pp = &parent->children;
+        while (*pp && *pp != child) {
+            pp = &(*pp)->next_sibling;
+        }
+        if (*pp) {
+            *pp = child->next_sibling;
+        }
     }
     
     parent->waiters--;
@@ -104,7 +135,11 @@ pid_t iox_waitpid(pid_t pid, int *wstatus, int options) {
     }
     
     pid_t child_pid = child->pid;
-    iox_task_free(child);
+    
+    /* Only free terminated children */
+    if (should_reap) {
+        iox_task_free(child);
+    }
     
     return child_pid;
 }

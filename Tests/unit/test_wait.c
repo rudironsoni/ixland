@@ -96,11 +96,12 @@ IOX_TEST(wait_parent_observes_child_exit) {
     atomic_store(&child->state, IOX_TASK_ZOMBIE);
     pthread_mutex_unlock(&child->lock);
     
-    /* Parent waits for child */
+    /* Parent waits for child - save PID before reap */
     int status;
-    pid_t result = iox_waitpid(child->pid, &status, 0);
+    pid_t child_pid = child->pid;
+    pid_t result = iox_waitpid(child_pid, &status, 0);
     
-    IOX_ASSERT_EQ(result, child->pid);
+    IOX_ASSERT_EQ(result, child_pid);
     IOX_ASSERT(WIFEXITED(status));
     IOX_ASSERT_EQ(WEXITSTATUS(status), 42);
     
@@ -198,14 +199,15 @@ IOX_TEST(wait_second_reap_fails) {
     atomic_store(&child->state, IOX_TASK_ZOMBIE);
     pthread_mutex_unlock(&child->lock);
     
-    /* First wait succeeds */
+    /* First wait succeeds - save PID before reap */
     int status;
-    pid_t result = iox_waitpid(child->pid, &status, 0);
-    IOX_ASSERT_EQ(result, child->pid);
+    pid_t child_pid = child->pid;
+    pid_t result = iox_waitpid(child_pid, &status, 0);
+    IOX_ASSERT_EQ(result, child_pid);
     
     /* Second wait should fail (no children) */
     errno = 0;
-    result = iox_waitpid(child->pid, &status, 0);
+    result = iox_waitpid(child_pid, &status, 0);
     IOX_ASSERT_EQ(result, -1);
     IOX_ASSERT_EQ(errno, ECHILD);
     
@@ -242,11 +244,12 @@ IOX_TEST(wait_signaled_child) {
     atomic_store(&child->state, IOX_TASK_ZOMBIE);
     pthread_mutex_unlock(&child->lock);
     
-    /* Parent waits */
+    /* Parent waits - save PID before reap */
     int status;
-    pid_t result = iox_waitpid(child->pid, &status, 0);
+    pid_t child_pid = child->pid;
+    pid_t result = iox_waitpid(child_pid, &status, 0);
     
-    IOX_ASSERT_EQ(result, child->pid);
+    IOX_ASSERT_EQ(result, child_pid);
     IOX_ASSERT(WIFSIGNALED(status));
     IOX_ASSERT_EQ(WTERMSIG(status), SIGTERM);
     
@@ -318,11 +321,12 @@ IOX_TEST(wnohang_exited_child_returns_pid) {
     atomic_store(&child->state, IOX_TASK_ZOMBIE);
     pthread_mutex_unlock(&child->lock);
     
-    /* WNOHANG with exited child returns PID */
+    /* WNOHANG with exited child returns PID - save before reap */
     int status;
+    pid_t child_pid = child->pid;
     pid_t result = iox_waitpid(-1, &status, WNOHANG);
     
-    IOX_ASSERT_EQ(result, child->pid);
+    IOX_ASSERT_EQ(result, child_pid);
     IOX_ASSERT(WIFEXITED(status));
     IOX_ASSERT_EQ(WEXITSTATUS(status), 99);
     
@@ -368,9 +372,10 @@ IOX_TEST(wait_child_list_unlinked_after_reap) {
     
     /* Wait for child2 - should only reap that one */
     int status;
-    pid_t result = iox_waitpid(child2->pid, &status, 0);
+    pid_t child2_pid = child2->pid;
+    pid_t result = iox_waitpid(child2_pid, &status, 0);
     
-    IOX_ASSERT_EQ(result, child2->pid);
+    IOX_ASSERT_EQ(result, child2_pid);
     
     /* Verify child1 still in list */
     pthread_mutex_lock(&parent->lock);
@@ -417,11 +422,12 @@ IOX_TEST(wait_refcount_coherent) {
     atomic_store(&child->state, IOX_TASK_ZOMBIE);
     pthread_mutex_unlock(&child->lock);
     
-    /* Wait should free the child */
+    /* Wait should free the child - save PID before reap */
     int status;
-    pid_t result = iox_waitpid(child->pid, &status, 0);
+    pid_t child_pid = child->pid;
+    pid_t result = iox_waitpid(child_pid, &status, 0);
     
-    IOX_ASSERT_EQ(result, child->pid);
+    IOX_ASSERT_EQ(result, child_pid);
     /* Child is freed, don't access it */
     
     return true;

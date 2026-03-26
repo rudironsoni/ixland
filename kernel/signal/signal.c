@@ -88,6 +88,50 @@ int iox_sigaction(int sig, const struct sigaction *act, struct sigaction *oldact
     return 0;
 }
 
+/* Apply signal to a single task with state transitions and parent notification.
+ * Must be called with task lock held. Does NOT release task reference.
+ */
+static void __iox_apply_signal_to_task(iox_task_t *task, int sig) {
+    int terminating = (sig == SIGTERM || sig == SIGKILL || sig == SIGINT);
+    /* Add signal to pending */
+    sigaddset(&task->sighand->pending, sig);
+    
+    /* Handle SIGSTOP: transition to STOPPED state (not reaped) */
+    if (sig == SIGSTOP) {
+        atomic_store(&task->state, IOX_TASK_STOPPED);
+        atomic_store(&task->stopped, true);
+        atomic_store(&task->stopsig, SIGSTOP);
+    }
+    
+    /* Handle SIGCONT: transition back to RUNNING (not reaped) */
+    if (sig == SIGCONT) {
+        atomic_store(&task->state, IOX_TASK_RUNNING);
+        atomic_store(&task->stopped, false);
+        atomic_store(&task->continued, true);
+    }
+    
+    /* Handle terminating signals: mark for reap on wait (SIGKILL, SIGTERM, SIGINT) */
+    if (terminating) {
+        atomic_store(&task->signaled, true);
+        atomic_store(&task->termsig, sig);
+    }
+    
+    /* Notify parent if this child state is wait-visible */
+    int state_changed = (sig == SIGSTOP) || (sig == SIGCONT) || atomic_load(&task->signaled);
+    if (state_changed && task->parent) {
+        pthread_mutex_lock(&task->parent->lock);
+        if (task->parent->waiters > 0) {
+            pthread_cond_broadcast(&task->parent->wait_cond);
+        }
+        pthread_mutex_unlock(&task->parent->lock);
+    }
+    
+    /* Wake up this task if waiting */
+    if (task->waiters > 0) {
+        pthread_cond_broadcast(&task->wait_cond);
+    }
+}
+
 int iox_kill(pid_t pid, int sig) {
     if (sig < 0 || sig >= IOX_NSIG) {
         errno = EINVAL;
@@ -126,14 +170,9 @@ int iox_kill(pid_t pid, int sig) {
         return 0;
     }
     
-    /* Add signal to pending */
+    /* Apply signal with state transitions and notifications */
     pthread_mutex_lock(&task->lock);
-    sigaddset(&task->sighand->pending, sig);
-    
-    /* Wake up if waiting */
-    if (task->waiters > 0) {
-        pthread_cond_broadcast(&task->wait_cond);
-    }
+    __iox_apply_signal_to_task(task, sig);
     pthread_mutex_unlock(&task->lock);
     
     iox_task_free(task);
@@ -204,17 +243,12 @@ int iox_killpg(pid_t pgrp, int sig) {
         return 0;
     }
     
-    /* Deliver signal to each matched task */
+    /* Deliver signal to each matched task using shared helper */
     for (int i = 0; i < match_count; i++) {
         iox_task_t *task = matches[i];
         
         pthread_mutex_lock(&task->lock);
-        sigaddset(&task->sighand->pending, sig);
-        
-        /* Wake up if waiting */
-        if (task->waiters > 0) {
-            pthread_cond_broadcast(&task->wait_cond);
-        }
+        __iox_apply_signal_to_task(task, sig);
         pthread_mutex_unlock(&task->lock);
         
         iox_task_free(matches[i]);

@@ -99,7 +99,7 @@ extern "C" {
 }
 
 - (void)testSignalDelivery {
-    int result = iox_test_run_all("signal_kill|signal_int|signal_ign|signal_forbidden");
+    int result = iox_test_run_all("signal_");
     XCTAssertEqual(result, 0, @"iox signal delivery tests failed");
 }
 
@@ -146,6 +146,11 @@ extern "C" {
 - (void)testFDTable {
     int result = iox_test_run_all("fdtable");
     XCTAssertEqual(result, 0, @"iox FD table tests failed");
+}
+
+- (void)testSignalStopContinue {
+    int result = iox_test_run_all("stopcont_");
+    XCTAssertEqual(result, 0, @"iox STOP/CONTINUE signal tests failed");
 }
 
 @end

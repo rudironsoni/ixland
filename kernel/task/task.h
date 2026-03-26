@@ -92,6 +92,9 @@ struct iox_task {
     atomic_bool exited;
     atomic_bool signaled;
     atomic_int termsig;
+    atomic_bool stopped;
+    atomic_int stopsig;
+    atomic_bool continued;
     
     pthread_t thread;
     char comm[IOX_MAX_NAME];
