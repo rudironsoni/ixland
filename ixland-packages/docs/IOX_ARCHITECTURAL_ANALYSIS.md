@@ -1082,8 +1082,10 @@ if ! xcrun --sdk iphonesimulator --show-sdk-path >/dev/null 2>&1; then
     exit 1
 fi
 
-# Initialize submodules
-git submodule update --init --recursive
+# Initialize submodules (NOT NEEDED - this is now a monorepo)
+# git submodule update --init --recursive
+# Instead, use the monorepo root:
+# git clone https://github.com/rudironsoni/a-shell-next.git
 
 # Run doctor
 tools/doctor.sh

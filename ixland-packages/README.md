@@ -85,9 +85,9 @@ Not literal Linux kernel compatibility—rather, Linux-like userland behavior th
 ### Fresh Clone Setup
 
 ```bash
-# Clone with submodules
-git clone --recursive https://github.com/yourusername/iox.git
-cd iox
+# Clone the monorepo (no submodules needed)
+git clone https://github.com/rudironsoni/a-shell-next.git
+cd a-shell-next/ixland-packages
 
 # Bootstrap (checks prerequisites, configures)
 tools/bootstrap.sh
