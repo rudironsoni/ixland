@@ -31,7 +31,11 @@ a-Shellは現在、<a href="https://holzschu.github.io/a-Shell_iOS/">AppStoreで
 ## コンパイル方法
 
 プロジェクトを自分でコンパイルしたい場合は、以下の手順が必要です：
-* `git submodule update --init --recursive`でプロジェクト全体とそのサブモジュールをダウンロードします
+* プロジェクト全体をダウンロードします：
+  ```bash
+  git clone https://github.com/rudironsoni/a-shell-next.git
+  ```
+  No submodule initialization required. This code is now part of the monorepo.
 * `downloadFrameworks.sh`ですべてのxcFrameworksをダウンロードします
     * これにより、標準のAppleフレームワークがダウンロードされます（`xcfs/.build/artefacts/xcfs`にあり、チェックサム制御があります）。
     * Pythonフレームワークは多すぎて（2000以上）自動でダウンロードできません。プロジェクトの「Embed」ステップからそれらを削除するか、以下の手順でコンパイルすることができます：

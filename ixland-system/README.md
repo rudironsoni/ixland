@@ -91,9 +91,9 @@ Not literal Linux kernel compatibility—rather, Linux-like userland behavior th
 ### Fresh Clone Setup
 
 ```bash
-# Clone with submodules
-git clone --recursive https://github.com/yourusername/iox.git
-cd iox
+# Clone the monorepo (no submodules needed)
+git clone https://github.com/rudironsoni/a-shell-next.git
+cd a-shell-next/ixland-system
 
 # Bootstrap (checks prerequisites, configures)
 tools/bootstrap.sh
@@ -274,4 +274,4 @@ See `docs/IOX_ARCHITECTURAL_ANALYSIS.md` for detailed implementation order.
 
 ---
 
-**Primary Rule**: `deps/wamr/` stays pristine, app customers access WAMR only through `iox_wamr_*`
+> **Note**: WAMR integration is handled within the monorepo. See the root `README.md` for current setup instructions. This component is now tracked directly in the monorepo.
