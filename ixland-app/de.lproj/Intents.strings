@@ -1,0 +1,118 @@
+"0MCBCc" = "${message}";
+
+"0ltuRO-Ev6eBG" = "There are ${count} options matching ‘default (depends on commands)’.";
+
+"0ltuRO-EzhjO7" = "There are ${count} options matching ‘yes’.";
+
+"0ltuRO-N556Rd" = "There are ${count} options matching ‘default (depend on commands)’.";
+
+"0ltuRO-i2Vf9p" = "There are ${count} options matching ‘no (run in extension)’.";
+
+"2PGaCe" = "Nach einem Fehler fortfahren";
+
+"2fJ9cq" = "wahr";
+
+"2iOcKE" = "Datei";
+
+"41sJlD" = "Shell Befehl ausführen";
+
+"4yCt8L-Ev6eBG" = "Just to confirm, you wanted ‘default (depends on commands)’?";
+
+"4yCt8L-EzhjO7" = "Just to confirm, you wanted ‘yes’?";
+
+"4yCt8L-N556Rd" = "Just to confirm, you wanted ‘default (depend on commands)’?";
+
+"4yCt8L-i2Vf9p" = "Just to confirm, you wanted ‘no (run in extension)’?";
+
+"58h7pK" = "${file}";
+
+"7wS9Ta" = "Datei ablegen";
+
+"8AtaM0" = "Erhalte Datei von a-Shell";
+
+"8PiF49" = "${property}";
+
+"8eLC56" = "${property}";
+
+"94QBWm" = "Datei erfolgreich erstellt";
+
+"9n3JUI" = "falsch";
+
+"BKUcxZ" = "Erhalte ${fileName} von a-Shell";
+
+"BxvHYF" = "Fehlercode";
+
+"CQUSHQ" = "Dateiname?";
+
+"ClThF5" = "Ausgabe";
+
+"Ev6eBG" = "Standard (abhängig von Befehlen)";
+
+"EzhjO7" = "ja";
+
+"J7zfzK" = "Datei erfolgreich erstellt";
+
+"JJgpB5" = "Die App öffnen um die Befehle auszuführen?";
+
+"KqS0gJ" = "Shell Befehl ausführen";
+
+"N556Rd" = "Standard (abhängig von Befehlen)";
+
+"NJGW0j" = "Der Befehl ist mit folgendem Fehlercode fehlgehschlagen ${property1}. Ausgabe war: ${property}";
+
+"OmjmQg" = "Datei";
+
+"PJgP7x" = "Fehler";
+
+"SMk14K" = "Fehlercode ${property1}. ${property}";
+
+"UvKwrp" = "Eine Datei in a-Shell sandbox erstellen";
+
+"W4gWBJ" = "Datei konnte nicht erstellt werden: ${error}";
+
+"Y7KKwU" = "Shell Befehle";
+
+"YxbbRt" = "${command} ausführen";
+
+"a2n63A" = "${file} nach a-Shell kopieren";
+
+"aRe2H0" = "Vorhandene Datei überschreiben?";
+
+"cELXqS" = "Vorhandene Datei überschreiben ${file}?";
+
+"d8qG96" = "Soll nach einem Fehler fortgesetzt werden?";
+
+"epnx1H" = "falsch";
+
+"fyMs4g" = "${message}";
+
+"i2Vf9p" = "Nein (in Erweiterung ausführen)";
+
+"iokfkK" = "Datei nach a-Shell kopieren";
+
+"isZTIL" = "Kopiere ${file} nach a-Shell";
+
+"mT8e9Y" = "Datei Name";
+
+"n11Zfh" = "Erhalte ${fileName} von a-Shell";
+
+"pHBUcg" = "Datei konnte nicht erstellt werden: ${error}";
+
+"qDIloo" = "FensterÖffnen";
+
+"rz0Hmn" = "Befehl ausführen";
+
+"tIMaMc" = "Kopiere ${file} nach a-Shell";
+
+"uW0NxR" = "Nachricht";
+
+"umwm1q" = "${command} ausführen";
+
+"vk5k4v" = "Führe folgenden Befehl in a-Shell aus";
+
+"wXdWw9" = "${file}";
+
+"xYZuUZ" = "wahr";
+
+"xrhJta" = "Datei erhalten";
+

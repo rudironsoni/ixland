@@ -9,9 +9,9 @@
 ## Executive Summary
 
 a-Shell Next brings a complete Linux-like environment to iOS through:
-- **a-shell-kernel**: Thread-based process simulation (no real fork/exec on iOS)
-- **a-shell-distro**: Session management and command dispatch
-- **a-shell-packages**: Termux-style package build system
+- **ixland-system**: Thread-based process simulation (no real fork/exec on iOS)
+- **a-shell-distro**: Session management and command dispatch  
+- **ixland-packages**: Termux-style package build system
 - **WAMR**: WebAssembly runtime for downloadable packages
 - **Python-Apple-Support**: Native Python with custom pip index for iOS wheels
 
@@ -21,11 +21,11 @@ a-Shell Next brings a complete Linux-like environment to iOS through:
 
 ```
 a-shell-next/
-├── a-shell-kernel/          # Syscall simulation layer (C)
+├── ixland-system/           # Syscall simulation layer (C)
 │   ├── a_shell_kernel.h     # Main kernel header
 │   ├── a_shell_system.h     # Syscall macros for packages
 │   ├── a_shell_syscalls.c   # Syscall implementations
-│   └── wamr/                # WAMR WASM runtime (submodule)
+│   └── wamr/                # WAMR WASM runtime
 ├── a-shell-distro/          # Distribution/session management (Swift)
 │   ├── Sources/
 │   │   ├── Session/         # Session management
@@ -101,15 +101,10 @@ Provides compile-time macro redirects:
 Used via `-include` flag in package builds (not manual inclusion).
 
 ### 1.5 Integrate WAMR
-**Status**: Pending  
-**Action**: Add WAMR submodule
-```bash
-git submodule add https://github.com/bytecodealliance/wasm-micro-runtime a-shell-kernel/wamr
-cd a-shell-kernel/wamr
-mkdir build && cd build
-cmake .. -DWAMR_BUILD_PLATFORM=ios -DWAMR_BUILD_AOT=1
-make
-```
+**Status**: Migrated to monorepo  
+**Note**: The repository structure has changed. WAMR integration is now handled within the `ixland-system` component as part of the monorepo. See root `README.md` for current setup instructions.
+
+**Historical Note**: This section previously described adding WAMR as a submodule. Submodules are no longer used in this project.
 
 ---
 

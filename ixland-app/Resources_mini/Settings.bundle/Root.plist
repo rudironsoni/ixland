@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>StringsTable</key>
+	<string>Root</string>
+	<key>PreferenceSpecifiers</key>
+	<array>
+		<dict>
+			<key>Type</key>
+			<string>PSMultiValueSpecifier</string>
+			<key>Title</key>
+			<string>Open files in Vim:</string>
+			<key>Key</key>
+			<string>VimOpenFile</string>
+			<key>DefaultValue</key>
+			<string>window</string>
+			<key>Titles</key>
+			<array>
+				<string>New window</string>
+				<string>New tab</string>
+				<string>New buffer</string>
+			</array>
+			<key>Values</key>
+			<array>
+				<string>window</string>
+				<string>tab</string>
+				<string>buffer</string>
+			</array>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Caps-Lock = Escape</string>
+			<key>Key</key>
+			<string>escape_preference</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>zshmarks-style bookmarks (jump, bookmark...)</string>
+			<key>Key</key>
+			<string>zshmarks</string>
+			<key>DefaultValue</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>bashmarks-style bookmarks (l, s, g...)</string>
+			<key>Key</key>
+			<string>bashmarks</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Show toolbar (Esc, Ctrl, Tab, arrows)</string>
+			<key>Key</key>
+			<string>show_toolbar</string>
+			<key>DefaultValue</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Use the iPadOS toolbar</string>
+			<key>Key</key>
+			<string>system_toolbar</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSMultiValueSpecifier</string>
+			<key>Title</key>
+			<string>Toolbar color:</string>
+			<key>Key</key>
+			<string>toolbar_color</string>
+			<key>DefaultValue</key>
+			<string>screen</string>
+			<key>Titles</key>
+			<array>
+				<string>system settings</string>
+				<string>depends on screen color (default)</string>
+				<string>dark mode</string>
+				<string>light mode</string>
+			</array>
+			<key>Values</key>
+			<array>
+				<string>system</string>
+				<string>screen</string>
+				<string>dark</string>
+				<string>light</string>
+			</array>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSMultiValueSpecifier</string>
+			<key>Title</key>
+			<string>Screen space:</string>
+			<key>Key</key>
+			<string>screen_space</string>
+			<key>DefaultValue</key>
+			<string>default</string>
+			<key>Titles</key>
+			<array>
+				<string>Safer</string>
+				<string>Default</string>
+				<string>Maximum</string>
+			</array>
+			<key>Values</key>
+			<array>
+				<string>safe</string>
+				<string>default</string>
+				<string>max</string>
+			</array>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Keep screen content between sessions</string>
+			<key>Key</key>
+			<string>keep_content</string>
+			<key>DefaultValue</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Restart Vim or dash after closing a-Shell</string>
+			<key>Key</key>
+			<string>restart_vim</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
+	</array>
+</dict>
+</plist>
