@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build a-shell-kernel for iOS
+# Build ixland-system for iOS
 # Usage: ./scripts/build-kernel.sh [arm64|simulator|all]
 
 set -e
@@ -12,7 +12,7 @@ BUILD_DIR="$PROJECT_ROOT/build"
 ARCH=${1:-all}
 
 echo "=========================================="
-echo "Building a-shell-kernel"
+echo "Building ixland-system"
 echo "Architecture: $ARCH"
 echo "=========================================="
 
@@ -25,7 +25,7 @@ fi
 # Create build directory
 mkdir -p "$BUILD_DIR"
 
-cd "$PROJECT_ROOT/a-shell-kernel"
+cd "$PROJECT_ROOT/ixland-system"
 
 # Build for iOS device (arm64)
 if [[ "$ARCH" == "arm64" || "$ARCH" == "all" ]]; then
@@ -69,8 +69,8 @@ if [[ "$ARCH" == "all" ]]; then
         xcodebuild -create-xcframework \
             -framework "$IOS_FRAMEWORK" \
             -framework "$SIM_FRAMEWORK" \
-            -output "$BUILD_DIR/a-shell-kernel.xcframework"
-        echo "XCFramework created at: $BUILD_DIR/a-shell-kernel.xcframework"
+            -output "$BUILD_DIR/ixland-system.xcframework"
+        echo "XCFramework created at: $BUILD_DIR/ixland-system.xcframework"
     else
         echo "WARNING: Frameworks not found. Build may have failed."
         echo "iOS Framework: $IOS_FRAMEWORK"
