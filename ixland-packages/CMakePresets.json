@@ -1,0 +1,23 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "ios-simulator-debug",
+            "generator": "Xcode",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_SYSTEM_NAME": "iOS",
+                "CMAKE_OSX_SYSROOT": "iphonesimulator",
+                "CMAKE_OSX_DEPLOYMENT_TARGET": "16.0",
+                "CMAKE_OSX_ARCHITECTURES": "arm64"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "ios-simulator-debug",
+            "configurePreset": "ios-simulator-debug",
+            "configuration": "Debug"
+        }
+    ]
+}
