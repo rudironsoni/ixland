@@ -1,10 +1,25 @@
 # ixland-libc
 
-This directory is reserved for the future libc and ABI split out of `ixland-system`.
+C library and ABI boundary for iXland.
 
-No deep split is performed in this migration. The kernel code remains in `ixland-system/` for now.
+## Status
 
-This boundary will eventually contain:
+**Not yet fully extracted.** This directory is the emerging boundary for public libc/ABI material.
+
+## First Extraction Target
+
+The first extraction from `ixland-system` will include:
+- Public headers and ABI-facing material
+- POSIX syscall interface definitions
+- User-facing libc headers
+
+## What Stays in ixland-system
+
+Runtime and kernel policy remains in `ixland-system` for now. Extraction is narrow and incremental.
+
+## Future Contents
+
+When extraction is complete, this boundary will contain:
 - POSIX compatibility layer
 - System call interface definitions
 - User-facing libc headers and implementations

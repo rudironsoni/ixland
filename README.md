@@ -1,24 +1,27 @@
-# a-shell-next
+# ixland
 
-This repository is now the monorepo for the a-shell project.
+This repository is the monorepo for iXland, a Linux-like environment for iOS.
 
 ## Repository Structure
 
 This monorepo contains:
-- `ixland-app/` - iOS terminal application (imported from a-shell-app with history preserved)
-- `ixland-system/` - Core kernel/system layer (imported from a-shell-kernel with history preserved)
-- `ixland-packages/` - Package build system (imported from a-shell-packages with history preserved)
-- `ixland-libc/` - C library boundary (skeletal, for future split)
-- `ixland-wasm/` - WebAssembly boundaries (skeletal, contains ixland-wasm-engine, ixland-wasm-host, ixland-wasm-wasi)
-- `ixland-toolchain/` - Toolchain boundary (skeletal, for future toolchain integration)
+- `ixland-app/` - iOS terminal application
+- `ixland-system/` - Core kernel/system layer with the current implementation
+- `ixland-packages/` - Package build system and distribution
+- `ixland-libc/` - C library boundary (emerging; contains public headers and ABI-facing material as they are extracted)
+- `ixland-wasm/` - WebAssembly boundaries (neutral container)
+  - `ixland-wasm-engine/` - Engine abstraction layer
+  - `ixland-wasm-host/` - Host contract between guest runtimes and iXland
+  - `ixland-wasm-wasi/` - WASI guest ABI policy and conformance
+- `ixland-toolchain/` - Toolchain integration boundary
 
 ## Setup
 
 Submodules are no longer used. Use the monorepo root for checkout and build.
 
 ```bash
-git clone git@github.com:rudironsoni/a-shell-next.git
-cd a-shell-next
+git clone git@github.com:rudironsoni/ixland.git
+cd ixland
 # No submodule initialization required
 ```
 
@@ -30,3 +33,9 @@ See individual component READMEs for specific build instructions.
 ## CI
 
 CI configuration lives in `.github/workflows/`.
+
+## Current Reality
+
+Most implementation still lives under `ixland-system`. The `ixland-libc` and `ixland-wasm` boundaries are currently forming areas for future extraction, not yet full extracted implementations.
+
+See `docs/ARCHITECTURE.md` for the canonical architecture documentation and `docs/BOUNDARIES.md` for boundary definitions.

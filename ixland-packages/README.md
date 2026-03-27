@@ -4,7 +4,7 @@ Package build system and distribution for the iXland environment.
 
 ## Overview
 
-This directory contains the package management infrastructure for a-shell, imported from `rudironsoni/a-shell-packages` with full Git history preserved.
+This directory contains the package management infrastructure for iXland, providing Termux-style build recipes for native XCFrameworks and future WASM packages.
 
 ## Contents
 
@@ -16,8 +16,8 @@ This directory contains the package management infrastructure for a-shell, impor
 
 ## Build System
 
-Package builds are integrated with the monorepo's CMake-based build system. See the root `README.md` for build instructions.
+Package builds are integrated with the monorepo's CMake-based build system. See the root `README.md` and `docs/ARCHITECTURE.md` for build instructions.
 
-## Note
+## Compiled Artifacts
 
-This component now lives inside the `a-shell-next` monorepo. Do not run `git submodule update --init --recursive`. Use the monorepo root checkout and see the root `README.md` for current setup and build instructions.
+Future compiled Wasm artifacts will be managed as a package concern within this component.
