@@ -79,6 +79,7 @@ set(IOX_FS_SOURCES
 # Runtime sources
 set(IOX_RUNTIME_SOURCES
     runtime/native/registry.c
+    runtime/wasi/wasm_adapter.c
 )
 
 # Combined sources
