@@ -1,0 +1,87 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "default",
+      "hidden": true,
+      "cacheVariables": {
+        "IXLAND_BUILD_LIBC": "ON",
+        "IXLAND_BUILD_SYSTEM": "ON",
+        "IXLAND_BUILD_WASM": "ON",
+        "IXLAND_BUILD_PACKAGES": "OFF",
+        "IXLAND_BUILD_TOOLCHAIN": "OFF",
+        "IXLAND_BUILD_TESTS": "ON"
+      }
+    },
+    {
+      "name": "ios-simulator",
+      "displayName": "iOS Simulator (arm64)",
+      "description": "Build for iOS Simulator with all core components",
+      "inherits": "default",
+      "generator": "Xcode",
+      "toolchainFile": "${sourceDir}/ixland-toolchain/cmake/ixland-ios-simulator.cmake",
+      "cacheVariables": {
+        "CMAKE_OSX_SYSROOT": "iphonesimulator",
+        "CMAKE_OSX_ARCHITECTURES": "arm64"
+      }
+    },
+    {
+      "name": "ios-device",
+      "displayName": "iOS Device (arm64)",
+      "description": "Build for iOS Device with all core components",
+      "inherits": "default",
+      "generator": "Xcode",
+      "toolchainFile": "${sourceDir}/ixland-toolchain/cmake/ixland-ios-device.cmake",
+      "cacheVariables": {
+        "CMAKE_OSX_SYSROOT": "iphoneos",
+        "CMAKE_OSX_ARCHITECTURES": "arm64"
+      }
+    },
+    {
+      "name": "local-dev",
+      "displayName": "Local Development",
+      "description": "Build only libc and wasm contracts (no iOS-specific components)",
+      "inherits": "default",
+      "cacheVariables": {
+        "IXLAND_BUILD_SYSTEM": "OFF",
+        "IXLAND_BUILD_PACKAGES": "ON",
+        "IXLAND_BUILD_TESTS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "ios-simulator",
+      "configurePreset": "ios-simulator"
+    },
+    {
+      "name": "ios-device",
+      "configurePreset": "ios-device"
+    },
+    {
+      "name": "local-dev",
+      "configurePreset": "local-dev"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "ios-simulator",
+      "configurePreset": "ios-simulator",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "local-dev",
+      "configurePreset": "local-dev",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}
