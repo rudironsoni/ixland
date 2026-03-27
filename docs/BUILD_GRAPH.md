@@ -33,12 +33,13 @@ Future: `ixland-packages` and `ixland-toolchain` will join when they have real C
 ### ixland-libc-headers
 
 - **Type**: `INTERFACE` library
-- **Provides**: Public `iox` headers at `ixland-libc/include/`
+- **Provides**: Public `iox` headers at `ixland-libc/include/iox/` and POSIX headers at `ixland-libc/include/`
 - **Consumers**: `ixland-system/iox-core`, `ixland-libc-core`
 - **Usage**:
   ```cmake
   target_link_libraries(my_target PUBLIC ixland-libc-headers)
   ```
+- **Headers**: `iox/*.h`, `grp.h`, `pwd.h`
 
 ## ixland-libc-core
 
