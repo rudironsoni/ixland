@@ -1,11 +1,11 @@
 /*
- * a_shell_kernel.h - Main kernel umbrella header
+ * ixland_kernel.h - Main kernel umbrella header
  *
- * Includes all a-shell-kernel syscall headers
+ * Includes all ixland kernel syscall headers
  */
 
-#ifndef A_SHELL_KERNEL_H
-#define A_SHELL_KERNEL_H
+#ifndef IXLAND_KERNEL_H
+#define IXLAND_KERNEL_H
 
 /* ============================================================================
  * System headers (for types, constants, structs)
@@ -53,11 +53,11 @@
  * Version Information
  * ============================================================================ */
 
-#define A_SHELL_KERNEL_VERSION_MAJOR 1
-#define A_SHELL_KERNEL_VERSION_MINOR 0
-#define A_SHELL_KERNEL_VERSION_PATCH 0
+#define IXLAND_KERNEL_VERSION_MAJOR 1
+#define IXLAND_KERNEL_VERSION_MINOR 0
+#define IXLAND_KERNEL_VERSION_PATCH 0
 
-#define A_SHELL_KERNEL_VERSION "1.0.0"
+#define IXLAND_KERNEL_VERSION "1.0.0"
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,12 +67,12 @@ extern "C" {
  * Kernel Initialization
  * ============================================================================ */
 
-extern int a_shell_kernel_init(const char *prefix);
-extern const char *a_shell_kernel_get_prefix(void);
-extern int a_shell_kernel_is_initialized(void);
+extern int ixland_kernel_init(const char *prefix);
+extern const char *ixland_kernel_get_prefix(void);
+extern int ixland_kernel_is_initialized(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* A_SHELL_KERNEL_H */
+#endif /* IXLAND_KERNEL_H */

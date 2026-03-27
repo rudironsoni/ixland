@@ -1,6 +1,6 @@
 //
-//  a_shell_process.c
-//  a-shell-kernel
+//  ixland_process.c
+//  ixland
 //
 //  Extended process table with parent/child tracking
 //
@@ -15,12 +15,12 @@
 #include <signal.h>
 #include <time.h>
 
-#include "a_shell_kernel.h"
+#include "ixland_kernel.h"
 
 // Extended process table: 1024 processes (up from 128)
-#define A_SHELL_MAX_PROCESSES 1024
+#define IXLAND_MAX_PROCESSES 1024
 
-typedef struct a_shell_process {
+typedef struct ixland_process {
     pid_t pid;                      // Virtual process ID
     pid_t ppid;                     // Parent process ID
     pthread_t thread;               // Thread handle
@@ -42,20 +42,20 @@ typedef struct a_shell_process {
     // Cleanup tracking
     volatile int marked_for_cleanup;
     pthread_mutex_t cleanup_lock;
-} a_shell_process_t;
+} ixland_process_t;
 
 // Process table
-static a_shell_process_t *process_table[A_SHELL_MAX_PROCESSES];
+static ixland_process_t *process_table[IXLAND_MAX_PROCESSES];
 static pthread_mutex_t process_table_lock = PTHREAD_MUTEX_INITIALIZER;
 static pid_t next_vpid = 1000;      // Start at 1000 to avoid conflicts
 static _Thread_local pid_t current_vpid = 0;
 
 // Process limit
-static int process_limit = A_SHELL_MAX_PROCESSES;
+static int process_limit = IXLAND_MAX_PROCESSES;
 
 // Initialize process table entry
-static a_shell_process_t* alloc_process_entry(void) {
-    a_shell_process_t *proc = calloc(1, sizeof(a_shell_process_t));
+static ixland_process_t* alloc_process_entry(void) {
+    ixland_process_t *proc = calloc(1, sizeof(ixland_process_t));
     if (proc) {
         pthread_mutex_init(&proc->cleanup_lock, NULL);
         proc->running = 0;
@@ -65,12 +65,12 @@ static a_shell_process_t* alloc_process_entry(void) {
 }
 
 // Find process by PID
-a_shell_process_t* find_process(pid_t pid) {
-    if (pid < 0 || pid >= A_SHELL_MAX_PROCESSES) {
+ixland_process_t* find_process(pid_t pid) {
+    if (pid < 0 || pid >= IXLAND_MAX_PROCESSES) {
         return NULL;
     }
     pthread_mutex_lock(&process_table_lock);
-    a_shell_process_t *proc = process_table[pid % A_SHELL_MAX_PROCESSES];
+    ixland_process_t *proc = process_table[pid % IXLAND_MAX_PROCESSES];
     // Verify PID matches (handles hash collisions)
     if (proc && proc->pid != pid) {
         proc = NULL;
@@ -80,16 +80,16 @@ a_shell_process_t* find_process(pid_t pid) {
 }
 
 // Allocate new virtual PID
-pid_t a_shell_vfork(void) {
+pid_t ixland_vfork(void) {
     pthread_mutex_lock(&process_table_lock);
     
     // Find available slot
     pid_t vpid = next_vpid++;
-    int slot = vpid % A_SHELL_MAX_PROCESSES;
+    int slot = vpid % IXLAND_MAX_PROCESSES;
     
     // Clean up old entry if exists
     if (process_table[slot]) {
-        a_shell_process_t *old = process_table[slot];
+        ixland_process_t *old = process_table[slot];
         if (old->marked_for_cleanup) {
             free(old);
             process_table[slot] = NULL;
@@ -97,7 +97,7 @@ pid_t a_shell_vfork(void) {
     }
     
     // Allocate new process entry
-    a_shell_process_t *proc = alloc_process_entry();
+    ixland_process_t *proc = alloc_process_entry();
     if (!proc) {
         pthread_mutex_unlock(&process_table_lock);
         errno = EAGAIN;
@@ -118,16 +118,16 @@ pid_t a_shell_vfork(void) {
     return vpid;
 }
 
-/* Note: a_shell_fork is defined in libc_replacement.c */
+/* Note: ixland_fork is defined in libc_replacement.c */
 
 // Get current PID
-pid_t a_shell_getpid(void) {
+pid_t ixland_getpid(void) {
     return current_vpid ? current_vpid : getpid();
 }
 
 // Get parent PID
-pid_t a_shell_getppid(void) {
-    a_shell_process_t *proc = find_process(current_vpid);
+pid_t ixland_getppid(void) {
+    ixland_process_t *proc = find_process(current_vpid);
     if (proc) {
         return proc->ppid;
     }
@@ -135,7 +135,7 @@ pid_t a_shell_getppid(void) {
 }
 
 // Wait for child process
-pid_t a_shell_waitpid(pid_t pid, int *stat_loc, int options) {
+pid_t ixland_waitpid(pid_t pid, int *stat_loc, int options) {
     if (pid < -1) {
         // Wait for any child in process group
         // TODO: Implement process groups
@@ -150,8 +150,8 @@ pid_t a_shell_waitpid(pid_t pid, int *stat_loc, int options) {
         while (1) {
             // Search for children of current process
             int found = 0;
-            for (int i = 0; i < A_SHELL_MAX_PROCESSES; i++) {
-                a_shell_process_t *proc = process_table[i];
+            for (int i = 0; i < IXLAND_MAX_PROCESSES; i++) {
+                ixland_process_t *proc = process_table[i];
                 if (proc && proc->ppid == current_vpid && !proc->running) {
                     // Found exited child
                     if (stat_loc) {
@@ -180,7 +180,7 @@ pid_t a_shell_waitpid(pid_t pid, int *stat_loc, int options) {
     }
     
     // Wait for specific PID
-    a_shell_process_t *proc = find_process(pid);
+    ixland_process_t *proc = find_process(pid);
     if (!proc) {
         errno = ECHILD;
         return -1;
@@ -208,13 +208,13 @@ pid_t a_shell_waitpid(pid_t pid, int *stat_loc, int options) {
 }
 
 // Simple wait (wait for any child)
-pid_t a_shell_wait(int *stat_loc) {
-    return a_shell_waitpid(-1, stat_loc, 0);
+pid_t ixland_wait(int *stat_loc) {
+    return ixland_waitpid(-1, stat_loc, 0);
 }
 
 // Exit process
-void a_shell_exit(int status) {
-    a_shell_process_t *proc = find_process(current_vpid);
+void ixland_exit(int status) {
+    ixland_process_t *proc = find_process(current_vpid);
     if (proc) {
         pthread_mutex_lock(&proc->cleanup_lock);
         proc->status = status;
@@ -233,8 +233,8 @@ static void* cleanup_thread_func(void* arg) {
         
         pthread_mutex_lock(&process_table_lock);
         
-        for (int i = 0; i < A_SHELL_MAX_PROCESSES; i++) {
-            a_shell_process_t *proc = process_table[i];
+        for (int i = 0; i < IXLAND_MAX_PROCESSES; i++) {
+            ixland_process_t *proc = process_table[i];
             if (proc && proc->marked_for_cleanup && !proc->running) {
                 // Free environment
                 if (proc->environment) {
@@ -268,13 +268,13 @@ static void init_cleanup_thread(void) {
 }
 
 // Signal handling stubs (for future implementation)
-sig_t a_shell_signal(int sig, sig_t func) {
+sig_t ixland_signal(int sig, sig_t func) {
     // TODO: Implement signal handling
     return SIG_DFL;
 }
 
-int a_shell_killpid(pid_t pid, int sig) {
-    a_shell_process_t *proc = find_process(pid);
+int ixland_killpid(pid_t pid, int sig) {
+    ixland_process_t *proc = find_process(pid);
     if (!proc) {
         errno = ESRCH;
         return -1;
@@ -285,17 +285,17 @@ int a_shell_killpid(pid_t pid, int sig) {
 }
 
 // Process tree helpers
-pid_t a_shell_getpgrp(void) {
+pid_t ixland_getpgrp(void) {
     // TODO: Implement process groups
-    return a_shell_getpid();
+    return ixland_getpid();
 }
 
-int a_shell_setpgid(pid_t pid, pid_t pgid) {
+int ixland_setpgid(pid_t pid, pid_t pgid) {
     // TODO: Implement process groups
     return 0;
 }
 
-pid_t a_shell_setsid(void) {
+pid_t ixland_setsid(void) {
     // TODO: Implement sessions
-    return a_shell_getpid();
+    return ixland_getpid();
 }

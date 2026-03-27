@@ -18,11 +18,11 @@ a_shell_pkg_configure() {
         --static \
         --libdir="$A_SHELL_PREFIX/lib" \
         --includedir="$A_SHELL_PREFIX/include" \
-        || a_shell_error "Configure failed"
+        || ixland_error "Configure failed"
 }
 
 a_shell_pkg_make() {
-    make -j$(sysctl -n hw.ncpu) libz.a || a_shell_error "Build failed"
+    make -j$(sysctl -n hw.ncpu) libz.a || ixland_error "Build failed"
 }
 
 a_shell_pkg_install() {

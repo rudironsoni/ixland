@@ -22,15 +22,15 @@ a_shell_pkg_configure() {
         no-shared \
         no-tests \
         no-apps \
-        || a_shell_error "Configure failed"
+        || ixland_error "Configure failed"
 }
 
 a_shell_pkg_make() {
-    make -j$(sysctl -n hw.ncpu) || a_shell_error "Build failed"
+    make -j$(sysctl -n hw.ncpu) || ixland_error "Build failed"
 }
 
 a_shell_pkg_install() {
-    make DESTDIR="$A_SHELL_PKG_STAGING" install_sw || a_shell_error "Install failed"
+    make DESTDIR="$A_SHELL_PKG_STAGING" install_sw || ixland_error "Install failed"
     
     # Create pkg-config files
     mkdir -p "$A_SHELL_PKG_STAGING$A_SHELL_PREFIX/lib/pkgconfig"

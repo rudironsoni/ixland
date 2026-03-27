@@ -255,7 +255,7 @@ a_shell_pkg_configure() {
     ./configure \
         --prefix="$A_SHELL_PREFIX" \
         --host="arm-apple-darwin" \
-        || a_shell_error "Configure failed"
+        || ixland_error "Configure failed"
 }
 
 a_shell_pkg_make() {
@@ -407,16 +407,16 @@ a_shell_pkg_configure() {
         --enable-static \
         --without-dpkg \
         --without-apt \
-        || a_shell_error "Configure failed"
+        || ixland_error "Configure failed"
 }
 
 a_shell_pkg_make() {
-    make -j$(sysctl -n hw.ncpu) || a_shell_error "Build failed"
+    make -j$(sysctl -n hw.ncpu) || ixland_error "Build failed"
 }
 
 a_shell_pkg_install() {
     make DESTDIR="$A_SHELL_PKG_STAGING" install \
-        || a_shell_error "Install failed"
+        || ixland_error "Install failed"
 }
 ```
 

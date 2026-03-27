@@ -1,9 +1,9 @@
-// a_shell_session_tests.m
+// ixland_session_tests.m
 // Unit tests for session management
 // XNU-style: Proper C pointer assertions
 
 #import <XCTest/XCTest.h>
-#import "a_shell_system/a_shell_system.h"
+#import "ixland_system/ixland_system.h"
 
 @interface AShellSessionTests : XCTestCase {
     void* _testSession;

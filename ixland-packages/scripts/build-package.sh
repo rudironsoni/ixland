@@ -90,7 +90,7 @@ build_single_target() {
     # Find package build script
     PKG_DIR="$SCRIPT_DIR/../packages/core/$PKG_NAME"
     if [ ! -f "$PKG_DIR/build.sh" ]; then
-        a_shell_error "Package $PKG_NAME not found at $PKG_DIR/build.sh"
+        ixland_error "Package $PKG_NAME not found at $PKG_DIR/build.sh"
     fi
     
     # Set paths based on target
@@ -118,13 +118,13 @@ build_single_target() {
     
     # Verify checksum
     if [ -n "$A_SHELL_PKG_SHA256" ]; then
-        echo "$A_SHELL_PKG_SHA256  $(basename $A_SHELL_PKG_SRCURL)" | shasum -a 256 -c - || a_shell_error "Checksum verification failed"
+        echo "$A_SHELL_PKG_SHA256  $(basename $A_SHELL_PKG_SRCURL)" | shasum -a 256 -c - || ixland_error "Checksum verification failed"
     fi
     
     # Extract
     if [ ! -d "$A_SHELL_PKG_NAME-$A_SHELL_PKG_VERSION" ] && [ ! -d "$(basename $A_SHELL_PKG_SRCURL .tar.gz)" ] && [ ! -d "$(basename $A_SHELL_PKG_SRCURL .tar.xz)" ]; then
         a_shell_step "Extracting..."
-        tar -xzf "$(basename $A_SHELL_PKG_SRCURL)" 2>/dev/null || tar -xJf "$(basename $A_SHELL_PKG_SRCURL)" 2>/dev/null || a_shell_error "Failed to extract"
+        tar -xzf "$(basename $A_SHELL_PKG_SRCURL)" 2>/dev/null || tar -xJf "$(basename $A_SHELL_PKG_SRCURL)" 2>/dev/null || ixland_error "Failed to extract"
     fi
     
     # Find extracted directory
@@ -138,7 +138,7 @@ build_single_target() {
     fi
     
     if [ ! -d "$EXTRACT_DIR" ]; then
-        a_shell_error "Could not find extracted directory"
+        ixland_error "Could not find extracted directory"
     fi
     
     cd "$EXTRACT_DIR"

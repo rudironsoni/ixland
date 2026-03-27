@@ -34,7 +34,7 @@ a_shell_pkg_configure() {
         --disable-pthreads \
         --disable-silent-rules \
         ac_cv_c_c99_format=yes \
-        || a_shell_error "Configure failed"
+        || ixland_error "Configure failed"
 }
 
 a_shell_pkg_make() {
@@ -45,7 +45,7 @@ a_shell_pkg_make() {
         NO_PERL=1 \
         NO_CURL=1 \
         NO_SVN_TESTS=1 \
-        || a_shell_error "Build failed"
+        || ixland_error "Build failed"
 }
 
 a_shell_pkg_install() {
@@ -54,5 +54,5 @@ a_shell_pkg_install() {
         NO_PYTHON=1 \
         NO_PERL=1 \
         NO_CURL=1 \
-        || a_shell_error "Install failed"
+        || ixland_error "Install failed"
 }
