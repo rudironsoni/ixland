@@ -37,6 +37,7 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -DNDEBUG")
     include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/ixland-libc/include
         ${CMAKE_CURRENT_SOURCE_DIR}/kernel/task
         ${CMAKE_CURRENT_SOURCE_DIR}/kernel/signal
         ${CMAKE_CURRENT_SOURCE_DIR}/kernel/exec
@@ -103,13 +104,13 @@ if(IOX_INSTALL)
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
     )
-    
-    install(DIRECTORY include/iox DESTINATION include)
-    install(DIRECTORY kernel/ DESTINATION include/iox/kernel 
+
+    # Note: Public iox headers are now installed from ixland-libc
+    install(DIRECTORY kernel/ DESTINATION include/iox/kernel
         FILES_MATCHING PATTERN "*.h")
-    install(DIRECTORY fs/ DESTINATION include/iox/fs 
+    install(DIRECTORY fs/ DESTINATION include/iox/fs
         FILES_MATCHING PATTERN "*.h")
-    install(DIRECTORY drivers/ DESTINATION include/iox/drivers 
+    install(DIRECTORY drivers/ DESTINATION include/iox/drivers
         FILES_MATCHING PATTERN "*.h")
 endif()
 
