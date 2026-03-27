@@ -24,6 +24,7 @@ option(IXLAND_BUILD_LIBC "Build ixland-libc component" ON)
 option(IXLAND_BUILD_SYSTEM "Build ixland-system component" ON)
 option(IXLAND_BUILD_WASM "Build ixland-wasm component" ON)
 option(IXLAND_BUILD_PACKAGES "Build ixland-packages component" OFF)
+option(IXLAND_BUILD_TOOLCHAIN "Build ixland-toolchain component" OFF)
 option(IXLAND_BUILD_TESTS "Build tests" ON)
 
 # Root build directory for all components
@@ -44,11 +45,15 @@ if(IXLAND_BUILD_WASM)
     add_subdirectory(ixland-wasm)
 endif()
 
-# Component: ixland-packages (placeholder)
-# Future: add_subdirectory(ixland-packages) when CMake build is added
+# Component: ixland-packages
+if(IXLAND_BUILD_PACKAGES)
+    add_subdirectory(ixland-packages)
+endif()
 
-# Component: ixland-toolchain (placeholder)
-# Future: add_subdirectory(ixland-toolchain) when populated
+# Component: ixland-toolchain
+if(IXLAND_BUILD_TOOLCHAIN)
+    add_subdirectory(ixland-toolchain)
+endif()
 
 # Summary
 message(STATUS "")
