@@ -41,6 +41,20 @@ This component provides:
 
 Include this component to get access to public iox headers and utilities.
 
+## Local Testing
+
+Build and run the smoke tests:
+
+```bash
+mkdir build && cd build
+cmake .. -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphonesimulator \
+         -DCMAKE_OSX_ARCHITECTURES=arm64 \
+         -DIXLAND_LIBC_BUILD_TESTS=ON
+cmake --build . --target ixland-libc-test
+```
+
+The test executable is built as `ixland-libc-test.app/ixland-libc-test`.
+
 ## Future Work
 
 - Additional self-contained libc utility implementations
