@@ -6,6 +6,7 @@
 
 #include <iox/iox.h>
 #include <string.h>
+#include <unistd.h>
 
 /* ============================================================================
  * VERSION
@@ -83,8 +84,18 @@ const char *iox_strerror(int errnum) {
 }
 
 void iox_perror(const char *s) {
-    /* Note: Minimal implementation without FILE* dependency */
-    /* Real implementation would use write(2) to stderr */
-    (void)s;
-    /* Placeholder - real implementation needs stdio or raw write */
+    /* Minimal truthful implementation using write(2) to stderr
+     * Avoids FILE* dependency while providing useful error output
+     */
+    extern ssize_t write(int fd, const void *buf, size_t count);
+    const char *msg = iox_strerror(0);
+    const char *sep = ": ";
+    const char *nl = "\n";
+
+    if (s && *s) {
+        write(2, s, strlen(s));
+        write(2, sep, 2);
+    }
+    write(2, msg, strlen(msg));
+    write(2, nl, 1);
 }
