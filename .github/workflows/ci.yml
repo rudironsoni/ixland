@@ -23,6 +23,7 @@ jobs:
           test -f README.md || (echo "README.md missing" && exit 1)
           test -f docs/ARCHITECTURE.md || (echo "ARCHITECTURE.md missing" && exit 1)
           test -f docs/BOUNDARIES.md || (echo "BOUNDARIES.md missing" && exit 1)
+          test -f docs/WASM_BOUNDARY_SPEC.md || (echo "WASM_BOUNDARY_SPEC.md missing" && exit 1)
           echo "All required documentation files present"
 
       - name: Check component READMEs exist
@@ -31,6 +32,30 @@ jobs:
             test -f "$dir/README.md" || (echo "$dir/README.md missing" && exit 1)
           done
           echo "All component READMEs present"
+
+      - name: Check libc public headers exist
+        run: |
+          test -f ixland-libc/include/iox/iox.h || (echo "iox.h missing" && exit 1)
+          test -f ixland-libc/include/iox/iox_types.h || (echo "iox_types.h missing" && exit 1)
+          test -f ixland-libc/include/iox/iox_syscalls.h || (echo "iox_syscalls.h missing" && exit 1)
+          test -f ixland-libc/include/iox/sys/types.h || (echo "sys/types.h missing" && exit 1)
+          echo "All libc public headers present"
+
+      - name: Check Wasm contract headers exist
+        run: |
+          test -f ixland-wasm/include/ixland/wasm/types.h || (echo "wasm/types.h missing" && exit 1)
+          test -f ixland-wasm/include/ixland/wasm/engine.h || (echo "wasm/engine.h missing" && exit 1)
+          test -f ixland-wasm/include/ixland/wasm/host.h || (echo "wasm/host.h missing" && exit 1)
+          test -f ixland-wasm/include/ixland/wasm/wasi.h || (echo "wasm/wasi.h missing" && exit 1)
+          echo "All Wasm contract headers present"
+
+      - name: Check old headers do NOT exist in ixland-system
+        run: |
+          if test -f ixland-system/include/iox/iox.h; then echo "OLD iox.h should not exist" && exit 1; fi
+          if test -f ixland-system/include/iox/iox_types.h; then echo "OLD iox_types.h should not exist" && exit 1; fi
+          if test -f ixland-system/include/iox/iox_syscalls.h; then echo "OLD iox_syscalls.h should not exist" && exit 1; fi
+          if test -d ixland-system/include/iox/sys; then echo "OLD sys/ should not exist" && exit 1; fi
+          echo "Old headers correctly removed from ixland-system"
 
   # Structure validation - ensures monorepo layout is correct
   structure:
