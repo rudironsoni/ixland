@@ -8,19 +8,26 @@ This boundary defines the interface for how WebAssembly guests interact with the
 
 ## Service Areas
 
-Future host services will include:
+Host services include:
 
-- **File descriptor I/O** - Read, write, poll on FDs
-- **Path and filesystem** - Open, stat, mkdir, symlink
-- **Clocks and timers** - Wall clock, monotonic clock, sleeps
-- **Random number generation** - Secure random
-- **Sockets and networking** - TCP, UDP, address resolution
-- **Process semantics** - Exit, interruption, environment
+- **File descriptor I/O** - `fd_read`, `fd_write`, `fd_close`
+- **Path and filesystem** - `path_open`, `path_stat`, `path_mkdir`
+- **Clocks and timers** - `clock_gettime`, `nanosleep`
+- **Random number generation** - `random_get`
+- **Sockets and networking** - `socket_create`, `socket_connect`, etc.
+- **Process semantics** - `proc_exit`, `proc_is_interrupted`
+
+## Public Headers
+
+- `../include/ixland/wasm/types.h` - Fundamental types
+- `../include/ixland/wasm/host.h` - Host service vtable
 
 ## Current State
 
-Host services are currently implemented within `ixland-system`. This boundary will receive extraction once the service contracts are well-defined.
+- Contract is defined in public headers (host.h)
+- Implementation remains in `ixland-system`
+- Host services provide iXland-native semantics, not iOS passthrough
 
-## Design Principle
+## Documentation
 
-Host services should provide iXland-native semantics to guests, not just passthrough to iOS APIs. This ensures consistent behavior between native and WASM execution.
+- `../../docs/WASM_BOUNDARY_SPEC.md` - Section on ixland-wasm-host
