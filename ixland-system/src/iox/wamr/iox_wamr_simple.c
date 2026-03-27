@@ -15,7 +15,7 @@
 #include <wasm_export.h>
 
 /* iox includes */
-#include <iox/iox_wamr.h>
+#include "runtime/wasi/iox_wamr.h"
 
 /* ============================================================================
  * WAMR STATE
