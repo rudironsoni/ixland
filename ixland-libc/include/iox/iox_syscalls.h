@@ -428,7 +428,7 @@ int iox_tcflow(int fd, int action);
 
 long iox__syscall(long number, ...);
 void iox_perror(const char *s);
-char *iox_strerror(int errnum);
+const char *iox_strerror(int errnum);
 
 /* ============================================================================
  * IOX-SPECIFIC EXTENSIONS
