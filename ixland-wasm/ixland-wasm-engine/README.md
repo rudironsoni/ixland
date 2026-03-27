@@ -4,18 +4,30 @@ Engine-neutral WebAssembly backend contract.
 
 ## Purpose
 
-This boundary defines the future engine-neutral interface that allows iXland to work with different WebAssembly engines without tight coupling to any specific implementation.
+This boundary defines the engine-neutral interface that allows iXland to work with different WebAssembly engines without tight coupling.
 
 ## Scope
 
 - Engine abstraction layer
 - Common interface for runtime backends
-- Engine-neutral WASM module loading and execution
+- WASM module loading and execution
+
+## Public Headers
+
+- `../include/ixland/wasm/types.h` - Fundamental types
+- `../include/ixland/wasm/engine.h` - Engine-neutral contract
 
 ## Current State
 
-The current backend is WAMR (WebAssembly Micro Runtime), implemented within `ixland-system`. This directory will receive narrow extraction once the engine-neutral contract is well-defined.
+- Contract is defined in public headers
+- Current backend is WAMR, implemented in `ixland-system`
+- WAMR remains an implementation detail, not a top-level boundary
 
-## Note on WAMR
+## Documentation
 
-WAMR is the current runtime backend detail, but it is not a top-level repository boundary. It remains an implementation detail until abstraction is warranted.
+- `../../docs/WASM_BOUNDARY_SPEC.md` - Section on ixland-wasm-engine
+
+## Future Work
+
+- Backend implementations (WAMR, Wasmtime)
+- Engine registration system
