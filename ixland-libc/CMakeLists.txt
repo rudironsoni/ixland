@@ -55,4 +55,16 @@ install(EXPORT ixland-libc-targets
 install(DIRECTORY include/iox DESTINATION include)
 install(FILES include/grp.h include/pwd.h DESTINATION include)
 
+# ============================================================================
+# TESTS (optional)
+# ============================================================================
+
+option(IXLAND_LIBC_BUILD_TESTS "Build ixland-libc tests" ON)
+
+if(IXLAND_LIBC_BUILD_TESTS)
+    add_executable(ixland-libc-test tests/test_core_smoke.c)
+    target_link_libraries(ixland-libc-test PRIVATE ixland-libc-core)
+    message(STATUS "ixland-libc: Tests enabled (ixland-libc-test)")
+endif()
+
 message(STATUS "ixland-libc: Headers and core implementation configured")
