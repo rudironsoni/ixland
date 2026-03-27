@@ -34,11 +34,22 @@ Future: `ixland-packages` and `ixland-toolchain` will join when they have real C
 
 - **Type**: `INTERFACE` library
 - **Provides**: Public `iox` headers at `ixland-libc/include/`
-- **Consumers**: `ixland-system/iox-core`
+- **Consumers**: `ixland-system/iox-core`, `ixland-libc-core`
 - **Usage**:
   ```cmake
   target_link_libraries(my_target PUBLIC ixland-libc-headers)
   ```
+
+## ixland-libc-core
+
+- **Type**: `STATIC` library
+- **Provides**: Self-contained libc-facing utilities (`iox_version`, `iox_strerror`, `iox_perror`)
+- **Consumers**: None yet (ixland-system can consume once fully extracted)
+- **Usage**:
+  ```cmake
+  target_link_libraries(my_target PUBLIC ixland-libc-core)
+  ```
+- **Note**: Depends on `ixland-libc-headers` for public API definitions
 
 ### ixland-wasm-contracts
 

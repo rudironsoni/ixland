@@ -1,22 +1,49 @@
 # ixland-libc - iXland C Library and ABI Boundary
 #
-# This component owns the public libc/ABI headers.
-# Implementations remain in ixland-system for now.
+# This component owns the public libc/ABI headers and select
+# self-contained libc-facing utility implementations.
 
 cmake_minimum_required(VERSION 3.20)
 
-# Headers-only INTERFACE library for public libc headers
+# ============================================================================
+# HEADERS TARGET
+# ============================================================================
+
+# INTERFACE library for public libc headers only
 add_library(ixland-libc-headers INTERFACE)
 
-# Expose the include directory
 target_include_directories(ixland-libc-headers INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 
-# Installation
-install(TARGETS ixland-libc-headers
+# ============================================================================
+# CORE IMPLEMENTATION TARGET
+# ============================================================================
+
+# First real extracted implementation target
+# Contains only self-contained libc-facing utilities (no kernel/VFS/runtime)
+add_library(ixland-libc-core STATIC
+    src/iox_version.c
+)
+
+target_include_directories(ixland-libc-core
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
+# Core depends on headers for public API definitions
+target_link_libraries(ixland-libc-core PUBLIC ixland-libc-headers)
+
+# ============================================================================
+# INSTALLATION
+# ============================================================================
+
+install(TARGETS ixland-libc-headers ixland-libc-core
     EXPORT ixland-libc-targets
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
 )
 
 install(EXPORT ixland-libc-targets
@@ -27,4 +54,4 @@ install(EXPORT ixland-libc-targets
 
 install(DIRECTORY include/iox DESTINATION include)
 
-message(STATUS "ixland-libc: Public headers configured")
+message(STATUS "ixland-libc: Headers and core implementation configured")
