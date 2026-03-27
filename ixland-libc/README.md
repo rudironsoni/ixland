@@ -17,6 +17,8 @@ This component owns:
 - `include/iox/iox_types.h` - Public type definitions
 - `include/iox/iox_syscalls.h` - Public syscall API
 - `include/iox/sys/types.h` - Linux-compatible types
+- `include/grp.h` - POSIX group database operations
+- `include/pwd.h` - POSIX user database operations
 
 ### Implementation
 - `src/iox_version.c` - Version and error string utilities
