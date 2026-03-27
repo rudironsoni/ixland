@@ -23,13 +23,13 @@ a_shell_pkg_configure() {
         --with-termlib \
         --with-ticlib \
         --with-default-terminfo-dir="$A_SHELL_PREFIX/share/terminfo" \
-        || a_shell_error "Configure failed"
+        || ixland_error "Configure failed"
 }
 
 a_shell_pkg_make() {
-    make -j$(sysctl -n hw.ncpu) || a_shell_error "Build failed"
+    make -j$(sysctl -n hw.ncpu) || ixland_error "Build failed"
 }
 
 a_shell_pkg_install() {
-    make DESTDIR="$A_SHELL_PKG_STAGING" install || a_shell_error "Install failed"
+    make DESTDIR="$A_SHELL_PKG_STAGING" install || ixland_error "Install failed"
 }

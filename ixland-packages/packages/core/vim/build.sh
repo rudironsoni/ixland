@@ -38,17 +38,17 @@ a_shell_pkg_configure() {
         --enable-multibyte \
         --with-tlib=ncurses \
         --without-x \
-        || a_shell_error "Configure failed"
+        || ixland_error "Configure failed"
 }
 
 a_shell_pkg_make() {
     cd src
     make -j$(sysctl -n hw.ncpu) VIMRCLOC="$A_SHELL_PREFIX/etc" \
-        || a_shell_error "Build failed"
+        || ixland_error "Build failed"
 }
 
 a_shell_pkg_install() {
     cd src
     make DESTDIR="$A_SHELL_PKG_STAGING" install \
-        || a_shell_error "Install failed"
+        || ixland_error "Install failed"
 }

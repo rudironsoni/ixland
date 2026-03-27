@@ -1,8 +1,8 @@
-// a_shell_cmd_tests.m
+// ixland_cmd_tests.m
 // Unit tests for command management
 
 #import <XCTest/XCTest.h>
-#import "a_shell_system/a_shell_system.h"
+#import "ixland_system/ixland_system.h"
 
 @interface AShellCmdTests : XCTestCase
 @end

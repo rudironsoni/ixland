@@ -26,15 +26,15 @@ a_shell_pkg_configure() {
         --enable-multibyte \
         --disable-nls \
         --disable-rpath \
-        || a_shell_error "Configure failed"
+        || ixland_error "Configure failed"
 }
 
 a_shell_pkg_make() {
-    make -j$(sysctl -n hw.ncpu) || a_shell_error "Build failed"
+    make -j$(sysctl -n hw.ncpu) || ixland_error "Build failed"
 }
 
 a_shell_pkg_install() {
-    make install DESTDIR="$A_SHELL_PKG_STAGING" || a_shell_error "Install failed"
+    make install DESTDIR="$A_SHELL_PKG_STAGING" || ixland_error "Install failed"
     
     # Create sh symlink
     ln -sf bash "$A_SHELL_PKG_STAGING$A_SHELL_PREFIX/bin/sh"
