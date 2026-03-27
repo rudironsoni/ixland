@@ -1,9 +1,3 @@
-> [!IMPORTANT]
-> This component now lives inside the `a-shell-next` monorepo.
-> Do not run `git submodule update --init --recursive`.
-> Use the monorepo root checkout and see the root `README.md` for current setup and build instructions.
-> Historical instructions below may be outdated.
-
 # iox: iOS Linux-Like Virtual Subsystem
 
 <p align="center">
@@ -22,7 +16,9 @@
 
 ## Status
 
-⚠️ **Work In Progress**: Transforming from compatibility layer to Linux-like subsystem. See `docs/IOX_ARCHITECTURAL_ANALYSIS.md` for the migration plan.
+⚠️ **Work In Progress**: Transforming from compatibility layer to Linux-like subsystem. See `docs/IOX_ARCHITECTURAL_ANALYSIS.md` for details.
+
+**Current Role**: This component (`ixland-system`) is the current home of the main iXland implementation. Most kernel, runtime, and syscall code lives here. Future narrow extractions will move public headers to `ixland-libc` and Wasm interfaces to `ixland-wasm`, but those boundaries are not yet populated.
 
 ## Platform Policy
 
@@ -91,9 +87,9 @@ Not literal Linux kernel compatibility—rather, Linux-like userland behavior th
 ### Fresh Clone Setup
 
 ```bash
-# Clone the monorepo (no submodules needed)
-git clone https://github.com/rudironsoni/a-shell-next.git
-cd a-shell-next/ixland-system
+# Clone the monorepo
+git clone git@github.com:rudironsoni/ixland.git
+cd ixland/ixland-system
 
 # Bootstrap (checks prerequisites, configures)
 tools/bootstrap.sh
@@ -134,7 +130,7 @@ ctest --preset ios-simulator-test
 ## Repository Layout
 
 ```
-iox/
+ixland-system/
 ├── include/
 │   ├── iox/               # Public headers
 │   │   ├── iox.h
@@ -171,10 +167,18 @@ iox/
 │   ├── simulator/         # Simulator-specific
 │   ├── stress/            # Stress tests
 │   └── perf/              # Performance tests
-├── tools/                 # Build and test scripts
-└── deps/
-    └── wamr/              # WAMR submodule (read-only)
+└── tools/                 # Build and test scripts
 ```
+
+## Wasm Boundaries
+
+WAMR is the current WebAssembly runtime backend. Future abstraction:
+
+- `ixland-wasm-engine/` will hold the engine-neutral contract
+- `ixland-wasm-host/` will define host-service boundaries
+- `ixland-wasm-wasi/` will define WASI guest policy
+
+For now, WAMR integration is handled within this component.
 
 ## Native Command Registry
 
@@ -249,7 +253,9 @@ ctest --preset ios-simulator-test
 
 ## Documentation
 
-- `docs/IOX_ARCHITECTURAL_ANALYSIS.md` - Architecture and migration plan
+- `docs/IOX_ARCHITECTURAL_ANALYSIS.md` - Architecture details
+- `docs/ARCHITECTURE.md` - Monorepo-level architecture
+- `docs/BOUNDARIES.md` - Component boundary definitions
 - `AGENTS.md` - Developer guidelines
 - `docs/SYSCALLS.md` - Syscall reference
 - `docs/PORTING.md` - Porting guide
@@ -257,7 +263,7 @@ ctest --preset ios-simulator-test
 
 ## Development Status
 
-- **Phase 0**: Repository reorganization (current)
+- **Phase 0**: Repository reorganization (complete)
 - **Phase 1**: Core kernel objects (task, files, fs, signal)
 - **Phase 2**: Fork/exec implementation
 - **Phase 3**: PTY, job control, signals
@@ -271,7 +277,3 @@ See `docs/IOX_ARCHITECTURAL_ANALYSIS.md` for detailed implementation order.
 ## License
 
 [License information]
-
----
-
-> **Note**: WAMR integration is handled within the monorepo. See the root `README.md` for current setup instructions. This component is now tracked directly in the monorepo.
