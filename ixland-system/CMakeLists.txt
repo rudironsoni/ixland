@@ -116,12 +116,10 @@ if(NOT IOX_STANDALONE_MODE)
         message(WARNING "iox: ixland-libc-headers target not found, headers may not be available")
     endif()
 
-    # Wasm contract headers are available but not yet consumed by implementation
-    # Future: link when runtime/wasi implementation uses the new contract
+    # Wasm contract headers - now consumed by runtime/wasi implementation
     if(TARGET ixland-wasm-contracts)
-        # Not linking yet - implementation still uses WAMR directly
-        # target_link_libraries(iox-core PUBLIC ixland-wasm-contracts)
-        message(STATUS "iox: ixland-wasm-contracts available (not yet consumed)")
+        target_link_libraries(iox-core PUBLIC ixland-wasm-contracts)
+        message(STATUS "iox: Linked to ixland-wasm-contracts")
     endif()
 else()
     # Standalone: add libc include path directly

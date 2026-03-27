@@ -1,7 +1,8 @@
 /*
- * iox_wamr.h - WAMR Integration Public API
+ * iox_wamr.h - WAMR Integration Internal API
  *
- * WebAssembly Micro Runtime integration for libiox
+ * WebAssembly Micro Runtime integration for libiox.
+ * This is the internal implementation header; public contract is in ixland-wasm.
  */
 
 #ifndef IOX_WAMR_H
@@ -9,6 +10,9 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
+/* Include public wasm contract types */
+#include <ixland/wasm/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -136,6 +140,12 @@ void iox_wamr_free_export_list(char **names, uint32_t count);
  * @return Error string (valid until next WAMR call)
  */
 const char *iox_wamr_get_error(void);
+
+/**
+ * Get the backend kind for this WAMR runtime
+ * @return Backend kind (always IXLAND_WASM_BACKEND_WAMR for this implementation)
+ */
+ixland_wasm_backend_kind_t iox_wamr_get_backend_kind(void);
 
 #ifdef __cplusplus
 }
