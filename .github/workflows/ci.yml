@@ -75,21 +75,44 @@ jobs:
           test -f CMakeLists.txt || (echo "Root CMakeLists.txt missing" && exit 1)
           echo "Root CMakeLists.txt present"
 
-  # Placeholder for future iOS build
-  # Currently just validates CMake configuration parses
-  cmake-check:
+  # Real root configure check
+  # Validates the monorepo build graph actually configures
+  cmake-configure:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check CMake is available
-        run: cmake --version
-
-      - name: Validate CMakeLists.txt syntax (dry run)
+      - name: Check CMake and Xcode
         run: |
-          # This validates the CMakeLists.txt is syntactically correct
-          # but skips actual iOS build (requires Xcode setup)
-          cmake -P - <<'EOF'
-            file(READ "${CMAKE_CURRENT_LIST_DIR}/CMakeLists.txt" content)
-            message(STATUS "CMakeLists.txt is readable and valid")
-          EOF
+          cmake --version
+          xcode-select -p
+          xcrun --show-sdk-path --sdk iphonesimulator
+
+      - name: Configure monorepo root
+        run: |
+          # Configure with iOS simulator settings
+          # This validates the actual build graph, not just file syntax
+          cmake -B build \
+            -S . \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT=iphonesimulator \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_C_COMPILER=$(xcrun -f clang) \
+            -DCMAKE_CXX_COMPILER=$(xcrun -f clang++) \
+            -DIXLAND_BUILD_TESTS=OFF \
+            -G Xcode
+          echo "Configure succeeded"
+
+      - name: Verify boundary targets exist
+        run: |
+          # Check that CMake generated the expected targets
+          grep -q "ixland-libc-headers" build/CMakeCache.txt || (echo "ixland-libc-headers not found" && exit 1)
+          grep -q "ixland-wasm-contracts" build/CMakeCache.txt || (echo "ixland-wasm-contracts not found" && exit 1)
+          grep -q "iox-core" build/CMakeCache.txt || (echo "iox-core not found" && exit 1)
+          echo "All boundary targets configured"
+
+      - name: Print configuration summary
+        run: |
+          echo "=== CMake Configuration ==="
+          cmake -B build --system-information | head -50

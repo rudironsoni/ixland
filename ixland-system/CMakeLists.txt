@@ -1,20 +1,44 @@
 # iox - iOS Linux-Like Virtual Subsystem
 # CMake Build Configuration
+#
+# This file supports both standalone and monorepo-subproject builds.
+# Standalone: cmake -B build . (sets up iOS, defines project)
+# Subproject: Built as part of ixland monorepo (uses parent project)
 
 cmake_minimum_required(VERSION 3.20)
 
-# MUST: Set iOS before project()
-set(CMAKE_SYSTEM_NAME iOS)
-set(CMAKE_OSX_SYSROOT "iphonesimulator" CACHE STRING "SDK")
-set(CMAKE_OSX_DEPLOYMENT_TARGET "16.0")
-set(CMAKE_OSX_ARCHITECTURES "arm64")
-
-# Hard fail on non-iOS
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
-    message(FATAL_ERROR "iox only supports iOS builds")
+# Detect standalone vs subproject mode
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    set(IOX_STANDALONE_MODE ON)
+else()
+    set(IOX_STANDALONE_MODE OFF)
 endif()
 
-project(iox VERSION 1.0.0 LANGUAGES C OBJCXX)
+if(IOX_STANDALONE_MODE)
+    # Standalone: MUST set iOS before project()
+    set(CMAKE_SYSTEM_NAME iOS)
+    set(CMAKE_OSX_SYSROOT "iphonesimulator" CACHE STRING "SDK")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "16.0")
+    set(CMAKE_OSX_ARCHITECTURES "arm64")
+
+    # Hard fail on non-iOS in standalone mode
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        message(FATAL_ERROR "iox only supports iOS builds")
+    endif()
+
+    project(iox VERSION 1.0.0 LANGUAGES C OBJCXX)
+
+    # Standalone: find boundary headers by source tree location
+    # In subproject mode, the parent adds these via target_link_libraries
+    set(IOX_LIBC_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ixland-libc/include")
+    if(NOT EXISTS "${IOX_LIBC_INCLUDE_DIR}/iox/iox.h")
+        message(FATAL_ERROR "Standalone build requires ixland-libc headers at ${IOX_LIBC_INCLUDE_DIR}")
+    endif()
+else()
+    # Subproject: Use parent project settings
+    # iOS settings should already be set by root CMakeLists.txt
+    message(STATUS "iox: Building as monorepo subproject")
+endif()
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -32,21 +56,6 @@ option(IOX_INSTALL "Enable installation" ON)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -DNDEBUG")
-
-    # Include directories
-    include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/ixland-libc/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/kernel/task
-        ${CMAKE_CURRENT_SOURCE_DIR}/kernel/signal
-        ${CMAKE_CURRENT_SOURCE_DIR}/kernel/exec
-        ${CMAKE_CURRENT_SOURCE_DIR}/fs
-        ${CMAKE_CURRENT_SOURCE_DIR}/fs/vfs
-        ${CMAKE_CURRENT_SOURCE_DIR}/runtime/native
-        ${CMAKE_CURRENT_SOURCE_DIR}/drivers/tty
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/iox/internal
-    )
 
 # Core kernel sources
 set(IOX_KERNEL_SOURCES
@@ -82,6 +91,43 @@ set(IOX_CORE_SOURCES
 # Create core library
 add_library(iox-core STATIC ${IOX_CORE_SOURCES})
 
+# Target include directories (NOT global include_directories)
+target_include_directories(iox-core
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/kernel/task>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/kernel/signal>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/kernel/exec>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fs>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fs/vfs>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/native>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/drivers/tty>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/iox/internal>
+)
+
+# Link to boundary targets if available in monorepo build
+# In standalone mode, we use the source tree include path set above
+if(NOT IOX_STANDALONE_MODE)
+    # Consume public headers from ixland-libc boundary target
+    if(TARGET ixland-libc-headers)
+        target_link_libraries(iox-core PUBLIC ixland-libc-headers)
+        message(STATUS "iox: Linked to ixland-libc-headers")
+    else()
+        message(WARNING "iox: ixland-libc-headers target not found, headers may not be available")
+    endif()
+
+    # Wasm contract headers are available but not yet consumed by implementation
+    # Future: link when runtime/wasi implementation uses the new contract
+    if(TARGET ixland-wasm-contracts)
+        # Not linking yet - implementation still uses WAMR directly
+        # target_link_libraries(iox-core PUBLIC ixland-wasm-contracts)
+        message(STATUS "iox: ixland-wasm-contracts available (not yet consumed)")
+    endif()
+else()
+    # Standalone: add libc include path directly
+    target_include_directories(iox-core PUBLIC ${IOX_LIBC_INCLUDE_DIR})
+endif()
+
 target_compile_options(iox-core PRIVATE
     -Wall
     -Wextra
@@ -105,7 +151,7 @@ if(IOX_INSTALL)
         LIBRARY DESTINATION lib
     )
 
-    # Note: Public iox headers are now installed from ixland-libc
+    # Note: Public iox headers are installed from ixland-libc
     install(DIRECTORY kernel/ DESTINATION include/iox/kernel
         FILES_MATCHING PATTERN "*.h")
     install(DIRECTORY fs/ DESTINATION include/iox/fs
@@ -117,7 +163,7 @@ endif()
 # Tools
 if(IOX_BUILD_TOOLS)
     # Install scripts
-    install(FILES 
+    install(FILES
         tools/bootstrap.sh
         tools/doctor.sh
         tools/test-simulator.sh
@@ -132,7 +178,7 @@ endif()
 # Tests
 if(IOX_BUILD_TESTS)
     enable_testing()
-    
+
     # XCTest bundle target
     set(IOX_TEST_SOURCES
         Tests/iOS/IOXCoreTests.mm
@@ -149,16 +195,22 @@ if(IOX_BUILD_TESTS)
         Tests/unit/test_vfs_path.c
         Tests/unit/test_fdtable.c
     )
-    
+
     # XCTest bundle as MODULE (dylib)
     add_library(iox-core-tests MODULE ${IOX_TEST_SOURCES})
-    
-    target_link_libraries(iox-core-tests PRIVATE 
-        iox-core 
+
+    # Tests inherit includes from iox-core via target_link_libraries
+    target_link_libraries(iox-core-tests PRIVATE
+        iox-core
         pthread
         "-framework XCTest"
     )
-    
+
+    # Add XCTest framework headers
+    target_include_directories(iox-core-tests PRIVATE
+        "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks/XCTest.framework/Headers"
+    )
+
     set_target_properties(iox-core-tests PROPERTIES
         BUNDLE YES
         XCODE_ATTRIBUTE_GENERATE_INFOPLIST_FILE YES
@@ -168,17 +220,18 @@ if(IOX_BUILD_TESTS)
         XCODE_ATTRIBUTE_OTHER_LDFLAGS "-framework XCTest"
         XCODE_PRODUCT_TYPE "com.apple.product-type.bundle.unit-test"
     )
-    
-    target_include_directories(iox-core-tests PRIVATE
-        "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks/XCTest.framework/Headers"
-    )
-    
+
     add_test(NAME core-tests COMMAND iox-core-tests)
 endif()
 
 # Print configuration
 message(STATUS "")
 message(STATUS "iox Configuration:")
+if(IOX_STANDALONE_MODE)
+    message(STATUS "  Mode: Standalone")
+else()
+    message(STATUS "  Mode: Monorepo subproject")
+endif()
 message(STATUS "  Version: ${PROJECT_VERSION}")
 message(STATUS "  System: ${CMAKE_SYSTEM_NAME}")
 message(STATUS "  SDK: ${CMAKE_OSX_SYSROOT}")
