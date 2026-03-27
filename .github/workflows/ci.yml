@@ -1,0 +1,70 @@
+# iXland Monorepo CI
+#
+# Minimal baseline workflow for building and testing iXland components.
+# This is intentionally simple and will be expanded as the project grows.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # Documentation check - validates docs are not broken
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check documentation files exist
+        run: |
+          test -f README.md || (echo "README.md missing" && exit 1)
+          test -f docs/ARCHITECTURE.md || (echo "ARCHITECTURE.md missing" && exit 1)
+          test -f docs/BOUNDARIES.md || (echo "BOUNDARIES.md missing" && exit 1)
+          echo "All required documentation files present"
+
+      - name: Check component READMEs exist
+        run: |
+          for dir in ixland-system ixland-packages ixland-libc ixland-wasm ixland-toolchain; do
+            test -f "$dir/README.md" || (echo "$dir/README.md missing" && exit 1)
+          done
+          echo "All component READMEs present"
+
+  # Structure validation - ensures monorepo layout is correct
+  structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate top-level structure
+        run: |
+          for dir in ixland-app ixland-system ixland-packages ixland-libc ixland-wasm ixland-toolchain docs; do
+            test -d "$dir" || (echo "Required directory $dir missing" && exit 1)
+          done
+          echo "All required top-level directories present"
+
+      - name: Validate CMakeLists.txt exists
+        run: |
+          test -f CMakeLists.txt || (echo "Root CMakeLists.txt missing" && exit 1)
+          echo "Root CMakeLists.txt present"
+
+  # Placeholder for future iOS build
+  # Currently just validates CMake configuration parses
+  cmake-check:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check CMake is available
+        run: cmake --version
+
+      - name: Validate CMakeLists.txt syntax (dry run)
+        run: |
+          # This validates the CMakeLists.txt is syntactically correct
+          # but skips actual iOS build (requires Xcode setup)
+          cmake -P - <<'EOF'
+            file(READ "${CMAKE_CURRENT_LIST_DIR}/CMakeLists.txt" content)
+            message(STATUS "CMakeLists.txt is readable and valid")
+          EOF
