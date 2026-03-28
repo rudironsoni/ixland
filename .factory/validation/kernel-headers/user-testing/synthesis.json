@@ -1,0 +1,44 @@
+{
+  "milestone": "kernel-headers",
+  "round": 1,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 57,
+    "passed": 57,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": [
+    "VAL-HEADERS-001", "VAL-HEADERS-002", "VAL-HEADERS-003", "VAL-HEADERS-004",
+    "VAL-HEADERS-010", "VAL-HEADERS-011", "VAL-HEADERS-012", "VAL-HEADERS-020",
+    "VAL-HEADERS-021", "VAL-HEADERS-022", "VAL-HEADERS-023", "VAL-HEADERS-024",
+    "VAL-HEADERS-030", "VAL-HEADERS-031", "VAL-HEADERS-032", "VAL-HEADERS-033",
+    "VAL-HEADERS-034", "VAL-HEADERS-035", "VAL-HEADERS-036", "VAL-HEADERS-037",
+    "VAL-HEADERS-040", "VAL-HEADERS-041", "VAL-HEADERS-042", "VAL-HEADERS-043",
+    "VAL-HEADERS-044", "VAL-HEADERS-045", "VAL-HEADERS-046", "VAL-HEADERS-047",
+    "VAL-HEADERS-048", "VAL-HEADERS-049", "VAL-HEADERS-050", "VAL-HEADERS-051",
+    "VAL-HEADERS-052", "VAL-HEADERS-053", "VAL-HEADERS-054", "VAL-HEADERS-060",
+    "VAL-HEADERS-061", "VAL-HEADERS-062", "VAL-HEADERS-063", "VAL-HEADERS-064",
+    "VAL-HEADERS-070", "VAL-HEADERS-071", "VAL-HEADERS-072", "VAL-HEADERS-073",
+    "VAL-HEADERS-074", "VAL-HEADERS-075", "VAL-HEADERS-076", "VAL-HEADERS-077",
+    "VAL-HEADERS-078", "VAL-HEADERS-080", "VAL-HEADERS-081", "VAL-HEADERS-082",
+    "VAL-HEADERS-083", "VAL-HEADERS-090", "VAL-HEADERS-091", "VAL-HEADERS-092",
+    "VAL-HEADERS-093"
+  ],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "notes": [
+    {
+      "assertion": "VAL-HEADERS-012",
+      "note": "Detected protection macros (_LINUX_TIMESPEC_DEFINED, IOX_O_CLOEXEC_DEFINED) are intentional and used to prevent duplicate symbol definitions. These are not include guards but conditional compilation guards."
+    }
+  ],
+  "appliedUpdates": [
+    {
+      "target": "validation-state.json",
+      "description": "Updated all 57 VAL-HEADERS assertion statuses based on comprehensive header validation",
+      "source": "user-testing validation"
+    }
+  ],
+  "previousRound": null
+}
