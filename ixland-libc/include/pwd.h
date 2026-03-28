@@ -4,8 +4,8 @@
  * POSIX user information interface
  */
 
-#ifndef _A_SHELL_PWD_H
-#define _A_SHELL_PWD_H
+#ifndef _IXLAND_PWD_H
+#define _IXLAND_PWD_H
 
 #include <sys/types.h>
 #include <stddef.h>
@@ -21,44 +21,28 @@ extern "C" {
  * Get User Information
  * ============================================================================ */
 
-extern struct passwd *a_shell_getpwnam(const char *name);
-extern struct passwd *a_shell_getpwuid(uid_t uid);
+extern struct passwd *ixland_getpwnam(const char *name);
+extern struct passwd *ixland_getpwuid(uid_t uid);
 
 /* ============================================================================
  * Reentrant Versions (thread-safe)
  * ============================================================================ */
 
-extern int a_shell_getpwnam_r(const char *name, struct passwd *pwd,
+extern int ixland_getpwnam_r(const char *name, struct passwd *pwd,
                               char *buf, size_t buflen, struct passwd **result);
-extern int a_shell_getpwuid_r(uid_t uid, struct passwd *pwd,
+extern int ixland_getpwuid_r(uid_t uid, struct passwd *pwd,
                               char *buf, size_t buflen, struct passwd **result);
 
 /* ============================================================================
  * Database Iteration
  * ============================================================================ */
 
-extern void a_shell_setpwent(void);
-extern struct passwd *a_shell_getpwent(void);
-extern void a_shell_endpwent(void);
-
-/* ============================================================================
- * Legacy Compatibility Macros
- * ============================================================================ */
-
-#define getpwnam(name)          a_shell_getpwnam(name)
-#define getpwuid(uid)           a_shell_getpwuid(uid)
-
-#define getpwnam_r(name, pwd, buf, buflen, result) \
-                                a_shell_getpwnam_r(name, pwd, buf, buflen, result)
-#define getpwuid_r(uid, pwd, buf, buflen, result) \
-                                a_shell_getpwuid_r(uid, pwd, buf, buflen, result)
-
-#define setpwent()              a_shell_setpwent()
-#define getpwent()              a_shell_getpwent()
-#define endpwent()              a_shell_endpwent()
+extern void ixland_setpwent(void);
+extern struct passwd *ixland_getpwent(void);
+extern void ixland_endpwent(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _A_SHELL_PWD_H */
+#endif /* _IXLAND_PWD_H */
