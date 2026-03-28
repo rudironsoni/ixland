@@ -7,9 +7,9 @@
 #ifndef _LINUX_TIME_H
 #define _LINUX_TIME_H
 
+#include <stdint.h>
 #include <sys/time.h>
 #include <time.h>
-#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,33 +22,33 @@ extern "C" {
 /* Clock IDs for clock_gettime/clock_settime/clock_getres
  * These are only defined if not already defined by system headers */
 #ifndef CLOCK_REALTIME
-#define CLOCK_REALTIME           0  /* System-wide realtime clock */
-#define CLOCK_MONOTONIC          1  /* Monotonic clock (not affected by time changes) */
-#define CLOCK_PROCESS_CPUTIME_ID 2  /* Per-process CPU-time clock */
-#define CLOCK_THREAD_CPUTIME_ID  3  /* Per-thread CPU-time clock */
-#define CLOCK_MONOTONIC_RAW      4  /* Hardware-based monotonic clock */
-#define CLOCK_REALTIME_COARSE    5  /* Fast but less accurate realtime */
-#define CLOCK_MONOTONIC_COARSE   6  /* Fast but less accurate monotonic */
-#define CLOCK_BOOTTIME           7  /* Monotonic with suspend time */
-#define CLOCK_REALTIME_ALARM     8  /* Alarm-style realtime clock */
-#define CLOCK_BOOTTIME_ALARM     9  /* Alarm-style boottime clock */
-#endif /* CLOCK_REALTIME */
+#define CLOCK_REALTIME 0           /* System-wide realtime clock */
+#define CLOCK_MONOTONIC 1          /* Monotonic clock (not affected by time changes) */
+#define CLOCK_PROCESS_CPUTIME_ID 2 /* Per-process CPU-time clock */
+#define CLOCK_THREAD_CPUTIME_ID 3  /* Per-thread CPU-time clock */
+#define CLOCK_MONOTONIC_RAW 4      /* Hardware-based monotonic clock */
+#define CLOCK_REALTIME_COARSE 5    /* Fast but less accurate realtime */
+#define CLOCK_MONOTONIC_COARSE 6   /* Fast but less accurate monotonic */
+#define CLOCK_BOOTTIME 7           /* Monotonic with suspend time */
+#define CLOCK_REALTIME_ALARM 8     /* Alarm-style realtime clock */
+#define CLOCK_BOOTTIME_ALARM 9     /* Alarm-style boottime clock */
+#endif                             /* CLOCK_REALTIME */
 
 /* iXland-specific clock extensions */
-#define CLOCK_IOX_VIRTUAL       128 /* Virtual process time */
-#define CLOCK_IOX_HOST          129 /* Host system time */
+#define CLOCK_IOX_VIRTUAL 128 /* Virtual process time */
+#define CLOCK_IOX_HOST 129    /* Host system time */
 
 /* Timer types for timer_create */
-#define TIMER_ABSTIME           0x01 /* Absolute time for timer_settime */
+#define TIMER_ABSTIME 0x01 /* Absolute time for timer_settime */
 
 /* Time conversion constants */
-#define IOX_NSEC_PER_SEC        1000000000L
-#define IOX_NSEC_PER_MSEC       1000000L
-#define IOX_USEC_PER_SEC        1000000L
-#define IOX_MSEC_PER_SEC        1000L
+#define IOX_NSEC_PER_SEC 1000000000L
+#define IOX_NSEC_PER_MSEC 1000000L
+#define IOX_USEC_PER_SEC 1000000L
+#define IOX_MSEC_PER_SEC 1000L
 
 /* Maximum time values */
-#define IOX_TIME_MAX_SEC        9223372036L /* Max seconds before overflow */
+#define IOX_TIME_MAX_SEC 9223372036L /* Max seconds before overflow */
 
 /* ============================================================================
  * TIME STRUCTURES
@@ -58,14 +58,14 @@ extern "C" {
 #ifndef _LINUX_TIMESPEC_DEFINED
 #define _LINUX_TIMESPEC_DEFINED
 struct linux_timespec {
-    int64_t tv_sec;     /* Seconds */
-    int64_t tv_nsec;    /* Nanoseconds */
+    int64_t tv_sec;  /* Seconds */
+    int64_t tv_nsec; /* Nanoseconds */
 };
 
 /* Linux kernel timeval structure */
 struct linux_timeval {
-    int64_t tv_sec;     /* Seconds */
-    int64_t tv_usec;    /* Microseconds */
+    int64_t tv_sec;  /* Seconds */
+    int64_t tv_usec; /* Microseconds */
 };
 #endif /* _LINUX_TIMESPEC_DEFINED */
 
@@ -98,8 +98,8 @@ struct linux_itimerspec64 {
  * ============================================================================ */
 
 /* Timer notification types */
-typedef int linux_timer_t;          /* POSIX timer ID */
-typedef int linux_clockid_t;        /* Clock ID type */
+typedef int linux_timer_t;   /* POSIX timer ID */
+typedef int linux_clockid_t; /* Clock ID type */
 
 /* Timer event notification structure */
 struct linux_sigevent;
@@ -109,55 +109,57 @@ struct linux_sigevent;
  * ============================================================================ */
 
 /* Convert timespec to milliseconds */
-#define IOX_TIMESPEC_TO_MS(ts) \
-    ((ts).tv_sec * IOX_MSEC_PER_SEC + (ts).tv_nsec / IOX_NSEC_PER_MSEC)
+#define IOX_TIMESPEC_TO_MS(ts) ((ts).tv_sec * IOX_MSEC_PER_SEC + (ts).tv_nsec / IOX_NSEC_PER_MSEC)
 
 /* Convert timespec to microseconds */
-#define IOX_TIMESPEC_TO_US(ts) \
-    ((ts).tv_sec * IOX_USEC_PER_SEC + (ts).tv_nsec / 1000)
+#define IOX_TIMESPEC_TO_US(ts) ((ts).tv_sec * IOX_USEC_PER_SEC + (ts).tv_nsec / 1000)
 
 /* Convert milliseconds to timespec */
-#define IOX_MS_TO_TIMESPEC(ms, ts) do { \
-    (ts).tv_sec = (ms) / IOX_MSEC_PER_SEC; \
-    (ts).tv_nsec = ((ms) % IOX_MSEC_PER_SEC) * IOX_NSEC_PER_MSEC; \
-} while (0)
+#define IOX_MS_TO_TIMESPEC(ms, ts)                                    \
+    do {                                                              \
+        (ts).tv_sec = (ms) / IOX_MSEC_PER_SEC;                        \
+        (ts).tv_nsec = ((ms) % IOX_MSEC_PER_SEC) * IOX_NSEC_PER_MSEC; \
+    } while (0)
 
 /* Normalize a timespec structure */
-#define IOX_TIMESPEC_NORMALIZE(ts) do { \
-    while ((ts).tv_nsec >= IOX_NSEC_PER_SEC) { \
-        (ts).tv_sec++; \
-        (ts).tv_nsec -= IOX_NSEC_PER_SEC; \
-    } \
-    while ((ts).tv_nsec < 0) { \
-        (ts).tv_sec--; \
-        (ts).tv_nsec += IOX_NSEC_PER_SEC; \
-    } \
-} while (0)
+#define IOX_TIMESPEC_NORMALIZE(ts)                 \
+    do {                                           \
+        while ((ts).tv_nsec >= IOX_NSEC_PER_SEC) { \
+            (ts).tv_sec++;                         \
+            (ts).tv_nsec -= IOX_NSEC_PER_SEC;      \
+        }                                          \
+        while ((ts).tv_nsec < 0) {                 \
+            (ts).tv_sec--;                         \
+            (ts).tv_nsec += IOX_NSEC_PER_SEC;      \
+        }                                          \
+    } while (0)
 
 /* Add two timespec values: result = a + b */
-#define IOX_TIMESPEC_ADD(a, b, result) do { \
-    (result).tv_sec = (a).tv_sec + (b).tv_sec; \
-    (result).tv_nsec = (a).tv_nsec + (b).tv_nsec; \
-    IOX_TIMESPEC_NORMALIZE(result); \
-} while (0)
+#define IOX_TIMESPEC_ADD(a, b, result)                \
+    do {                                              \
+        (result).tv_sec = (a).tv_sec + (b).tv_sec;    \
+        (result).tv_nsec = (a).tv_nsec + (b).tv_nsec; \
+        IOX_TIMESPEC_NORMALIZE(result);               \
+    } while (0)
 
 /* Subtract two timespec values: result = a - b */
-#define IOX_TIMESPEC_SUB(a, b, result) do { \
-    (result).tv_sec = (a).tv_sec - (b).tv_sec; \
-    (result).tv_nsec = (a).tv_nsec - (b).tv_nsec; \
-    IOX_TIMESPEC_NORMALIZE(result); \
-} while (0)
+#define IOX_TIMESPEC_SUB(a, b, result)                \
+    do {                                              \
+        (result).tv_sec = (a).tv_sec - (b).tv_sec;    \
+        (result).tv_nsec = (a).tv_nsec - (b).tv_nsec; \
+        IOX_TIMESPEC_NORMALIZE(result);               \
+    } while (0)
 
 /* Compare two timespec values: -1 if a < b, 0 if equal, 1 if a > b */
-#define IOX_TIMESPEC_CMP(a, b) \
-    (((a).tv_sec < (b).tv_sec) ? -1 : \
-     ((a).tv_sec > (b).tv_sec) ? 1 : \
-     ((a).tv_nsec < (b).tv_nsec) ? -1 : \
-     ((a).tv_nsec > (b).tv_nsec) ? 1 : 0)
+#define IOX_TIMESPEC_CMP(a, b)          \
+    (((a).tv_sec < (b).tv_sec)     ? -1 \
+     : ((a).tv_sec > (b).tv_sec)   ? 1  \
+     : ((a).tv_nsec < (b).tv_nsec) ? -1 \
+     : ((a).tv_nsec > (b).tv_nsec) ? 1  \
+                                   : 0)
 
 /* Check if timespec is zero */
-#define IOX_TIMESPEC_IS_ZERO(ts) \
-    ((ts).tv_sec == 0 && (ts).tv_nsec == 0)
+#define IOX_TIMESPEC_IS_ZERO(ts) ((ts).tv_sec == 0 && (ts).tv_nsec == 0)
 
 /* ============================================================================
  * FUNCTION DECLARATIONS
@@ -199,8 +201,7 @@ int iox_clock_getres(linux_clockid_t clockid, struct linux_timespec *res);
  * @param remain Remaining time (if interrupted)
  * @return int 0 on success, -1 on error with errno set
  */
-int iox_clock_nanosleep(linux_clockid_t clockid, int flags,
-                        const struct linux_timespec *request,
+int iox_clock_nanosleep(linux_clockid_t clockid, int flags, const struct linux_timespec *request,
                         struct linux_timespec *remain);
 
 /**
@@ -297,8 +298,7 @@ int iox_timerfd_create(linux_clockid_t clockid, int flags);
  * @param old_value Where to store old value (may be NULL)
  * @return int 0 on success, -1 on error
  */
-int iox_timerfd_settime(int fd, int flags,
-                        const struct linux_itimerspec *new_value,
+int iox_timerfd_settime(int fd, int flags, const struct linux_itimerspec *new_value,
                         struct linux_itimerspec *old_value);
 
 /**
@@ -311,9 +311,9 @@ int iox_timerfd_settime(int fd, int flags,
 int iox_timerfd_gettime(int fd, struct linux_itimerspec *curr_value);
 
 /* Timerfd flags */
-#define IOX_TFD_CLOEXEC     02000000  /* Close on exec */
-#define IOX_TFD_NONBLOCK    00004000  /* Non-blocking I/O */
-#define IOX_TFD_TIMER_ABSTIME   1   /* Absolute time */
+#define IOX_TFD_CLOEXEC 02000000  /* Close on exec */
+#define IOX_TFD_NONBLOCK 00004000 /* Non-blocking I/O */
+#define IOX_TFD_TIMER_ABSTIME 1   /* Absolute time */
 
 /* ============================================================================
  * TIME CONVERSION FUNCTIONS
@@ -369,43 +369,43 @@ char *iox_strptime(const char *buf, const char *format, struct tm *tm);
  * ============================================================================ */
 
 /* Timex modes for adjtimex */
-#define IOX_ADJ_OFFSET      0x0001  /* Time offset */
-#define IOX_ADJ_FREQUENCY   0x0002  /* Frequency offset */
-#define IOX_ADJ_MAXERROR    0x0004  /* Maximum time error */
-#define IOX_ADJ_ESTERROR    0x0008  /* Estimated time error */
-#define IOX_ADJ_STATUS      0x0010  /* Clock status */
-#define IOX_ADJ_TIMECONST   0x0020  /* PLL time constant */
-#define IOX_ADJ_TICK        0x4000  /* Tick value */
-#define IOX_ADJ_OFFSET_SINGLESHOT   0x8001  /* Old-fashioned adjtime */
+#define IOX_ADJ_OFFSET 0x0001            /* Time offset */
+#define IOX_ADJ_FREQUENCY 0x0002         /* Frequency offset */
+#define IOX_ADJ_MAXERROR 0x0004          /* Maximum time error */
+#define IOX_ADJ_ESTERROR 0x0008          /* Estimated time error */
+#define IOX_ADJ_STATUS 0x0010            /* Clock status */
+#define IOX_ADJ_TIMECONST 0x0020         /* PLL time constant */
+#define IOX_ADJ_TICK 0x4000              /* Tick value */
+#define IOX_ADJ_OFFSET_SINGLESHOT 0x8001 /* Old-fashioned adjtime */
 
 /* Clock status bits */
-#define IOX_STA_PLL         0x0001  /* Enable PLL updates */
-#define IOX_STA_PPSFREQ     0x0002  /* Enable PPS freq discipline */
-#define IOX_STA_PPSTIME     0x0004  /* Enable PPS time discipline */
-#define IOX_STA_FLL         0x0008  /* Enable FLL mode */
+#define IOX_STA_PLL 0x0001     /* Enable PLL updates */
+#define IOX_STA_PPSFREQ 0x0002 /* Enable PPS freq discipline */
+#define IOX_STA_PPSTIME 0x0004 /* Enable PPS time discipline */
+#define IOX_STA_FLL 0x0008     /* Enable FLL mode */
 
 /* Timex structure */
 struct iox_timex {
-    unsigned int modes;     /* Mode selector */
-    long offset;            /* Time offset (usec) */
-    long freq;              /* Frequency offset (scaled ppm) */
-    long maxerror;          /* Maximum error (usec) */
-    long esterror;          /* Estimated error (usec) */
-    int status;             /* Clock command/status */
-    long constant;          /* PLL time constant */
-    long precision;         /* Clock precision (usec) */
-    long tolerance;         /* Clock freq tolerance (ppm) */
-    struct linux_timeval time;  /* Current time */
-    long tick;              /* Clock tick (usec) */
-    long ppsfreq;           /* PPS frequency (scaled ppm) */
-    long jitter;            /* PPS jitter (usec) */
-    int shift;              /* Interval duration (s) */
-    long stabil;            /* PPS stability (scaled ppm) */
-    long jitcnt;            /* Jitter limit exceeded count */
-    long calcnt;            /* Calibration intervals */
-    long errcnt;            /* Calibration errors */
-    long stbcnt;            /* Stability limit exceeded count */
-    int tai;                /* TAI offset */
+    unsigned int modes;        /* Mode selector */
+    long offset;               /* Time offset (usec) */
+    long freq;                 /* Frequency offset (scaled ppm) */
+    long maxerror;             /* Maximum error (usec) */
+    long esterror;             /* Estimated error (usec) */
+    int status;                /* Clock command/status */
+    long constant;             /* PLL time constant */
+    long precision;            /* Clock precision (usec) */
+    long tolerance;            /* Clock freq tolerance (ppm) */
+    struct linux_timeval time; /* Current time */
+    long tick;                 /* Clock tick (usec) */
+    long ppsfreq;              /* PPS frequency (scaled ppm) */
+    long jitter;               /* PPS jitter (usec) */
+    int shift;                 /* Interval duration (s) */
+    long stabil;               /* PPS stability (scaled ppm) */
+    long jitcnt;               /* Jitter limit exceeded count */
+    long calcnt;               /* Calibration intervals */
+    long errcnt;               /* Calibration errors */
+    long stbcnt;               /* Stability limit exceeded count */
+    int tai;                   /* TAI offset */
 };
 
 /**

@@ -25,11 +25,11 @@ extern "C" {
  * VERSION
  * ============================================================================ */
 
-#define IOX_VERSION_MAJOR   1
-#define IOX_VERSION_MINOR   0
-#define IOX_VERSION_PATCH   0
+#define IOX_VERSION_MAJOR 1
+#define IOX_VERSION_MINOR 0
+#define IOX_VERSION_PATCH 0
 
-#define IOX_VERSION_STRING  "1.0.0"
+#define IOX_VERSION_STRING "1.0.0"
 
 /* ============================================================================
  * CORE PUBLIC API

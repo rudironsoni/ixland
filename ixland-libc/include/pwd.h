@@ -7,8 +7,8 @@
 #ifndef _IXLAND_PWD_H
 #define _IXLAND_PWD_H
 
-#include <sys/types.h>
 #include <stddef.h>
+#include <sys/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,19 +19,19 @@ extern "C" {
  * ============================================================================ */
 
 /** Maximum buffer size for getpwuid_r and getpwnam_r */
-#define IOX_GETPW_R_SIZE_MAX    1024
+#define IOX_GETPW_R_SIZE_MAX 1024
 
 /** Maximum length of user name */
-#define IOX_MAX_USER_NAME       32
+#define IOX_MAX_USER_NAME 32
 
 /** Maximum length of password field */
-#define IOX_MAX_PASSWD_FIELD    256
+#define IOX_MAX_PASSWD_FIELD 256
 
 /** Maximum length of home directory path */
-#define IOX_MAX_HOME_DIR        256
+#define IOX_MAX_HOME_DIR 256
 
 /** Maximum length of shell path */
-#define IOX_MAX_SHELL_PATH      256
+#define IOX_MAX_SHELL_PATH 256
 
 /* ============================================================================
  * Data Structures
@@ -44,13 +44,13 @@ extern "C" {
  * Fields match POSIX.1-2008 specification.
  */
 struct passwd {
-    char *pw_name;      /**< User login name */
-    char *pw_passwd;    /**< Encrypted password (or "*" for shadow) */
-    uid_t pw_uid;       /**< User ID */
-    gid_t pw_gid;       /**< Group ID */
-    char *pw_gecos;     /**< Real name or comment field */
-    char *pw_dir;       /**< Home directory */
-    char *pw_shell;     /**< Default shell program */
+    char *pw_name;   /**< User login name */
+    char *pw_passwd; /**< Encrypted password (or "*" for shadow) */
+    uid_t pw_uid;    /**< User ID */
+    gid_t pw_gid;    /**< Group ID */
+    char *pw_gecos;  /**< Real name or comment field */
+    char *pw_dir;    /**< Home directory */
+    char *pw_shell;  /**< Default shell program */
 };
 
 /* ============================================================================
@@ -97,8 +97,8 @@ extern struct passwd *iox_getpwuid(uid_t uid);
  * @param result Pointer to store result pointer (or NULL on error/not found)
  * @return 0 on success, error code on failure
  */
-extern int iox_getpwnam_r(const char *name, struct passwd *pwd,
-                          char *buf, size_t buflen, struct passwd **result);
+extern int iox_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t buflen,
+                          struct passwd **result);
 
 /**
  * @brief Get password file entry by UID (reentrant)
@@ -112,8 +112,8 @@ extern int iox_getpwnam_r(const char *name, struct passwd *pwd,
  * @param result Pointer to store result pointer (or NULL on error/not found)
  * @return 0 on success, error code on failure
  */
-extern int iox_getpwuid_r(uid_t uid, struct passwd *pwd,
-                          char *buf, size_t buflen, struct passwd **result);
+extern int iox_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen,
+                          struct passwd **result);
 
 /* ============================================================================
  * Database Iteration
@@ -147,17 +147,15 @@ extern void iox_endpwent(void);
  * Legacy Compatibility Macros
  * ============================================================================ */
 
-#define getpwnam(name)          iox_getpwnam(name)
-#define getpwuid(uid)           iox_getpwuid(uid)
+#define getpwnam(name) iox_getpwnam(name)
+#define getpwuid(uid) iox_getpwuid(uid)
 
-#define getpwnam_r(name, pwd, buf, buflen, result) \
-                                iox_getpwnam_r(name, pwd, buf, buflen, result)
-#define getpwuid_r(uid, pwd, buf, buflen, result) \
-                                iox_getpwuid_r(uid, pwd, buf, buflen, result)
+#define getpwnam_r(name, pwd, buf, buflen, result) iox_getpwnam_r(name, pwd, buf, buflen, result)
+#define getpwuid_r(uid, pwd, buf, buflen, result) iox_getpwuid_r(uid, pwd, buf, buflen, result)
 
-#define setpwent()              iox_setpwent()
-#define getpwent()              iox_getpwent()
-#define endpwent()              iox_endpwent()
+#define setpwent() iox_setpwent()
+#define getpwent() iox_getpwent()
+#define endpwent() iox_endpwent()
 
 #ifdef __cplusplus
 }

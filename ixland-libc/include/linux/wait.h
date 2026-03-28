@@ -7,8 +7,8 @@
 #ifndef IOX_LINUX_WAIT_H
 #define IOX_LINUX_WAIT_H
 
-#include <sys/types.h>
 #include <sys/resource.h>
+#include <sys/types.h>
 
 /* Forward declaration - iox_siginfo is defined in linux/signal.h */
 struct iox_siginfo;
@@ -24,20 +24,20 @@ extern "C" {
 /**
  * @brief Wait options for waitpid, waitid, and wait3/4
  */
-#define IOX_WNOHANG      0x00000001  /* Return immediately if no child exited */
-#define IOX_WUNTRACED    0x00000002  /* Report stopped children */
-#define IOX_WCONTINUED   0x00000008  /* Report continued children */
-#define IOX_WEXITED      0x00000004  /* Wait for exited children (waitid) */
-#define IOX_WSTOPPED     0x00000002  /* Wait for stopped children (waitid) */
-#define IOX_WNOWAIT      0x01000000  /* Leave child in waitable state */
+#define IOX_WNOHANG 0x00000001    /* Return immediately if no child exited */
+#define IOX_WUNTRACED 0x00000002  /* Report stopped children */
+#define IOX_WCONTINUED 0x00000008 /* Report continued children */
+#define IOX_WEXITED 0x00000004    /* Wait for exited children (waitid) */
+#define IOX_WSTOPPED 0x00000002   /* Wait for stopped children (waitid) */
+#define IOX_WNOWAIT 0x01000000    /* Leave child in waitable state */
 
 /**
  * @brief Wait for all children (waitid only)
  */
-#define IOX_P_ALL        0  /* Wait for any child */
-#define IOX_P_PID        1  /* Wait for specific PID */
-#define IOX_P_PGID       2  /* Wait for any child in process group */
-#define IOX_P_PIDFD      3  /* Wait for child referred to by PID file descriptor */
+#define IOX_P_ALL 0   /* Wait for any child */
+#define IOX_P_PID 1   /* Wait for specific PID */
+#define IOX_P_PGID 2  /* Wait for any child in process group */
+#define IOX_P_PIDFD 3 /* Wait for child referred to by PID file descriptor */
 
 /* ============================================================================
  * PROCESS STATUS MACROS
@@ -51,45 +51,45 @@ extern "C" {
  */
 
 /* Normal exit */
-#define IOX_WIFEXITED(status)   (((status) & 0x7f) == 0)
+#define IOX_WIFEXITED(status) (((status) & 0x7f) == 0)
 #define IOX_WEXITSTATUS(status) (((status) >> 8) & 0xff)
 
 /* Signal termination */
 #define IOX_WIFSIGNALED(status) (((signed char)(((status) & 0x7f) + 1) >> 1) > 0)
-#define IOX_WTERMSIG(status)    ((status) & 0x7f)
-#define IOX_WCOREDUMP(status)   ((status) & 0x80)
+#define IOX_WTERMSIG(status) ((status) & 0x7f)
+#define IOX_WCOREDUMP(status) ((status) & 0x80)
 
 /* Stopped processes */
-#define IOX_WIFSTOPPED(status)  (((status) & 0xff) == 0x7f)
-#define IOX_WSTOPSIG(status)    IOX_WEXITSTATUS(status)
+#define IOX_WIFSTOPPED(status) (((status) & 0xff) == 0x7f)
+#define IOX_WSTOPSIG(status) IOX_WEXITSTATUS(status)
 
 /* Continued processes */
 #define IOX_WIFCONTINUED(status) ((status) == 0xffff)
 
 /* Construct status values (for testing) */
-#define IOX_W_EXITCODE(ret, sig)  ((ret) << 8 | (sig))
-#define IOX_W_STOPCODE(sig)       ((sig) << 8 | 0x7f)
+#define IOX_W_EXITCODE(ret, sig) ((ret) << 8 | (sig))
+#define IOX_W_STOPCODE(sig) ((sig) << 8 | 0x7f)
 
 /* ============================================================================
  * IDTYPE VALUES
  * ============================================================================ */
 
 typedef enum {
-    IOX_P_ALL_ID  = 0,  /* Wait for any child */
-    IOX_P_PID_ID  = 1,  /* Wait for child with specific PID */
-    IOX_P_PGID_ID = 2   /* Wait for child in specific process group */
+    IOX_P_ALL_ID = 0, /* Wait for any child */
+    IOX_P_PID_ID = 1, /* Wait for child with specific PID */
+    IOX_P_PGID_ID = 2 /* Wait for child in specific process group */
 } iox_idtype_t;
 
 /* Note: struct iox_siginfo is defined in linux/signal.h */
 /* Reuse the signal.h definition for consistency */
 
 /* Signal codes for SIGCHLD */
-#define IOX_CLD_EXITED      1   /* Child has exited */
-#define IOX_CLD_KILLED      2   /* Child was killed */
-#define IOX_CLD_DUMPED      3   /* Child terminated abnormally */
-#define IOX_CLD_TRAPPED     4   /* Traced child has trapped */
-#define IOX_CLD_STOPPED     5   /* Child has stopped */
-#define IOX_CLD_CONTINUED   6   /* Stopped child has continued */
+#define IOX_CLD_EXITED 1    /* Child has exited */
+#define IOX_CLD_KILLED 2    /* Child was killed */
+#define IOX_CLD_DUMPED 3    /* Child terminated abnormally */
+#define IOX_CLD_TRAPPED 4   /* Traced child has trapped */
+#define IOX_CLD_STOPPED 5   /* Child has stopped */
+#define IOX_CLD_CONTINUED 6 /* Stopped child has continued */
 
 /* ============================================================================
  * RUSAGE STRUCTURE
@@ -102,22 +102,22 @@ typedef enum {
  * Mirrors struct rusage from sys/resource.h
  */
 struct iox_rusage {
-    struct timeval ru_utime;    /* User CPU time */
-    struct timeval ru_stime;    /* System CPU time */
-    long ru_maxrss;             /* Maximum resident set size */
-    long ru_ixrss;              /* Integral shared memory size */
-    long ru_idrss;              /* Integral unshared data size */
-    long ru_isrss;              /* Integral unshared stack size */
-    long ru_minflt;             /* Page reclaims (soft page faults) */
-    long ru_majflt;             /* Page faults (hard page faults) */
-    long ru_nswap;              /* Swaps */
-    long ru_inblock;            /* Block input operations */
-    long ru_oublock;            /* Block output operations */
-    long ru_msgsnd;             /* Messages sent */
-    long ru_msgrcv;             /* Messages received */
-    long ru_nsignals;           /* Signals received */
-    long ru_nvcsw;              /* Voluntary context switches */
-    long ru_nivcsw;             /* Involuntary context switches */
+    struct timeval ru_utime; /* User CPU time */
+    struct timeval ru_stime; /* System CPU time */
+    long ru_maxrss;          /* Maximum resident set size */
+    long ru_ixrss;           /* Integral shared memory size */
+    long ru_idrss;           /* Integral unshared data size */
+    long ru_isrss;           /* Integral unshared stack size */
+    long ru_minflt;          /* Page reclaims (soft page faults) */
+    long ru_majflt;          /* Page faults (hard page faults) */
+    long ru_nswap;           /* Swaps */
+    long ru_inblock;         /* Block input operations */
+    long ru_oublock;         /* Block output operations */
+    long ru_msgsnd;          /* Messages sent */
+    long ru_msgrcv;          /* Messages received */
+    long ru_nsignals;        /* Signals received */
+    long ru_nvcsw;           /* Voluntary context switches */
+    long ru_nivcsw;          /* Involuntary context switches */
 };
 
 /* ============================================================================

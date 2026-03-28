@@ -22,7 +22,6 @@ AlignOperands: true
 AlignTrailingComments: true
 
 # Breaking
-AllowAllParametersOfDeclarationOnANextLine: true
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None

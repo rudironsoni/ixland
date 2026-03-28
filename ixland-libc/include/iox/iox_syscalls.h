@@ -9,21 +9,22 @@
  * Extracted from ixland-system as part of libc boundary formation.
  */
 
-#include "iox_types.h"
+#include <fcntl.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/wait.h>
+#include <sys/poll.h>
+#include <sys/select.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <sys/socket.h>
-#include <sys/select.h>
-#include <sys/poll.h>
-#include <signal.h>
-#include <fcntl.h>
-#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <termios.h>
-#include <stdint.h>
-#include <stdarg.h>
+#include <unistd.h>
+
+#include "iox_types.h"
 
 /* Define sighandler_t if not defined */
 #ifndef __sighandler_t
@@ -378,11 +379,11 @@ int iox_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 int iox_accept4(int sockfd, struct sockaddr *addr, socklen_t *addrlen, int flags);
 ssize_t iox_send(int sockfd, const void *buf, size_t len, int flags);
 ssize_t iox_sendto(int sockfd, const void *buf, size_t len, int flags,
-                     const struct sockaddr *dest_addr, socklen_t addrlen);
+                   const struct sockaddr *dest_addr, socklen_t addrlen);
 ssize_t iox_sendmsg(int sockfd, const struct msghdr *msg, int flags);
 ssize_t iox_recv(int sockfd, void *buf, size_t len, int flags);
-ssize_t iox_recvfrom(int sockfd, void *buf, size_t len, int flags,
-                       struct sockaddr *src_addr, socklen_t *addrlen);
+ssize_t iox_recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr,
+                     socklen_t *addrlen);
 ssize_t iox_recvmsg(int sockfd, struct msghdr *msg, int flags);
 int iox_shutdown(int sockfd, int how);
 int iox_getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
@@ -408,7 +409,8 @@ int iox_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 int iox_pselect(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
                 const struct timespec *timeout, const sigset_t *sigmask);
 int iox_poll(struct pollfd *fds, nfds_t nfds, int timeout);
-int iox_ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *tmo_p, const sigset_t *sigmask);
+int iox_ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *tmo_p,
+              const sigset_t *sigmask);
 
 /* ============================================================================
  * TTY

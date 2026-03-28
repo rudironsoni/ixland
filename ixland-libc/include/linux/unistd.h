@@ -7,11 +7,11 @@
 #ifndef IOX_LINUX_UNISTD_H
 #define IOX_LINUX_UNISTD_H
 
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <sys/resource.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #include <time.h>
 
 #ifdef __cplusplus
@@ -375,8 +375,7 @@ int iox_link(const char *oldpath, const char *newpath);
  * @param flags Flags
  * @return int 0 on success, -1 on error
  */
-int iox_linkat(int olddirfd, const char *oldpath, int newdirfd,
-               const char *newpath, int flags);
+int iox_linkat(int olddirfd, const char *oldpath, int newdirfd, const char *newpath, int flags);
 
 /**
  * @brief Create symbolic link
@@ -416,8 +415,7 @@ ssize_t iox_readlink(const char *pathname, char *buf, size_t bufsiz);
  * @param bufsiz Buffer size
  * @return ssize_t Bytes read, -1 on error
  */
-ssize_t iox_readlinkat(int dirfd, const char *pathname, char *buf,
-                       size_t bufsiz);
+ssize_t iox_readlinkat(int dirfd, const char *pathname, char *buf, size_t bufsiz);
 
 /**
  * @brief Change root directory

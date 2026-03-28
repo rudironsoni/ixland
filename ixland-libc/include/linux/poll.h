@@ -7,8 +7,8 @@
 #ifndef _LINUX_POLL_H
 #define _LINUX_POLL_H
 
-#include <sys/types.h>
 #include <stdint.h>
+#include <sys/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,50 +19,50 @@ extern "C" {
  * ============================================================================ */
 
 /* Poll events (compatible with Linux poll.h) */
-#define IOX_POLLIN      0x001   /* There is data to read */
-#define IOX_POLLPRI     0x002   /* There is urgent data to read */
-#define IOX_POLLOUT     0x004   /* Writing now will not block */
-#define IOX_POLLERR     0x008   /* Error condition */
-#define IOX_POLLHUP     0x010   /* Hung up */
-#define IOX_POLLNVAL    0x020   /* Invalid polling request */
+#define IOX_POLLIN 0x001   /* There is data to read */
+#define IOX_POLLPRI 0x002  /* There is urgent data to read */
+#define IOX_POLLOUT 0x004  /* Writing now will not block */
+#define IOX_POLLERR 0x008  /* Error condition */
+#define IOX_POLLHUP 0x010  /* Hung up */
+#define IOX_POLLNVAL 0x020 /* Invalid polling request */
 
 /* Extended poll events */
-#define IOX_POLLRDNORM  0x040   /* Normal data may be read */
-#define IOX_POLLRDBAND  0x080   /* Priority data may be read */
-#define IOX_POLLWRNORM  0x100   /* Writing now will not block */
-#define IOX_POLLWRBAND  0x200   /* Priority data may be written */
-#define IOX_POLLMSG     0x400   /* Signal message received */
-#define IOX_POLLREMOVE  0x800   /* Remove from watched list (epoll internal) */
-#define IOX_POLLRDHUP   0x2000  /* Peer closed connection */
+#define IOX_POLLRDNORM 0x040 /* Normal data may be read */
+#define IOX_POLLRDBAND 0x080 /* Priority data may be read */
+#define IOX_POLLWRNORM 0x100 /* Writing now will not block */
+#define IOX_POLLWRBAND 0x200 /* Priority data may be written */
+#define IOX_POLLMSG 0x400    /* Signal message received */
+#define IOX_POLLREMOVE 0x800 /* Remove from watched list (epoll internal) */
+#define IOX_POLLRDHUP 0x2000 /* Peer closed connection */
 
 /* Compatibility aliases (standard names) */
-#define POLLIN          IOX_POLLIN
-#define POLLPRI         IOX_POLLPRI
-#define POLLOUT         IOX_POLLOUT
-#define POLLERR         IOX_POLLERR
-#define POLLHUP         IOX_POLLHUP
-#define POLLNVAL        IOX_POLLNVAL
-#define POLLRDNORM      IOX_POLLRDNORM
-#define POLLRDBAND      IOX_POLLRDBAND
-#define POLLWRNORM      IOX_POLLWRNORM
-#define POLLWRBAND      IOX_POLLWRBAND
-#define POLLMSG         IOX_POLLMSG
-#define POLLREMOVE      IOX_POLLREMOVE
-#define POLLRDHUP       IOX_POLLRDHUP
+#define POLLIN IOX_POLLIN
+#define POLLPRI IOX_POLLPRI
+#define POLLOUT IOX_POLLOUT
+#define POLLERR IOX_POLLERR
+#define POLLHUP IOX_POLLHUP
+#define POLLNVAL IOX_POLLNVAL
+#define POLLRDNORM IOX_POLLRDNORM
+#define POLLRDBAND IOX_POLLRDBAND
+#define POLLWRNORM IOX_POLLWRNORM
+#define POLLWRBAND IOX_POLLWRBAND
+#define POLLMSG IOX_POLLMSG
+#define POLLREMOVE IOX_POLLREMOVE
+#define POLLRDHUP IOX_POLLRDHUP
 
 /* Set of events that can be specified for poll() */
-#define IOX_POLLIN_SET  (IOX_POLLIN | IOX_POLLRDNORM | IOX_POLLRDBAND)
+#define IOX_POLLIN_SET (IOX_POLLIN | IOX_POLLRDNORM | IOX_POLLRDBAND)
 #define IOX_POLLOUT_SET (IOX_POLLOUT | IOX_POLLWRNORM | IOX_POLLWRBAND)
 #define IOX_POLLERR_SET (IOX_POLLERR | IOX_POLLHUP | IOX_POLLNVAL)
 
 /* Input event mask (events user can request) */
-#define IOX_POLLIN_EVENTS   (IOX_POLLIN | IOX_POLLPRI | IOX_POLLOUT | \
-                             IOX_POLLRDNORM | IOX_POLLRDBAND | \
-                             IOX_POLLWRNORM | IOX_POLLWRBAND | IOX_POLLRDHUP)
+#define IOX_POLLIN_EVENTS                                                                        \
+    (IOX_POLLIN | IOX_POLLPRI | IOX_POLLOUT | IOX_POLLRDNORM | IOX_POLLRDBAND | IOX_POLLWRNORM | \
+     IOX_POLLWRBAND | IOX_POLLRDHUP)
 
 /* Output event mask (events that can be returned) */
-#define IOX_POLLOUT_EVENTS  (IOX_POLLIN_EVENTS | IOX_POLLERR | IOX_POLLHUP | \
-                             IOX_POLLNVAL | IOX_POLLMSG)
+#define IOX_POLLOUT_EVENTS \
+    (IOX_POLLIN_EVENTS | IOX_POLLERR | IOX_POLLHUP | IOX_POLLNVAL | IOX_POLLMSG)
 
 /* ============================================================================
  * POLL STRUCTURES
@@ -70,9 +70,9 @@ extern "C" {
 
 /* Poll file descriptor structure - Linux-compatible */
 struct linux_pollfd {
-    int fd;             /* File descriptor to poll */
-    short events;       /* Requested events */
-    short revents;      /* Returned events */
+    int fd;        /* File descriptor to poll */
+    short events;  /* Requested events */
+    short revents; /* Returned events */
 };
 
 /* Legacy BSD struct (for compatibility) */
@@ -96,11 +96,11 @@ struct linux_poll_list {
  * ============================================================================ */
 
 /* Special timeout values */
-#define IOX_POLL_WAIT_FOREVER   (-1)    /* Wait indefinitely */
-#define IOX_POLL_WAIT_NONE      0       /* Return immediately */
+#define IOX_POLL_WAIT_FOREVER (-1) /* Wait indefinitely */
+#define IOX_POLL_WAIT_NONE 0       /* Return immediately */
 
 /* Standard timeout */
-#define IOX_POLL_TIMEOUT_MS     1000    /* Default timeout in milliseconds */
+#define IOX_POLL_TIMEOUT_MS 1000 /* Default timeout in milliseconds */
 
 /* ============================================================================
  * SELECT MACROS
@@ -108,17 +108,17 @@ struct linux_poll_list {
 
 /* FD set size for select() */
 #ifndef IOX_FD_SETSIZE
-#define IOX_FD_SETSIZE  1024
+#define IOX_FD_SETSIZE 1024
 #endif
 
 #ifndef FD_SETSIZE
-#define FD_SETSIZE      IOX_FD_SETSIZE
+#define FD_SETSIZE IOX_FD_SETSIZE
 #endif
 
 /* Calculate number of longs needed for fd_set */
-#define IOX_NFDBITS     (8 * sizeof(unsigned long))
-#define IOX_FDELT(d)    ((d) / IOX_NFDBITS)
-#define IOX_FDMASK(d)   (1UL << ((d) % IOX_NFDBITS))
+#define IOX_NFDBITS (8 * sizeof(unsigned long))
+#define IOX_FDELT(d) ((d) / IOX_NFDBITS)
+#define IOX_FDMASK(d) (1UL << ((d) % IOX_NFDBITS))
 
 /* FD set structure - Linux-compatible */
 typedef struct {
@@ -129,28 +129,27 @@ typedef struct {
 #define fd_set linux_fd_set_t
 
 /* FD set manipulation macros */
-#define IOX_FD_ZERO(set) \
-    do { \
-        unsigned int __i; \
+#define IOX_FD_ZERO(set)                                           \
+    do {                                                           \
+        unsigned int __i;                                          \
         for (__i = 0; __i < (IOX_FD_SETSIZE / IOX_NFDBITS); __i++) \
-            (set)->fds_bits[__i] = 0; \
+            (set)->fds_bits[__i] = 0;                              \
     } while (0)
 
-#define IOX_FD_SET(fd, set) \
-    do { \
-        if ((unsigned int)(fd) < IOX_FD_SETSIZE) \
+#define IOX_FD_SET(fd, set)                                   \
+    do {                                                      \
+        if ((unsigned int)(fd) < IOX_FD_SETSIZE)              \
             (set)->fds_bits[IOX_FDELT(fd)] |= IOX_FDMASK(fd); \
     } while (0)
 
-#define IOX_FD_CLR(fd, set) \
-    do { \
-        if ((unsigned int)(fd) < IOX_FD_SETSIZE) \
+#define IOX_FD_CLR(fd, set)                                    \
+    do {                                                       \
+        if ((unsigned int)(fd) < IOX_FD_SETSIZE)               \
             (set)->fds_bits[IOX_FDELT(fd)] &= ~IOX_FDMASK(fd); \
     } while (0)
 
 #define IOX_FD_ISSET(fd, set) \
-    (((unsigned int)(fd) < IOX_FD_SETSIZE) ? \
-     ((set)->fds_bits[IOX_FDELT(fd)] & IOX_FDMASK(fd)) : 0)
+    (((unsigned int)(fd) < IOX_FD_SETSIZE) ? ((set)->fds_bits[IOX_FDELT(fd)] & IOX_FDMASK(fd)) : 0)
 
 /* ============================================================================
  * TIMEOUT STRUCTURES
@@ -160,14 +159,14 @@ typedef struct {
 #ifndef _LINUX_TIMESPEC_DEFINED
 #define _LINUX_TIMESPEC_DEFINED
 struct linux_timespec {
-    int64_t tv_sec;     /* Seconds */
-    int64_t tv_nsec;    /* Nanoseconds */
+    int64_t tv_sec;  /* Seconds */
+    int64_t tv_nsec; /* Nanoseconds */
 };
 
 /* Timeval for select */
 struct linux_timeval {
-    int64_t tv_sec;     /* Seconds */
-    int64_t tv_usec;    /* Microseconds */
+    int64_t tv_sec;  /* Seconds */
+    int64_t tv_usec; /* Microseconds */
 };
 #endif /* _LINUX_TIMESPEC_DEFINED */
 
@@ -188,8 +187,8 @@ typedef struct {
  * ============================================================================ */
 
 /* Poll modes for optimized implementations */
-#define IOX_POLL_MODE_LEVEL     0   /* Level-triggered (default) */
-#define IOX_POLL_MODE_EDGE      1   /* Edge-triggered */
+#define IOX_POLL_MODE_LEVEL 0 /* Level-triggered (default) */
+#define IOX_POLL_MODE_EDGE 1  /* Edge-triggered */
 
 /* ============================================================================
  * POLL STATISTICS
@@ -197,12 +196,12 @@ typedef struct {
 
 /* Poll statistics structure */
 struct iox_poll_stats {
-    uint64_t poll_calls;        /* Number of poll() calls */
-    uint64_t poll_returns;      /* Number of returns */
-    uint64_t poll_events;       /* Total events returned */
-    uint64_t poll_timeouts;     /* Number of timeouts */
-    uint64_t poll_interrupts;   /* Number of EINTR returns */
-    uint64_t poll_time_total;   /* Total time waiting (ns) */
+    uint64_t poll_calls;      /* Number of poll() calls */
+    uint64_t poll_returns;    /* Number of returns */
+    uint64_t poll_events;     /* Total events returned */
+    uint64_t poll_timeouts;   /* Number of timeouts */
+    uint64_t poll_interrupts; /* Number of EINTR returns */
+    uint64_t poll_time_total; /* Total time waiting (ns) */
 };
 
 /* ============================================================================
@@ -228,8 +227,8 @@ int iox_poll(struct linux_pollfd *fds, unsigned int nfds, int timeout);
  * @param sigmask Signal mask to restore during wait
  * @return int Number of ready fds on success, -1 on error with errno set
  */
-int iox_ppoll(struct linux_pollfd *fds, unsigned int nfds,
-              const struct linux_timespec *timeout, const linux_sigset_t *sigmask);
+int iox_ppoll(struct linux_pollfd *fds, unsigned int nfds, const struct linux_timespec *timeout,
+              const linux_sigset_t *sigmask);
 
 /**
  * @brief Poll multiple file descriptors with advanced options
@@ -240,13 +239,12 @@ int iox_ppoll(struct linux_pollfd *fds, unsigned int nfds,
  * @param extra_flags Additional flags (implementation-specific)
  * @return int Number of ready fds on success, -1 on error
  */
-int iox_poll_advanced(struct linux_pollfd *fds, unsigned int nfds,
-                      int timeout, int extra_flags);
+int iox_poll_advanced(struct linux_pollfd *fds, unsigned int nfds, int timeout, int extra_flags);
 
 /* Extra poll flags */
-#define IOX_POLL_ADV_NONBLOCK   0x01    /* Never block */
-#define IOX_POLL_ADV_ONESHOT    0x02    /* One-shot notification */
-#define IOX_POLL_ADV_WAKEUP     0x04    /* Wake up waiters */
+#define IOX_POLL_ADV_NONBLOCK 0x01 /* Never block */
+#define IOX_POLL_ADV_ONESHOT 0x02  /* One-shot notification */
+#define IOX_POLL_ADV_WAKEUP 0x04   /* Wake up waiters */
 
 /* ============================================================================
  * SELECT FUNCTIONS
@@ -301,55 +299,53 @@ int iox_pselect6(int nfds, linux_fd_set_t *readfds, linux_fd_set_t *writefds,
  * ============================================================================ */
 
 /* Check if any FD is ready in a pollfd array */
-#define IOX_POLL_HAS_EVENTS(pollfds, nfds) \
-    ({ \
-        unsigned int __i; \
-        int __found = 0; \
-        for (__i = 0; __i < (nfds); __i++) { \
+#define IOX_POLL_HAS_EVENTS(pollfds, nfds)     \
+    ({                                         \
+        unsigned int __i;                      \
+        int __found = 0;                       \
+        for (__i = 0; __i < (nfds); __i++) {   \
             if ((pollfds)[__i].revents != 0) { \
-                __found = 1; \
-                break; \
-            } \
-        } \
-        __found; \
+                __found = 1;                   \
+                break;                         \
+            }                                  \
+        }                                      \
+        __found;                               \
     })
 
 /* Count number of ready FDs in pollfd array */
 #define IOX_POLL_COUNT_EVENTS(pollfds, nfds) \
-    ({ \
-        unsigned int __i, __count = 0; \
+    ({                                       \
+        unsigned int __i, __count = 0;       \
         for (__i = 0; __i < (nfds); __i++) { \
             if ((pollfds)[__i].revents != 0) \
-                __count++; \
-        } \
-        __count; \
+                __count++;                   \
+        }                                    \
+        __count;                             \
     })
 
 /* Wait for input on a single FD */
-#define IOX_POLL_WAIT_INPUT(fd, timeout_ms) \
-    ({ \
-        struct linux_pollfd __pfd = { (fd), IOX_POLLIN, 0 }; \
-        iox_poll(&__pfd, 1, (timeout_ms)); \
+#define IOX_POLL_WAIT_INPUT(fd, timeout_ms)                \
+    ({                                                     \
+        struct linux_pollfd __pfd = {(fd), IOX_POLLIN, 0}; \
+        iox_poll(&__pfd, 1, (timeout_ms));                 \
     })
 
 /* Wait for output on a single FD */
-#define IOX_POLL_WAIT_OUTPUT(fd, timeout_ms) \
-    ({ \
-        struct linux_pollfd __pfd = { (fd), IOX_POLLOUT, 0 }; \
-        iox_poll(&__pfd, 1, (timeout_ms)); \
+#define IOX_POLL_WAIT_OUTPUT(fd, timeout_ms)                \
+    ({                                                      \
+        struct linux_pollfd __pfd = {(fd), IOX_POLLOUT, 0}; \
+        iox_poll(&__pfd, 1, (timeout_ms));                  \
     })
 
 /* Check if pollfd has error events */
-#define IOX_POLL_HAS_ERROR(pfd) \
-    ((pfd)->revents & (IOX_POLLERR | IOX_POLLHUP | IOX_POLLNVAL))
+#define IOX_POLL_HAS_ERROR(pfd) ((pfd)->revents & (IOX_POLLERR | IOX_POLLHUP | IOX_POLLNVAL))
 
 /* Check if pollfd has input events */
 #define IOX_POLL_HAS_INPUT(pfd) \
     ((pfd)->revents & (IOX_POLLIN | IOX_POLLRDNORM | IOX_POLLRDBAND | IOX_POLLRDHUP))
 
 /* Check if pollfd has output events */
-#define IOX_POLL_HAS_OUTPUT(pfd) \
-    ((pfd)->revents & (IOX_POLLOUT | IOX_POLLWRNORM | IOX_POLLWRBAND))
+#define IOX_POLL_HAS_OUTPUT(pfd) ((pfd)->revents & (IOX_POLLOUT | IOX_POLLWRNORM | IOX_POLLWRBAND))
 
 /* ============================================================================
  * INTERNAL POLLING (for kernel use)
@@ -365,7 +361,7 @@ typedef int (*iox_poll_callback_t)(struct linux_pollfd *pfd, void *data);
 struct iox_poll_wait_queue {
     struct iox_poll_wait_queue *next;
     struct iox_poll_wait_queue *prev;
-    void *private;              /* Private data for wait */
+    void *private; /* Private data for wait */
 };
 
 /* Initialize poll table */
@@ -386,9 +382,9 @@ void iox_poll_wake(struct iox_poll_wait_queue *wq, int key);
 
 /* Poll notify structure */
 struct iox_poll_notify {
-    int fd;                     /* File descriptor */
-    short events;               /* Events to notify */
-    void *userdata;             /* User data */
+    int fd;         /* File descriptor */
+    short events;   /* Events to notify */
+    void *userdata; /* User data */
 };
 
 /* Request poll notification */
@@ -403,14 +399,14 @@ int iox_poll_cancel_notify(int fd);
 
 /* Vector poll structure */
 struct iox_poll_vec {
-    struct linux_pollfd *fds;   /* FD array */
-    unsigned int nfds;          /* Number of FDs */
-    void *userdata;             /* User context */
+    struct linux_pollfd *fds; /* FD array */
+    unsigned int nfds;        /* Number of FDs */
+    void *userdata;           /* User context */
 };
 
 /* Batch poll operation */
-int iox_poll_vec_poll(struct iox_poll_vec *vecs, unsigned int nvec,
-                      int timeout, unsigned int *results);
+int iox_poll_vec_poll(struct iox_poll_vec *vecs, unsigned int nvec, int timeout,
+                      unsigned int *results);
 
 #ifdef __cplusplus
 }
