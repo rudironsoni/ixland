@@ -1,0 +1,67 @@
+# iXland Services Configuration
+# This project is a kernel library - no long-running services
+# Build commands are the primary "services"
+
+commands:
+  # Build commands
+  build:
+    cmd: cmake --build build
+    desc: Build all components
+  
+  build-debug:
+    cmd: cmake --build build-debug
+    desc: Build debug configuration
+  
+  configure:
+    cmd: cmake -B build -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphonesimulator
+    desc: Configure CMake build (Simulator)
+  
+  configure-device:
+    cmd: cmake -B build -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphoneos
+    desc: Configure CMake build (Device)
+  
+  configure-macos:
+    cmd: cmake -B build
+    desc: Configure CMake build (macOS for testing)
+  
+  clean:
+    cmd: rm -rf build build-debug
+    desc: Clean all build artifacts
+  
+  # Test commands
+  test:
+    cmd: cd build && ctest --output-on-failure
+    desc: Run all tests
+  
+  test-verbose:
+    cmd: cd build && ctest -V
+    desc: Run tests with verbose output
+  
+  # Lint commands
+  lint:
+    cmd: ./scripts/lint.sh
+    desc: Run all linters
+  
+  lint-check:
+    cmd: ./scripts/lint.sh --check
+    desc: Run linters in check mode (CI)
+  
+  format:
+    cmd: ./scripts/format.sh
+    desc: Format all code
+  
+  format-check:
+    cmd: ./scripts/format.sh --check
+    desc: Check code formatting (CI)
+  
+  # Development helpers
+  dry-run:
+    cmd: cmake -B build --dry-run
+    desc: Show what would be built
+  
+  settings:
+    cmd: cmake -B build && cmake -B build -LAH
+    desc: Show all CMake settings
+
+# No services - this is a library project
+services: {}
