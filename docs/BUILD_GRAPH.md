@@ -26,7 +26,7 @@ The root build includes subdirectories in dependency order:
 2. `ixland-system` - Consumes `ixland-libc-headers`
 3. `ixland-wasm` - Headers-only, no dependencies
 
-Future: `ixland-packages` and `ixland-toolchain` will join when they have real CMake builds.
+`ixland-packages` provides a validation target (`ixland-packages-validate`). `ixland-toolchain` is referenced via `CMAKE_TOOLCHAIN_FILE`, not via `add_subdirectory`.
 
 ## Boundary Targets
 

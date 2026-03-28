@@ -45,7 +45,7 @@
     {
       "name": "local-dev",
       "displayName": "Local Development",
-      "description": "Build only libc and wasm contracts (no iOS-specific components)",
+      "description": "Build libc, wasm contracts, and packages validation (no iOS-specific components)",
       "inherits": "default",
       "cacheVariables": {
         "IXLAND_BUILD_SYSTEM": "OFF",

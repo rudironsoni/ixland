@@ -9,11 +9,9 @@ This document describes the supported local validations for the current reposito
 cmake --preset ios-simulator
 cmake --build --preset ios-simulator
 
-# Or manual configuration
-mkdir build && cd build
-cmake .. -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphonesimulator \
-         -DCMAKE_OSX_ARCHITECTURES=arm64
-cmake --build .
+# Or use local-dev for non-iOS builds (documentation, validation)
+cmake --preset local-dev
+cmake --build --preset local-dev
 ```
 
 ## Supported Build Paths
@@ -165,8 +163,8 @@ iOS builds require macOS with Xcode.
 | ixland-libc-core | ✅ | ✅ | ✅ | Smoke tests |
 | ixland-wasm-contracts | ✅ | ✅ | N/A | Headers only |
 | iox-core | ✅ | ✅ | ⚠️ | XCTest requires Xcode |
-| ixland-packages | ✅ | ✅ | N/A | Validation only |
-| ixland-toolchain | ✅ | N/A | N/A | Toolchain files |
+| ixland-packages | ✅ | ✅ | N/A | Validation target |
+| ixland-toolchain | N/A | N/A | N/A | Referenced via `CMAKE_TOOLCHAIN_FILE` |
 
 ## Troubleshooting
 

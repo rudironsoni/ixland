@@ -27,8 +27,19 @@ cd ixland
 
 ## Build
 
-Build orchestration is expected to flow through CMake.
-See individual component READMEs for specific build instructions.
+Build orchestration flows through CMake with presets. See `CMakePresets.json` for available configurations.
+
+```bash
+# iOS Simulator (primary development)
+cmake --preset ios-simulator
+cmake --build --preset ios-simulator
+
+# Local development (non-iOS: documentation, validation)
+cmake --preset local-dev
+cmake --build --preset local-dev
+```
+
+See `docs/LOCAL_BUILD_MATRIX.md` for detailed build paths and `docs/BUILD_GRAPH.md` for component dependencies.
 
 ## CI
 
