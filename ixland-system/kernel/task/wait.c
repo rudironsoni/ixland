@@ -42,7 +42,7 @@ pid_t iox_waitpid(pid_t pid, int *wstatus, int options) {
     parent->waiters++;
 
     while (1) {
-        /* Find matching child */
+        /* Find matching child based on pid selector */
         if (pid > 0) {
             /* Wait for specific child */
             child = parent->children;
@@ -50,24 +50,44 @@ pid_t iox_waitpid(pid_t pid, int *wstatus, int options) {
                 child = child->next_sibling;
             }
         } else if (pid == -1) {
-            /* Wait for any child */
+            /* Wait for any child - iterate to find one matching state criteria */
             child = parent->children;
+            while (child) {
+                if (atomic_load(&child->exited) ||
+                    ((options & WUNTRACED) && atomic_load(&child->stopped)) ||
+                    ((options & WCONTINUED) && atomic_load(&child->continued))) {
+                    break;
+                }
+                child = child->next_sibling;
+            }
         } else if (pid == 0) {
             /* Wait for any child in same process group */
             child = parent->children;
-            while (child && child->pgid != parent->pgid) {
+            while (child) {
+                if (child->pgid == parent->pgid &&
+                    (atomic_load(&child->exited) ||
+                     ((options & WUNTRACED) && atomic_load(&child->stopped)) ||
+                     ((options & WCONTINUED) && atomic_load(&child->continued)))) {
+                    break;
+                }
                 child = child->next_sibling;
             }
         } else {
             /* pid < -1: Wait for any child in process group |pid| */
             pid_t pgid = -pid;
             child = parent->children;
-            while (child && child->pgid != pgid) {
+            while (child) {
+                if (child->pgid == pgid &&
+                    (atomic_load(&child->exited) ||
+                     ((options & WUNTRACED) && atomic_load(&child->stopped)) ||
+                     ((options & WCONTINUED) && atomic_load(&child->continued)))) {
+                    break;
+                }
                 child = child->next_sibling;
             }
         }
 
-        /* Check for children based on options */
+        /* Check if we found a matching child */
         if (child) {
             /* Check for exited child */
             if (atomic_load(&child->exited)) {
@@ -103,7 +123,6 @@ pid_t iox_waitpid(pid_t pid, int *wstatus, int options) {
         }
 
         /* Wait for child to exit */
-        struct timespec timeout;
         if (options & WNOHANG) {
             /* Non-blocking: just check once */
             parent->waiters--;
