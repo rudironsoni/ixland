@@ -1,0 +1,164 @@
+{
+  "milestone": "process-table",
+  "round": 1,
+  "status": "pass",
+  "timestamp": "2026-03-28T13:58:00Z",
+  "assertionsSummary": {
+    "total": 28,
+    "passed": 26,
+    "failed": 0,
+    "blocked": 0,
+    "alreadyPassed": 2
+  },
+  "passedAssertions": [
+    "VAL-PROCESS-001",
+    "VAL-PROCESS-002",
+    "VAL-PROCESS-003",
+    "VAL-PROCESS-004",
+    "VAL-PROCESS-005",
+    "VAL-PROCESS-006",
+    "VAL-PROCESS-009",
+    "VAL-PROCESS-010",
+    "VAL-PROCESS-011",
+    "VAL-PROCESS-012",
+    "VAL-PROCESS-013",
+    "VAL-PROCESS-014",
+    "VAL-PROCESS-015",
+    "VAL-PROCESS-016",
+    "VAL-PROCESS-017",
+    "VAL-PROCESS-018",
+    "VAL-PROCESS-019",
+    "VAL-PROCESS-020",
+    "VAL-PROCESS-021",
+    "VAL-PROCESS-022",
+    "VAL-PROCESS-023",
+    "VAL-PROCESS-024",
+    "VAL-PROCESS-025",
+    "VAL-PROCESS-026",
+    "VAL-PROCESS-027",
+    "VAL-PROCESS-028"
+  ],
+  "alreadyPassedAssertions": [
+    "VAL-PROCESS-007",
+    "VAL-PROCESS-008"
+  ],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "testResults": {
+    "totalTests": 100,
+    "passedTests": 98,
+    "failedTests": 2,
+    "testCategories": {
+      "pid_allocation": {
+        "tests": [
+          "pid_alloc_basic",
+          "pid_alloc_returns_unique_values",
+          "pid_alloc_many",
+          "pid_free_immediate_reuse",
+          "pid_range_validation",
+          "pid_alloc_exhaustion",
+          "pid_alloc_free_cycles",
+          "pid_uniqueness_no_collisions",
+          "pid_wraparound_simulation",
+          "pid_stress_rapid_allocation",
+          "pid_o1_timing",
+          "pid_thread_safety",
+          "pid_invalid_handling"
+        ],
+        "allPassed": true
+      },
+      "task_allocation": {
+        "tests": [
+          "task_init_state_after_alloc",
+          "task_pid_invariants",
+          "task_refs_initial",
+          "task_lookup_returns_same_task",
+          "task_lookup_invalid_pid",
+          "task_refcount_increments",
+          "task_exit_status_flag",
+          "task_exit_signaled_flag",
+          "task_alloc_basic_state",
+          "task_alloc_concurrent_safety",
+          "task_lookup_refcount_thread_safety",
+          "task_free_decrements_only_when_refs_high",
+          "task_alloc_returns_non_null",
+          "task_free_releases_memory_and_removes_from_hash",
+          "task_alloc_safe_defaults",
+          "task_alloc_free_stress"
+        ],
+        "allPassed": true
+      },
+      "waitpid": {
+        "tests": [
+          "wait_parent_observes_child_exit",
+          "wait_no_children_returns_echild",
+          "wait_specific_pid_finds_correct_child",
+          "wait_any_pid_minus_one_finds_any_child",
+          "wait_wrong_pid_returns_error",
+          "wait_second_reap_fails",
+          "wait_signaled_child",
+          "wnohang_live_child_returns_zero",
+          "wnohang_exited_child_returns_pid",
+          "wait_child_list_unlinked_after_reap",
+          "wait_refcount_coherent",
+          "wait_multiple_children_sequence",
+          "waitpid_wuntraced_reports_stopped_child",
+          "waitpid_wcontinued_reports_continued_child"
+        ],
+        "allPassed": true
+      },
+      "process_groups_sessions": {
+        "tests": [
+          "pgrp_initial_task_leader_invariants",
+          "pgrp_fork_inheritance",
+          "pgrp_multiple_children_same_group",
+          "pgrp_session_invariants",
+          "pgrp_child_lookup_by_pgid",
+          "pgrp_zombie_retains_pgid",
+          "pgrp_refcount_with_membership",
+          "setsid_creates_new_session_and_pgrp",
+          "setsid_fails_for_group_leader",
+          "getsid_returns_correct_session",
+          "getsid_fails_for_invalid_pid",
+          "getpgrp_returns_process_group",
+          "getpgid_returns_process_group",
+          "getpgid_fails_for_invalid_pid",
+          "setpgid_moves_process_to_group",
+          "setpgid_zero_pid_uses_current",
+          "setpgid_fails_for_non_child",
+          "setpgid_fails_cross_session"
+        ],
+        "allPassed": true
+      },
+      "signal_delivery": {
+        "tests": [
+          "signal_kill_delivers_termination",
+          "signal_int_delivers_interrupt",
+          "signal_ign_disposition_ignored",
+          "signal_forbidden_handlers_rejected",
+          "signal_invalid_signal_number",
+          "signal_group_delivery_simulation",
+          "signal_shell_foreground_child_terminates",
+          "signal_multiple_pending",
+          "signal_pending_cleared_on_unblock",
+          "signal_sigkill_cannot_be_blocked",
+          "signal_null_sighand_fails",
+          "signal_disposition_preserved_after_sigaction_get",
+          "signal_invalid_pid_kill_fails",
+          "signal_invalid_signal_kill_fails",
+          "signal_signal_zero_check_exists",
+          "signal_killpg_basic_delivery"
+        ],
+        "allPassed": true
+      }
+    }
+  },
+  "notes": [
+    "All process-table related assertions validated through unit test execution",
+    "VAL-PROCESS-007 and VAL-PROCESS-008 were already marked as passed from prior scrutiny validation",
+    "2 exec-related test failures are unrelated to process-table milestone (VAL-SYSCALL-004, VAL-SYSCALL-006)",
+    "All process allocation, PID management, waitpid, zombie handling, sessions, and signal delivery tests pass"
+  ],
+  "appliedUpdates": [],
+  "previousRound": null
+}
