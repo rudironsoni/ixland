@@ -9,6 +9,8 @@ This directory contains the package management infrastructure for iXland, provid
 ## Contents
 
 - `packages/` - Package definitions and build scripts
+  - `packages/core/` - Core native packages (bash, coreutils, etc.)
+  - `packages/wasm/` - WebAssembly packages (future - see docs/WASM_PACKAGE_LAYOUT.md)
 - `core-packages/` - Core package definitions
 - `root-packages/` - Root-level packages
 - `scripts/` - Build automation scripts
@@ -18,6 +20,13 @@ This directory contains the package management infrastructure for iXland, provid
 
 Package builds are integrated with the monorepo's CMake-based build system. See the root `README.md` and `docs/ARCHITECTURE.md` for build instructions.
 
-## Compiled Artifacts
+## Wasm Package Layout
 
 Future compiled Wasm artifacts will be managed as a package concern within this component.
+
+See [docs/WASM_PACKAGE_LAYOUT.md](../docs/WASM_PACKAGE_LAYOUT.md) for the detailed specification of:
+- Wasm package directory structure
+- Artifact naming conventions
+- Metadata schema
+- Validation rules
+- Integration with the build system
