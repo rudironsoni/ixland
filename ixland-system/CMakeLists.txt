@@ -200,7 +200,6 @@ if(IOX_BUILD_TESTS)
 
     # XCTest bundle target
     set(IOX_TEST_SOURCES
-        Tests/iOS/IOXCoreTests.mm
         Tests/harness/harness.c
         Tests/unit/test_pid.c
         Tests/unit/test_exec.c
@@ -213,6 +212,7 @@ if(IOX_BUILD_TESTS)
         Tests/unit/test_tty.c
         Tests/unit/test_vfs_path.c
         Tests/unit/test_fdtable.c
+        Tests/unit/test_fork.c
     )
 
     # XCTest bundle as MODULE (dylib)

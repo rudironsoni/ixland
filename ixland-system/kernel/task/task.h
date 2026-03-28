@@ -1,12 +1,12 @@
 #ifndef IOX_TASK_H
 #define IOX_TASK_H
 
-#include <sys/types.h>
-#include <stdatomic.h>
-#include <stdbool.h>
 #include <pthread.h>
 #include <signal.h>
+#include <stdatomic.h>
+#include <stdbool.h>
 #include <sys/resource.h>
+#include <sys/types.h>
 #include <time.h>
 
 #ifdef __cplusplus
@@ -55,7 +55,7 @@ typedef struct iox_exec_image {
     iox_image_type_t type;
     char path[IOX_MAX_PATH];
     char interpreter[IOX_MAX_PATH];
-    
+
     union {
         struct {
             iox_native_entry_t entry;
@@ -86,7 +86,7 @@ struct iox_task {
     pid_t tgid;
     pid_t pgid;
     pid_t sid;
-    
+
     atomic_int state;
     int exit_status;
     atomic_bool exited;
@@ -95,31 +95,34 @@ struct iox_task {
     atomic_bool stopped;
     atomic_int stopsig;
     atomic_bool continued;
-    
+
     pthread_t thread;
     char comm[IOX_MAX_NAME];
     char exe[IOX_MAX_PATH];
-    
+
     iox_files_t *files;
     iox_fs_t *fs;
     iox_sighand_t *sighand;
     iox_tty_t *tty;
     iox_mm_emu_t *mm;
     iox_exec_image_t *exec_image;
-    
+
     struct iox_task *parent;
     struct iox_task *children;
     struct iox_task *next_sibling;
     struct iox_task *hash_next;
-    
+
+    /* Vfork tracking - set when created by vfork() */
+    struct iox_task *vfork_parent;
+
     pthread_cond_t wait_cond;
     pthread_mutex_t wait_lock;
     int waiters;
-    
+
     struct rlimit rlimits[RLIMIT_NLIMITS];
-    
+
     struct timespec start_time;
-    
+
     atomic_int refs;
     pthread_mutex_t lock;
 };
@@ -136,6 +139,14 @@ int iox_task_init(void);
 void iox_task_deinit(void);
 
 iox_task_t *iox_task_lookup(pid_t pid);
+
+/* Process identity functions */
+pid_t iox_getpid(void);
+pid_t iox_getppid(void);
+
+/* Fork functions */
+pid_t iox_fork(void);
+int iox_vfork(void);
 
 #ifdef __cplusplus
 }
