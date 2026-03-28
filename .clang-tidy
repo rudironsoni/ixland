@@ -1,0 +1,61 @@
+# iXland C Code Linting Configuration
+# This file configures clang-tidy for the C components of the project
+#
+# Usage:
+#   clang-tidy src/*.c -- -I./include
+#   Or via CMake: cmake -DCMAKE_CXX_CLANG_TIDY=clang-tidy ...
+
+---
+Checks: >
+  bugprone-*,
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  misc-*,
+  modernize-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-magic-numbers,
+  -modernize-macro-to-enum,
+  -cppcoreguidelines-avoid-non-const-global-variables,
+  -readability-named-parameter,
+  -misc-unused-parameters
+
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*'
+FormatStyle: file
+
+CheckOptions:
+  - key:   readability-identifier-naming.StructCase
+    value: lower_case
+  - key:   readability-identifier-naming.StructPrefix
+    value: iox_
+  - key:   readability-identifier-naming.FunctionCase
+    value: lower_case
+  - key:   readability-identifier-naming.FunctionPrefix
+    value: iox_
+  - key:   readability-identifier-naming.VariableCase
+    value: lower_case
+  - key:   readability-identifier-naming.MacroCase
+    value: UPPER_CASE
+  - key:   readability-identifier-naming.EnumCase
+    value: lower_case
+  - key:   readability-identifier-naming.EnumConstantCase
+    value: UPPER_CASE
+  - key:   readability-identifier-naming.TypedefCase
+    value: lower_case
+  - key:   readability-identifier-naming.TypedefSuffix
+    value: _t
+  - key:   readability-function-cognitive-complexity.Threshold
+    value: 25
+  - key:   readability-function-size.LineThreshold
+    value: 80
+  - key:   readability-function-size.StatementThreshold
+    value: 50
+  - key:   bugprone-argument-comment.StrictMode
+    value: 1
+  - key:   cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
+    value: 0
+  - key:   cppcoreguidelines-avoid-do-while.IgnoreMacros
+    value: 1

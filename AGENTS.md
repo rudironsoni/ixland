@@ -167,6 +167,87 @@ _TODO: Add test commands here_
 
 _Add a brief overview of your project architecture_
 
+## Code Quality & Linting
+
+This project uses automated linting and formatting to maintain code quality:
+
+### Running Linters
+
+**Run all linters:**
+```bash
+./scripts/lint.sh
+```
+
+**Auto-fix issues where possible:**
+```bash
+./scripts/lint.sh --fix
+```
+
+**Check mode (for CI):**
+```bash
+./scripts/lint.sh --check
+```
+
+### C Code (ixland-system, ixland-libc)
+
+**Linting Tools:**
+- **clang-tidy**: Static analysis and bug detection
+- **clang-format**: Code formatting
+
+**Configuration:**
+- `.clang-tidy` - Linting rules and checks
+- `.clang-format` - Formatting style rules
+
+**Key Checks Enabled:**
+- Bug detection (null pointer dereference, memory leaks)
+- Performance optimizations
+- Code style consistency (naming, formatting)
+- Cyclomatic complexity limits
+
+### Swift Code (ixland-app)
+
+**Linting Tool:**
+- **SwiftLint**: Swift-specific linting and formatting
+
+**Configuration:**
+- `.swiftlint.yml` - SwiftLint rules
+
+**Key Rules:**
+- Line length limit (120 characters)
+- Function complexity limits
+- Trailing whitespace, unused imports
+- Force unwrapping discouraged
+
+### Shell Scripts
+
+**Linting Tool:**
+- **ShellCheck**: Shell script analysis
+
+**Usage:**
+```bash
+shellcheck scripts/*.sh
+```
+
+### CI Integration
+
+Linting runs automatically on:
+- All pull requests
+- Pushes to main/develop branches
+
+See `.github/workflows/lint.yml` for CI configuration.
+
 ## Conventions & Patterns
 
-_Add your project-specific conventions here_
+### C Code Naming Conventions
+
+- **Structs/Types**: `iox_` prefix with lowercase (e.g., `iox_task_t`)
+- **Functions**: `iox_` prefix with lowercase (e.g., `iox_task_alloc()`)
+- **Macros**: UPPER_CASE (e.g., `IOX_MAX_NAME`)
+- **Constants**: UPPER_CASE (e.g., `IOX_NSIG`)
+
+### Swift Code Naming Conventions
+
+- Follow standard Swift naming guidelines
+- Use PascalCase for types (e.g., `ContentView`)
+- Use camelCase for functions and variables
+- Private outlets and actions marked accordingly
