@@ -144,14 +144,14 @@ struct iox_task {
     pid_t ppid;             // Parent PID
     pid_t pgid;             // Process group ID
     pid_t sid;              // Session ID
-    
+
     atomic_int state;       // Task state (RUNNING, ZOMBIE, etc.)
     pthread_t thread;       // Thread handle
-    
+
     iox_files_t *files;     // File descriptor table
     iox_fs_t *fs;           // Filesystem context (cwd, root)
     iox_sighand_t *sighand; // Signal handlers
-    
+
     // Tree links
     struct iox_task *parent;
     struct iox_task *children;

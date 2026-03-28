@@ -66,12 +66,16 @@ typedef enum {
  * FLAGS
  * ============================================================================ */
 
-/* File open flags - additional to standard fcntl.h */
+/* File open flags - additional to standard fcntl.h
+ * Note: These may be defined in linux/fcntl.h as well, so we guard them */
+#ifndef IOX_O_CLOEXEC_DEFINED
+#define IOX_O_CLOEXEC_DEFINED
 #define IOX_O_CLOEXEC       0x80000     /* Close on exec */
 #define IOX_O_DIRECTORY     0x20000     /* Must be directory */
 #define IOX_O_NOFOLLOW      0x40000     /* Don't follow symlinks */
 #define IOX_O_PATH          0x2000000   /* Path only, no I/O */
 #define IOX_O_TMPFILE       0x404000    /* Create unnamed temp file */
+#endif
 
 /* Memory protection flags - additional to standard mman.h */
 #define IOX_PROT_GROWSDOWN  0x01000000  /* Stack grows down */

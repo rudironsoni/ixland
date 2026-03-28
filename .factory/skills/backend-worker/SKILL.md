@@ -180,9 +180,9 @@ int iox_syscall_name(int arg) {
         errno = EINVAL;
         return -1;
     }
-    
+
     // Implementation
-    
+
     return result;
 }
 ```
