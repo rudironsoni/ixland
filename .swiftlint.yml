@@ -99,6 +99,8 @@ function_parameter_count:
   warning: 5
   error: 8
 
+# Naming Conventions
+# Swift naming follows standard Swift guidelines enforced by SwiftLint
 identifier_name:
   min_length:
     warning: 2
@@ -114,6 +116,24 @@ identifier_name:
     - i
     - j
     - k
+  # Enforce consistent naming patterns
+  validates_start_with_lowercase: warning
+
+# Type naming conventions
+type_name:
+  min_length:
+    warning: 3
+    error: 2
+  max_length:
+    warning: 40
+    error: 50
+  # Enforce PascalCase for types
+  validates_start_with_uppercase: warning
+  # Exclude common abbreviations
+  excluded:
+    - ID
+    - URL
+    - UUID
 
 large_tuple:
   warning: 3

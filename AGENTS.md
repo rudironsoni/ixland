@@ -319,14 +319,69 @@ Use pre-commit hooks during development for fast feedback, CI for comprehensive 
 
 ### C Code Naming Conventions
 
-- **Structs/Types**: `iox_` prefix with lowercase (e.g., `iox_task_t`)
-- **Functions**: `iox_` prefix with lowercase (e.g., `iox_task_alloc()`)
-- **Macros**: UPPER_CASE (e.g., `IOX_MAX_NAME`)
-- **Constants**: UPPER_CASE (e.g., `IOX_NSIG`)
+All C code follows strict naming conventions enforced by clang-tidy:
+
+| Construct | Pattern | Example |
+|-----------|---------|---------|
+| **Functions** | `iox_lowercase()` | `iox_task_alloc()`, `iox_pid_alloc()` |
+| **Structs/Types** | `iox_lowercase_t` | `iox_task_t`, `iox_files_t` |
+| **Typedefs** | `iox_lowercase_t` | `iox_pid_t`, `iox_mode_t` |
+| **Macros** | `IOX_UPPER_CASE` | `IOX_MAX_NAME`, `IOX_NSIG` |
+| **Enum Types** | `iox_lowercase` | `iox_task_state_t` |
+| **Enum Values** | `IOX_PREFIX_VALUE` | `IOX_TASK_RUNNING`, `IOX_MAX_FD` |
+| **Constants** | `IOX_UPPER_CASE` | `IOX_MAX_PATH`, `IOX_MAX_ARGS` |
+| **Global Variables** | `iox_lowercase` | `iox_current_task` |
+| **Parameters** | `lowercase` | `task`, `pid`, `fd` |
+
+**Enforcement:**
+- clang-tidy checks naming on every build
+- CI validates naming conventions in `naming-c` job
+- Pre-commit hooks check staged files
+
+**Check naming:**
+```bash
+./scripts/check-naming.sh
+./scripts/check-naming.sh --strict  # Exit with error on violations
+```
+
+**Exceptions:**
+- `main()` function
+- `test_*` functions in test files
+- Standard library callbacks
+- Platform-specific entry points (e.g., `ios_system_*`)
 
 ### Swift Code Naming Conventions
 
-- Follow standard Swift naming guidelines
-- Use PascalCase for types (e.g., `ContentView`)
-- Use camelCase for functions and variables
-- Private outlets and actions marked accordingly
+Swift code follows standard Swift guidelines enforced by SwiftLint:
+
+| Construct | Pattern | Example |
+|-----------|---------|---------|
+| **Types (classes/structs/enums)** | `PascalCase` | `ContentView`, `TerminalManager` |
+| **Protocols** | `PascalCase` | `CommandExecutable` |
+| **Functions** | `camelCase` | `loadView()`, `executeCommand()` |
+| **Variables/Properties** | `camelCase` | `currentDirectory`, `taskCount` |
+| **Constants** | `camelCase` | `defaultTimeout`, `maxBufferSize` |
+| **Enum Cases** | `camelCase` | `.running`, `.completed` |
+| **Private IBOutlet** | `camelCase` | `terminalView`, `inputField` |
+| **Private IBAction** | `camelCase` with action verb | `handleInput()`, `dismissKeyboard()` |
+
+**Enforcement:**
+- SwiftLint validates naming on every build
+- CI validates naming conventions in `naming-swift` job
+- Identifier minimum length: 2 characters
+- Type names must start with uppercase
+- Function/variable names must start with lowercase
+
+### Naming Convention Rationale
+
+**Why `iox_` prefix for C APIs?**
+1. **Namespace isolation**: Prevents symbol collisions
+2. **Clarity**: Makes iXland APIs instantly recognizable
+3. **Consistency**: All public APIs follow same pattern
+4. **Future-proof**: Allows coexistence with other libraries
+
+**Why strict enforcement?**
+1. **Maintainability**: Easy to identify code origin
+2. **Documentation**: Naming conveys API boundaries
+3. **Tooling**: Enables automated analysis
+4. **Onboarding**: New developers learn conventions quickly

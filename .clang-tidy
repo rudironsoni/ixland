@@ -27,6 +27,10 @@ HeaderFilterRegex: '.*'
 FormatStyle: file
 
 CheckOptions:
+  # ============================================================================
+  # Naming Conventions - Enforced for iXland Code Consistency
+  # ============================================================================
+  # All public APIs must use iox_ prefix
   - key:   readability-identifier-naming.StructCase
     value: lower_case
   - key:   readability-identifier-naming.StructPrefix
@@ -35,18 +39,47 @@ CheckOptions:
     value: lower_case
   - key:   readability-identifier-naming.FunctionPrefix
     value: iox_
+  - key:   readability-identifier-naming.FunctionIgnoredRegexp
+    value: "^(main|test_|ios_|ios_system_|executeInC)"
   - key:   readability-identifier-naming.VariableCase
     value: lower_case
+  - key:   readability-identifier-naming.VariableIgnoredRegexp
+    value: "^[A-Z_]+$"  # Allow ALL_CAPS for constants
   - key:   readability-identifier-naming.MacroCase
     value: UPPER_CASE
   - key:   readability-identifier-naming.EnumCase
     value: lower_case
+  - key:   readability-identifier-naming.EnumPrefix
+    value: iox_
   - key:   readability-identifier-naming.EnumConstantCase
     value: UPPER_CASE
+  - key:   readability-identifier-naming.EnumConstantPrefix
+    value: IOX_
   - key:   readability-identifier-naming.TypedefCase
     value: lower_case
   - key:   readability-identifier-naming.TypedefSuffix
     value: _t
+  - key:   readability-identifier-naming.TypedefPrefix
+    value: iox_
+  - key:   readability-identifier-naming.GlobalConstantCase
+    value: UPPER_CASE
+  - key:   readability-identifier-naming.GlobalConstantPrefix
+    value: IOX_
+  - key:   readability-identifier-naming.LocalConstantCase
+    value: UPPER_CASE
+  - key:   readability-identifier-naming.ParameterCase
+    value: lower_case
+  - key:   readability-identifier-naming.MemberCase
+    value: lower_case
+  - key:   readability-identifier-naming.MemberSuffix
+    value: _
+  - key:   readability-identifier-naming.ConstantMemberCase
+    value: UPPER_CASE
+  - key:   readability-identifier-naming.ConstantMemberSuffix
+    value: _
+  # ============================================================================
+  # Complexity and Size Limits
+  # ============================================================================
   - key:   readability-function-cognitive-complexity.Threshold
     value: 25
   - key:   readability-function-size.LineThreshold
