@@ -104,6 +104,8 @@ target_include_directories(iox-core
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/native>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/drivers/tty>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/iox/internal>
+    PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/wamr/include>
 )
 
 # Link to boundary targets if available in monorepo build
