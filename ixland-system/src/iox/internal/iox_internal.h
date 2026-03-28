@@ -35,6 +35,12 @@
 #include <iox/iox_types.h>
 #endif
 
+/* Include poll/epoll headers directly to avoid system header conflicts */
+#define _LINUX_POLL_H
+#define _LINUX_EPOLL_H
+#include "../../../ixland-libc/include/linux/poll.h"
+#include "../../../ixland-libc/include/linux/epoll.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -720,6 +726,24 @@ char **iox_environ(void);
 int iox_chdir(const char *path);
 int iox_fchdir(int fd);
 char *iox_getcwd(char *buf, size_t size);
+
+/* I/O Multiplexing */
+int iox_select(int nfds, linux_fd_set_t *readfds, linux_fd_set_t *writefds,
+               linux_fd_set_t *exceptfds, struct linux_timeval *timeout);
+int iox_pselect(int nfds, linux_fd_set_t *readfds, linux_fd_set_t *writefds,
+                linux_fd_set_t *exceptfds, const struct linux_timespec *timeout,
+                const linux_sigset_t *sigmask);
+int iox_poll(struct linux_pollfd *fds, unsigned int nfds, int timeout);
+int iox_ppoll(struct linux_pollfd *fds, unsigned int nfds, const struct linux_timespec *timeout,
+              const linux_sigset_t *sigmask);
+int iox_epoll_create(int size);
+int iox_epoll_create1(int flags);
+int iox_epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+int iox_epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
+int iox_epoll_pwait(int epfd, struct epoll_event *events, int maxevents,
+                    int timeout, const struct iox_sigset *sigmask);
+int iox_epoll_pwait2(int epfd, struct epoll_event *events, int maxevents,
+                     const struct iox_timespec *timeout, const struct iox_sigset *sigmask);
 
 /* Pipes */
 int iox_pipe(int pipefd[2]);

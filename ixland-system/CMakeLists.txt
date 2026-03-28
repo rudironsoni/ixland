@@ -87,6 +87,7 @@ set(IOX_RUNTIME_SOURCES
 set(IOX_SYSCALL_SOURCES
     src/iox/core/iox_file_v2.c
     src/iox/core/iox_identity.c
+    src/iox/core/iox_poll.c
 )
 
 # Combined sources (without runtime - will be separate target)
@@ -223,6 +224,7 @@ if(IOX_BUILD_TESTS)
         Tests/unit/test_fork.c
         Tests/unit/test_file_syscalls.c
         Tests/unit/test_identity_syscalls.c
+        # Tests/unit/test_poll_syscalls.c  # TODO: needs type compatibility work
         # Tests/unit/test_directory_syscalls.c  # TODO: requires directory syscall implementation
     )
 
