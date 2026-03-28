@@ -4,17 +4,18 @@
  * Maps Linux socket calls to iOS Network.framework and BSD sockets
  */
 
-#include "../internal/iox_internal.h"
+#include <arpa/inet.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
+#include <unistd.h>
+
+#include "../internal/iox_internal.h"
 
 /* iOS Network framework includes */
 #import <Network/Network.h>
@@ -26,11 +27,11 @@
 /* Socket table entry - maps virtual fds to real iOS sockets */
 typedef struct {
     int used;
-    int domain;        /* AF_INET, AF_INET6, AF_UNIX */
-    int type;          /* SOCK_STREAM, SOCK_DGRAM */
-    int protocol;      /* IPPROTO_TCP, IPPROTO_UDP */
-    nw_connection_t connection;  /* iOS Network connection */
-    nw_listener_t listener;      /* iOS Network listener (for server) */
+    int domain;                 /* AF_INET, AF_INET6, AF_UNIX */
+    int type;                   /* SOCK_STREAM, SOCK_DGRAM */
+    int protocol;               /* IPPROTO_TCP, IPPROTO_UDP */
+    nw_connection_t connection; /* iOS Network connection */
+    nw_listener_t listener;     /* iOS Network listener (for server) */
     struct sockaddr_storage local_addr;
     struct sockaddr_storage remote_addr;
     socklen_t local_addr_len;
@@ -63,8 +64,9 @@ static int iox_socket_alloc(void) {
 }
 
 static void iox_socket_free(int fd) {
-    if (fd < 0 || fd >= IOX_MAX_SOCKETS) return;
-    
+    if (fd < 0 || fd >= IOX_MAX_SOCKETS)
+        return;
+
     pthread_mutex_lock(&socket_table_lock);
     if (socket_table[fd].used) {
         /* Release iOS Network resources */
@@ -81,7 +83,7 @@ static void iox_socket_free(int fd) {
     pthread_mutex_unlock(&socket_table_lock);
 }
 
-static iox_socket_entry_t* iox_socket_get(int fd) {
+static iox_socket_entry_t *iox_socket_get(int fd) {
     if (fd < 0 || fd >= IOX_MAX_SOCKETS) {
         errno = EBADF;
         return NULL;
@@ -101,10 +103,10 @@ int __iox_network_init_impl(void) {
     if (atomic_load(&network_initialized)) {
         return 0;
     }
-    
+
     /* Initialize socket table */
     memset(socket_table, 0, sizeof(socket_table));
-    
+
     atomic_store(&network_initialized, 1);
     return 0;
 }
@@ -113,7 +115,7 @@ int __iox_network_deinit_impl(void) {
     if (!atomic_load(&network_initialized)) {
         return 0;
     }
-    
+
     /* Close all sockets */
     pthread_mutex_lock(&socket_table_lock);
     for (int i = 0; i < IOX_MAX_SOCKETS; i++) {
@@ -128,7 +130,7 @@ int __iox_network_deinit_impl(void) {
     }
     memset(socket_table, 0, sizeof(socket_table));
     pthread_mutex_unlock(&socket_table_lock);
-    
+
     atomic_store(&network_initialized, 0);
     return 0;
 }
@@ -142,32 +144,32 @@ int __iox_socket_impl(int domain, int type, int protocol) {
     if (fd < 0) {
         return -1;
     }
-    
+
     iox_socket_entry_t *sock = &socket_table[fd];
     sock->domain = domain;
     sock->type = type;
     sock->protocol = protocol;
-    
+
     /* Map to iOS Network framework based on domain/type */
     switch (domain) {
-        case AF_INET:
-        case AF_INET6:
-            /* TCP/UDP sockets - use BSD sockets for now */
-            /* TODO: Implement using Network.framework for modern iOS */
-            break;
-            
-        case AF_UNIX:
-            /* Unix domain sockets - not supported on iOS */
-            errno = EAFNOSUPPORT;
-            iox_socket_free(fd);
-            return -1;
-            
-        default:
-            errno = EAFNOSUPPORT;
-            iox_socket_free(fd);
-            return -1;
+    case AF_INET:
+    case AF_INET6:
+        /* TCP/UDP sockets - use BSD sockets for now */
+        /* TODO: Implement using Network.framework for modern iOS */
+        break;
+
+    case AF_UNIX:
+        /* Unix domain sockets - not supported on iOS */
+        errno = EAFNOSUPPORT;
+        iox_socket_free(fd);
+        return -1;
+
+    default:
+        errno = EAFNOSUPPORT;
+        iox_socket_free(fd);
+        return -1;
     }
-    
+
     return fd;
 }
 
@@ -190,25 +192,25 @@ int __iox_connect_impl(int sockfd, const struct sockaddr *addr, socklen_t addrle
     if (!sock) {
         return -1;
     }
-    
+
     /* Validate address */
     if (!addr || addrlen == 0) {
         errno = EINVAL;
         return -1;
     }
-    
+
     /* Copy remote address */
     if (addrlen > sizeof(sock->remote_addr)) {
         addrlen = sizeof(sock->remote_addr);
     }
     memcpy(&sock->remote_addr, addr, addrlen);
     sock->remote_addr_len = addrlen;
-    
+
     /* For TCP sockets, create Network.framework connection */
     if (sock->type == SOCK_STREAM) {
         /* Create endpoint from address */
         nw_endpoint_t endpoint = NULL;
-        
+
         if (addr->sa_family == AF_INET) {
             struct sockaddr_in *sin = (struct sockaddr_in *)addr;
             char addr_str[INET_ADDRSTRLEN];
@@ -224,46 +226,46 @@ int __iox_connect_impl(int sockfd, const struct sockaddr *addr, socklen_t addrle
             snprintf(port_str, sizeof(port_str), "%u", ntohs(sin6->sin6_port));
             endpoint = nw_endpoint_create_host(addr_str, port_str);
         }
-        
+
         if (!endpoint) {
             errno = EINVAL;
             return -1;
         }
-        
+
         /* Create TCP parameters */
         nw_parameters_t params = nw_parameters_create_secure_tcp(
-            NW_PARAMETERS_DISABLE_PROTOCOL,
-            NW_PARAMETERS_DEFAULT_CONFIGURATION
-        );
-        
+            NW_PARAMETERS_DISABLE_PROTOCOL, NW_PARAMETERS_DEFAULT_CONFIGURATION);
+
         /* Create connection */
         sock->connection = nw_connection_create(endpoint, params);
         nw_release(endpoint);
         nw_release(params);
-        
+
         if (!sock->connection) {
             errno = ENOMEM;
             return -1;
         }
-        
+
         /* Start connection */
         nw_connection_set_queue(sock->connection, dispatch_get_main_queue());
-        
+
         dispatch_semaphore_t sem = dispatch_semaphore_create(0);
         __block int connect_error = 0;
-        
-        nw_connection_set_state_changed_handler(sock->connection, ^(nw_connection_state_t state, nw_error_t error) {
-            (void)error;
-            if (state == nw_connection_state_ready) {
-                connect_error = 0;
-            } else if (state == nw_connection_state_failed || state == nw_connection_state_cancelled) {
-                connect_error = -1;
-            }
-            dispatch_semaphore_signal(sem);
-        });
-        
+
+        nw_connection_set_state_changed_handler(
+            sock->connection, ^(nw_connection_state_t state, nw_error_t error) {
+              (void)error;
+              if (state == nw_connection_state_ready) {
+                  connect_error = 0;
+              } else if (state == nw_connection_state_failed ||
+                         state == nw_connection_state_cancelled) {
+                  connect_error = -1;
+              }
+              dispatch_semaphore_signal(sem);
+            });
+
         nw_connection_start(sock->connection);
-        
+
         /* Wait for connection with timeout */
         dispatch_time_t timeout = dispatch_time(DISPATCH_TIME_NOW, 30 * NSEC_PER_SEC);
         if (dispatch_semaphore_wait(sem, timeout) != 0) {
@@ -272,7 +274,7 @@ int __iox_connect_impl(int sockfd, const struct sockaddr *addr, socklen_t addrle
             errno = ETIMEDOUT;
             return -1;
         }
-        
+
         if (connect_error != 0) {
             nw_connection_cancel(sock->connection);
             sock->connection = NULL;
@@ -280,7 +282,7 @@ int __iox_connect_impl(int sockfd, const struct sockaddr *addr, socklen_t addrle
             return -1;
         }
     }
-    
+
     return 0;
 }
 
@@ -289,20 +291,20 @@ int __iox_bind_impl(int sockfd, const struct sockaddr *addr, socklen_t addrlen) 
     if (!sock) {
         return -1;
     }
-    
+
     /* Validate address */
     if (!addr || addrlen == 0) {
         errno = EINVAL;
         return -1;
     }
-    
+
     /* Copy local address */
     if (addrlen > sizeof(sock->local_addr)) {
         addrlen = sizeof(sock->local_addr);
     }
     memcpy(&sock->local_addr, addr, addrlen);
     sock->local_addr_len = addrlen;
-    
+
     return 0;
 }
 
@@ -311,41 +313,39 @@ int __iox_listen_impl(int sockfd, int backlog) {
     if (!sock) {
         return -1;
     }
-    
+
     (void)backlog;
-    
+
     /* For TCP sockets, create listener */
     if (sock->type != SOCK_STREAM) {
         errno = EOPNOTSUPP;
         return -1;
     }
-    
+
     /* Create parameters */
-    nw_parameters_t params = nw_parameters_create_secure_tcp(
-        NW_PARAMETERS_DEFAULT_CONFIGURATION,
-        NW_PARAMETERS_DISABLE_PROTOCOL
-    );
-    
+    nw_parameters_t params = nw_parameters_create_secure_tcp(NW_PARAMETERS_DEFAULT_CONFIGURATION,
+                                                             NW_PARAMETERS_DISABLE_PROTOCOL);
+
     /* Create listener */
     sock->listener = nw_listener_create(params);
     nw_release(params);
-    
+
     if (!sock->listener) {
         errno = ENOMEM;
         return -1;
     }
-    
+
     /* Configure listener */
     nw_listener_set_queue(sock->listener, dispatch_get_main_queue());
     nw_listener_set_new_connection_handler(sock->listener, ^(nw_connection_t connection) {
-        /* Handle new connection - store for accept */
-        /* TODO: Implement accept queue */
-        nw_release(connection);
+      /* Handle new connection - store for accept */
+      /* TODO: Implement accept queue */
+      nw_release(connection);
     });
-    
+
     /* Start listener */
     nw_listener_start(sock->listener);
-    
+
     return 0;
 }
 
@@ -357,12 +357,12 @@ int __iox_accept_impl(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
 
     (void)addr;
     (void)addrlen;
-    
+
     if (!sock->listener) {
         errno = EINVAL;
         return -1;
     }
-    
+
     /* TODO: Implement accept queue */
     errno = EAGAIN;
     return -1;
@@ -382,48 +382,48 @@ ssize_t __iox_send_impl(int sockfd, const void *buf, size_t len, int flags) {
     if (!sock) {
         return -1;
     }
-    
+
     if (!buf || len == 0) {
         return 0;
     }
-    
+
     (void)flags;
-    
+
     if (!sock->connection) {
         errno = ENOTCONN;
         return -1;
     }
-    
+
     /* Create data */
     dispatch_data_t data = dispatch_data_create(buf, len, NULL, DISPATCH_DATA_DESTRUCTOR_DEFAULT);
     if (!data) {
         errno = ENOMEM;
         return -1;
     }
-    
+
     /* Send data */
     dispatch_semaphore_t sem = dispatch_semaphore_create(0);
     __block ssize_t bytes_sent = 0;
-    
-    nw_connection_send(sock->connection, data, NW_CONNECTION_DEFAULT_MESSAGE_CONTEXT, true, 
-        ^(nw_error_t error) {
-            if (error) {
-                bytes_sent = -1;
-            } else {
-                bytes_sent = len;
-            }
-            dispatch_semaphore_signal(sem);
-        });
-    
+
+    nw_connection_send(sock->connection, data, NW_CONNECTION_DEFAULT_MESSAGE_CONTEXT, true,
+                       ^(nw_error_t error) {
+                         if (error) {
+                             bytes_sent = -1;
+                         } else {
+                             bytes_sent = len;
+                         }
+                         dispatch_semaphore_signal(sem);
+                       });
+
     dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
     dispatch_release(sem);
     dispatch_release(data);
-    
+
     if (bytes_sent < 0) {
         errno = EPIPE;
         return -1;
     }
-    
+
     return bytes_sent;
 }
 
@@ -432,67 +432,69 @@ ssize_t __iox_recv_impl(int sockfd, void *buf, size_t len, int flags) {
     if (!sock) {
         return -1;
     }
-    
+
     if (!buf || len == 0) {
         return 0;
     }
-    
+
     (void)flags;
-    
+
     if (!sock->connection) {
         errno = ENOTCONN;
         return -1;
     }
-    
+
     /* Receive data */
     dispatch_semaphore_t sem = dispatch_semaphore_create(0);
     __block ssize_t bytes_received = 0;
-    
-    nw_connection_receive(sock->connection, 1, len, 
-        ^(dispatch_data_t content, nw_content_context_t context, bool is_complete, nw_error_t error) {
-            (void)context;
-            (void)is_complete;
-            if (content) {
-                const void *data_ptr = NULL;
-                size_t data_len = 0;
-                
-                dispatch_data_t mapped = dispatch_data_create_map(content, &data_ptr, &data_len);
-                if (mapped && data_ptr && data_len > 0) {
-                    size_t copy_len = data_len < len ? data_len : len;
-                    memcpy(buf, data_ptr, copy_len);
-                    bytes_received = copy_len;
-                    dispatch_release(mapped);
-                }
-            }
-            
-            if (error) {
-                bytes_received = -1;
-            }
-            
-            dispatch_semaphore_signal(sem);
-        });
-    
+
+    nw_connection_receive(sock->connection, 1, len,
+                          ^(dispatch_data_t content, nw_content_context_t context, bool is_complete,
+                            nw_error_t error) {
+                            (void)context;
+                            (void)is_complete;
+                            if (content) {
+                                const void *data_ptr = NULL;
+                                size_t data_len = 0;
+
+                                dispatch_data_t mapped =
+                                    dispatch_data_create_map(content, &data_ptr, &data_len);
+                                if (mapped && data_ptr && data_len > 0) {
+                                    size_t copy_len = data_len < len ? data_len : len;
+                                    memcpy(buf, data_ptr, copy_len);
+                                    bytes_received = copy_len;
+                                    dispatch_release(mapped);
+                                }
+                            }
+
+                            if (error) {
+                                bytes_received = -1;
+                            }
+
+                            dispatch_semaphore_signal(sem);
+                          });
+
     dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
     dispatch_release(sem);
-    
+
     if (bytes_received < 0) {
         errno = ECONNRESET;
         return -1;
     }
-    
+
     return bytes_received;
 }
 
 ssize_t __iox_sendto_impl(int sockfd, const void *buf, size_t len, int flags,
-                         const struct sockaddr *dest_addr, socklen_t addrlen) {
+                          const struct sockaddr *dest_addr, socklen_t addrlen) {
     /* For connectionless sockets */
     (void)dest_addr;
     (void)addrlen;
     return __iox_send_impl(sockfd, buf, len, flags);
 }
 
-ssize_t __iox_recvfrom_impl(int sockfd, void *buf, size_t len, int flags,
-                           struct sockaddr *src_addr, socklen_t *addrlen) {
+ssize_t __iox_recvfrom_impl(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr,
+                            socklen_t *addrlen) {
     /* For connectionless sockets */
     (void)src_addr;
     (void)addrlen;
@@ -503,37 +505,36 @@ ssize_t __iox_recvfrom_impl(int sockfd, void *buf, size_t len, int flags,
  * SOCKET OPTIONS
  * ============================================================================ */
 
-int __iox_setsockopt_impl(int sockfd, int level, int optname, 
-                         const void *optval, socklen_t optlen) {
+int __iox_setsockopt_impl(int sockfd, int level, int optname, const void *optval,
+                          socklen_t optlen) {
     iox_socket_entry_t *sock = iox_socket_get(sockfd);
     if (!sock) {
         return -1;
     }
-    
+
     (void)level;
     (void)optname;
     (void)optval;
     (void)optlen;
-    
+
     /* Socket options not fully implemented in this version */
     return 0;
 }
 
-int __iox_getsockopt_impl(int sockfd, int level, int optname,
-                         void *optval, socklen_t *optlen) {
+int __iox_getsockopt_impl(int sockfd, int level, int optname, void *optval, socklen_t *optlen) {
     iox_socket_entry_t *sock = iox_socket_get(sockfd);
     if (!sock) {
         return -1;
     }
-    
+
     (void)level;
     (void)optname;
-    
+
     if (optval && optlen && *optlen >= sizeof(int)) {
-        *(int*)optval = 0;
+        *(int *)optval = 0;
         *optlen = sizeof(int);
     }
-    
+
     return 0;
 }
 
@@ -552,7 +553,7 @@ int __iox_inet_pton_impl(int af, const char *src, void *dst) {
     }
 }
 
-const char* __iox_inet_ntop_impl(int af, const void *src, char *dst, socklen_t size) {
+const char *__iox_inet_ntop_impl(int af, const void *src, char *dst, socklen_t size) {
     if (af == AF_INET) {
         return inet_ntop(AF_INET, src, dst, size);
     } else if (af == AF_INET6) {
@@ -572,14 +573,14 @@ int __iox_shutdown_impl(int sockfd, int how) {
     if (!sock) {
         return -1;
     }
-    
+
     (void)how;
-    
+
     if (sock->connection) {
         nw_connection_cancel(sock->connection);
         sock->connection = NULL;
     }
-    
+
     return 0;
 }
 
@@ -628,18 +629,16 @@ ssize_t iox_sendto(int sockfd, const void *buf, size_t len, int flags,
     return __iox_sendto_impl(sockfd, buf, len, flags, dest_addr, addrlen);
 }
 
-ssize_t iox_recvfrom(int sockfd, void *buf, size_t len, int flags,
-                     struct sockaddr *src_addr, socklen_t *addrlen) {
+ssize_t iox_recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr,
+                     socklen_t *addrlen) {
     return __iox_recvfrom_impl(sockfd, buf, len, flags, src_addr, addrlen);
 }
 
-int iox_setsockopt(int sockfd, int level, int optname, 
-                   const void *optval, socklen_t optlen) {
+int iox_setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen) {
     return __iox_setsockopt_impl(sockfd, level, optname, optval, optlen);
 }
 
-int iox_getsockopt(int sockfd, int level, int optname,
-                   void *optval, socklen_t *optlen) {
+int iox_getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen) {
     return __iox_getsockopt_impl(sockfd, level, optname, optval, optlen);
 }
 
@@ -651,7 +650,7 @@ int iox_inet_pton(int af, const char *src, void *dst) {
     return __iox_inet_pton_impl(af, src, dst);
 }
 
-const char* iox_inet_ntop(int af, const void *src, char *dst, socklen_t size) {
+const char *iox_inet_ntop(int af, const void *src, char *dst, socklen_t size) {
     return __iox_inet_ntop_impl(af, src, dst, size);
 }
 

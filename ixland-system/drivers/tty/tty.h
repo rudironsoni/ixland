@@ -1,9 +1,9 @@
 #ifndef IOX_TTY_H
 #define IOX_TTY_H
 
-#include <termios.h>
-#include <stdbool.h>
 #include <pthread.h>
+#include <stdbool.h>
+#include <termios.h>
 
 #ifdef __cplusplus
 extern "C" {
