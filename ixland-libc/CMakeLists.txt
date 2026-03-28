@@ -37,10 +37,31 @@ target_include_directories(ixland-libc-core
 target_link_libraries(ixland-libc-core PUBLIC ixland-libc-headers)
 
 # ============================================================================
+# USERSDB IMPLEMENTATION TARGET
+# ============================================================================
+
+# User and group database implementation
+# Self-contained stub implementations that return ENOSYS for
+# functions requiring kernel/runtime integration
+add_library(ixland-libc-usersdb STATIC
+    src/usersdb/grp.c
+    src/usersdb/pwd.c
+)
+
+target_include_directories(ixland-libc-usersdb
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
+# Usersdb depends on headers for public API definitions
+target_link_libraries(ixland-libc-usersdb PUBLIC ixland-libc-headers)
+
+# ============================================================================
 # INSTALLATION
 # ============================================================================
 
-install(TARGETS ixland-libc-headers ixland-libc-core
+install(TARGETS ixland-libc-headers ixland-libc-core ixland-libc-usersdb
     EXPORT ixland-libc-targets
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
@@ -65,6 +86,11 @@ if(IXLAND_LIBC_BUILD_TESTS)
     add_executable(ixland-libc-test tests/test_core_smoke.c)
     target_link_libraries(ixland-libc-test PRIVATE ixland-libc-core)
     message(STATUS "ixland-libc: Tests enabled (ixland-libc-test)")
+
+    add_executable(ixland-libc-usersdb-test tests/test_usersdb_smoke.c)
+    target_link_libraries(ixland-libc-usersdb-test PRIVATE ixland-libc-usersdb)
+    message(STATUS "ixland-libc: Usersdb tests enabled (ixland-libc-usersdb-test)")
 endif()
 
 message(STATUS "ixland-libc: Headers and core implementation configured")
+message(STATUS "ixland-libc: Users database implementation configured (ixland-libc-usersdb)")

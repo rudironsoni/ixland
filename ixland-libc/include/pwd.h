@@ -10,8 +10,8 @@
 #include <sys/types.h>
 #include <stddef.h>
 
-/* Include system pwd.h first to get struct passwd */
-#include <pwd.h>
+/* Get struct passwd from system headers */
+#include_next <pwd.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,9 +29,9 @@ extern struct passwd *ixland_getpwuid(uid_t uid);
  * ============================================================================ */
 
 extern int ixland_getpwnam_r(const char *name, struct passwd *pwd,
-                              char *buf, size_t buflen, struct passwd **result);
+                             char *buf, size_t buflen, struct passwd **result);
 extern int ixland_getpwuid_r(uid_t uid, struct passwd *pwd,
-                              char *buf, size_t buflen, struct passwd **result);
+                             char *buf, size_t buflen, struct passwd **result);
 
 /* ============================================================================
  * Database Iteration
@@ -40,6 +40,22 @@ extern int ixland_getpwuid_r(uid_t uid, struct passwd *pwd,
 extern void ixland_setpwent(void);
 extern struct passwd *ixland_getpwent(void);
 extern void ixland_endpwent(void);
+
+/* ============================================================================
+ * Legacy Compatibility Macros
+ * ============================================================================ */
+
+#define getpwnam(name)          ixland_getpwnam(name)
+#define getpwuid(uid)           ixland_getpwuid(uid)
+
+#define getpwnam_r(name, pwd, buf, buflen, result) \
+                                ixland_getpwnam_r(name, pwd, buf, buflen, result)
+#define getpwuid_r(uid, pwd, buf, buflen, result) \
+                                ixland_getpwuid_r(uid, pwd, buf, buflen, result)
+
+#define setpwent()              ixland_setpwent()
+#define getpwent()              ixland_getpwent()
+#define endpwent()              ixland_endpwent()
 
 #ifdef __cplusplus
 }
