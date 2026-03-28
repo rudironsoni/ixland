@@ -15,7 +15,9 @@ ixland-system/Tests/unit/test_hello.c
 ixland-system/Tests/unit/test_process_real.c
 ixland-system/Tests/unit/test_signal_pending.c
 ixland-system/Tests/unit/test_basic.c
+ixland-system/Tests/unit/test_poll_syscalls.c
 ixland-system/Tests/unit/test_simple.c
+ixland-system/Tests/unit/test_identity_syscalls.c
 ixland-system/Tests/unit/test_signal.c
 ixland-system/Tests/unit/test_exec.c
 ixland-system/Tests/unit/test_fork.c
@@ -60,8 +62,10 @@ ixland-system/src/iox/core/iox_process.c
 ixland-system/src/iox/core/iox_libc_delegate.c
 ixland-system/src/iox/core/iox_file_v2.c
 ixland-system/src/iox/core/iox_minimal.c
+ixland-system/src/iox/core/iox_poll.c
 ixland-system/src/iox/core/iox_init.c
 ixland-system/src/iox/core/iox_directory.c
+ixland-system/src/iox/core/iox_identity.c
 ixland-system/src/iox/internal/iox_internal.h
 ixland-system/src/vfs.c
 ixland-libc/include/pwd.h

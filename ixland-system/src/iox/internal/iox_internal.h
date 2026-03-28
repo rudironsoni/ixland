@@ -36,8 +36,7 @@
 #endif
 
 /* Include poll/epoll headers directly to avoid system header conflicts */
-#define _LINUX_POLL_H
-#define _LINUX_EPOLL_H
+/* Note: Do NOT define _LINUX_POLL_H or _LINUX_EPOLL_H here - the headers define their own guards */
 #include "../../../ixland-libc/include/linux/poll.h"
 #include "../../../ixland-libc/include/linux/epoll.h"
 
