@@ -7,23 +7,25 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <pthread.h>
 #include <signal.h>
+#include <stdatomic.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/event.h>
-#include <sys/time.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <unistd.h>
-#include <pthread.h>
-#include <stdatomic.h>
 
 #include "../internal/iox_internal.h"
 
-/* Prevent system headers from being included for poll/epoll types */
+/* Include poll/epoll headers from ixland-libc boundary
+ * These are public headers installed to include/linux/
+ * Include paths are set by CMake: ixland-libc/include */
 #define _LINUX_POLL_H
 #define _LINUX_EPOLL_H
-#include "../../../ixland-libc/include/linux/poll.h"
-#include "../../../ixland-libc/include/linux/epoll.h"
+#include <linux/epoll.h>
+#include <linux/poll.h>
 
 /* ============================================================================
  * POLL IMPLEMENTATION
@@ -122,13 +124,15 @@ static int iox_poll_kqueue(struct linux_pollfd *fds, unsigned int nfds, int time
 
         /* Add read filter if requested */
         if (fds[i].events & (IOX_POLLIN | IOX_POLLRDNORM | IOX_POLLRDBAND | IOX_POLLPRI)) {
-            EV_SET(&changelist[nchanges], fds[i].fd, EVFILT_READ, EV_ADD, 0, 0, (void *)(uintptr_t)i);
+            EV_SET(&changelist[nchanges], fds[i].fd, EVFILT_READ, EV_ADD, 0, 0,
+                   (void *)(uintptr_t)i);
             nchanges++;
         }
 
         /* Add write filter if requested */
         if (fds[i].events & (IOX_POLLOUT | IOX_POLLWRNORM | IOX_POLLWRBAND)) {
-            EV_SET(&changelist[nchanges], fds[i].fd, EVFILT_WRITE, EV_ADD, 0, 0, (void *)(uintptr_t)i);
+            EV_SET(&changelist[nchanges], fds[i].fd, EVFILT_WRITE, EV_ADD, 0, 0,
+                   (void *)(uintptr_t)i);
             nchanges++;
         }
     }
@@ -183,7 +187,8 @@ static int iox_poll_kqueue(struct linux_pollfd *fds, unsigned int nfds, int time
     for (int i = 0; i < nevents; i++) {
         unsigned int idx = (unsigned int)(uintptr_t)eventlist[i].udata;
         if (idx < nfds) {
-            fds[idx].revents |= iox_kfilter_to_poll_revents(eventlist[i].filter, eventlist[i].flags);
+            fds[idx].revents |=
+                iox_kfilter_to_poll_revents(eventlist[i].filter, eventlist[i].flags);
             ready_count++;
         }
     }
@@ -390,9 +395,12 @@ int iox_select(int nfds, linux_fd_set_t *readfds, linux_fd_set_t *writefds,
     }
 
     /* Clear output fd_sets */
-    if (readfds) IOX_FD_ZERO(readfds);
-    if (writefds) IOX_FD_ZERO(writefds);
-    if (exceptfds) IOX_FD_ZERO(exceptfds);
+    if (readfds)
+        IOX_FD_ZERO(readfds);
+    if (writefds)
+        IOX_FD_ZERO(writefds);
+    if (exceptfds)
+        IOX_FD_ZERO(exceptfds);
 
     /* Wait for events */
     int nevents = kevent(kq, changelist, nchanges, eventlist, nchanges, tsp);
@@ -410,20 +418,24 @@ int iox_select(int nfds, linux_fd_set_t *readfds, linux_fd_set_t *writefds,
     int ready_count = 0;
     for (int i = 0; i < nevents; i++) {
         int fd = (int)(intptr_t)eventlist[i].udata - 1;
-        if (fd < 0 || fd >= nfds) continue;
+        if (fd < 0 || fd >= nfds)
+            continue;
 
         if (eventlist[i].filter == EVFILT_READ) {
             if (eventlist[i].flags & EV_OOBAND) {
                 /* Exception condition */
-                if (exceptfds) IOX_FD_SET(fd, exceptfds);
+                if (exceptfds)
+                    IOX_FD_SET(fd, exceptfds);
             } else {
                 /* Read ready */
-                if (readfds) IOX_FD_SET(fd, readfds);
+                if (readfds)
+                    IOX_FD_SET(fd, readfds);
             }
             ready_count++;
         } else if (eventlist[i].filter == EVFILT_WRITE) {
             /* Write ready */
-            if (writefds) IOX_FD_SET(fd, writefds);
+            if (writefds)
+                IOX_FD_SET(fd, writefds);
             ready_count++;
         }
     }
@@ -482,30 +494,30 @@ int iox_pselect(int nfds, linux_fd_set_t *readfds, linux_fd_set_t *writefds,
 
 /* Epoll item - represents a registered file descriptor */
 typedef struct iox_epitem {
-    int fd;                           /* Registered file descriptor */
-    struct epoll_event event;         /* Registered events */
-    uint32_t registered_events;       /* Events currently registered with kqueue */
-    bool is_registered;               /* Is this item active? */
-    bool edge_triggered;              /* EPOLLET mode */
-    struct iox_epitem *next;          /* Hash table chaining */
-    struct iox_epitem *prev;          /* Hash table chaining */
+    int fd;                     /* Registered file descriptor */
+    struct epoll_event event;   /* Registered events */
+    uint32_t registered_events; /* Events currently registered with kqueue */
+    bool is_registered;         /* Is this item active? */
+    bool edge_triggered;        /* EPOLLET mode */
+    struct iox_epitem *next;    /* Hash table chaining */
+    struct iox_epitem *prev;    /* Hash table chaining */
 } iox_epitem_t;
 
 /* Epoll instance structure */
 typedef struct iox_epoll_instance {
-    int kq;                           /* kqueue descriptor */
-    uint32_t flags;                   /* Creation flags (EPOLL_CLOEXEC) */
-    int size;                         /* Original size hint */
-    atomic_int ref_count;             /* Reference count */
-    pthread_mutex_t lock;             /* Instance lock */
+    int kq;               /* kqueue descriptor */
+    uint32_t flags;       /* Creation flags (EPOLL_CLOEXEC) */
+    int size;             /* Original size hint */
+    atomic_int ref_count; /* Reference count */
+    pthread_mutex_t lock; /* Instance lock */
 
     /* Hash table for fast fd lookup (size is power of 2) */
-    iox_epitem_t **items;             /* Hash table buckets */
-    int hash_size;                    /* Number of buckets */
-    int item_count;                   /* Number of registered items */
+    iox_epitem_t **items; /* Hash table buckets */
+    int hash_size;        /* Number of buckets */
+    int item_count;       /* Number of registered items */
 
     /* Stats */
-    uint64_t total_events;            /* Total events returned */
+    uint64_t total_events; /* Total events returned */
 } iox_epoll_instance_t;
 
 /* Hash function for fd -> bucket */
@@ -558,7 +570,7 @@ static uint32_t iox_epoll_to_kqueue_flags(uint32_t epoll_events) {
     uint32_t kflags = 0;
 
     if (epoll_events & EPOLLET) {
-        kflags |= EV_CLEAR;  /* Edge-triggered */
+        kflags |= EV_CLEAR; /* Edge-triggered */
     }
     if (epoll_events & EPOLLONESHOT) {
         kflags |= EV_ONESHOT;
@@ -568,18 +580,15 @@ static uint32_t iox_epoll_to_kqueue_flags(uint32_t epoll_events) {
 }
 
 /* Convert epoll events to kqueue filters and build kevent changes */
-static int iox_epoll_build_kevents(struct kevent *changes, int max_changes,
-                                    int fd, uint32_t epoll_events,
-                                    void *udata, bool add_mode) {
+static int iox_epoll_build_kevents(struct kevent *changes, int max_changes, int fd,
+                                   uint32_t epoll_events, void *udata, bool add_mode) {
     int n = 0;
     uint32_t kflags = iox_epoll_to_kqueue_flags(epoll_events);
 
     /* Read events */
     if (epoll_events & (EPOLLIN | EPOLLRDNORM | EPOLLRDBAND | EPOLLPRI)) {
         if (n < max_changes) {
-            EV_SET(&changes[n], fd, EVFILT_READ,
-                   add_mode ? EV_ADD : EV_DELETE,
-                   0, 0, udata);
+            EV_SET(&changes[n], fd, EVFILT_READ, add_mode ? EV_ADD : EV_DELETE, 0, 0, udata);
             if (add_mode) {
                 changes[n].flags |= kflags;
             }
@@ -590,9 +599,7 @@ static int iox_epoll_build_kevents(struct kevent *changes, int max_changes,
     /* Write events */
     if (epoll_events & (EPOLLOUT | EPOLLWRNORM | EPOLLWRBAND)) {
         if (n < max_changes) {
-            EV_SET(&changes[n], fd, EVFILT_WRITE,
-                   add_mode ? EV_ADD : EV_DELETE,
-                   0, 0, udata);
+            EV_SET(&changes[n], fd, EVFILT_WRITE, add_mode ? EV_ADD : EV_DELETE, 0, 0, udata);
             if (add_mode) {
                 changes[n].flags |= kflags;
             }
@@ -705,7 +712,7 @@ int iox_epoll_create1(int flags) {
     ep->kq = kqueue();
     if (ep->kq < 0) {
         free(ep);
-        errno = EMFILE;  /* Or ENFILE depending on the error */
+        errno = EMFILE; /* Or ENFILE depending on the error */
         return -1;
     }
 
@@ -810,16 +817,15 @@ int iox_epoll_ctl(int epfd, int op, int fd, struct epoll_event *event) {
 
         /* Build kevent changes */
         struct kevent changes[2];
-        int nchanges = iox_epoll_build_kevents(changes, 2, fd,
-                                                event->events & ~EPOLLONESHOT,
-                                                item, true);
+        int nchanges =
+            iox_epoll_build_kevents(changes, 2, fd, event->events & ~EPOLLONESHOT, item, true);
 
         if (nchanges > 0) {
             int ret = kevent(ep->kq, changes, nchanges, NULL, 0, NULL);
             if (ret < 0) {
                 free(item);
                 pthread_mutex_unlock(&ep->lock);
-                errno = EPERM;  /* FD doesn't support epoll */
+                errno = EPERM; /* FD doesn't support epoll */
                 return -1;
             }
         }
@@ -839,9 +845,8 @@ int iox_epoll_ctl(int epfd, int op, int fd, struct epoll_event *event) {
 
         /* Remove from kqueue */
         struct kevent changes[2];
-        int nchanges = iox_epoll_build_kevents(changes, 2, fd,
-                                                item->registered_events,
-                                                item, false);
+        int nchanges =
+            iox_epoll_build_kevents(changes, 2, fd, item->registered_events, item, false);
         if (nchanges > 0) {
             kevent(ep->kq, changes, nchanges, NULL, 0, NULL);
         }
@@ -869,9 +874,8 @@ int iox_epoll_ctl(int epfd, int op, int fd, struct epoll_event *event) {
 
         /* Delete old registration first */
         struct kevent changes[2];
-        int nchanges = iox_epoll_build_kevents(changes, 2, fd,
-                                                item->registered_events,
-                                                item, false);
+        int nchanges =
+            iox_epoll_build_kevents(changes, 2, fd, item->registered_events, item, false);
         if (nchanges > 0) {
             kevent(ep->kq, changes, nchanges, NULL, 0, NULL);
         }
@@ -881,9 +885,8 @@ int iox_epoll_ctl(int epfd, int op, int fd, struct epoll_event *event) {
         item->edge_triggered = (event->events & EPOLLET) != 0;
 
         /* Add new registration */
-        nchanges = iox_epoll_build_kevents(changes, 2, fd,
-                                            event->events & ~EPOLLONESHOT,
-                                            item, true);
+        nchanges =
+            iox_epoll_build_kevents(changes, 2, fd, event->events & ~EPOLLONESHOT, item, true);
         if (nchanges > 0) {
             int ret = kevent(ep->kq, changes, nchanges, NULL, 0, NULL);
             if (ret < 0) {
@@ -921,8 +924,8 @@ int iox_epoll_wait(int epfd, struct epoll_event *events, int maxevents, int time
 /**
  * @brief Wait for events with signal mask
  */
-int iox_epoll_pwait(int epfd, struct epoll_event *events, int maxevents,
-                    int timeout, const struct iox_sigset *sigmask) {
+int iox_epoll_pwait(int epfd, struct epoll_event *events, int maxevents, int timeout,
+                    const struct iox_sigset *sigmask) {
     /* Validate parameters */
     if (!events || maxevents <= 0) {
         errno = EINVAL;
@@ -982,10 +985,11 @@ int iox_epoll_pwait(int epfd, struct epoll_event *events, int maxevents,
     int ready_count = 0;
     for (int i = 0; i < nevents && ready_count < maxevents; i++) {
         iox_epitem_t *item = (iox_epitem_t *)kevents[i].udata;
-        if (!item) continue;
+        if (!item)
+            continue;
 
-        events[ready_count].events = iox_kqueue_to_epoll_events(
-            kevents[i].filter, kevents[i].flags, (int)kevents[i].data);
+        events[ready_count].events =
+            iox_kqueue_to_epoll_events(kevents[i].filter, kevents[i].flags, (int)kevents[i].data);
 
         /* Copy user data from the registered event */
         memcpy(&events[ready_count].data, &item->event.data, sizeof(epoll_data_t));
@@ -994,9 +998,8 @@ int iox_epoll_pwait(int epfd, struct epoll_event *events, int maxevents,
         if (item->event.events & EPOLLONESHOT) {
             pthread_mutex_lock(&ep->lock);
             struct kevent changes[2];
-            int nchanges = iox_epoll_build_kevents(changes, 2, item->fd,
-                                                    item->registered_events,
-                                                    item, false);
+            int nchanges =
+                iox_epoll_build_kevents(changes, 2, item->fd, item->registered_events, item, false);
             if (nchanges > 0) {
                 kevent(ep->kq, changes, nchanges, NULL, 0, NULL);
             }
@@ -1028,6 +1031,5 @@ int iox_epoll_pwait2(int epfd, struct epoll_event *events, int maxevents,
         timeout_ms = (int)(timeout->tv_sec * 1000 + timeout->tv_nsec / 1000000);
     }
 
-    return iox_epoll_pwait(epfd, events, maxevents, timeout_ms,
-                           (const struct iox_sigset *)sigmask);
+    return iox_epoll_pwait(epfd, events, maxevents, timeout_ms, (const struct iox_sigset *)sigmask);
 }

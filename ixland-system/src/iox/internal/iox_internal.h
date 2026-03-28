@@ -35,10 +35,11 @@
 #include <iox/iox_types.h>
 #endif
 
-/* Include poll/epoll headers directly to avoid system header conflicts */
-/* Note: Do NOT define _LINUX_POLL_H or _LINUX_EPOLL_H here - the headers define their own guards */
-#include "../../../ixland-libc/include/linux/epoll.h"
-#include "../../../ixland-libc/include/linux/poll.h"
+/* Include poll/epoll headers from ixland-libc boundary
+ * These are public headers installed to include/linux/
+ * Include paths are set by CMake: ixland-libc/include */
+#include <linux/epoll.h>
+#include <linux/poll.h>
 
 #ifdef __cplusplus
 extern "C" {
