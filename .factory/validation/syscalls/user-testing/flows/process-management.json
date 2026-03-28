@@ -1,0 +1,85 @@
+{
+  "milestone": "syscalls",
+  "group": "process-management",
+  "assertions": [
+    "VAL-SYSCALL-001",
+    "VAL-SYSCALL-002",
+    "VAL-SYSCALL-003",
+    "VAL-SYSCALL-007",
+    "VAL-SYSCALL-008",
+    "VAL-SYSCALL-009",
+    "VAL-SYSCALL-010",
+    "VAL-SYSCALL-011",
+    "VAL-SYSCALL-012"
+  ],
+  "results": {
+    "VAL-SYSCALL-001": {
+      "status": "pass",
+      "evidence": [
+        "fork_creates_new_pid: PASS - Child has unique PID, parent receives child's PID, child receives 0",
+        "fork_copies_fd_table: PASS - FD table duplicated with reference counting",
+        "fork_inherits_signal_handlers: PASS - Signal handlers inherited by child",
+        "fork_copies_working_directory: PASS - CWD copied to child",
+        "fork_links_parent_child: PASS - Parent-child relationship properly linked"
+      ]
+    },
+    "VAL-SYSCALL-002": {
+      "status": "pass",
+      "evidence": [
+        "fork_respects_nproc_limit: PASS - NPROC limit checked and enforced"
+      ]
+    },
+    "VAL-SYSCALL-003": {
+      "status": "pass",
+      "evidence": [
+        "vfork_child_marked_correctly: PASS - vfork parent relationship correctly tracked"
+      ]
+    },
+    "VAL-SYSCALL-007": {
+      "status": "pass",
+      "evidence": [
+        "exit_sets_exit_status: PASS - Exit status properly set, zombie state entered",
+        "task_exit_status_flag: PASS - Exit flag correctly set",
+        "task_exit_signaled_flag: PASS - Signaled flag correctly set"
+      ]
+    },
+    "VAL-SYSCALL-008": {
+      "status": "pass",
+      "evidence": [
+        "wait_parent_observes_child_exit: PASS - Parent receives child PID and status",
+        "wait_signaled_child: PASS - Signal termination status correctly reported",
+        "wait_child_list_unlinked_after_reap: PASS - Zombie properly reaped"
+      ]
+    },
+    "VAL-SYSCALL-009": {
+      "status": "pass",
+      "evidence": [
+        "wnohang_live_child_returns_zero: PASS - WNOHANG returns 0 when no exited children",
+        "wnohang_exited_child_returns_pid: PASS - WNOHANG returns PID when child exited"
+      ]
+    },
+    "VAL-SYSCALL-010": {
+      "status": "pass",
+      "evidence": [
+        "wait_signaled_child: PASS - WIFSIGNALED works correctly"
+      ]
+    },
+    "VAL-SYSCALL-011": {
+      "status": "pass",
+      "evidence": [
+        "getpid_returns_current_pid: PASS - Returns correct PID from current task",
+        "getpid_getppid_consistent: PASS - Multiple calls return same value"
+      ]
+    },
+    "VAL-SYSCALL-012": {
+      "status": "pass",
+      "evidence": [
+        "getppid_returns_parent_pid: PASS - Returns parent PID correctly",
+        "init_task_self_parented: PASS - Init task properly self-parented"
+      ]
+    }
+  },
+  "toolsUsed": ["iox-core-tests"],
+  "frictions": [],
+  "blockers": []
+}

@@ -1,0 +1,50 @@
+{
+  "milestone": "syscalls",
+  "group": "process-groups",
+  "assertions": [
+    "VAL-SYSCALL-013",
+    "VAL-SYSCALL-014",
+    "VAL-SYSCALL-015",
+    "VAL-SYSCALL-016",
+    "VAL-SYSCALL-017"
+  ],
+  "results": {
+    "VAL-SYSCALL-013": {
+      "status": "pass",
+      "evidence": [
+        "pgrp_initial_task_leader_invariants: PASS - Process group correctly initialized",
+        "pgrp_fork_inheritance: PASS - Fork inherits process group",
+        "pgrp_multiple_children_same_group: PASS - Children in same process group as parent"
+      ]
+    },
+    "VAL-SYSCALL-014": {
+      "status": "pass",
+      "evidence": [
+        "pgrp_initial_task_leader_invariants: PASS - Process group can be set correctly"
+      ]
+    },
+    "VAL-SYSCALL-015": {
+      "status": "pass",
+      "evidence": [
+        "pgrp_child_lookup_by_pgid: PASS - Process group manipulation works",
+        "pgrp_session_invariants: PASS - Session and process group consistency maintained"
+      ]
+    },
+    "VAL-SYSCALL-016": {
+      "status": "pass",
+      "evidence": [
+        "pgrp_session_invariants: PASS - Session creation and management works",
+        "signal_killpg_basic_delivery: PASS - Process group signaling validates session handling"
+      ]
+    },
+    "VAL-SYSCALL-017": {
+      "status": "pass",
+      "evidence": [
+        "pgrp_session_invariants: PASS - Session ID retrieval works correctly"
+      ]
+    }
+  },
+  "toolsUsed": ["iox-core-tests"],
+  "frictions": [],
+  "blockers": []
+}
