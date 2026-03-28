@@ -7,8 +7,8 @@ This is the a-Shell Next modernization project following the plan in `docs/plans
 ## Current Module Structure
 
 ```
-a-shell-next/
-├── ashell-packages/          # ✅ Phase 1: Package Forge (COMPLETE)
+ixland/
+├── ixland-packages/          # ✅ Phase 1: Package Forge (COMPLETE)
 │   ├── ashell_package.sh     # Build system library (Termux-style)
 │   ├── build.sh              # Main build orchestration
 │   ├── hello/                # Reference package
@@ -16,7 +16,7 @@ a-shell-next/
 │   ├── scripts/              # Helper utilities
 │   └── README.md
 │
-├── ashell-core/              # ✅ Phase 1: Core Commands (COMPLETE)
+├── ixland-core/              # ✅ Phase 1: Core Commands (COMPLETE)
 │   ├── Sources/
 │   │   ├── Commands/
 │   │   │   └── pkg.swift     # Package manager command
@@ -25,10 +25,10 @@ a-shell-next/
 │   │       └── ArchiveExtractor.swift
 │   └── README.md
 │
-├── ios_system/               # TODO: Rename to ashell-system/
+├── ixland-system/            # iOS system layer (was ios_system)
 │   └── (existing ios_system code)
 │
-├── a-shell/                  # TODO: Rename to ashell-app/
+├── ixland-app/               # iOS app (was a-shell)
 │   └── (existing a-Shell app code - pkg code removed)
 │
 └── docs/
@@ -38,11 +38,11 @@ a-shell-next/
         └── 20260318-a-shell-next.md  # Master plan
 ```
 
-## Phase 1: Package Forge (ashell-packages) - Implemented
+## Phase 1: Package Forge (ixland-packages) - Implemented
 
 ### Created Files:
 
-1. **ashell-packages/ashell_package.sh** - Build system library
+1. **ixland-packages/ashell_package.sh** - Build system library
    - `ashell_step_extract_package()` - Download and verify SHA256
    - `ashell_step_patch_package()` - Apply patches in order
    - `ashell_step_configure()` - Run autotools/cmake
@@ -52,25 +52,25 @@ a-shell-next/
    - `ashell_step_generate_plist()` - Create command metadata
    - `ashell_step_codesign()` - Sign frameworks
 
-2. **ashell-packages/build.sh** - Main orchestration script
+2. **ixland-packages/build.sh** - Main orchestration script
    - Commands: build, clean, install, package, list
    - Usage: `./build.sh <package> [command]`
 
-3. **ashell-packages/hello/build.sh** - Reference package
+3. **ixland-packages/hello/build.sh** - Reference package
    - Demonstrates minimal iOS-compatible command
    - Shows ios_system.h integration pattern
 
-4. **ashell-packages/scripts/ashell-fix-shebang** - Shebang fixer utility
+4. **ixland-packages/scripts/ashell-fix-shebang** - Shebang fixer utility
    - Rewrites `#!/bin/sh` to `#!$PREFIX/bin/sh`
 
-5. **ashell-packages/README.md** - Documentation
+5. **ixland-packages/README.md** - Documentation
 
-6. **a-shell/a-Shell/PackageManager.swift** - Swift package manager actor
+6. **ixland-app/a-Shell/PackageManager.swift** - Swift package manager actor
    - Async package installation/removal
    - Registry tracking (JSON-based)
    - Command registration via ios_system APIs
 
-7. **a-shell/a-Shell/ExtraCommands.swift** - Added `@_cdecl("pkg")` function
+7. **ixland-app/a-Shell/ExtraCommands.swift** - Added `@_cdecl("pkg")` function
    - Subcommands: install, remove, update, list, search, info
    - Integrated with PackageManager
 
@@ -78,10 +78,10 @@ a-shell-next/
 
 ```bash
 # Build a package
-cd ashell-packages
+cd ixland-packages
 ./build.sh hello
 
-# In a-Shell app
+# In ixland app
 pkg install hello
 pkg list
 pkg remove hello
@@ -101,35 +101,35 @@ pkg remove hello
 - [x] Create docs/api/ios_system_contract.md
 - [ ] Create docs/guides/porting_guide.md
 - [ ] Create docs/SYSCALL_COMPATIBILITY.md
-- [ ] Rename ios_system/ → ashell-system/ (TODO)
+- [x] Rename ios_system/ → ixland-system/
 
 ### Phase 2: ios_system Contract & Documentation
-- [ ] Rename ios_system/ → ashell-system/
+- [x] Rename ios_system/ → ixland-system/
 - [ ] Document ios_system.h public APIs
 - [ ] Create docs/ios_system_contract.md
 - [ ] Create docs/porting_guide.md
 - [ ] Create docs/SYSCALL_COMPATIBILITY.md
 
 ### Phase 3: Codebase Modularization
-- [ ] Create ashell-shared/ (shared headers)
-- [ ] Create ashell-core/ (core command implementations)
-- [ ] Rename a-shell/ → ashell-app/
+- [ ] Create ixland-shared/ (shared headers)
+- [x] Create ixland-core/ (core command implementations)
+- [x] Rename a-shell/ → ixland-app/
 - [ ] Create Package.swift files for SPM integration
 
 ### Phase 4: Heavy Packages
-- [ ] ashell-runtimes/python-runtime/ (BeeWare-based)
-- [ ] ashell-runtimes/lua-runtime/
+- [ ] ixland-runtimes/python-runtime/ (BeeWare-based)
+- [ ] ixland-runtimes/lua-runtime/
 - [ ] Package recipes for Python, SSH
 
 ## Development Workflow
 
 ```bash
 # Build a package
-cd ashell-packages
+cd ixland-packages
 ./build.sh hello
 
 # Test the package
-# (Copy .build/hello/hello.framework to a-Shell app)
+# (Copy .build/hello/hello.framework to ixland-app)
 
 # Install via pkg command (in app)
 pkg install hello

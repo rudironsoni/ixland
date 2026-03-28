@@ -321,13 +321,13 @@ struct passwd {
     char *pw_shell;
 };
 
-struct passwd *a_shell_getpwnam(const char *name);
-struct passwd *a_shell_getpwuid(uid_t uid);
-int a_shell_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t buflen, struct passwd **result);
-int a_shell_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen, struct passwd **result);
-void a_shell_endpwent(void);
-struct passwd *a_shell_getpwent(void);
-void a_shell_setpwent(void);
+struct passwd *ixland_getpwnam(const char *name);
+struct passwd *ixland_getpwuid(uid_t uid);
+int ixland_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t buflen, struct passwd **result);
+int ixland_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen, struct passwd **result);
+void ixland_endpwent(void);
+struct passwd *ixland_getpwent(void);
+void ixland_setpwent(void);
 
 #endif
 ```
@@ -346,16 +346,16 @@ struct group {
     char **gr_mem;
 };
 
-struct group *a_shell_getgrnam(const char *name);
-struct group *a_shell_getgrgid(gid_t gid);
-int a_shell_getgrnam_r(const char *name, struct group *grp, char *buf, size_t buflen, struct group **result);
-int a_shell_getgrgid_r(gid_t gid, struct group *grp, char *buf, size_t buflen, struct group **result);
-void a_shell_endgrent(void);
-struct group *a_shell_getgrent(void);
-void a_shell_setgrent(void);
-int a_shell_getgroups(int size, gid_t list[]);
-int a_shell_setgroups(size_t size, const gid_t *list);
-int a_shell_initgroups(const char *user, gid_t group);
+struct group *ixland_getgrnam(const char *name);
+struct group *ixland_getgrgid(gid_t gid);
+int ixland_getgrnam_r(const char *name, struct group *grp, char *buf, size_t buflen, struct group **result);
+int ixland_getgrgid_r(gid_t gid, struct group *grp, char *buf, size_t buflen, struct group **result);
+void ixland_endgrent(void);
+struct group *ixland_getgrent(void);
+void ixland_setgrent(void);
+int ixland_getgroups(int size, gid_t list[]);
+int ixland_setgroups(size_t size, const gid_t *list);
+int ixland_initgroups(const char *user, gid_t group);
 
 #endif
 ```
