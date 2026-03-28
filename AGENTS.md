@@ -274,6 +274,47 @@ See `.github/workflows/code-quality.yml` for CI configuration.
 - `lint-swift` - Runs SwiftLint analysis
 - `lint-scripts` - Runs ShellCheck on shell scripts
 
+### Pre-commit Hooks
+
+Pre-commit hooks run automatically before each commit to ensure code quality.
+
+**Install hooks:**
+```bash
+./scripts/install-hooks.sh
+```
+
+**What hooks check:**
+- C/C++ code formatting (clang-format)
+- Swift code formatting (SwiftLint)
+- Shell script quality (ShellCheck)
+- Trailing whitespace detection
+- Large file warnings (>1MB)
+
+**Hooks location:** `.pre-commit-hooks/hooks/`
+
+**To bypass hooks temporarily:**
+```bash
+git commit --no-verify
+# or
+SKIP_CODE_QUALITY_CHECKS=1 git commit
+```
+
+**Uninstall hooks:**
+```bash
+./scripts/install-hooks.sh --uninstall
+```
+
+### Pre-commit vs CI
+
+| Check | Pre-commit | CI |
+|-------|-----------|-----|
+| Runs on | Staged files only | All files |
+| Speed | Fast | Complete |
+| Enforcement | Blocks commit | Blocks merge |
+| Best for | Development feedback | Final validation |
+
+Use pre-commit hooks during development for fast feedback, CI for comprehensive validation.
+
 ## Conventions & Patterns
 
 ### C Code Naming Conventions
