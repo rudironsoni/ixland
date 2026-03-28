@@ -228,13 +228,51 @@ This project uses automated linting and formatting to maintain code quality:
 shellcheck scripts/*.sh
 ```
 
+### Code Formatting
+
+**Format all code:**
+```bash
+./scripts/format.sh
+```
+
+**Auto-fix formatting issues:**
+```bash
+./scripts/format.sh --fix
+```
+
+**Check mode (for CI):**
+```bash
+./scripts/format.sh --check
+```
+
+**Editor Integration:**
+- Install EditorConfig plugin for your editor to respect `.editorconfig`
+- Configure your editor to run clang-format on save for C files
+- Configure SwiftLint integration for Swift files
+
+### Formatting Tools by Language
+
+| Language | Formatter | Config File |
+|----------|-----------|-------------|
+| C/C++ | clang-format | `.clang-format` |
+| Swift | SwiftLint | `.swiftlint.yml` |
+| Shell | shfmt | `.editorconfig` |
+| All | EditorConfig | `.editorconfig` |
+
 ### CI Integration
 
-Linting runs automatically on:
+Linting and formatting checks run automatically on:
 - All pull requests
 - Pushes to main/develop branches
 
-See `.github/workflows/lint.yml` for CI configuration.
+See `.github/workflows/code-quality.yml` for CI configuration.
+
+**CI Jobs:**
+- `format-c` - Verifies C/C++ code formatting
+- `format-swift` - Verifies Swift code formatting
+- `lint-c` - Runs clang-tidy static analysis
+- `lint-swift` - Runs SwiftLint analysis
+- `lint-scripts` - Runs ShellCheck on shell scripts
 
 ## Conventions & Patterns
 
