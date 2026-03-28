@@ -2,17 +2,17 @@
  * Tests fundamental syscalls
  */
 
+#include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/wait.h>
-#include <fcntl.h>
-#include <errno.h>
+#include <unistd.h>
 
 int main() {
     printf("=== libiox Basic Test ===\n\n");
-    
+
     /* Test getpid/getppid */
     printf("Testing getpid/getppid...\n");
     pid_t pid = getpid();
@@ -20,7 +20,7 @@ int main() {
     printf("  PID: %d\n", pid);
     printf("  PPID: %d\n", ppid);
     printf("  ✓ Passed\n\n");
-    
+
     /* Test getcwd */
     printf("Testing getcwd...\n");
     char cwd[1024];
@@ -30,7 +30,7 @@ int main() {
     } else {
         printf("  ✗ Failed: %s\n\n", strerror(errno));
     }
-    
+
     /* Test open/write/close */
     printf("Testing open/write/close...\n");
     int fd = open("/tmp/iox_test.txt", O_CREAT | O_WRONLY | O_TRUNC, 0644);
@@ -47,7 +47,7 @@ int main() {
     } else {
         printf("  ✗ Failed to open: %s\n\n", strerror(errno));
     }
-    
+
     /* Test read */
     printf("Testing open/read/close...\n");
     fd = open("/tmp/iox_test.txt", O_RDONLY);
@@ -65,7 +65,7 @@ int main() {
     } else {
         printf("  ✗ Failed to open: %s\n\n", strerror(errno));
     }
-    
+
     /* Test fork (thread-based simulation) */
     printf("Testing fork (thread simulation)...\n");
     pid = fork();
@@ -87,7 +87,7 @@ int main() {
             printf("  ✗ Wait failed: %s\n\n", strerror(errno));
         }
     }
-    
+
     printf("=== Test Complete ===\n");
     return 0;
 }

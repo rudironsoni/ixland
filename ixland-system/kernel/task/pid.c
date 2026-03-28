@@ -1,8 +1,9 @@
-#include "task.h"
+#include <pthread.h>
+#include <stdatomic.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdatomic.h>
-#include <pthread.h>
+
+#include "task.h"
 
 #define IOX_MIN_PID 1000
 #define IOX_MAX_PID 65535

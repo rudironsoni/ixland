@@ -4,11 +4,12 @@
  * Path translation: /etc/passwd -> $PREFIX/etc/passwd
  */
 
+#include "../include/vfs.h"
+
+#include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#include <errno.h>
-#include "../include/vfs.h"
 
 static char *a_shell_prefix = NULL;
 
@@ -27,17 +28,13 @@ char *vfs_translate_path(const char *path) {
     if (!path) {
         return NULL;
     }
-    
+
     /* Absolute paths that need prefix translation */
     if (path[0] == '/') {
         /* Check if it's a system path that needs prefix */
-        if (strncmp(path, "/usr/", 5) == 0 ||
-            strncmp(path, "/etc/", 5) == 0 ||
-            strncmp(path, "/var/", 5) == 0 ||
-            strncmp(path, "/bin/", 5) == 0 ||
-            strncmp(path, "/lib/", 5) == 0 ||
-            strncmp(path, "/sbin/", 6) == 0) {
-            
+        if (strncmp(path, "/usr/", 5) == 0 || strncmp(path, "/etc/", 5) == 0 ||
+            strncmp(path, "/var/", 5) == 0 || strncmp(path, "/bin/", 5) == 0 ||
+            strncmp(path, "/lib/", 5) == 0 || strncmp(path, "/sbin/", 6) == 0) {
             size_t len = strlen(vfs_get_prefix()) + strlen(path) + 1;
             char *real_path = malloc(len);
             if (!real_path) {
@@ -48,7 +45,7 @@ char *vfs_translate_path(const char *path) {
             return real_path;
         }
     }
-    
+
     /* Return copy of original path */
     char *copy = strdup(path);
     if (!copy) {
@@ -65,11 +62,8 @@ int vfs_path_needs_translation(const char *path) {
     if (!path || path[0] != '/') {
         return 0;
     }
-    
-    return (strncmp(path, "/usr/", 5) == 0 ||
-            strncmp(path, "/etc/", 5) == 0 ||
-            strncmp(path, "/var/", 5) == 0 ||
-            strncmp(path, "/bin/", 5) == 0 ||
-            strncmp(path, "/lib/", 5) == 0 ||
-            strncmp(path, "/sbin/", 6) == 0);
+
+    return (strncmp(path, "/usr/", 5) == 0 || strncmp(path, "/etc/", 5) == 0 ||
+            strncmp(path, "/var/", 5) == 0 || strncmp(path, "/bin/", 5) == 0 ||
+            strncmp(path, "/lib/", 5) == 0 || strncmp(path, "/sbin/", 6) == 0);
 }

@@ -47,23 +47,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 #include "a_shell_system.h"
 
-__thread int    __db_getopt_reset;    /* global reset for VxWorks. */
+__thread int __db_getopt_reset; /* global reset for VxWorks. */
 
-// Not __thread unless I rename them. 
-int    opterr = 1,        /* if error message should be printed */
-optind = 1,        /* index into parent argv vector */
-optopt,            /* character checked for validity */
-optreset;        /* reset getopt */
-char    *optarg;        /* argument associated with option */
+// Not __thread unless I rename them.
+int opterr = 1, /* if error message should be printed */
+    optind = 1, /* index into parent argv vector */
+    optopt,     /* character checked for validity */
+    optreset;   /* reset getopt */
+char *optarg;   /* argument associated with option */
 
-#undef    BADCH
-#define    BADCH    (int)'?'
-#undef    BADARG
-#define    BADARG    (int)':'
-#undef    EMSG
-#define    EMSG    ""
+#undef BADCH
+#define BADCH (int)'?'
+#undef BADARG
+#define BADARG (int)':'
+#undef EMSG
+#define EMSG ""
 
 /*
  * getopt --
@@ -73,23 +74,22 @@ char    *optarg;        /* argument associated with option */
  * PUBLIC: int getopt __P((int, char * const *, const char *));
  * PUBLIC: #endif
  */
-int
-getopt(nargc, nargv, ostr)
+int getopt(nargc, nargv, ostr)
 int nargc;
-char * const *nargv;
+char *const *nargv;
 const char *ostr;
 {
     static char *progname;
-    static char *place = EMSG;        /* option letter processing */
-    char *oli;                /* option letter list index */
-    
+    static char *place = EMSG; /* option letter processing */
+    char *oli;                 /* option letter list index */
+
     /*
      * VxWorks needs to be able to repeatedly call getopt from multiple
      * programs within its global name space. And so does iOS.
      */
     if (__db_getopt_reset) {
         __db_getopt_reset = 0;
-        
+
         opterr = optind = 1;
         optopt = optreset = 0;
         optarg = NULL;
@@ -98,25 +98,24 @@ const char *ostr;
     }
     if (!progname) {
         // if ((progname = __db_rpath(*nargv)) == NULL)
-            progname = *nargv;
+        progname = *nargv;
         // else
         //    ++progname;
     }
-    
-    if (optreset || !*place) {        /* update scanning pointer */
+
+    if (optreset || !*place) { /* update scanning pointer */
         optreset = 0;
         if (optind >= nargc || *(place = nargv[optind]) != '-') {
             place = EMSG;
             return (EOF);
         }
-        if (place[1] && *++place == '-') {    /* found "--" */
+        if (place[1] && *++place == '-') { /* found "--" */
             ++optind;
             place = EMSG;
             return (EOF);
         }
-    }                    /* option letter okay? */
-    if ((optopt = (int)*place++) == (int)':' ||
-        !(oli = strchr(ostr, optopt))) {
+    } /* option letter okay? */
+    if ((optopt = (int)*place++) == (int)':' || !(oli = strchr(ostr, optopt))) {
         /*
          * if the user didn't specify '-' as an option,
          * assume it means EOF.
@@ -126,32 +125,28 @@ const char *ostr;
         if (!*place)
             ++optind;
         if (opterr && *ostr != ':')
-            (void)fprintf(thread_stderr,
-                          "%s: illegal option -- %c\n", progname, optopt);
+            (void)fprintf(thread_stderr, "%s: illegal option -- %c\n", progname, optopt);
         return (BADCH);
     }
-    if (*++oli != ':') {            /* don't need argument */
+    if (*++oli != ':') { /* don't need argument */
         optarg = NULL;
         if (!*place)
             ++optind;
-    }
-    else {                    /* need an argument */
-        if (*place)            /* no white space */
+    } else {        /* need an argument */
+        if (*place) /* no white space */
             optarg = place;
-        else if (nargc <= ++optind) {    /* no arg */
+        else if (nargc <= ++optind) { /* no arg */
             place = EMSG;
             if (*ostr == ':')
                 return (BADARG);
             if (opterr)
-                (void)fprintf(thread_stderr,
-                              "%s: option requires an argument -- %c\n",
-                              progname, optopt);
+                (void)fprintf(thread_stderr, "%s: option requires an argument -- %c\n", progname,
+                              optopt);
             return (BADCH);
-        }
-        else                /* white space */
+        } else /* white space */
             optarg = nargv[optind];
         place = EMSG;
         ++optind;
     }
-    return (optopt);            /* dump back option letter */
+    return (optopt); /* dump back option letter */
 }

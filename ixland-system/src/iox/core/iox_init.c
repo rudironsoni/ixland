@@ -3,12 +3,13 @@
  * Automatic initialization using constructor attribute
  */
 
-#include <unistd.h>
-#include "../internal/iox_internal.h"
+#include <pthread.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#include <pthread.h>
+#include <unistd.h>
+
+#include "../internal/iox_internal.h"
 
 /* Global initialization flag */
 static atomic_int iox_initialized = 0;
@@ -29,22 +30,22 @@ void iox_library_init(void) {
     if (atomic_load(&iox_initialized)) {
         return;
     }
-    
+
     pthread_mutex_lock(&iox_init_lock);
-    
+
     /* Double-check after acquiring lock */
     if (atomic_load(&iox_initialized)) {
         pthread_mutex_unlock(&iox_init_lock);
         return;
     }
-    
+
     /* Initialize VFS first (safe initialization) */
     int vfs_result = iox_vfs_init();
     if (vfs_result != 0) {
         /* VFS init failed - continue anyway with defaults */
         /* This allows the library to work even if HOME is not set */
     }
-    
+
     /* Initialize process simulation state before exposing process APIs */
     int proc_result = __iox_init();
     if (proc_result != 0) {
@@ -59,14 +60,14 @@ void iox_library_init(void) {
         pthread_mutex_unlock(&iox_init_lock);
         return;
     }
-    
+
     /* Initialize file descriptor table */
     extern void __iox_file_init_impl(void);
     __iox_file_init_impl();
-    
+
     /* Set initialized flag */
     atomic_store(&iox_initialized, 1);
-    
+
     pthread_mutex_unlock(&iox_init_lock);
 }
 
@@ -74,12 +75,12 @@ void iox_library_deinit(void) {
     if (!atomic_load(&iox_initialized)) {
         return;
     }
-    
+
     iox_context_deinit();
     iox_vfs_deinit();
-    
+
     atomic_store(&iox_initialized, 0);
-    
+
     if (getenv("IOX_DEBUG")) {
         fprintf(stderr, "iox: Library deinitialized\n");
     }
@@ -92,7 +93,7 @@ void iox_library_deinit(void) {
 int iox_init(const iox_config_t *config) {
     /* Initialization happens automatically via constructor,
      * but this function allows explicit initialization if needed */
-    (void)config;  /* Config ignored for now */
+    (void)config; /* Config ignored for now */
     if (!atomic_load(&iox_initialized)) {
         iox_library_init();
     }

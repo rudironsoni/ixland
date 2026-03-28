@@ -5,11 +5,11 @@
  * Minimal implementation that works with current WAMR API
  */
 
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <stdint.h>
 
 /* WAMR includes */
 #include <wasm_export.h>
@@ -39,19 +39,19 @@ int iox_wamr_init(void) {
     if (g_wamr_state.initialized) {
         return 0;  // Already initialized
     }
-    
+
     /* Initialize WAMR runtime - no arguments needed */
     if (!wasm_runtime_init()) {
         strncpy(g_error_buf, "Failed to initialize WAMR runtime", sizeof(g_error_buf));
         return -1;
     }
-    
+
     g_wamr_state.initialized = true;
-    
+
     if (getenv("IOX_DEBUG")) {
         fprintf(stderr, "iox_wamr: Initialized successfully\n");
     }
-    
+
     return 0;
 }
 
@@ -59,28 +59,28 @@ void iox_wamr_deinit(void) {
     if (!g_wamr_state.initialized) {
         return;
     }
-    
+
     /* Cleanup any loaded module */
     if (g_wamr_state.exec_env) {
         wasm_runtime_destroy_exec_env(g_wamr_state.exec_env);
         g_wamr_state.exec_env = NULL;
     }
-    
+
     if (g_wamr_state.instance) {
         wasm_runtime_deinstantiate(g_wamr_state.instance);
         g_wamr_state.instance = NULL;
     }
-    
+
     if (g_wamr_state.module) {
         wasm_runtime_unload(g_wamr_state.module);
         g_wamr_state.module = NULL;
     }
-    
+
     /* Destroy runtime */
     wasm_runtime_destroy();
-    
+
     g_wamr_state.initialized = false;
-    
+
     if (getenv("IOX_DEBUG")) {
         fprintf(stderr, "iox_wamr: Deinitialized\n");
     }
@@ -99,40 +99,40 @@ int iox_wamr_load_module(const uint8_t *wasm_buf, uint32_t wasm_size) {
         strncpy(g_error_buf, "Runtime not initialized", sizeof(g_error_buf));
         return -1;
     }
-    
+
     /* Cleanup previous module if any */
     if (g_wamr_state.exec_env) {
         wasm_runtime_destroy_exec_env(g_wamr_state.exec_env);
         g_wamr_state.exec_env = NULL;
     }
-    
+
     if (g_wamr_state.instance) {
         wasm_runtime_deinstantiate(g_wamr_state.instance);
         g_wamr_state.instance = NULL;
     }
-    
+
     if (g_wamr_state.module) {
         wasm_runtime_unload(g_wamr_state.module);
         g_wamr_state.module = NULL;
     }
-    
+
     /* Load WASM module */
-    g_wamr_state.module = wasm_runtime_load((uint8_t *)wasm_buf, wasm_size,
-                                            g_error_buf, sizeof(g_error_buf));
-    
+    g_wamr_state.module =
+        wasm_runtime_load((uint8_t *)wasm_buf, wasm_size, g_error_buf, sizeof(g_error_buf));
+
     if (!g_wamr_state.module) {
         return -1;
     }
-    
+
     /* Instantiate module */
-    g_wamr_state.instance = wasm_runtime_instantiate(g_wamr_state.module, 64 * 1024, 64 * 1024, 
-                                                      g_error_buf, sizeof(g_error_buf));
+    g_wamr_state.instance = wasm_runtime_instantiate(g_wamr_state.module, 64 * 1024, 64 * 1024,
+                                                     g_error_buf, sizeof(g_error_buf));
     if (!g_wamr_state.instance) {
         wasm_runtime_unload(g_wamr_state.module);
         g_wamr_state.module = NULL;
         return -1;
     }
-    
+
     /* Create execution environment */
     g_wamr_state.exec_env = wasm_runtime_create_exec_env(g_wamr_state.instance, 64 * 1024);
     if (!g_wamr_state.exec_env) {
@@ -143,11 +143,11 @@ int iox_wamr_load_module(const uint8_t *wasm_buf, uint32_t wasm_size) {
         g_wamr_state.module = NULL;
         return -1;
     }
-    
+
     if (getenv("IOX_DEBUG")) {
         fprintf(stderr, "iox_wamr: Module loaded successfully\n");
     }
-    
+
     return 0;
 }
 
@@ -156,12 +156,12 @@ void iox_wamr_unload_module(void) {
         wasm_runtime_destroy_exec_env(g_wamr_state.exec_env);
         g_wamr_state.exec_env = NULL;
     }
-    
+
     if (g_wamr_state.instance) {
         wasm_runtime_deinstantiate(g_wamr_state.instance);
         g_wamr_state.instance = NULL;
     }
-    
+
     if (g_wamr_state.module) {
         wasm_runtime_unload(g_wamr_state.module);
         g_wamr_state.module = NULL;
@@ -177,28 +177,28 @@ int iox_wamr_call_function(const char *func_name, uint32_t argc, uint32_t argv[]
         strncpy(g_error_buf, "No module loaded", sizeof(g_error_buf));
         return -1;
     }
-    
+
     /* Lookup function */
     wasm_function_inst_t func = wasm_runtime_lookup_function(g_wamr_state.instance, func_name);
     if (!func) {
         snprintf(g_error_buf, sizeof(g_error_buf), "Function '%s' not found", func_name);
         return -1;
     }
-    
+
     /* Call function - 4 arguments: exec_env, function, argc, argv */
     bool success = wasm_runtime_call_wasm(g_wamr_state.exec_env, func, argc, argv);
-    
+
     if (!success) {
         const char *exception = wasm_runtime_get_exception(g_wamr_state.instance);
-        snprintf(g_error_buf, sizeof(g_error_buf), "Function call failed: %s", 
-                exception ? exception : "unknown error");
+        snprintf(g_error_buf, sizeof(g_error_buf), "Function call failed: %s",
+                 exception ? exception : "unknown error");
         return -1;
     }
-    
+
     if (getenv("IOX_DEBUG")) {
         fprintf(stderr, "iox_wamr: Function '%s' called successfully\n", func_name);
     }
-    
+
     return 0;
 }
 
@@ -206,7 +206,7 @@ bool iox_wamr_function_exists(const char *func_name) {
     if (!g_wamr_state.initialized || !g_wamr_state.instance) {
         return false;
     }
-    
+
     wasm_function_inst_t func = wasm_runtime_lookup_function(g_wamr_state.instance, func_name);
     return (func != NULL);
 }
@@ -219,14 +219,14 @@ bool iox_wamr_validate_wasm(const uint8_t *wasm_buf, uint32_t wasm_size) {
     if (!wasm_buf || wasm_size == 0) {
         return false;
     }
-    
+
     /* Check WASM magic number: \0asm */
     if (wasm_size < 4) {
         return false;
     }
-    
-    return (wasm_buf[0] == 0x00 && wasm_buf[1] == 0x61 && 
-            wasm_buf[2] == 0x73 && wasm_buf[3] == 0x6d);
+
+    return (wasm_buf[0] == 0x00 && wasm_buf[1] == 0x61 && wasm_buf[2] == 0x73 &&
+            wasm_buf[3] == 0x6d);
 }
 
 /* ============================================================================
@@ -237,13 +237,13 @@ int iox_wamr_memory_read(uint32_t offset, void *buf, uint32_t len) {
     if (!g_wamr_state.initialized || !g_wamr_state.instance || !buf) {
         return -1;
     }
-    
+
     uint8_t *memory = wasm_runtime_addr_app_to_native(g_wamr_state.instance, offset);
     if (!memory) {
         strncpy(g_error_buf, "Invalid memory offset", sizeof(g_error_buf));
         return -1;
     }
-    
+
     memcpy(buf, memory, len);
     return 0;
 }
@@ -252,13 +252,13 @@ int iox_wamr_memory_write(uint32_t offset, const void *buf, uint32_t len) {
     if (!g_wamr_state.initialized || !g_wamr_state.instance || !buf) {
         return -1;
     }
-    
+
     uint8_t *memory = wasm_runtime_addr_app_to_native(g_wamr_state.instance, offset);
     if (!memory) {
         strncpy(g_error_buf, "Invalid memory offset", sizeof(g_error_buf));
         return -1;
     }
-    
+
     memcpy(memory, buf, len);
     return 0;
 }
@@ -282,7 +282,7 @@ int iox_wamr_get_export_list(char ***names, uint32_t *count) {
     if (!names || !count) {
         return -1;
     }
-    
+
     *names = NULL;
     *count = 0;
     return 0;

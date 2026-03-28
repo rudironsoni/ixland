@@ -9,7 +9,6 @@
 
 #include "../../fs/fdtable.h"
 #include "../../fs/vfs.h"
-#include "../../include/iox/iox_syscalls.h"
 #include "../../kernel/exec/exec.h"
 #include "../../kernel/signal/iox_signal.h"
 #include "../../kernel/task/task.h"

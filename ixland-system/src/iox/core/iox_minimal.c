@@ -3,16 +3,16 @@
  * Streamlined version that builds and works
  */
 
+#include <errno.h>
+#include <fcntl.h>
+#include <pthread.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <pthread.h>
-#include <signal.h>
+#include <unistd.h>
 
 /* ============================================================================
  * BASIC DEFINITIONS
@@ -75,7 +75,7 @@ pid_t iox_getpid(void) {
 }
 
 pid_t iox_getppid(void) {
-    return 0;  /* No real parent in this simulation */
+    return 0; /* No real parent in this simulation */
 }
 
 int iox_open(const char *pathname, int flags, ...) {
@@ -86,20 +86,21 @@ int iox_open(const char *pathname, int flags, ...) {
         mode = va_arg(ap, int);
         va_end(ap);
     }
-    
+
     int fd = alloc_fd();
-    if (fd < 0) return -1;
-    
+    if (fd < 0)
+        return -1;
+
     int real_fd = open(pathname, flags, mode);
     if (real_fd < 0) {
         free_fd(fd);
         return -1;
     }
-    
+
     pthread_mutex_lock(&fd_lock);
     fd_table[fd].real_fd = real_fd;
     pthread_mutex_unlock(&fd_lock);
-    
+
     return fd;
 }
 
@@ -108,11 +109,11 @@ ssize_t iox_read(int fd, void *buf, size_t count) {
         errno = EBADF;
         return -1;
     }
-    
+
     if (fd <= 2) {
         return read(fd, buf, count);
     }
-    
+
     pthread_mutex_lock(&fd_lock);
     if (!fd_table[fd].used) {
         pthread_mutex_unlock(&fd_lock);
@@ -121,7 +122,7 @@ ssize_t iox_read(int fd, void *buf, size_t count) {
     }
     int real_fd = fd_table[fd].real_fd;
     pthread_mutex_unlock(&fd_lock);
-    
+
     return read(real_fd, buf, count);
 }
 
@@ -130,11 +131,11 @@ ssize_t iox_write(int fd, const void *buf, size_t count) {
         errno = EBADF;
         return -1;
     }
-    
+
     if (fd <= 2) {
         return write(fd, buf, count);
     }
-    
+
     pthread_mutex_lock(&fd_lock);
     if (!fd_table[fd].used) {
         pthread_mutex_unlock(&fd_lock);
@@ -143,7 +144,7 @@ ssize_t iox_write(int fd, const void *buf, size_t count) {
     }
     int real_fd = fd_table[fd].real_fd;
     pthread_mutex_unlock(&fd_lock);
-    
+
     return write(real_fd, buf, count);
 }
 
@@ -152,11 +153,11 @@ int iox_close(int fd) {
         errno = EBADF;
         return -1;
     }
-    
+
     if (fd <= 2) {
-        return 0;  /* Don't close standard FDs */
+        return 0; /* Don't close standard FDs */
     }
-    
+
     pthread_mutex_lock(&fd_lock);
     if (!fd_table[fd].used) {
         pthread_mutex_unlock(&fd_lock);
@@ -166,7 +167,7 @@ int iox_close(int fd) {
     int real_fd = fd_table[fd].real_fd;
     fd_table[fd].used = false;
     pthread_mutex_unlock(&fd_lock);
-    
+
     return close(real_fd);
 }
 
@@ -174,8 +175,12 @@ int iox_close(int fd) {
  * SYMBOL INTERPOSITION
  * ============================================================================ */
 
-pid_t getpid(void) { return iox_getpid(); }
-pid_t getppid(void) { return iox_getppid(); }
+pid_t getpid(void) {
+    return iox_getpid();
+}
+pid_t getppid(void) {
+    return iox_getppid();
+}
 
 int open(const char *pathname, int flags, ...) {
     mode_t mode = 0;

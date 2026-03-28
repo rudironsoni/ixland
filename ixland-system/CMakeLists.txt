@@ -73,6 +73,7 @@ set(IOX_FS_SOURCES
     fs/fdtable.c
     fs/vfs.c
     fs/iox_path.c
+    fs/vfs/iox_vfs.c
     Tests/unit/stub_vfs_translate.c
 )
 
@@ -82,10 +83,16 @@ set(IOX_RUNTIME_SOURCES
     runtime/wasi/wasm_adapter.c
 )
 
+# Core syscall sources (VFS-aware implementations)
+set(IOX_SYSCALL_SOURCES
+    src/iox/core/iox_file_v2.c
+)
+
 # Combined sources (without runtime - will be separate target)
 set(IOX_CORE_SOURCES
     ${IOX_KERNEL_SOURCES}
     ${IOX_FS_SOURCES}
+    ${IOX_SYSCALL_SOURCES}
 )
 
 # Create runtime/wasi library (internal target)
@@ -198,7 +205,7 @@ endif()
 if(IOX_BUILD_TESTS)
     enable_testing()
 
-    # XCTest bundle target
+    # Simple C test executable (not XCTest bundle - avoids framework linking issues)
     set(IOX_TEST_SOURCES
         Tests/harness/harness.c
         Tests/unit/test_pid.c
@@ -213,31 +220,16 @@ if(IOX_BUILD_TESTS)
         Tests/unit/test_vfs_path.c
         Tests/unit/test_fdtable.c
         Tests/unit/test_fork.c
+        Tests/unit/test_file_syscalls.c
     )
 
-    # XCTest bundle as MODULE (dylib)
-    add_library(iox-core-tests MODULE ${IOX_TEST_SOURCES})
+    # Create standalone test executable
+    add_executable(iox-core-tests ${IOX_TEST_SOURCES})
 
     # Tests inherit includes from iox-core via target_link_libraries
     target_link_libraries(iox-core-tests PRIVATE
         iox-core
         pthread
-        "-framework XCTest"
-    )
-
-    # Add XCTest framework headers
-    target_include_directories(iox-core-tests PRIVATE
-        "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks/XCTest.framework/Headers"
-    )
-
-    set_target_properties(iox-core-tests PROPERTIES
-        BUNDLE YES
-        XCODE_ATTRIBUTE_GENERATE_INFOPLIST_FILE YES
-        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "iox.core.tests"
-        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
-        XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED NO
-        XCODE_ATTRIBUTE_OTHER_LDFLAGS "-framework XCTest"
-        XCODE_PRODUCT_TYPE "com.apple.product-type.bundle.unit-test"
     )
 
     add_test(NAME core-tests COMMAND iox-core-tests)

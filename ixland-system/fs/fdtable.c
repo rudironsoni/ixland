@@ -1,7 +1,8 @@
 #include "fdtable.h"
+
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 
 iox_files_t *iox_files_alloc(size_t max_fds) {
     iox_files_t *files = calloc(1, sizeof(iox_files_t));
@@ -9,23 +10,24 @@ iox_files_t *iox_files_alloc(size_t max_fds) {
         errno = ENOMEM;
         return NULL;
     }
-    
-    files->fd = calloc(max_fds, sizeof(iox_file_t*));
+
+    files->fd = calloc(max_fds, sizeof(iox_file_t *));
     if (!files->fd) {
         free(files);
         errno = ENOMEM;
         return NULL;
     }
-    
+
     files->max_fds = max_fds;
     pthread_mutex_init(&files->lock, NULL);
-    
+
     return files;
 }
 
 void iox_files_free(iox_files_t *files) {
-    if (!files) return;
-    
+    if (!files)
+        return;
+
     pthread_mutex_lock(&files->lock);
     for (size_t i = 0; i < files->max_fds; i++) {
         if (files->fd[i]) {
@@ -33,7 +35,7 @@ void iox_files_free(iox_files_t *files) {
         }
     }
     pthread_mutex_unlock(&files->lock);
-    
+
     free(files->fd);
     pthread_mutex_destroy(&files->lock);
     free(files);
@@ -44,10 +46,11 @@ iox_files_t *iox_files_dup(iox_files_t *parent) {
         errno = EINVAL;
         return NULL;
     }
-    
+
     iox_files_t *child = iox_files_alloc(parent->max_fds);
-    if (!child) return NULL;
-    
+    if (!child)
+        return NULL;
+
     pthread_mutex_lock(&parent->lock);
     for (size_t i = 0; i < parent->max_fds; i++) {
         if (parent->fd[i]) {
@@ -61,7 +64,7 @@ iox_files_t *iox_files_dup(iox_files_t *parent) {
         }
     }
     pthread_mutex_unlock(&parent->lock);
-    
+
     return child;
 }
 
@@ -74,14 +77,16 @@ iox_file_t *iox_file_alloc(void) {
 }
 
 void iox_file_free(iox_file_t *file) {
-    if (!file) return;
+    if (!file)
+        return;
     if (atomic_fetch_sub(&file->refs, 1) == 1) {
         free(file);
     }
 }
 
 iox_file_t *iox_file_dup(iox_file_t *file) {
-    if (!file) return NULL;
+    if (!file)
+        return NULL;
     atomic_fetch_add(&file->refs, 1);
     return file;
 }
@@ -91,7 +96,7 @@ int iox_fd_alloc(iox_files_t *files, iox_file_t *file) {
         errno = EINVAL;
         return -1;
     }
-    
+
     pthread_mutex_lock(&files->lock);
     for (size_t i = 0; i < files->max_fds; i++) {
         if (!files->fd[i]) {
@@ -102,7 +107,7 @@ int iox_fd_alloc(iox_files_t *files, iox_file_t *file) {
         }
     }
     pthread_mutex_unlock(&files->lock);
-    
+
     errno = EMFILE;
     return -1;
 }
@@ -112,7 +117,7 @@ int iox_fd_free(iox_files_t *files, int fd) {
         errno = EBADF;
         return -1;
     }
-    
+
     pthread_mutex_lock(&files->lock);
     iox_file_t *file = files->fd[fd];
     if (!file) {
@@ -120,11 +125,11 @@ int iox_fd_free(iox_files_t *files, int fd) {
         errno = EBADF;
         return -1;
     }
-    
+
     files->fd[fd] = NULL;
     iox_file_free(file);
     pthread_mutex_unlock(&files->lock);
-    
+
     return 0;
 }
 
@@ -133,13 +138,13 @@ iox_file_t *iox_fd_lookup(iox_files_t *files, int fd) {
         errno = EBADF;
         return NULL;
     }
-    
+
     pthread_mutex_lock(&files->lock);
     iox_file_t *file = files->fd[fd];
     if (file) {
         atomic_fetch_add(&file->refs, 1);
     }
     pthread_mutex_unlock(&files->lock);
-    
+
     return file;
 }

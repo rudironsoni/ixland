@@ -5,15 +5,15 @@
 //  Extended process table with parent/child tracking
 //
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <pthread.h>
-#include <unistd.h>
 #include <errno.h>
-#include <sys/wait.h>
+#include <pthread.h>
 #include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "ixland_kernel.h"
 
@@ -21,24 +21,24 @@
 #define IXLAND_MAX_PROCESSES 1024
 
 typedef struct ixland_process {
-    pid_t pid;                      // Virtual process ID
-    pid_t ppid;                     // Parent process ID
-    pthread_t thread;               // Thread handle
-    char name[64];                  // Process name
-    int status;                     // Exit status
-    volatile int running;           // Running flag
-    time_t start_time;              // Process start time
-    
+    pid_t pid;             // Virtual process ID
+    pid_t ppid;            // Parent process ID
+    pthread_t thread;      // Thread handle
+    char name[64];         // Process name
+    int status;            // Exit status
+    volatile int running;  // Running flag
+    time_t start_time;     // Process start time
+
     // Signal handling
     struct sigaction sig_handlers[NSIG];
-    sigjmp_buf *signal_env;         // For signal emulation
+    sigjmp_buf *signal_env;  // For signal emulation
     volatile int pending_signals;
-    
+
     // Environment (per-process)
     char **environment;
     int env_count;
-    char *cwd;                      // Current working directory
-    
+    char *cwd;  // Current working directory
+
     // Cleanup tracking
     volatile int marked_for_cleanup;
     pthread_mutex_t cleanup_lock;
@@ -47,14 +47,14 @@ typedef struct ixland_process {
 // Process table
 static ixland_process_t *process_table[IXLAND_MAX_PROCESSES];
 static pthread_mutex_t process_table_lock = PTHREAD_MUTEX_INITIALIZER;
-static pid_t next_vpid = 1000;      // Start at 1000 to avoid conflicts
+static pid_t next_vpid = 1000;  // Start at 1000 to avoid conflicts
 static _Thread_local pid_t current_vpid = 0;
 
 // Process limit
 static int process_limit = IXLAND_MAX_PROCESSES;
 
 // Initialize process table entry
-static ixland_process_t* alloc_process_entry(void) {
+static ixland_process_t *alloc_process_entry(void) {
     ixland_process_t *proc = calloc(1, sizeof(ixland_process_t));
     if (proc) {
         pthread_mutex_init(&proc->cleanup_lock, NULL);
@@ -65,7 +65,7 @@ static ixland_process_t* alloc_process_entry(void) {
 }
 
 // Find process by PID
-ixland_process_t* find_process(pid_t pid) {
+ixland_process_t *find_process(pid_t pid) {
     if (pid < 0 || pid >= IXLAND_MAX_PROCESSES) {
         return NULL;
     }
@@ -82,11 +82,11 @@ ixland_process_t* find_process(pid_t pid) {
 // Allocate new virtual PID
 pid_t ixland_vfork(void) {
     pthread_mutex_lock(&process_table_lock);
-    
+
     // Find available slot
     pid_t vpid = next_vpid++;
     int slot = vpid % IXLAND_MAX_PROCESSES;
-    
+
     // Clean up old entry if exists
     if (process_table[slot]) {
         ixland_process_t *old = process_table[slot];
@@ -95,7 +95,7 @@ pid_t ixland_vfork(void) {
             process_table[slot] = NULL;
         }
     }
-    
+
     // Allocate new process entry
     ixland_process_t *proc = alloc_process_entry();
     if (!proc) {
@@ -103,18 +103,18 @@ pid_t ixland_vfork(void) {
         errno = EAGAIN;
         return -1;
     }
-    
+
     proc->pid = vpid;
-    proc->ppid = current_vpid ? current_vpid : 1; // 1 is init
-    proc->running = 0;  // Not running yet (vfork semantics)
+    proc->ppid = current_vpid ? current_vpid : 1;  // 1 is init
+    proc->running = 0;                             // Not running yet (vfork semantics)
     proc->start_time = time(NULL);
     strncpy(proc->name, "vfork-child", 63);
-    
+
     process_table[slot] = proc;
     current_vpid = vpid;
-    
+
     pthread_mutex_unlock(&process_table_lock);
-    
+
     return vpid;
 }
 
@@ -131,7 +131,7 @@ pid_t ixland_getppid(void) {
     if (proc) {
         return proc->ppid;
     }
-    return 1; // init
+    return 1;  // init
 }
 
 // Wait for child process
@@ -142,11 +142,11 @@ pid_t ixland_waitpid(pid_t pid, int *stat_loc, int options) {
         errno = ECHILD;
         return -1;
     }
-    
+
     if (pid == -1) {
         // Wait for any child
         pthread_mutex_lock(&process_table_lock);
-        
+
         while (1) {
             // Search for children of current process
             int found = 0;
@@ -158,52 +158,52 @@ pid_t ixland_waitpid(pid_t pid, int *stat_loc, int options) {
                         *stat_loc = proc->status;
                     }
                     pid_t child_pid = proc->pid;
-                    
+
                     // Mark for cleanup
                     proc->marked_for_cleanup = 1;
-                    
+
                     pthread_mutex_unlock(&process_table_lock);
                     return child_pid;
                 }
             }
-            
+
             pthread_mutex_unlock(&process_table_lock);
-            
+
             if (options & WNOHANG) {
-                return 0; // No children ready
+                return 0;  // No children ready
             }
-            
+
             // Wait a bit and retry
-            usleep(10000); // 10ms
+            usleep(10000);  // 10ms
             pthread_mutex_lock(&process_table_lock);
         }
     }
-    
+
     // Wait for specific PID
     ixland_process_t *proc = find_process(pid);
     if (!proc) {
         errno = ECHILD;
         return -1;
     }
-    
+
     if (proc->ppid != current_vpid) {
         errno = ECHILD;
         return -1;
     }
-    
+
     // Wait for process to exit
     while (proc->running) {
         usleep(10000);
     }
-    
+
     if (stat_loc) {
         *stat_loc = proc->status;
     }
-    
+
     pthread_mutex_lock(&process_table_lock);
     proc->marked_for_cleanup = 1;
     pthread_mutex_unlock(&process_table_lock);
-    
+
     return pid;
 }
 
@@ -221,18 +221,18 @@ void ixland_exit(int status) {
         proc->running = 0;
         pthread_mutex_unlock(&proc->cleanup_lock);
     }
-    
+
     // Exit the thread
-    pthread_exit((void*)(intptr_t)status);
+    pthread_exit((void *)(intptr_t)status);
 }
 
 // Cleanup thread - periodically removes exited processes
-static void* cleanup_thread_func(void* arg) {
+static void *cleanup_thread_func(void *arg) {
     while (1) {
-        sleep(1); // Run every second
-        
+        sleep(1);  // Run every second
+
         pthread_mutex_lock(&process_table_lock);
-        
+
         for (int i = 0; i < IXLAND_MAX_PROCESSES; i++) {
             ixland_process_t *proc = process_table[i];
             if (proc && proc->marked_for_cleanup && !proc->running) {
@@ -246,22 +246,21 @@ static void* cleanup_thread_func(void* arg) {
                 if (proc->cwd) {
                     free(proc->cwd);
                 }
-                
+
                 pthread_mutex_destroy(&proc->cleanup_lock);
                 free(proc);
                 process_table[i] = NULL;
             }
         }
-        
+
         pthread_mutex_unlock(&process_table_lock);
     }
-    
+
     return NULL;
 }
 
 // Initialize cleanup thread
-__attribute__((constructor))
-static void init_cleanup_thread(void) {
+__attribute__((constructor)) static void init_cleanup_thread(void) {
     pthread_t cleanup_thread;
     pthread_create(&cleanup_thread, NULL, cleanup_thread_func, NULL);
     pthread_detach(cleanup_thread);
@@ -279,7 +278,7 @@ int ixland_killpid(pid_t pid, int sig) {
         errno = ESRCH;
         return -1;
     }
-    
+
     // TODO: Deliver signal
     return 0;
 }

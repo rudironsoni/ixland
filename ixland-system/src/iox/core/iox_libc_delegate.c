@@ -9,19 +9,20 @@
  * that delegate directly to libc.
  */
 
-#include "../internal/iox_internal.h"
+#include <dlfcn.h>
+#include <errno.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <signal.h>
-#include <termios.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 #include <sys/time.h>
+#include <sys/wait.h>
+#include <termios.h>
 #include <time.h>
-#include <dlfcn.h>
+#include <unistd.h>
+
+#include "../internal/iox_internal.h"
 
 /* Define sighandler_t if needed */
 #ifndef __sighandler_t
@@ -72,14 +73,15 @@ static int (*libc_mprotect)(void *, size_t, int) = NULL;
 
 void init_orig_funcs(void) {
     static int initialized = 0;
-    if (initialized) return;
+    if (initialized)
+        return;
     initialized = 1;
-    
+
     /* Directory */
     libc_chdir = (int (*)(const char *))dlsym(RTLD_NEXT, "chdir");
     libc_fchdir = (int (*)(int))dlsym(RTLD_NEXT, "fchdir");
     libc_getcwd = (char *(*)(char *, size_t))dlsym(RTLD_NEXT, "getcwd");
-    
+
     /* Filesystem */
     libc_stat = (int (*)(const char *, struct stat *))dlsym(RTLD_NEXT, "stat");
     libc_fstat = (int (*)(int, struct stat *))dlsym(RTLD_NEXT, "fstat");
@@ -92,18 +94,19 @@ void init_orig_funcs(void) {
     libc_chown = (int (*)(const char *, uid_t, gid_t))dlsym(RTLD_NEXT, "chown");
     libc_fchown = (int (*)(int, uid_t, gid_t))dlsym(RTLD_NEXT, "fchown");
     libc_lchown = (int (*)(const char *, uid_t, gid_t))dlsym(RTLD_NEXT, "lchown");
-    
+
     /* Time */
     libc_alarm = (unsigned int (*)(unsigned int))dlsym(RTLD_NEXT, "alarm");
     libc_sleep = (unsigned int (*)(unsigned int))dlsym(RTLD_NEXT, "sleep");
     libc_usleep = (int (*)(useconds_t))dlsym(RTLD_NEXT, "usleep");
-    libc_nanosleep = (int (*)(const struct timespec *, struct timespec *))dlsym(RTLD_NEXT, "nanosleep");
-    
+    libc_nanosleep =
+        (int (*)(const struct timespec *, struct timespec *))dlsym(RTLD_NEXT, "nanosleep");
+
     /* Memory */
     libc_mmap = (void *(*)(void *, size_t, int, int, int, off_t))dlsym(RTLD_NEXT, "mmap");
     libc_munmap = (int (*)(void *, size_t))dlsym(RTLD_NEXT, "munmap");
     libc_mprotect = (int (*)(void *, size_t, int))dlsym(RTLD_NEXT, "mprotect");
-    
+
     /* File operations */
     libc_open = (int (*)(const char *, int, mode_t))dlsym(RTLD_NEXT, "open");
     libc_close = (int (*)(int))dlsym(RTLD_NEXT, "close");
@@ -191,7 +194,7 @@ int __iox_chroot_impl(const char *path) {
 
 /* ============================================================================
  * SIGNAL STUBS
- * 
+ *
  * Note: __iox_kill_impl, __iox_signal_impl, __iox_sigaction_impl
  * are implemented in iox_process.c with full functionality
  * ============================================================================ */
@@ -233,7 +236,8 @@ unsigned int __iox_alarm_impl(unsigned int seconds) {
     return libc_alarm ? libc_alarm(seconds) : 0;
 }
 
-int __iox_setitimer_impl(int which, const struct itimerval *new_value, struct itimerval *old_value) {
+int __iox_setitimer_impl(int which, const struct itimerval *new_value,
+                         struct itimerval *old_value) {
     return setitimer(which, new_value, old_value);
 }
 
@@ -356,66 +360,157 @@ int __iox_tcsetattr_impl(int fd, int optional_actions, const struct termios *ter
  * ============================================================================ */
 
 /* Filesystem */
-int iox_stat(const char *pathname, struct stat *statbuf) { return __iox_stat_impl(pathname, statbuf); }
-int iox_fstat(int fd, struct stat *statbuf) { return __iox_fstat_impl(fd, statbuf); }
-int iox_lstat(const char *pathname, struct stat *statbuf) { return __iox_lstat_impl(pathname, statbuf); }
-int iox_mkdir(const char *pathname, mode_t mode) { return __iox_mkdir_impl(pathname, mode); }
-int iox_rmdir(const char *pathname) { return __iox_rmdir_impl(pathname); }
-int iox_unlink(const char *pathname) { return __iox_unlink_impl(pathname); }
-int iox_link(const char *oldpath, const char *newpath) { return __iox_link_impl(oldpath, newpath); }
-int iox_symlink(const char *target, const char *linkpath) { return __iox_symlink_impl(target, linkpath); }
-ssize_t iox_readlink(const char *pathname, char *buf, size_t bufsiz) { return __iox_readlink_impl(pathname, buf, bufsiz); }
-int iox_chmod(const char *pathname, mode_t mode) { return __iox_chmod_impl(pathname, mode); }
-int iox_fchmod(int fd, mode_t mode) { return __iox_fchmod_impl(fd, mode); }
-int iox_chown(const char *pathname, uid_t owner, gid_t group) { return __iox_chown_impl(pathname, owner, group); }
-int iox_fchown(int fd, uid_t owner, gid_t group) { return __iox_fchown_impl(fd, owner, group); }
-int iox_lchown(const char *pathname, uid_t owner, gid_t group) { return __iox_lchown_impl(pathname, owner, group); }
-int iox_chroot(const char *path) { return __iox_chroot_impl(path); }
+int iox_stat(const char *pathname, struct stat *statbuf) {
+    return __iox_stat_impl(pathname, statbuf);
+}
+int iox_fstat(int fd, struct stat *statbuf) {
+    return __iox_fstat_impl(fd, statbuf);
+}
+int iox_lstat(const char *pathname, struct stat *statbuf) {
+    return __iox_lstat_impl(pathname, statbuf);
+}
+int iox_mkdir(const char *pathname, mode_t mode) {
+    return __iox_mkdir_impl(pathname, mode);
+}
+int iox_rmdir(const char *pathname) {
+    return __iox_rmdir_impl(pathname);
+}
+int iox_unlink(const char *pathname) {
+    return __iox_unlink_impl(pathname);
+}
+int iox_link(const char *oldpath, const char *newpath) {
+    return __iox_link_impl(oldpath, newpath);
+}
+int iox_symlink(const char *target, const char *linkpath) {
+    return __iox_symlink_impl(target, linkpath);
+}
+ssize_t iox_readlink(const char *pathname, char *buf, size_t bufsiz) {
+    return __iox_readlink_impl(pathname, buf, bufsiz);
+}
+int iox_chmod(const char *pathname, mode_t mode) {
+    return __iox_chmod_impl(pathname, mode);
+}
+int iox_fchmod(int fd, mode_t mode) {
+    return __iox_fchmod_impl(fd, mode);
+}
+int iox_chown(const char *pathname, uid_t owner, gid_t group) {
+    return __iox_chown_impl(pathname, owner, group);
+}
+int iox_fchown(int fd, uid_t owner, gid_t group) {
+    return __iox_fchown_impl(fd, owner, group);
+}
+int iox_lchown(const char *pathname, uid_t owner, gid_t group) {
+    return __iox_lchown_impl(pathname, owner, group);
+}
+int iox_chroot(const char *path) {
+    return __iox_chroot_impl(path);
+}
 
 /* Signal wrappers - main implementations in iox_process.c */
 /* __sighandler_t iox_signal(int signum, __sighandler_t handler) - in iox_process.c */
 /* int iox_kill(pid_t pid, int sig) - in iox_process.c */
-/* int iox_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact) - in iox_process.c */
-int iox_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) { return __iox_sigprocmask_impl(how, set, oldset); }
-int iox_sigpending(sigset_t *set) { return __iox_sigpending_impl(set); }
-int iox_sigsuspend(const sigset_t *mask) { return __iox_sigsuspend_impl(mask); }
-int iox_sigemptyset(sigset_t *set) { return __iox_sigemptyset_impl(set); }
-int iox_sigfillset(sigset_t *set) { return __iox_sigfillset_impl(set); }
-int iox_sigaddset(sigset_t *set, int signum) { return __iox_sigaddset_impl(set, signum); }
-int iox_sigdelset(sigset_t *set, int signum) { return __iox_sigdelset_impl(set, signum); }
-int iox_sigismember(const sigset_t *set, int signum) { return __iox_sigismember_impl(set, signum); }
-unsigned int iox_alarm(unsigned int seconds) { return __iox_alarm_impl(seconds); }
-int iox_setitimer(int which, const struct itimerval *new_value, struct itimerval *old_value) { return __iox_setitimer_impl(which, new_value, old_value); }
-int iox_getitimer(int which, struct itimerval *curr_value) { return __iox_getitimer_impl(which, curr_value); }
-int iox_pause(void) { return __iox_pause_impl(); }
+/* int iox_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact) - in
+ * iox_process.c */
+int iox_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
+    return __iox_sigprocmask_impl(how, set, oldset);
+}
+int iox_sigpending(sigset_t *set) {
+    return __iox_sigpending_impl(set);
+}
+int iox_sigsuspend(const sigset_t *mask) {
+    return __iox_sigsuspend_impl(mask);
+}
+int iox_sigemptyset(sigset_t *set) {
+    return __iox_sigemptyset_impl(set);
+}
+int iox_sigfillset(sigset_t *set) {
+    return __iox_sigfillset_impl(set);
+}
+int iox_sigaddset(sigset_t *set, int signum) {
+    return __iox_sigaddset_impl(set, signum);
+}
+int iox_sigdelset(sigset_t *set, int signum) {
+    return __iox_sigdelset_impl(set, signum);
+}
+int iox_sigismember(const sigset_t *set, int signum) {
+    return __iox_sigismember_impl(set, signum);
+}
+unsigned int iox_alarm(unsigned int seconds) {
+    return __iox_alarm_impl(seconds);
+}
+int iox_setitimer(int which, const struct itimerval *new_value, struct itimerval *old_value) {
+    return __iox_setitimer_impl(which, new_value, old_value);
+}
+int iox_getitimer(int which, struct itimerval *curr_value) {
+    return __iox_getitimer_impl(which, curr_value);
+}
+int iox_pause(void) {
+    return __iox_pause_impl();
+}
 
 /* Time */
-unsigned int iox_sleep(unsigned int seconds) { return __iox_sleep_impl(seconds); }
-int iox_usleep(useconds_t usec) { return __iox_usleep_impl(usec); }
-int iox_nanosleep(const struct timespec *req, struct timespec *rem) { return __iox_nanosleep_impl(req, rem); }
-int iox_gettimeofday(struct timeval *tv, struct timezone *tz) { return __iox_gettimeofday_impl(tv, tz); }
-int iox_settimeofday(const struct timeval *tv, const struct timezone *tz) { return __iox_settimeofday_impl(tv, tz); }
-int iox_clock_gettime(clockid_t clk_id, struct timespec *tp) { return __iox_clock_gettime_impl(clk_id, tp); }
-time_t iox_time(time_t *tloc) { return __iox_time_impl(tloc); }
+unsigned int iox_sleep(unsigned int seconds) {
+    return __iox_sleep_impl(seconds);
+}
+int iox_usleep(useconds_t usec) {
+    return __iox_usleep_impl(usec);
+}
+int iox_nanosleep(const struct timespec *req, struct timespec *rem) {
+    return __iox_nanosleep_impl(req, rem);
+}
+int iox_gettimeofday(struct timeval *tv, struct timezone *tz) {
+    return __iox_gettimeofday_impl(tv, tz);
+}
+int iox_settimeofday(const struct timeval *tv, const struct timezone *tz) {
+    return __iox_settimeofday_impl(tv, tz);
+}
+int iox_clock_gettime(clockid_t clk_id, struct timespec *tp) {
+    return __iox_clock_gettime_impl(clk_id, tp);
+}
+time_t iox_time(time_t *tloc) {
+    return __iox_time_impl(tloc);
+}
 
 /* Environment */
-char *iox_getenv(const char *name) { return __iox_getenv_impl(name); }
-int iox_setenv(const char *name, const char *value, int overwrite) { return __iox_setenv_impl(name, value, overwrite); }
-int iox_unsetenv(const char *name) { return __iox_unsetenv_impl(name); }
-int iox_clearenv(void) { return __iox_clearenv_impl(); }
+char *iox_getenv(const char *name) {
+    return __iox_getenv_impl(name);
+}
+int iox_setenv(const char *name, const char *value, int overwrite) {
+    return __iox_setenv_impl(name, value, overwrite);
+}
+int iox_unsetenv(const char *name) {
+    return __iox_unsetenv_impl(name);
+}
+int iox_clearenv(void) {
+    return __iox_clearenv_impl();
+}
 
 /* Memory */
-void *iox_mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset) { return __iox_mmap_impl(addr, length, prot, flags, fd, offset); }
-int iox_munmap(void *addr, size_t length) { return __iox_munmap_impl(addr, length); }
-int iox_mprotect(void *addr, size_t len, int prot) { return __iox_mprotect_impl(addr, len, prot); }
+void *iox_mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset) {
+    return __iox_mmap_impl(addr, length, prot, flags, fd, offset);
+}
+int iox_munmap(void *addr, size_t length) {
+    return __iox_munmap_impl(addr, length);
+}
+int iox_mprotect(void *addr, size_t len, int prot) {
+    return __iox_mprotect_impl(addr, len, prot);
+}
 
 /* Pipe */
-int iox_pipe(int pipefd[2]) { return __iox_pipe_impl(pipefd); }
+int iox_pipe(int pipefd[2]) {
+    return __iox_pipe_impl(pipefd);
+}
 
 /* TTY */
-int iox_isatty(int fd) { return __iox_isatty_impl(fd); }
-int iox_tcgetattr(int fd, struct termios *termios_p) { return __iox_tcgetattr_impl(fd, termios_p); }
-int iox_tcsetattr(int fd, int optional_actions, const struct termios *termios_p) { return __iox_tcsetattr_impl(fd, optional_actions, termios_p); }
+int iox_isatty(int fd) {
+    return __iox_isatty_impl(fd);
+}
+int iox_tcgetattr(int fd, struct termios *termios_p) {
+    return __iox_tcgetattr_impl(fd, termios_p);
+}
+int iox_tcsetattr(int fd, int optional_actions, const struct termios *termios_p) {
+    return __iox_tcsetattr_impl(fd, optional_actions, termios_p);
+}
 
 /* ============================================================================
  * DIRECTORY STUBS
@@ -452,9 +547,15 @@ char *__iox_getcwd_impl(char *buf, size_t size) {
  * PUBLIC API - DIRECTORY
  * ============================================================================ */
 
-int iox_chdir(const char *path) { return __iox_chdir_impl(path); }
-int iox_fchdir(int fd) { return __iox_fchdir_impl(fd); }
-char *iox_getcwd(char *buf, size_t size) { return __iox_getcwd_impl(buf, size); }
+int iox_chdir(const char *path) {
+    return __iox_chdir_impl(path);
+}
+int iox_fchdir(int fd) {
+    return __iox_fchdir_impl(fd);
+}
+char *iox_getcwd(char *buf, size_t size) {
+    return __iox_getcwd_impl(buf, size);
+}
 
 /* ============================================================================
  * PUBLIC API - USER/GROUP
@@ -469,7 +570,8 @@ uid_t iox_getuid(void) {
         initialized = 1;
         libc_getuid = (uid_t (*)(void))dlsym(RTLD_NEXT, "getuid");
     }
-    if (libc_getuid) return libc_getuid();
+    if (libc_getuid)
+        return libc_getuid();
     /* Return iOS default uid */
     return 501;
 }
@@ -480,7 +582,8 @@ gid_t iox_getgid(void) {
         initialized = 1;
         libc_getgid = (gid_t (*)(void))dlsym(RTLD_NEXT, "getgid");
     }
-    if (libc_getgid) return libc_getgid();
+    if (libc_getgid)
+        return libc_getgid();
     /* Return iOS default gid */
     return 501;
 }
