@@ -115,6 +115,9 @@ iox_task_t *iox_task_lookup(pid_t pid) {
 }
 
 static void iox_task_init_once(void) {
+    /* Initialize PID allocator first */
+    iox_pid_init();
+
     init_task = iox_task_alloc();
     if (!init_task)
         return;

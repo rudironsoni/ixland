@@ -134,6 +134,7 @@ void iox_set_current_task(iox_task_t *task);
 
 pid_t iox_alloc_pid(void);
 void iox_free_pid(pid_t pid);
+void iox_pid_init(void);
 
 int iox_task_init(void);
 void iox_task_deinit(void);
