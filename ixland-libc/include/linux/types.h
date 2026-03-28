@@ -104,16 +104,26 @@ typedef uint32_t __kernel_old_dev_t; /* Old 16-bit device number */
  * Full definitions are in internal headers.
  */
 
-/* Forward declaration for task structure */
+/* Forward declaration for task structure
+ * Note: Full definition is in kernel/task/task.h
+ * This typedef must match the one in task.h exactly:
+ *   task.h: typedef struct iox_task iox_task_t;
+ */
 struct iox_task;
+typedef struct iox_task iox_task_t;
+
 struct iox_task_struct;
-typedef struct iox_task *iox_task_t;
 typedef struct iox_task_struct *iox_task_struct_t;
 
-/* Forward declaration for file descriptor table */
+/* Forward declaration for file descriptor table
+ * Note: Full definition is in kernel/task/task.h
+ * This typedef must match the one in task.h exactly:
+ *   task.h: typedef struct iox_files iox_files_t;
+ */
 struct iox_files;
+typedef struct iox_files iox_files_t;
+
 struct iox_files_struct;
-typedef struct iox_files *iox_files_t;
 typedef struct iox_files_struct *iox_files_struct_t;
 
 /* Forward declaration for signal handling */
@@ -138,9 +148,16 @@ struct iox_real_cred;
 typedef struct iox_cred *iox_cred_t;
 typedef struct iox_real_cred *iox_real_cred_t;
 
-/* Forward declaration for signal handling state */
+/* Forward declaration for signal handling state
+ * Note: Full definition is in kernel/task/task.h
+ * This typedef must match the one in task.h exactly:
+ *   task.h: typedef struct iox_sighand iox_sighand_t;
+ */
+struct iox_sighand;
+typedef struct iox_sighand iox_sighand_t;
+
 struct iox_sighand_struct;
-typedef struct iox_sighand_struct *iox_sighand_t;
+typedef struct iox_sighand_struct *iox_sighand_struct_t;
 
 /* Forward declaration for thread group */
 struct iox_thread_group;
@@ -279,7 +296,8 @@ typedef struct iox_itimerspec iox_itimerspec_t;
  * ============================================================================
  */
 
-/* Poll file descriptor */
+/* Poll file descriptor - also defined in linux/poll.h */
+#define IOX_POLLFD_DEFINED
 struct iox_pollfd {
     int32_t fd;      /* File descriptor */
     int16_t events;  /* Requested events */
@@ -291,25 +309,11 @@ typedef struct iox_pollfd iox_pollfd_t;
 /* ============================================================================
  * EPOLL TYPES
  * ============================================================================
+ *
+ * Note: iox_epoll_event and iox_epoll_data are defined in linux/epoll.h
+ * to avoid duplication. If you need epoll types, include linux/epoll.h
+ * or use the linux/epoll.h header directly.
  */
-
-/* Epoll data union */
-union iox_epoll_data {
-    void *ptr;
-    int32_t fd;
-    uint32_t u32;
-    uint64_t u64;
-};
-
-typedef union iox_epoll_data iox_epoll_data_t;
-
-/* Epoll event structure */
-struct iox_epoll_event {
-    uint32_t events;       /* Epoll events */
-    iox_epoll_data_t data; /* User data variable */
-} __attribute__((packed));
-
-typedef struct iox_epoll_event iox_epoll_event_t;
 
 /* ============================================================================
  * SOCKET TYPES

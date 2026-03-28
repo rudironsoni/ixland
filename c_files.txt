@@ -91,6 +91,8 @@ ixland-libc/include/iox/iox_types.h
 ixland-libc/include/iox/iox.h
 ixland-libc/tests/test_usersdb_smoke.c
 ixland-libc/tests/test_core_smoke.c
+ixland-libc/build-standalone/CMakeFiles/4.3.0/CompilerIdC/CMakeCCompilerId.c
+ixland-libc/build-standalone/CMakeFiles/4.3.0/CompilerIdC/apple-sdk.c
 ixland-libc/src/iox_version.c
 ixland-libc/src/usersdb/grp.c
 ixland-libc/src/usersdb/pwd.c

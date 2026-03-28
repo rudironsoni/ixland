@@ -113,17 +113,23 @@ struct epoll_event {
 } __attribute__((packed));
 
 /* iXland compatibility types */
+#ifndef IOX_EPOLL_DATA_DEFINED
 typedef union iox_epoll_data {
     void *ptr;
     int fd;
     uint32_t u32;
     uint64_t u64;
 } iox_epoll_data_t;
+#define IOX_EPOLL_DATA_DEFINED
+#endif
 
+#ifndef IOX_EPOLL_EVENT_DEFINED
 struct iox_epoll_event {
     uint32_t events;
     iox_epoll_data_t data;
 } __attribute__((packed));
+#define IOX_EPOLL_EVENT_DEFINED
+#endif
 
 /* ============================================================================
  * EPOLL INFO STRUCTURE (for epoll_pwait2)

@@ -75,12 +75,14 @@ struct linux_pollfd {
     short revents; /* Returned events */
 };
 
-/* Legacy BSD struct (for compatibility) */
+/* Legacy BSD struct (for compatibility) - defined in linux/types.h if included first */
+#ifndef IOX_POLLFD_DEFINED
 struct iox_pollfd {
     int fd;
     short events;
     short revents;
 };
+#endif
 
 /* Compatibility alias */
 #define pollfd linux_pollfd
@@ -128,28 +130,36 @@ typedef struct {
 /* Compatibility alias */
 #define fd_set linux_fd_set_t
 
-/* FD set manipulation macros */
+/* FD set manipulation macros - guard against iox/sys/types.h versions */
+#ifndef IOX_FD_ZERO
 #define IOX_FD_ZERO(set)                                           \
     do {                                                           \
         unsigned int __i;                                          \
         for (__i = 0; __i < (IOX_FD_SETSIZE / IOX_NFDBITS); __i++) \
             (set)->fds_bits[__i] = 0;                              \
     } while (0)
+#endif
 
+#ifndef IOX_FD_SET
 #define IOX_FD_SET(fd, set)                                   \
     do {                                                      \
         if ((unsigned int)(fd) < IOX_FD_SETSIZE)              \
             (set)->fds_bits[IOX_FDELT(fd)] |= IOX_FDMASK(fd); \
     } while (0)
+#endif
 
+#ifndef IOX_FD_CLR
 #define IOX_FD_CLR(fd, set)                                    \
     do {                                                       \
         if ((unsigned int)(fd) < IOX_FD_SETSIZE)               \
             (set)->fds_bits[IOX_FDELT(fd)] &= ~IOX_FDMASK(fd); \
     } while (0)
+#endif
 
+#ifndef IOX_FD_ISSET
 #define IOX_FD_ISSET(fd, set) \
     (((unsigned int)(fd) < IOX_FD_SETSIZE) ? ((set)->fds_bits[IOX_FDELT(fd)] & IOX_FDMASK(fd)) : 0)
+#endif
 
 /* ============================================================================
  * TIMEOUT STRUCTURES

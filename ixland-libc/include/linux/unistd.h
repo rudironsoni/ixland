@@ -505,7 +505,7 @@ int iox_getgroups(int size, gid_t list[]);
  * @param list Array of group IDs
  * @return int 0 on success, -1 on error
  */
-int iox_setgroups(int size, const gid_t list[]);
+int iox_setgroups(size_t size, const gid_t *list);
 
 /* ============================================================================
  * TIME
