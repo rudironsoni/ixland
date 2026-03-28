@@ -2,8 +2,44 @@
 #
 # This component owns the public libc/ABI headers and select
 # self-contained libc-facing utility implementations.
+#
+# This file supports both standalone and monorepo-subproject builds.
+# Standalone: cmake -B build . (sets up iOS, defines project)
+# Subproject: Built as part of ixland monorepo (uses parent settings)
 
 cmake_minimum_required(VERSION 3.20)
+
+# Detect standalone vs subproject mode
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    set(IXLAND_LIBC_STANDALONE_MODE ON)
+else()
+    set(IXLAND_LIBC_STANDALONE_MODE OFF)
+endif()
+
+if(IXLAND_LIBC_STANDALONE_MODE)
+    # Standalone: MUST set iOS before project()
+    set(CMAKE_SYSTEM_NAME iOS)
+    set(CMAKE_OSX_SYSROOT "iphonesimulator" CACHE STRING "SDK")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "16.0")
+    set(CMAKE_OSX_ARCHITECTURES "arm64")
+
+    # Hard fail on non-iOS in standalone mode
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        message(FATAL_ERROR "ixland-libc only supports iOS builds")
+    endif()
+
+    project(ixland-libc
+        VERSION 0.1.0
+        DESCRIPTION "iXland C Library and ABI Boundary"
+        LANGUAGES C
+    )
+
+    message(STATUS "ixland-libc: Building in standalone mode")
+else()
+    # Subproject: Use parent project settings
+    # iOS settings should already be set by root CMakeLists.txt
+    message(STATUS "ixland-libc: Building as monorepo subproject")
+endif()
 
 # ============================================================================
 # HEADERS TARGET
@@ -93,5 +129,20 @@ if(IXLAND_LIBC_BUILD_TESTS)
     message(STATUS "ixland-libc: Usersdb tests enabled (ixland-libc-usersdb-test)")
 endif()
 
+# Print configuration summary
+message(STATUS "")
+message(STATUS "ixland-libc Configuration:")
+if(IXLAND_LIBC_STANDALONE_MODE)
+    message(STATUS "  Mode: Standalone")
+    message(STATUS "  System: ${CMAKE_SYSTEM_NAME}")
+    message(STATUS "  SDK: ${CMAKE_OSX_SYSROOT}")
+    message(STATUS "  Deployment: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
+    message(STATUS "  Architecture: ${CMAKE_OSX_ARCHITECTURES}")
+else()
+    message(STATUS "  Mode: Monorepo subproject")
+endif()
+message(STATUS "  Version: 0.1.0")
+message(STATUS "  Build tests: ${IXLAND_LIBC_BUILD_TESTS}")
+message(STATUS "")
 message(STATUS "ixland-libc: Headers and core implementation configured")
 message(STATUS "ixland-libc: Users database implementation configured (ixland-libc-usersdb)")

@@ -38,8 +38,39 @@ This component owns:
 This component provides:
 - `ixland-libc-headers` - INTERFACE target for public headers only
 - `ixland-libc-core` - STATIC library with self-contained utilities
+- `ixland-libc-usersdb` - STATIC library with user/group database stubs
 
 Include this component to get access to public iox headers and utilities.
+
+## Build Modes
+
+### Standalone Build
+
+When built independently, ixland-libc automatically configures iOS settings:
+
+```bash
+cd ixland-libc
+cmake -B build .
+cmake --build build
+```
+
+In standalone mode, the following iOS settings are automatically configured:
+- `CMAKE_SYSTEM_NAME=iOS`
+- `CMAKE_OSX_DEPLOYMENT_TARGET=16.0`
+- `CMAKE_OSX_SYSROOT=iphonesimulator`
+- `CMAKE_OSX_ARCHITECTURES=arm64`
+
+### Monorepo Build
+
+When built as part of the ixland monorepo, ixland-libc uses the parent project's settings:
+
+```bash
+cd /path/to/ixland
+cmake -B build .
+cmake --build build --target ixland-libc-core ixland-libc-usersdb
+```
+
+Both build modes produce identical targets (`libixland-libc-core.a`, `libixland-libc-usersdb.a`).
 
 ## Local Testing
 
