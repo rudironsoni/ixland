@@ -70,10 +70,9 @@ Future: `ixland-packages` and `ixland-toolchain` will join when they have real C
 ### Current Consumption
 
 - `ixland-libc-headers` → `iox-core` (via `target_link_libraries`)
-
-### Future Consumption
-
-- `ixland-wasm-contracts` → runtime/wasi implementation (when refactored)
+- `ixland-libc-headers` → `iox-runtime` (via `target_link_libraries`)
+- `ixland-wasm-contracts` → `iox-runtime` (via `target_link_libraries`)
+- `iox-runtime` → `iox-core` (runtime layer consumed by core)
 
 ### Standalone vs Subproject
 
@@ -114,13 +113,25 @@ cmake --build .
 ```
 ixland-libc-headers (INTERFACE)
     │
+    ├─ PUBLIC include → iox-runtime
     └─ PUBLIC include → iox-core
+
+ixland-wasm-contracts (INTERFACE)
+    │
+    └─ PUBLIC include → iox-runtime
+
+iox-runtime (STATIC)
+    │
+    ├─ PRIVATE sources: runtime/wasi/, runtime/native/
+    ├─ PUBLIC link: ixland-wasm-contracts
+    └─ PUBLIC link: ixland-libc-headers
 
 iox-core (STATIC)
     │
-    ├─ PRIVATE sources: kernel/, fs/, runtime/
-    ├─ PUBLIC includes: internal/, kernel/, fs/, runtime/
+    ├─ PRIVATE sources: kernel/, fs/
+    ├─ PUBLIC includes: internal/, kernel/, fs/
     ├─ PUBLIC link: ixland-libc-headers (boundary consumption)
+    ├─ PUBLIC link: iox-runtime (runtime/wasi layer)
     └─ PUBLIC link: pthread
 
 iox-core-tests (MODULE)

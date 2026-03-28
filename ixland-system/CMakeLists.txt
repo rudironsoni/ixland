@@ -82,11 +82,23 @@ set(IOX_RUNTIME_SOURCES
     runtime/wasi/wasm_adapter.c
 )
 
-# Combined sources
+# Combined sources (without runtime - will be separate target)
 set(IOX_CORE_SOURCES
     ${IOX_KERNEL_SOURCES}
     ${IOX_FS_SOURCES}
-    ${IOX_RUNTIME_SOURCES}
+)
+
+# Create runtime/wasi library (internal target)
+add_library(iox-runtime STATIC ${IOX_RUNTIME_SOURCES})
+
+# Runtime target include directories
+target_include_directories(iox-runtime
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/native>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/wasi>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/wamr/include>
 )
 
 # Create core library
@@ -106,8 +118,19 @@ target_include_directories(iox-core
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/iox/internal>
 )
 
+# Link runtime to boundary targets if available in monorepo build
+if(NOT IOX_STANDALONE_MODE)
+    # Wasm contract headers - consumed by runtime/wasi implementation
+    if(TARGET ixland-wasm-contracts)
+        target_link_libraries(iox-runtime PUBLIC ixland-wasm-contracts)
+        message(STATUS "iox-runtime: Linked to ixland-wasm-contracts")
+    endif()
+else()
+    # Standalone: add libc include path directly
+    target_include_directories(iox-runtime PUBLIC ${IOX_LIBC_INCLUDE_DIR})
+endif()
+
 # Link to boundary targets if available in monorepo build
-# In standalone mode, we use the source tree include path set above
 if(NOT IOX_STANDALONE_MODE)
     # Consume public headers from ixland-libc boundary target
     if(TARGET ixland-libc-headers)
@@ -116,16 +139,10 @@ if(NOT IOX_STANDALONE_MODE)
     else()
         message(WARNING "iox: ixland-libc-headers target not found, headers may not be available")
     endif()
-
-    # Wasm contract headers - now consumed by runtime/wasi implementation
-    if(TARGET ixland-wasm-contracts)
-        target_link_libraries(iox-core PUBLIC ixland-wasm-contracts)
-        message(STATUS "iox: Linked to ixland-wasm-contracts")
-    endif()
-else()
-    # Standalone: add libc include path directly
-    target_include_directories(iox-core PUBLIC ${IOX_LIBC_INCLUDE_DIR})
 endif()
+
+# Link core to runtime (core depends on runtime/wasi)
+target_link_libraries(iox-core PUBLIC iox-runtime)
 
 target_compile_options(iox-core PRIVATE
     -Wall
