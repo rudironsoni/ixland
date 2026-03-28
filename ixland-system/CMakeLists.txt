@@ -225,6 +225,8 @@ if(IOX_BUILD_TESTS)
         Tests/unit/test_fork.c
         Tests/unit/test_file_syscalls.c
         Tests/unit/test_identity_syscalls.c
+        Tests/unit/test_process_relationships.c
+        Tests/unit/test_orphan_adoption.c
         # Tests/unit/test_poll_syscalls.c  # TODO: needs type compatibility work
         # Tests/unit/test_directory_syscalls.c  # TODO: requires directory syscall implementation
     )
