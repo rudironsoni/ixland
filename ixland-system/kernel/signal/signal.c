@@ -1,7 +1,9 @@
 #include <errno.h>
 #include <pthread.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "iox_signal.h"
 
@@ -316,4 +318,178 @@ int iox_sigpending(sigset_t *set) {
 
     *set = task->sighand->pending;
     return 0;
+}
+
+/* ============================================================================
+ * SIGNAL - Simple signal handler installation
+ * ============================================================================ */
+
+iox_sighandler_t iox_signal(int signum, iox_sighandler_t handler) {
+    if (signum < 1 || signum >= IOX_NSIG) {
+        errno = EINVAL;
+        return SIG_ERR;
+    }
+
+    if (signum == SIGKILL || signum == SIGSTOP) {
+        errno = EINVAL;
+        return SIG_ERR;
+    }
+
+    iox_task_t *task = iox_current_task();
+    if (!task || !task->sighand) {
+        errno = ESRCH;
+        return SIG_ERR;
+    }
+
+    /* Get old handler */
+    iox_sighandler_t old_handler = task->sighand->action[signum].sa_handler;
+
+    /* Install new handler */
+    task->sighand->action[signum].sa_handler = handler;
+    task->sighand->action[signum].sa_flags = 0;
+    sigemptyset(&task->sighand->action[signum].sa_mask);
+
+    return old_handler;
+}
+
+/* ============================================================================
+ * RAISE - Send signal to current process
+ * ============================================================================ */
+
+int iox_raise(int sig) {
+    iox_task_t *task = iox_current_task();
+    if (!task) {
+        errno = ESRCH;
+        return -1;
+    }
+    return iox_kill(task->pid, sig);
+}
+
+/* ============================================================================
+ * ALARM - Set alarm timer (simulated)
+ *
+ * Note: iOS doesn't support POSIX timers (timer_create/timer_delete).
+ * We implement a simplified version that tracks alarm state without
+ * actual timer delivery.
+ * ============================================================================ */
+
+static pthread_mutex_t alarm_lock = PTHREAD_MUTEX_INITIALIZER;
+static unsigned int alarm_remaining = 0;
+static time_t alarm_set_time = 0;
+static int alarm_active = 0;
+
+unsigned int iox_alarm(unsigned int seconds) {
+    pthread_mutex_lock(&alarm_lock);
+
+    unsigned int old_remaining = 0;
+
+    /* Calculate remaining time from previous alarm */
+    if (alarm_active && alarm_set_time > 0) {
+        time_t elapsed = time(NULL) - alarm_set_time;
+        if (elapsed < (time_t)alarm_remaining) {
+            old_remaining = alarm_remaining - (unsigned int)elapsed;
+        }
+    }
+
+    /* Cancel existing alarm */
+    alarm_active = 0;
+    alarm_remaining = 0;
+    alarm_set_time = 0;
+
+    if (seconds == 0) {
+        /* Just cancel, don't set new alarm */
+        pthread_mutex_unlock(&alarm_lock);
+        return old_remaining;
+    }
+
+    /* Set new alarm state */
+    alarm_remaining = seconds;
+    alarm_set_time = time(NULL);
+    alarm_active = 1;
+
+    /* Note: On iOS, we cannot create real timers that deliver signals.
+     * The alarm is tracked but not actively delivered.
+     * In a complete implementation, a background thread would
+     * monitor alarms and deliver SIGALRM when they expire.
+     */
+
+    pthread_mutex_unlock(&alarm_lock);
+    return old_remaining;
+}
+
+/* Helper to check if sigset is empty (macOS/iOS doesn't have sigisemptyset) */
+static int sigset_is_empty(const sigset_t *set) {
+    for (int i = 1; i < IOX_NSIG; i++) {
+        if (sigismember(set, i)) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+/* ============================================================================
+ * PAUSE - Wait for signal
+ * ============================================================================ */
+
+int iox_pause(void) {
+    iox_task_t *task = iox_current_task();
+    if (!task) {
+        errno = ESRCH;
+        return -1;
+    }
+
+    /* Block until a signal is delivered */
+    /* In our simulation, we use a condition variable that's signaled on signal delivery */
+    pthread_mutex_lock(&task->wait_lock);
+
+    /* Wait for a signal to be delivered */
+    /* The signal delivery mechanism will wake us up */
+    while (sigset_is_empty(&task->sighand->pending)) {
+        task->waiters++;
+        pthread_cond_wait(&task->wait_cond, &task->wait_lock);
+        task->waiters--;
+    }
+
+    pthread_mutex_unlock(&task->wait_lock);
+
+    /* Always returns -1 with EINTR when signal is caught */
+    errno = EINTR;
+    return -1;
+}
+
+/* ============================================================================
+ * SIGSUSPEND - Atomically replace mask and wait for signal
+ * ============================================================================ */
+
+int iox_sigsuspend(const sigset_t *mask) {
+    iox_task_t *task = iox_current_task();
+    if (!task || !task->sighand) {
+        errno = ESRCH;
+        return -1;
+    }
+
+    if (!mask) {
+        errno = EFAULT;
+        return -1;
+    }
+
+    /* Save old mask */
+    sigset_t old_mask = task->sighand->blocked;
+
+    /* Install new mask */
+    task->sighand->blocked = *mask;
+
+    /* Wait for signal */
+    pthread_mutex_lock(&task->wait_lock);
+    task->waiters++;
+    pthread_cond_wait(&task->wait_cond, &task->wait_lock);
+    task->waiters--;
+    pthread_mutex_unlock(&task->wait_lock);
+
+    /* Restore old mask */
+    task->sighand->blocked = old_mask;
+
+    /* Always returns -1 with EINTR */
+    errno = EINTR;
+    return -1;
 }

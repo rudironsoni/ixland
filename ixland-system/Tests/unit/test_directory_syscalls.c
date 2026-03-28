@@ -42,10 +42,15 @@ static void setup_test_dir(void) {
 }
 
 static void cleanup_test_dir(void) {
-    /* Remove all test files and directories */
+    /* Remove all test files and directories using iox_unlink/rmdir */
+    /* Note: iox_unlink and iox_rmdir are the syscall wrappers being tested */
+    /* For cleanup, we use the native system calls directly */
     char cmd[256];
     snprintf(cmd, sizeof(cmd), "rm -rf %s", TEST_DIR);
-    system(cmd);
+    /* system() unavailable on iOS - use direct system call via libc */
+    (void)cmd;
+    /* Manual cleanup - just try to remove the directory */
+    rmdir(TEST_DIR);
 }
 
 /* ============================================================================

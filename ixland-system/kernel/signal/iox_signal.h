@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <time.h>
+
 #include "../task/task.h"
 
 #ifdef __cplusplus
@@ -50,6 +51,19 @@ int iox_sigpending(sigset_t *set);
 int iox_sigsuspend(const sigset_t *mask);
 int iox_sigqueue(pid_t pid, int sig, const union sigval value);
 int iox_sigtimedwait(const sigset_t *set, siginfo_t *info, const struct timespec *timeout);
+
+/* Signal handler installation (simplified interface) */
+typedef void (*iox_sighandler_t)(int);
+iox_sighandler_t iox_signal(int signum, iox_sighandler_t handler);
+
+/* Signal to current process */
+int iox_raise(int sig);
+
+/* Alarm timer */
+unsigned int iox_alarm(unsigned int seconds);
+
+/* Wait for signal */
+int iox_pause(void);
 
 void iox_signal_init(void);
 void iox_signal_deinit(void);

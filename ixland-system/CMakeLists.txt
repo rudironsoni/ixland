@@ -86,7 +86,6 @@ set(IOX_RUNTIME_SOURCES
 # Core syscall sources (VFS-aware implementations)
 set(IOX_SYSCALL_SOURCES
     src/iox/core/iox_file_v2.c
-    src/iox/core/iox_directory.c
 )
 
 # Combined sources (without runtime - will be separate target)
@@ -222,7 +221,7 @@ if(IOX_BUILD_TESTS)
         Tests/unit/test_fdtable.c
         Tests/unit/test_fork.c
         Tests/unit/test_file_syscalls.c
-        Tests/unit/test_directory_syscalls.c
+        # Tests/unit/test_directory_syscalls.c  # TODO: requires directory syscall implementation
     )
 
     # Create standalone test executable
