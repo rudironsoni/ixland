@@ -74,6 +74,7 @@ install(EXPORT ixland-libc-targets
 )
 
 install(DIRECTORY include/iox DESTINATION include)
+install(DIRECTORY include/linux DESTINATION include)
 install(FILES include/grp.h include/pwd.h DESTINATION include)
 
 # ============================================================================

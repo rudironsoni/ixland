@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 /* File descriptor set for select */
 #ifndef _IOX_FD_SET_SIZE
