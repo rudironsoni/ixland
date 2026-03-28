@@ -188,47 +188,47 @@ struct __iox_process_s {
     pthread_mutex_t thread_lock;
     char name[IOX_MAX_NAME];
     char cwd[IOX_MAX_PATH];
-    
+
     /* Signal handling */
     struct sigaction sig_actions[IOX_NSIG];
     sigset_t sig_mask;
     sigset_t sig_pending;
     __iox_sigqueue_t sigqueue;
     pthread_mutex_t sig_lock;
-    
+
     /* Waiters */
     __iox_wait_entry_t *waiters;
     bool waited_on;
     pthread_mutex_t wait_lock;
     pthread_cond_t wait_cond;
-    
+
     /* File descriptors */
     struct __iox_fd_entry_s fd_table[IOX_MAX_FD];
     int fd_count;
     pthread_mutex_t fd_lock;
-    
+
     /* Environment and arguments */
     char **argv;
     char **envp;
-    
+
     /* Resource limits */
     struct rlimit rlimits[RLIMIT_NLIMITS];
-    
+
     /* Links */
     __iox_process_t *parent;
     __iox_process_t *children;
     __iox_process_t *next_sibling;
     struct __iox_process_s *hash_next;
     struct __iox_process_s *sibling;
-    
+
     /* Reference counting */
     atomic_int refcount;
     atomic_int children_count;
     atomic_int children_exited;
-    
+
     /* Timing */
     struct timespec start_time;
-    
+
     /* Execution info */
     char exe[IOX_MAX_PATH];
     atomic_bool exited;
@@ -255,19 +255,19 @@ struct iox_process_context {
     pid_t pgid;
     pid_t sid;
     char name[IOX_MAX_NAME];
-    
+
     /* State */
     atomic_int state;
     int exit_status;
-    
+
     /* Thread */
     pthread_t thread;
     pthread_mutex_t lock;
-    
+
     /* Working directory */
     char cwd[IOX_MAX_PATH];
     char root[IOX_MAX_PATH];
-    
+
     /* File descriptor table */
     struct {
         int real_fd;
@@ -277,30 +277,30 @@ struct iox_process_context {
         bool used;
     } fd_table[IOX_MAX_FD];
     pthread_mutex_t fd_lock;
-    
+
     /* Environment */
     char **env;
     int env_count;
     pthread_mutex_t env_lock;
-    
+
     /* Signal state */
     struct sigaction sig_actions[IOX_NSIG];
     sigset_t sig_mask;
     sigset_t sig_pending;
     pthread_mutex_t sig_lock;
-    
+
     /* Resource limits */
     struct rlimit rlimits[RLIMIT_NLIMITS];
-    
+
     /* Parent/child */
     struct iox_process_context *parent;
     struct iox_process_context *children;
     struct iox_process_context *next_sibling;
-    
+
     /* Wait queue */
     pthread_cond_t wait_cond;
     bool waited_on;
-    
+
     /* Reference counting */
     atomic_int refs;
 };
@@ -736,6 +736,14 @@ int iox_tcsendbreak(int fd, int duration);
 int iox_tcdrain(int fd);
 int iox_tcflush(int fd, int queue_selector);
 int iox_tcflow(int fd, int action);
+
+/* Identity - User/Group */
+uid_t iox_getuid(void);
+uid_t iox_geteuid(void);
+gid_t iox_getgid(void);
+gid_t iox_getegid(void);
+int iox_setuid(uid_t uid);
+int iox_setgid(gid_t gid);
 
 /* Initialization */
 int iox_init(const iox_config_t *config);

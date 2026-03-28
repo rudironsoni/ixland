@@ -558,32 +558,8 @@ char *iox_getcwd(char *buf, size_t size) {
 }
 
 /* ============================================================================
- * PUBLIC API - USER/GROUP
+ * IDENTITY SYSCALLS
+ *
+ * Note: iox_getuid(), iox_geteuid(), iox_getgid(), iox_getegid(),
+ * iox_setuid(), iox_setgid() are implemented in iox_identity.c
  * ============================================================================ */
-
-static uid_t (*libc_getuid)(void) = NULL;
-static gid_t (*libc_getgid)(void) = NULL;
-
-uid_t iox_getuid(void) {
-    static int initialized = 0;
-    if (!initialized) {
-        initialized = 1;
-        libc_getuid = (uid_t (*)(void))dlsym(RTLD_NEXT, "getuid");
-    }
-    if (libc_getuid)
-        return libc_getuid();
-    /* Return iOS default uid */
-    return 501;
-}
-
-gid_t iox_getgid(void) {
-    static int initialized = 0;
-    if (!initialized) {
-        initialized = 1;
-        libc_getgid = (gid_t (*)(void))dlsym(RTLD_NEXT, "getgid");
-    }
-    if (libc_getgid)
-        return libc_getgid();
-    /* Return iOS default gid */
-    return 501;
-}
