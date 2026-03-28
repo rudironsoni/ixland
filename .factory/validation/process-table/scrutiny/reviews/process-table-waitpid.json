@@ -1,0 +1,31 @@
+{
+  "featureId": "process-table-waitpid",
+  "reviewedAt": "2026-03-28T12:50:00Z",
+  "commitId": "64d676951",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The waitpid() implementation is comprehensive and correct. It supports all POSIX PID selection modes (-1 for any, >0 for specific, 0 for same pgrp, <-1 for specific pgrp) and options (WNOHANG, WUNTRACED, WCONTINUED). Status encoding matches Linux semantics with proper macros (WIFEXITED, WEXITSTATUS, WIFSIGNALED, WTERMSIG, WIFSTOPPED, WSTOPSIG, WIFCONTINUED). The implementation correctly handles zombie reaping only for terminated children, while stopped/continued children are reported but not reaped.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "The implementation correctly follows the iox_ naming convention for functions (iox_waitpid, iox_wait, iox_wait4, iox_wait3) and uses proper POSIX errno values (ECHILD, ESRCH). The code follows the established pattern in the codebase for task manipulation with proper mutex locking.",
+      "evidence": "ixland-system/kernel/task/wait.c - all functions use iox_ prefix, errno values match POSIX"
+    },
+    {
+      "area": "skills",
+      "observation": "The worker followed the backend-worker skill procedure correctly. The implementation includes proper error handling, thread safety with atomic operations, and comprehensive test coverage. The handoff report accurately describes what was implemented.",
+      "evidence": "handoff.skillFeedback.followedProcedure is true with no deviations reported"
+    },
+    {
+      "area": "knowledge",
+      "observation": "The status encoding implementation correctly encodes different child states following Linux conventions: normal exit ((status & 0xFF) << 8), signal termination (termsig), stopped ((stopsig << 8) | 0x7f), and continued ((SIGCONT << 8) | 0x7f). This knowledge is properly documented in the wait status macros.",
+      "evidence": "task_to_status() function in wait.c and W_STOPPED/W_CONTINUED macros"
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "PASS: The waitpid() implementation fully satisfies all validation assertions VAL-PROCESS-013 through VAL-PROCESS-019. The code correctly implements: (1) returning child PID and exit status, (2) reaping terminated children while preserving stopped/continued in the list, (3) WNOHANG non-blocking behavior returning 0 when no matches, (4) WUNTRACED reporting stopped children with WIFSTOPPED/WSTOPSIG working, (5) WCONTINUED reporting continued children with WIFCONTINUED working, (6) all four PID selection modes (specific, any, same pgrp, specific pgrp), and (7) ECHILD when no children exist. The 237 lines of new tests provide excellent coverage of all functionality including edge cases like multiple children, wrong PID, and second reap attempts."
+}
