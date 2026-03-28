@@ -1,9 +1,9 @@
 # Unified Implementation Plan: a-Shell Next
 
-**Version**: 1.0  
-**Date**: 2026-03-20  
-**Status**: Approved - Ready for Implementation  
-**Approach**: Big Bang Migration (No Backward Compatibility)  
+**Version**: 1.0
+**Date**: 2026-03-20
+**Status**: Approved - Ready for Implementation
+**Approach**: Big Bang Migration (No Backward Compatibility)
 
 ---
 
@@ -115,14 +115,14 @@ a-shell-next/
 
 ## Phase 1: Foundation (Kernel Headers + Syscalls)
 
-**Priority**: CRITICAL - Must Complete First  
+**Priority**: CRITICAL - Must Complete First
 **Rationale**: Kernel headers are required by ALL packages. Cannot build bash, coreutils, or any tool without syscall definitions.
 
 ### 1.1 Big Bang Migration
 
 **Action**: Delete `ios_error.h` immediately. Do not maintain backward compatibility.
 
-**Rationale**: 
+**Rationale**:
 - Forces complete migration to new headers
 - Eliminates technical debt
 - Ensures all code uses proper Linux-compatible headers
@@ -321,13 +321,13 @@ struct passwd {
     char *pw_shell;
 };
 
-struct passwd *a_shell_getpwnam(const char *name);
-struct passwd *a_shell_getpwuid(uid_t uid);
-int a_shell_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t buflen, struct passwd **result);
-int a_shell_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen, struct passwd **result);
-void a_shell_endpwent(void);
-struct passwd *a_shell_getpwent(void);
-void a_shell_setpwent(void);
+struct passwd *ixland_getpwnam(const char *name);
+struct passwd *ixland_getpwuid(uid_t uid);
+int ixland_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t buflen, struct passwd **result);
+int ixland_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen, struct passwd **result);
+void ixland_endpwent(void);
+struct passwd *ixland_getpwent(void);
+void ixland_setpwent(void);
 
 #endif
 ```
@@ -346,16 +346,16 @@ struct group {
     char **gr_mem;
 };
 
-struct group *a_shell_getgrnam(const char *name);
-struct group *a_shell_getgrgid(gid_t gid);
-int a_shell_getgrnam_r(const char *name, struct group *grp, char *buf, size_t buflen, struct group **result);
-int a_shell_getgrgid_r(gid_t gid, struct group *grp, char *buf, size_t buflen, struct group **result);
-void a_shell_endgrent(void);
-struct group *a_shell_getgrent(void);
-void a_shell_setgrent(void);
-int a_shell_getgroups(int size, gid_t list[]);
-int a_shell_setgroups(size_t size, const gid_t *list);
-int a_shell_initgroups(const char *user, gid_t group);
+struct group *ixland_getgrnam(const char *name);
+struct group *ixland_getgrgid(gid_t gid);
+int ixland_getgrnam_r(const char *name, struct group *grp, char *buf, size_t buflen, struct group **result);
+int ixland_getgrgid_r(gid_t gid, struct group *grp, char *buf, size_t buflen, struct group **result);
+void ixland_endgrent(void);
+struct group *ixland_getgrent(void);
+void ixland_setgrent(void);
+int ixland_getgroups(int size, gid_t list[]);
+int ixland_setgroups(size_t size, const gid_t *list);
+int ixland_initgroups(const char *user, gid_t group);
 
 #endif
 ```
@@ -623,23 +623,23 @@ static process_entry_t process_table[MAX_PROCESSES];
 
 pid_t a_shell_fork(void) {
     pthread_mutex_lock(&pid_table_mutex);
-    
+
     pid_t pid = next_virtual_pid++;
     if (pid >= next_virtual_pid + MAX_PROCESSES) {
         errno = EAGAIN;
         pthread_mutex_unlock(&pid_table_mutex);
         return -1;
     }
-    
+
     process_entry_t *entry = &process_table[pid % MAX_PROCESSES];
     entry->pid = pid;
     entry->ppid = a_shell_getpid();
     entry->thread = pthread_self();
     entry->running = true;
     entry->exited = false;
-    
+
     pthread_mutex_unlock(&pid_table_mutex);
-    
+
     return pid;
 }
 
@@ -655,7 +655,7 @@ int a_shell_execve(const char *pathname, char *const argv[], char *const envp[])
 
 pid_t a_shell_waitpid(pid_t pid, int *wstatus, int options) {
     pthread_mutex_lock(&pid_table_mutex);
-    
+
     if (pid == -1) {
         /* Wait for any child */
         for (int i = 0; i < MAX_PROCESSES; i++) {
@@ -690,7 +690,7 @@ pid_t a_shell_waitpid(pid_t pid, int *wstatus, int options) {
             /* Would need to actually wait - simplified for now */
         }
     }
-    
+
     pthread_mutex_unlock(&pid_table_mutex);
     errno = ECHILD;
     return -1;
@@ -724,7 +724,7 @@ int a_shell_open(const char *pathname, int flags, mode_t mode) {
         errno = ENOENT;
         return -1;
     }
-    
+
     int fd = open(real_path, flags, mode);
     free(real_path);
     return fd;
@@ -747,7 +747,7 @@ int a_shell_stat(const char *pathname, struct stat *statbuf) {
         errno = ENOENT;
         return -1;
     }
-    
+
     int ret = stat(real_path, statbuf);
     free(real_path);
     return ret;
@@ -771,21 +771,21 @@ a_shell_sighandler_t a_shell_signal(int signum, a_shell_sighandler_t handler) {
         errno = EINVAL;
         return SIG_ERR;
     }
-    
+
     a_shell_sighandler_t old_handler = (a_shell_sighandler_t)signal_handlers[signum].sa_handler;
     signal_handlers[signum].sa_handler = (void (*)(int))handler;
-    
+
     /* Set up actual signal handler if needed */
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_handler = (void (*)(int))handler;
     sa.sa_flags = 0;
     sigemptyset(&sa.sa_mask);
-    
+
     if (sigaction(signum, &sa, NULL) < 0) {
         return SIG_ERR;
     }
-    
+
     return old_handler;
 }
 
@@ -794,24 +794,24 @@ int a_shell_sigaction(int signum, const struct sigaction *act, struct sigaction 
         errno = EINVAL;
         return -1;
     }
-    
+
     if (oldact) {
         *oldact = signal_handlers[signum];
     }
-    
+
     if (act) {
         signal_handlers[signum] = *act;
-        
+
         struct sigaction sa;
         sa.sa_handler = act->sa_handler;
         sa.sa_flags = act->sa_flags;
         sa.sa_mask = act->sa_mask;
-        
+
         if (sigaction(signum, &sa, NULL) < 0) {
             return -1;
         }
     }
-    
+
     return 0;
 }
 
@@ -821,7 +821,7 @@ int a_shell_kill(pid_t pid, int sig) {
     if (pid == a_shell_getpid()) {
         return raise(sig);
     }
-    
+
     errno = ESRCH;
     return -1;
 }
@@ -842,14 +842,14 @@ static struct itimerval current_timer;
 unsigned int a_shell_alarm(unsigned int seconds) {
     struct itimerval old_timer;
     struct itimerval new_timer;
-    
+
     memset(&new_timer, 0, sizeof(new_timer));
     new_timer.it_value.tv_sec = seconds;
-    
+
     if (setitimer(ITIMER_REAL, &new_timer, &old_timer) < 0) {
         return 0;
     }
-    
+
     return old_timer.it_value.tv_sec + (old_timer.it_value.tv_usec > 0 ? 1 : 0);
 }
 
@@ -939,10 +939,10 @@ int a_shell_epoll_ctl(int epfd, int op, int fd, struct epoll_event *event) {
     struct kevent kev;
     int16_t filter = 0;
     uint16_t kev_flags = 0;
-    
+
     if (event->events & EPOLLIN) filter = EVFILT_READ;
     else if (event->events & EPOLLOUT) filter = EVFILT_WRITE;
-    
+
     switch (op) {
         case EPOLL_CTL_ADD:
             kev_flags = EV_ADD;
@@ -957,7 +957,7 @@ int a_shell_epoll_ctl(int epfd, int op, int fd, struct epoll_event *event) {
             errno = EINVAL;
             return -1;
     }
-    
+
     EV_SET(&kev, fd, filter, kev_flags, 0, 0, event->data.ptr);
     return kevent(epfd, &kev, 1, NULL, 0, NULL);
 }
@@ -966,18 +966,18 @@ int a_shell_epoll_wait(int epfd, struct epoll_event *events, int maxevents, int 
     struct kevent kevs[maxevents];
     struct timespec ts;
     struct timespec *tsp = NULL;
-    
+
     if (timeout >= 0) {
         ts.tv_sec = timeout / 1000;
         ts.tv_nsec = (timeout % 1000) * 1000000;
         tsp = &ts;
     }
-    
+
     int n = kevent(epfd, NULL, 0, kevs, maxevents, tsp);
     if (n < 0) {
         return -1;
     }
-    
+
     for (int i = 0; i < n; i++) {
         events[i].data.ptr = kevs[i].udata;
         events[i].events = 0;
@@ -986,7 +986,7 @@ int a_shell_epoll_wait(int epfd, struct epoll_event *events, int maxevents, int 
         if (kevs[i].flags & EV_ERROR) events[i].events |= EPOLLERR;
         if (kevs[i].flags & EV_EOF) events[i].events |= EPOLLHUP;
     }
-    
+
     return n;
 }
 ```
@@ -1015,7 +1015,7 @@ char *vfs_translate_path(const char *path) {
     if (!path) {
         return NULL;
     }
-    
+
     /* Absolute paths that need prefix translation */
     if (path[0] == '/') {
         /* Check if it's a system path */
@@ -1025,7 +1025,7 @@ char *vfs_translate_path(const char *path) {
             strncmp(path, "/bin/", 5) == 0 ||
             strncmp(path, "/lib/", 5) == 0 ||
             strncmp(path, "/sbin/", 6) == 0) {
-            
+
             size_t len = strlen(vfs_get_prefix()) + strlen(path) + 1;
             char *real_path = malloc(len);
             if (!real_path) {
@@ -1035,7 +1035,7 @@ char *vfs_translate_path(const char *path) {
             return real_path;
         }
     }
-    
+
     /* Return copy of original path */
     return strdup(path);
 }
@@ -1048,7 +1048,7 @@ int vfs_path_needs_translation(const char *path) {
     if (!path || path[0] != '/') {
         return 0;
     }
-    
+
     return (strncmp(path, "/usr/", 5) == 0 ||
             strncmp(path, "/etc/", 5) == 0 ||
             strncmp(path, "/var/", 5) == 0 ||
@@ -1097,12 +1097,12 @@ void test_fork_basic() {
 void test_vfs_translation() {
     printf("Testing VFS path translation...\n");
     vfs_init("/Users/test/Library/ashell");
-    
+
     char *path1 = vfs_translate_path("/etc/passwd");
     assert(strcmp(path1, "/Users/test/Library/ashell/etc/passwd") == 0);
     vfs_free_path(path1);
     printf("  ✓ /etc/passwd translates correctly\n");
-    
+
     char *path2 = vfs_translate_path("/home/user/file.txt");
     assert(strcmp(path2, "/home/user/file.txt") == 0);
     vfs_free_path(path2);
@@ -1114,7 +1114,7 @@ void test_signal_handling() {
     a_shell_sighandler_t old_handler = a_shell_signal(SIGINT, SIG_IGN);
     assert(old_handler != SIG_ERR);
     printf("  ✓ signal() sets handler\n");
-    
+
     a_shell_signal(SIGINT, old_handler);
     printf("  ✓ signal() restores handler\n");
 }
@@ -1123,15 +1123,15 @@ int main(int argc, char *argv[]) {
     printf("\n========================================\n");
     printf("a-shell-kernel Syscall Tests\n");
     printf("========================================\n\n");
-    
+
     test_fork_basic();
     test_vfs_translation();
     test_signal_handling();
-    
+
     printf("\n========================================\n");
     printf("All tests passed!\n");
     printf("========================================\n");
-    
+
     return 0;
 }
 ```
@@ -1174,11 +1174,11 @@ A_SHELL_PKG_DESCRIPTION="compression library - runtime"
 
 a_shell_pkg_configure() {
     cd "$ASHELL_PKG_SRCDIR"
-    
+
     export CC="xcrun -sdk iphoneos clang -arch arm64"
     export CFLAGS="-arch arm64 -isysroot $(xcrun -sdk iphoneos --show-sdk-path) -O3"
     export LDFLAGS="-arch arm64"
-    
+
     ./configure \
         --prefix="$ASHELL_PREFIX" \
         --static \
@@ -1210,11 +1210,11 @@ A_SHELL_PKG_DESCRIPTION="Secure Sockets Layer toolkit - runtime"
 
 a_shell_pkg_configure() {
     cd "$ASHELL_PKG_SRCDIR"
-    
+
     export CC="xcrun -sdk iphoneos clang -arch arm64"
     export CFLAGS="-arch arm64 -isysroot $(xcrun -sdk iphoneos --show-sdk-path)"
     export LDFLAGS="-arch arm64"
-    
+
     ./Configure \
         ios64-xcrun \
         --prefix="$ASHELL_PREFIX" \
@@ -1256,11 +1256,11 @@ A_SHELL_PKG_DESCRIPTION="Library for transferring data with URLs"
 
 a_shell_pkg_configure() {
     cd "$ASHELL_PKG_SRCDIR"
-    
+
     export CC="xcrun -sdk iphoneos clang -arch arm64"
     export CFLAGS="-arch arm64 -isysroot $(xcrun -sdk iphoneos --show-sdk-path)"
     export LDFLAGS="-arch arm64"
-    
+
     ./configure \
         --prefix="$ASHELL_PREFIX" \
         --host=arm-apple-darwin \
@@ -1305,11 +1305,11 @@ A_SHELL_PKG_DESCRIPTION="Terminal handling library"
 
 a_shell_pkg_configure() {
     cd "$ASHELL_PKG_SRCDIR"
-    
+
     export CC="xcrun -sdk iphoneos clang -arch arm64"
     export CFLAGS="-arch arm64 -isysroot $(xcrun -sdk iphoneos --show-sdk-path)"
     export LDFLAGS="-arch arm64"
-    
+
     ./configure \
         --prefix="$ASHELL_PREFIX" \
         --host=arm-apple-darwin \
@@ -1349,12 +1349,12 @@ A_SHELL_PKG_DESCRIPTION="Library for line editing (required by bash)"
 
 a_shell_pkg_configure() {
     cd "$ASHELL_PKG_SRCDIR"
-    
+
     export CC="xcrun -sdk iphoneos clang -arch arm64"
     export CFLAGS="-arch arm64 -isysroot $(xcrun -sdk iphoneos --show-sdk-path) -I${ASHELL_PREFIX}/include"
     export LDFLAGS="-arch arm64 -L${ASHELL_PREFIX}/lib"
     export CPPFLAGS="-I${ASHELL_PREFIX}/include"
-    
+
     ./configure \
         --prefix="$ASHELL_PREFIX" \
         --host=arm-apple-darwin \
@@ -1393,12 +1393,12 @@ A_SHELL_PKG_DESCRIPTION="GNU Bourne Again SHell"
 
 a_shell_pkg_configure() {
     cd "$ASHELL_PKG_SRCDIR"
-    
+
     export CC="xcrun -sdk iphoneos clang -arch arm64"
     export CFLAGS="-arch arm64 -isysroot $(xcrun -sdk iphoneos --show-sdk-path) -I${ASHELL_PREFIX}/include"
     export LDFLAGS="-arch arm64 -L${ASHELL_PREFIX}/lib"
     export CPPFLAGS="-I${ASHELL_PREFIX}/include"
-    
+
     ./configure \
         --prefix="$ASHELL_PREFIX" \
         --host=arm-apple-darwin \
@@ -1453,12 +1453,12 @@ A_SHELL_PKG_DESCRIPTION="GNU core utilities (ls, cp, mv, rm, cat, etc.)"
 
 a_shell_pkg_configure() {
     cd "$ASHELL_PKG_SRCDIR"
-    
+
     export CC="xcrun -sdk iphoneos clang -arch arm64"
     export CFLAGS="-arch arm64 -isysroot $(xcrun -sdk iphoneos --show-sdk-path)"
     export LDFLAGS="-arch arm64"
     export FORCE_UNSAFE_CONFIGURE=1
-    
+
     ./configure \
         --prefix="$ASHELL_PREFIX" \
         --host=arm-apple-darwin \
@@ -1515,11 +1515,11 @@ A_SHELL_PKG_DESCRIPTION="Debian package management system"
 
 a_shell_pkg_configure() {
     cd "$ASHELL_PKG_SRCDIR"
-    
+
     export CC="xcrun -sdk iphoneos clang -arch arm64"
     export CFLAGS="-arch arm64 -isysroot $(xcrun -sdk iphoneos --show-sdk-path)"
     export LDFLAGS="-arch arm64"
-    
+
     ./configure \
         --prefix="$ASHELL_PREFIX" \
         --host=arm-apple-darwin \
@@ -1560,9 +1560,9 @@ A_SHELL_PKG_DESCRIPTION="Advanced Package Tool"
 
 a_shell_pkg_configure() {
     cd "$ASHELL_PKG_SRCDIR"
-    
+
     mkdir -p build && cd build
-    
+
     cmake .. \
         -DCMAKE_INSTALL_PREFIX="$ASHELL_PREFIX" \
         -DCMAKE_SYSTEM_NAME=iOS \
@@ -1645,7 +1645,7 @@ mkdir -p "${BOOTSTRAP_DIR}"
 for pkg in "${PACKAGES[@]}"; do
     version=$(grep "A_SHELL_PKG_VERSION=" "${SCRIPT_DIR}/../packages/core/$pkg/build.sh" | head -1 | cut -d'"' -f2)
     deb="${pkg}_${version}_ios-arm64.deb"
-    
+
     if [[ -f "$deb" ]]; then
         echo "  → Extracting $deb"
         dpkg-deb -x "$deb" "$BOOTSTRAP_DIR"
@@ -1709,51 +1709,51 @@ echo "  3. Bootstrap will extract on first launch"
 import UIKit
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
+
         // Check if bootstrap needs extraction
         if !bootstrapExists() {
             extractBootstrap()
         }
-        
+
         return true
     }
-    
+
     private func bootstrapExists() -> Bool {
         let prefix = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!
             .appendingPathComponent("ashell")
         return FileManager.default.fileExists(atPath: prefix.path)
     }
-    
+
     private func extractBootstrap() {
         guard let bootstrapURL = Bundle.main.url(forResource: "bootstrap", withExtension: "tar.gz") else {
             print("ERROR: Bootstrap not found in bundle")
             return
         }
-        
+
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let prefixURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!
             .appendingPathComponent("ashell")
-        
+
         do {
             // Show progress UI
             let progressView = UIProgressView(progressViewStyle: .bar)
             // ... setup progress UI
-            
+
             // Extract bootstrap
             try extractTarGz(from: bootstrapURL, to: prefixURL)
-            
+
             // Setup environment
             setupEnvironment(prefix: prefixURL.path)
-            
+
             print("Bootstrap extracted successfully")
-            
+
         } catch {
             print("ERROR: Failed to extract bootstrap: \(error)")
         }
     }
-    
+
     private func setupEnvironment(prefix: String) {
         setenv("ASHELL_PREFIX", prefix, 1)
         setenv("PATH", "\(prefix)/usr/bin:/usr/bin:/bin", 1)
@@ -1834,12 +1834,12 @@ static int32_t wasi_fd_read(wasm_exec_env_t exec_env, int32_t fd,
         native_iov[i].iov_base = wasm_runtime_addr_app_to_native(exec_env, iov[i].buf);
         native_iov[i].iov_len = iov[i].buf_len;
     }
-    
+
     ssize_t ret = readv(fd, native_iov, iovcnt);
     if (ret < 0) {
         return -1;
     }
-    
+
     *nread = (int32_t)ret;
     return 0;
 }
@@ -1851,12 +1851,12 @@ static int32_t wasi_fd_write(wasm_exec_env_t exec_env, int32_t fd,
         native_iov[i].iov_base = wasm_runtime_addr_app_to_native(exec_env, iov[i].buf);
         native_iov[i].iov_len = iov[i].buf_len;
     }
-    
+
     ssize_t ret = writev(fd, native_iov, iovcnt);
     if (ret < 0) {
         return -1;
     }
-    
+
     *nwritten = (int32_t)ret;
     return 0;
 }
@@ -1869,34 +1869,34 @@ static int32_t wasi_path_open(wasm_exec_env_t exec_env, int32_t dirfd,
     /* Translate WASI oflags to POSIX flags */
     int flags = 0;
     mode_t mode = 0666;
-    
+
     if (oflags & 0x1) flags |= O_CREAT;      /* CREATE */
     if (oflags & 0x2) flags |= O_DIRECTORY;  /* DIRECTORY */
     if (oflags & 0x4) flags |= O_EXCL;       /* EXCL */
     if (oflags & 0x8) flags |= O_TRUNC;      /* TRUNC */
-    
+
     if (fs_rights_base & 0x2) flags |= O_RDONLY;
     if (fs_rights_base & 0x4) flags |= O_WRONLY;
     if ((fs_rights_base & 0x6) == 0x6) flags = (flags & ~O_ACCMODE) | O_RDWR;
-    
+
     if (fdflags & 0x1) flags |= O_APPEND;
     if (fdflags & 0x2) flags |= O_DSYNC;
     if (fdflags & 0x4) flags |= O_NONBLOCK;
     if (fdflags & 0x8) flags |= O_SYNC;
     if (fdflags & 0x10) flags |= O_RSYNC;
-    
+
     char *translated_path = vfs_translate_path(path);
     if (!translated_path) {
         return -1;
     }
-    
+
     int ret_fd = a_shell_openat(dirfd, translated_path, flags, mode);
     vfs_free_path(translated_path);
-    
+
     if (ret_fd < 0) {
         return -1;
     }
-    
+
     *fd = ret_fd;
     return 0;
 }
@@ -1910,7 +1910,7 @@ void a_shell_wasi_init(void) {
         REG_WASI_NATIVE_FUNC(path_open, "(ii*iIIii*)i"),
         /* Add more WASI syscalls as needed */
     };
-    
+
     uint32_t n_symbols = sizeof(native_symbols) / sizeof(NativeSymbol);
     wasm_runtime_register_natives("wasi_snapshot_preview1",
                                    native_symbols, n_symbols);
@@ -1930,23 +1930,23 @@ static uint8_t *read_wasm_file(const char *filename, uint32_t *size) {
     if (!file) {
         return NULL;
     }
-    
+
     fseek(file, 0, SEEK_END);
     *size = (uint32_t)ftell(file);
     fseek(file, 0, SEEK_SET);
-    
+
     uint8_t *buffer = malloc(*size);
     if (!buffer) {
         fclose(file);
         return NULL;
     }
-    
+
     if (fread(buffer, 1, *size, file) != *size) {
         free(buffer);
         fclose(file);
         return NULL;
     }
-    
+
     fclose(file);
     return buffer;
 }
@@ -1956,24 +1956,24 @@ int a_shell_wasm_exec(int argc, char **argv) {
         fprintf(stderr, "Usage: wasm <file.wasm> [args...]\n");
         return 1;
     }
-    
+
     const char *wasm_file = argv[1];
-    
+
     /* Initialize WAMR runtime */
     RuntimeInitArgs init_args;
     memset(&init_args, 0, sizeof(RuntimeInitArgs));
     init_args.mem_alloc_type = Alloc_With_Pool;
     init_args.mem_alloc_option.pool.heap_buf = NULL; /* Use system allocator */
     init_args.mem_alloc_option.pool.heap_size = 0;
-    
+
     if (!wasm_runtime_full_init(&init_args)) {
         fprintf(stderr, "Failed to initialize WAMR runtime\n");
         return 1;
     }
-    
+
     /* Register WASI syscalls */
     a_shell_wasi_init();
-    
+
     /* Load WASM module */
     uint32_t wasm_file_size;
     uint8_t *wasm_file_buf = read_wasm_file(wasm_file, &wasm_file_size);
@@ -1982,31 +1982,31 @@ int a_shell_wasm_exec(int argc, char **argv) {
         wasm_runtime_destroy();
         return 1;
     }
-    
+
     char error_buf[128];
     wasm_module_t module = wasm_runtime_load(wasm_file_buf, wasm_file_size,
                                               error_buf, sizeof(error_buf));
     free(wasm_file_buf);
-    
+
     if (!module) {
         fprintf(stderr, "Failed to load WASM module: %s\n", error_buf);
         wasm_runtime_destroy();
         return 1;
     }
-    
+
     /* Instantiate module */
     wasm_module_inst_t module_inst = wasm_runtime_instantiate(module,
         64 * 1024,   /* stack size: 64KB */
         64 * 1024,   /* heap size: 64KB */
         error_buf, sizeof(error_buf));
-    
+
     if (!module_inst) {
         fprintf(stderr, "Failed to instantiate WASM module: %s\n", error_buf);
         wasm_runtime_unload(module);
         wasm_runtime_destroy();
         return 1;
     }
-    
+
     /* Set up WASI environment */
     const char *dir_list[1] = { "." };
     const char *env_list[1] = { NULL };
@@ -2014,16 +2014,16 @@ int a_shell_wasm_exec(int argc, char **argv) {
     for (int i = 0; i < argc - 1; i++) {
         argv_wasm[i] = argv[i + 1];
     }
-    
+
     wasm_runtime_set_wasi_args(module_inst, dir_list, 1, NULL, 0,
                                env_list, 0, argv_wasm, argc - 1);
-    
+
     /* Execute main function */
     wasm_function_inst_t func = wasm_runtime_lookup_function(module_inst, "_start");
     if (!func) {
         func = wasm_runtime_lookup_function(module_inst, "main");
     }
-    
+
     if (!func) {
         fprintf(stderr, "No entry function found in WASM module\n");
         wasm_runtime_deinstantiate(module_inst);
@@ -2031,7 +2031,7 @@ int a_shell_wasm_exec(int argc, char **argv) {
         wasm_runtime_destroy();
         return 1;
     }
-    
+
     uint32_t argv_results[1] = { 0 };
     if (!wasm_runtime_call_wasm(module_inst, func, 0, NULL)) {
         fprintf(stderr, "WASM execution failed: %s\n",
@@ -2041,12 +2041,12 @@ int a_shell_wasm_exec(int argc, char **argv) {
         wasm_runtime_destroy();
         return 1;
     }
-    
+
     /* Cleanup */
     wasm_runtime_deinstantiate(module_inst);
     wasm_runtime_unload(module);
     wasm_runtime_destroy();
-    
+
     return 0;
 }
 ```
@@ -2105,23 +2105,23 @@ declare -A processed_packages
 
 for deb in $(find "$POOL_DIR" -name "*.deb" -type f | sort); do
     pkg_name=$(basename "$deb" | cut -d'_' -f1)
-    
+
     # Skip duplicates (keep newest)
     if [[ -n "${processed_packages[$pkg_name]}" ]]; then
         continue
     fi
     processed_packages[$pkg_name]=1
-    
+
     # Extract control file
     control=$(dpkg-deb -f "$deb")
-    
+
     # Add Filename, Size, and hashes
     filename="${deb#${REPO_DIR}/}"
     size=$(stat -f%z "$deb" 2>/dev/null || stat -c%s "$deb")
     md5=$(md5sum "$deb" 2>/dev/null | cut -d' ' -f1 || md5 -q "$deb")
     sha1=$(sha1sum "$deb" 2>/dev/null | cut -d' ' -f1 || shasum -a 1 "$deb" | cut -d' ' -f1)
     sha256=$(sha256sum "$deb" 2>/dev/null | cut -d' ' -f1 || shasum -a 256 "$deb" | cut -d' ' -f1)
-    
+
     cat >> "${DIST_DIR}/Packages" <<EOF
 $control
 Filename: $filename
@@ -2131,7 +2131,7 @@ SHA1: $sha1
 SHA256: $sha256
 
 EOF
-    
+
     echo "  Added: $pkg_name"
 done
 
