@@ -25,6 +25,7 @@ ixland-system/Tests/unit/test_pid.c
 ixland-system/Tests/unit/test_wait.c
 ixland-system/Tests/unit/test_task_lifecycle.c
 ixland-system/Tests/unit/test_tty.c
+ixland-system/Tests/unit/test_task_alloc_thread_safety.c
 ixland-system/Tests/unit/stub_vfs_translate.c
 ixland-system/Tests/unit/test_file_syscalls.c
 ixland-system/Tests/unit/test_vfs_path.c

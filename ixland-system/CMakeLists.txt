@@ -215,6 +215,7 @@ if(IOX_BUILD_TESTS)
         Tests/unit/test_signal.c
         Tests/unit/test_signal_pending.c
         Tests/unit/test_task_lifecycle.c
+        Tests/unit/test_task_alloc_thread_safety.c
         Tests/unit/test_wait.c
         Tests/unit/test_pgrp_session.c
         Tests/unit/test_signal_process.c
