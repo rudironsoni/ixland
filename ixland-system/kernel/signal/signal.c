@@ -138,6 +138,13 @@ static void __iox_apply_signal_to_task(iox_task_t *task, int sig) {
     if (task->waiters > 0) {
         pthread_cond_broadcast(&task->wait_cond);
     }
+
+    /* Deliver signal to target thread via pthread_kill for actual signal handling.
+     * This ensures the target thread's signal handler is invoked if not blocked.
+     * We use SIGUSR1 as the notification signal - the task's signal handling
+     * infrastructure will process the actual pending signal from sighand->pending.
+     */
+    pthread_kill(task->thread, SIGUSR1);
 }
 
 int iox_kill(pid_t pid, int sig) {
