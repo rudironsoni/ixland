@@ -137,6 +137,7 @@ if(NOT IOX_STANDALONE_MODE)
     # Consume public headers from ixland-libc boundary target
     if(TARGET ixland-libc-headers)
         target_link_libraries(iox-core PUBLIC ixland-libc-headers)
+        target_link_libraries(iox-runtime PUBLIC ixland-libc-headers)
         message(STATUS "iox: Linked to ixland-libc-headers")
     else()
         message(WARNING "iox: ixland-libc-headers target not found, headers may not be available")

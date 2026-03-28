@@ -21,6 +21,7 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <termios.h>
 #include <stdint.h>
 #include <stdarg.h>
 

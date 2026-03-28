@@ -60,11 +60,17 @@ ixland-system/src/iox/internal/iox_internal.h
 ixland-system/src/vfs.c
 ixland-libc/include/pwd.h
 ixland-libc/include/grp.h
+ixland-libc/include/linux/time.h
+ixland-libc/include/linux/types.h
+ixland-libc/include/linux/epoll.h
 ixland-libc/include/linux/unistd.h
 ixland-libc/include/linux/wait.h
 ixland-libc/include/linux/fcntl.h
 ixland-libc/include/linux/stat.h
 ixland-libc/include/linux/signal.h
+ixland-libc/include/linux/mman.h
+ixland-libc/include/linux/resource.h
+ixland-libc/include/linux/poll.h
 ixland-libc/include/iox/iox_syscalls.h
 ixland-libc/include/iox/sys/types.h
 ixland-libc/include/iox/iox_types.h
