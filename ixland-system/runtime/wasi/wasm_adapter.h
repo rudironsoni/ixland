@@ -11,6 +11,7 @@
 #include <ixland/wasm/types.h>
 #include <ixland/wasm/engine.h>
 #include <ixland/wasm/host.h>
+#include <ixland/wasm/wasi.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -54,6 +55,12 @@ ixland_wasm_module_t *ixland_wasm_adapter_load_module(
 /* Unload a module through the adapter */
 void ixland_wasm_adapter_unload_module(ixland_wasm_module_t *module);
 
+/* Get module info using engine.h contract type ixland_wasm_module_info_t */
+ixland_wasm_error_t ixland_wasm_adapter_get_module_info(
+    ixland_wasm_module_t *module,
+    ixland_wasm_module_info_t *out_info
+);
+
 /* ============================================================================
  * INSTANCE ADAPTER
  * ============================================================================ */
@@ -86,6 +93,13 @@ int ixland_wasm_adapter_call(
     ixland_wasm_value_t *results,
     uint32_t result_count
 );
+
+/* ============================================================================
+ * WASI ADAPTER HELPERS
+ * ============================================================================ */
+
+/* Convert system errno to WASI errno - uses wasi.h contract definitions */
+ixland_wasi_errno_t ixland_wasm_adapter_convert_errno(int system_errno);
 
 #ifdef __cplusplus
 }
