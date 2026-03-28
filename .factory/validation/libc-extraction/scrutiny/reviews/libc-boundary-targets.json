@@ -1,0 +1,36 @@
+{
+  "featureId": "libc-boundary-targets",
+  "reviewedAt": "2026-03-28T14:30:00Z",
+  "commitId": "1dabb2f69",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The CMake boundary targets feature is fully and correctly implemented. All three targets exist and function as specified: ixland-libc-headers (INTERFACE library providing public include paths), ixland-libc-core (STATIC library with version/strerror/perror implementations), and ixland-libc-usersdb (STATIC library with pwd/grp stub implementations). The ixland-system component correctly consumes these targets via target_link_libraries(), with proper dependency propagation. No source file duplication exists.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "The project uses a clean CMake target-based dependency pattern where ixland-system consumes ixland-libc-headers via target_link_libraries(iox-core PUBLIC ixland-libc-headers). This propagates include paths transitively without requiring global include_directories() calls.",
+      "evidence": "ixland-system/CMakeLists.txt:109-113 shows conditional linking to ixland-libc-headers target when available in monorepo builds"
+    },
+    {
+      "area": "knowledge",
+      "observation": "The implementation correctly distinguishes between standalone and monorepo build modes using CMAKE_SOURCE_DIR detection. In standalone mode, it sets iOS-specific CMake variables (CMAKE_SYSTEM_NAME, CMAKE_OSX_SYSROOT, etc.) automatically.",
+      "evidence": "ixland-libc/CMakeLists.txt:8-32 shows IXLAND_LIBC_STANDALONE_MODE detection and conditional project setup"
+    },
+    {
+      "area": "knowledge",
+      "observation": "The relative path includes (../../../ixland-libc/include) were replaced with system-style includes (<linux/poll.h>, <linux/epoll.h>) in iox_internal.h and iox_poll.c. This ensures proper separation between public headers and internal implementation.",
+      "evidence": "Commit 1dabb2f69 shows cleanup of relative path includes in favor of CMake-configured include paths"
+    },
+    {
+      "area": "services",
+      "observation": "The CMake install() commands properly export all three targets with namespace ixland:: for consumer projects. This enables find_package(ixland-libc) to work correctly.",
+      "evidence": "ixland-libc/CMakeLists.txt:75-83 shows install(EXPORT ...) with NAMESPACE ixland::"
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "The libc-boundary-targets feature is complete and well-implemented. All three CMake targets (ixland-libc-headers, ixland-libc-core, ixland-libc-usersdb) exist with correct types (INTERFACE vs STATIC). The ixland-system component properly consumes these targets, and the build supports both standalone and monorepo modes. No source file duplication exists - headers are in ixland-libc/, implementations are split appropriately between ixland-libc/src/ (self-contained utilities) and ixland-system/ (kernel-dependent code)."
+}
