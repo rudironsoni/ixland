@@ -45,6 +45,8 @@ typedef struct {
 #define IOX_ASSERT_LE(a, b) IOX_ASSERT((a) <= (b))
 #define IOX_ASSERT_NULL(p) IOX_ASSERT((p) == NULL)
 #define IOX_ASSERT_NOT_NULL(p) IOX_ASSERT((p) != NULL)
+#define IOX_ASSERT_TRUE(expr) IOX_ASSERT((expr))
+#define IOX_ASSERT_FALSE(expr) IOX_ASSERT(!(expr))
 
 void iox_test_fail(const char *file, int line, const char *expr);
 int iox_test_run_all(const char *filter);
