@@ -41,7 +41,7 @@ static void iox_fill_default_group(struct group *grp) {
  * Group Information Retrieval
  * ============================================================================ */
 
-struct group *ixland_getgrnam(const char *name) {
+struct group *iox_getgrnam(const char *name) {
     if (name == NULL) {
         errno = EINVAL;
         return NULL;
@@ -58,7 +58,7 @@ struct group *ixland_getgrnam(const char *name) {
     return NULL;
 }
 
-struct group *ixland_getgrgid(gid_t gid) {
+struct group *iox_getgrgid(gid_t gid) {
     /* Stub: only return data for mobile GID (501) */
     if (gid == 501) {
         iox_fill_default_group(&iox_static_group);
@@ -74,8 +74,8 @@ struct group *ixland_getgrgid(gid_t gid) {
  * Reentrant Versions (Thread-safe)
  * ============================================================================ */
 
-int ixland_getgrnam_r(const char *name, struct group *grp,
-                      char *buf, size_t buflen, struct group **result) {
+int iox_getgrnam_r(const char *name, struct group *grp,
+                   char *buf, size_t buflen, struct group **result) {
     if (name == NULL || grp == NULL || buf == NULL || result == NULL) {
         if (result != NULL) {
             *result = NULL;
@@ -117,8 +117,8 @@ int ixland_getgrnam_r(const char *name, struct group *grp,
     return 0;
 }
 
-int ixland_getgrgid_r(gid_t gid, struct group *grp,
-                      char *buf, size_t buflen, struct group **result) {
+int iox_getgrgid_r(gid_t gid, struct group *grp,
+                   char *buf, size_t buflen, struct group **result) {
     if (grp == NULL || buf == NULL || result == NULL) {
         if (result != NULL) {
             *result = NULL;
@@ -167,12 +167,12 @@ int ixland_getgrgid_r(gid_t gid, struct group *grp,
 /* Iterator state for sequential access */
 static int iox_grent_valid = 0;
 
-void ixland_setgrent(void) {
+void iox_setgrent(void) {
     /* Reset iteration - mark as ready to return first entry */
     iox_grent_valid = 1;
 }
 
-struct group *ixland_getgrent(void) {
+struct group *iox_getgrent(void) {
     /* Stub: return mobile group once, then NULL */
     if (iox_grent_valid) {
         iox_grent_valid = 0;
@@ -184,7 +184,7 @@ struct group *ixland_getgrent(void) {
     return NULL;
 }
 
-void ixland_endgrent(void) {
+void iox_endgrent(void) {
     /* Reset iteration state */
     iox_grent_valid = 0;
 }
@@ -193,7 +193,7 @@ void ixland_endgrent(void) {
  * Group Membership
  * ============================================================================ */
 
-int ixland_getgroups(int size, gid_t list[]) {
+int iox_getgroups(int size, gid_t list[]) {
     if (size < 0) {
         errno = EINVAL;
         return -1;
@@ -212,7 +212,7 @@ int ixland_getgroups(int size, gid_t list[]) {
     return 1;
 }
 
-int ixland_setgroups(size_t size, const gid_t *list[]) {
+int iox_setgroups(size_t size, const gid_t *list) {
     /* Stub: always return ENOSYS as this requires kernel support */
     (void)size;
     (void)list;
@@ -220,7 +220,7 @@ int ixland_setgroups(size_t size, const gid_t *list[]) {
     return -1;
 }
 
-int ixland_initgroups(const char *user, gid_t group) {
+int iox_initgroups(const char *user, gid_t group) {
     /* Stub: always return ENOSYS as this requires kernel support */
     (void)user;
     (void)group;

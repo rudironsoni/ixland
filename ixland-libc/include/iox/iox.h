@@ -17,4 +17,17 @@
 /* Linux-compatible system headers */
 #include "sys/types.h"
 
+/* User and Group Database Headers */
+#include "../pwd.h"
+#include "../grp.h"
+
+/* Advanced Linux-compatible headers
+ * These can be included individually as needed:
+ *   #include "linux/time.h"
+ *   #include "linux/resource.h"
+ *   #include "linux/mman.h"
+ *   #include "linux/poll.h"
+ *   #include "linux/epoll.h"
+ */
+
 #endif /* IOX_H */

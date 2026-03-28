@@ -10,31 +10,9 @@
  * ixland-libc-usersdb target.
  */
 
-/*
- * pwd.c - Password database operations
- *
- * Stub implementation for iXland password database API.
- */
-
-#include <sys/types.h>
+#include <pwd.h>
 #include <errno.h>
 #include <string.h>
-#include <unistd.h>
-#include <stddef.h>
-
-/* 
- * Define struct passwd locally to avoid conflicts with system headers.
- * This is the POSIX-compliant passwd structure.
- */
-struct passwd {
-    char *pw_name;      /* User name */
-    char *pw_passwd;    /* Password */
-    uid_t pw_uid;       /* User ID */
-    gid_t pw_gid;       /* Group ID */
-    char *pw_gecos;     /* Real name */
-    char *pw_dir;       /* Home directory */
-    char *pw_shell;     /* Shell program */
-};
 
 /* ============================================================================
  * Static Data (Minimal stub data for mobile environment)
@@ -68,7 +46,7 @@ static void iox_fill_default_passwd(struct passwd *pwd) {
  * User Information Retrieval
  * ============================================================================ */
 
-struct passwd *ixland_getpwnam(const char *name) {
+struct passwd *iox_getpwnam(const char *name) {
     if (name == NULL) {
         errno = EINVAL;
         return NULL;
@@ -85,7 +63,7 @@ struct passwd *ixland_getpwnam(const char *name) {
     return NULL;
 }
 
-struct passwd *ixland_getpwuid(uid_t uid) {
+struct passwd *iox_getpwuid(uid_t uid) {
     /* Stub: only return data for mobile UID (501) */
     if (uid == 501) {
         iox_fill_default_passwd(&iox_static_passwd);
@@ -114,8 +92,8 @@ struct passwd *ixland_getpwuid(uid_t uid) {
  * Reentrant Versions (Thread-safe)
  * ============================================================================ */
 
-int ixland_getpwnam_r(const char *name, struct passwd *pwd,
-                      char *buf, size_t buflen, struct passwd **result) {
+int iox_getpwnam_r(const char *name, struct passwd *pwd,
+                   char *buf, size_t buflen, struct passwd **result) {
     if (name == NULL || pwd == NULL || buf == NULL || result == NULL) {
         if (result != NULL) {
             *result = NULL;
@@ -171,8 +149,8 @@ int ixland_getpwnam_r(const char *name, struct passwd *pwd,
     return 0;
 }
 
-int ixland_getpwuid_r(uid_t uid, struct passwd *pwd,
-                      char *buf, size_t buflen, struct passwd **result) {
+int iox_getpwuid_r(uid_t uid, struct passwd *pwd,
+                   char *buf, size_t buflen, struct passwd **result) {
     if (pwd == NULL || buf == NULL || result == NULL) {
         if (result != NULL) {
             *result = NULL;
@@ -256,12 +234,12 @@ int ixland_getpwuid_r(uid_t uid, struct passwd *pwd,
 /* Iterator state for sequential access */
 static int iox_pwent_index = 0;
 
-void ixland_setpwent(void) {
+void iox_setpwent(void) {
     /* Reset iteration */
     iox_pwent_index = 0;
 }
 
-struct passwd *ixland_getpwent(void) {
+struct passwd *iox_getpwent(void) {
     /* Stub: iterate through known users (root, then mobile) */
     if (iox_pwent_index == 0) {
         iox_pwent_index = 1;
@@ -284,7 +262,7 @@ struct passwd *ixland_getpwent(void) {
     return NULL;
 }
 
-void ixland_endpwent(void) {
+void iox_endpwent(void) {
     /* Reset iteration state */
     iox_pwent_index = 0;
 }
