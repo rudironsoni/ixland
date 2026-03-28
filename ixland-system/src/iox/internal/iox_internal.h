@@ -10,25 +10,25 @@
 #define _DARWIN_C_SOURCE
 
 /* Standard headers */
-#include <pthread.h>
-#include <stdbool.h>
-#include <stdatomic.h>
-#include <sys/types.h>
-#include <sys/resource.h>
-#include <sys/time.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <signal.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <time.h>
 #include <errno.h>
-#include <string.h>
+#include <fcntl.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdatomic.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/ioctl.h>
+#include <sys/resource.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <termios.h>
+#include <time.h>
+#include <unistd.h>
 
 /* Include iox types - Makefile adds -I./include */
 #ifndef IOX_TYPES_H
@@ -37,8 +37,8 @@
 
 /* Include poll/epoll headers directly to avoid system header conflicts */
 /* Note: Do NOT define _LINUX_POLL_H or _LINUX_EPOLL_H here - the headers define their own guards */
-#include "../../../ixland-libc/include/linux/poll.h"
 #include "../../../ixland-libc/include/linux/epoll.h"
+#include "../../../ixland-libc/include/linux/poll.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,37 +52,37 @@ extern "C" {
 #define RLIMIT_NLIMITS 16
 #endif
 
-#define IOX_MAX_PROCESSES     1024
-#define IOX_MAX_THREADS       1024
-#define IOX_MAX_SESSIONS      64
-#define IOX_MAX_PATH          1024
-#define IOX_MAX_NAME          256
-#define IOX_MIN_PID           1000
-#define IOX_MAX_FD            256
-#define IOX_NSIG              64
-#define IOX_SIGQUEUE_MAX      1024
+#define IOX_MAX_PROCESSES 1024
+#define IOX_MAX_THREADS 1024
+#define IOX_MAX_SESSIONS 64
+#define IOX_MAX_PATH 1024
+#define IOX_MAX_NAME 256
+#define IOX_MIN_PID 1000
+#define IOX_MAX_FD 256
+#define IOX_NSIG 64
+#define IOX_SIGQUEUE_MAX 1024
 
 /* Process states */
-#define IOX_PROC_RUNNING      0
-#define IOX_PROC_STOPPED      1
-#define IOX_PROC_ZOMBIE       2
-#define IOX_PROC_DEAD         3
+#define IOX_PROC_RUNNING 0
+#define IOX_PROC_STOPPED 1
+#define IOX_PROC_ZOMBIE 2
+#define IOX_PROC_DEAD 3
 
 /* Task states (Linux-compatible) */
-#define IOX_TASK_RUNNING        0x0000
-#define IOX_TASK_INTERRUPTIBLE  0x0001
+#define IOX_TASK_RUNNING 0x0000
+#define IOX_TASK_INTERRUPTIBLE 0x0001
 #define IOX_TASK_UNINTERRUPTIBLE 0x0002
-#define IOX_TASK_STOPPED        0x0004
-#define IOX_TASK_TRACED         0x0008
-#define IOX_EXIT_ZOMBIE         0x0010
-#define IOX_EXIT_DEAD           0x0020
+#define IOX_TASK_STOPPED 0x0004
+#define IOX_TASK_TRACED 0x0008
+#define IOX_EXIT_ZOMBIE 0x0010
+#define IOX_EXIT_DEAD 0x0020
 
 /* VFS mount flags */
-#define IOX_VFS_BIND        0x0001
-#define IOX_VFS_RDONLY      0x0002
-#define IOX_VFS_NOSUID      0x0004
-#define IOX_VFS_NOEXEC      0x0008
-#define IOX_VFS_RECURSIVE   0x0010
+#define IOX_VFS_BIND 0x0001
+#define IOX_VFS_RDONLY 0x0002
+#define IOX_VFS_NOSUID 0x0004
+#define IOX_VFS_NOEXEC 0x0008
+#define IOX_VFS_RECURSIVE 0x0010
 
 /* ============================================================================
  * TYPE DEFINITIONS
@@ -440,9 +440,9 @@ bool __iox_path_in_sandbox(const char *path);
 /* Path classification for hybrid iOS/Linux architecture */
 typedef enum {
     IOX_PATH_INVALID = 0,
-    IOX_PATH_VIRTUAL_LINUX,    /* /home, /tmp, /etc - needs VFS translation */
-    IOX_PATH_OWN_SANDBOX,      /* Within app container - direct access */
-    IOX_PATH_EXTERNAL          /* Security-scoped external paths */
+    IOX_PATH_VIRTUAL_LINUX, /* /home, /tmp, /etc - needs VFS translation */
+    IOX_PATH_OWN_SANDBOX,   /* Within app container - direct access */
+    IOX_PATH_EXTERNAL       /* Security-scoped external paths */
 } iox_path_type_t;
 
 bool __iox_path_is_virtual_linux(const char *path);
@@ -607,8 +607,8 @@ void __iox_set_log_level(__iox_log_level_t level);
 void __iox_log(__iox_log_level_t level, const char *fmt, ...);
 
 #define IOX_ERROR(...) __iox_log(IOX_LOG_ERROR, __VA_ARGS__)
-#define IOX_WARN(...)  __iox_log(IOX_LOG_WARN, __VA_ARGS__)
-#define IOX_INFO(...)  __iox_log(IOX_LOG_INFO, __VA_ARGS__)
+#define IOX_WARN(...) __iox_log(IOX_LOG_WARN, __VA_ARGS__)
+#define IOX_INFO(...) __iox_log(IOX_LOG_INFO, __VA_ARGS__)
 #define IOX_DEBUG(...) __iox_log(IOX_LOG_DEBUG, __VA_ARGS__)
 #define IOX_TRACE(...) __iox_log(IOX_LOG_TRACE, __VA_ARGS__)
 
@@ -629,6 +629,8 @@ pid_t iox_getpgrp(void);
 int iox_setpgrp(void);
 pid_t iox_getpgid(pid_t pid);
 int iox_setpgid(pid_t pid, pid_t pgid);
+pid_t iox_getsid(pid_t pid);
+pid_t iox_setsid(void);
 pid_t iox_wait(int *stat_loc);
 pid_t iox_waitpid(pid_t pid, int *stat_loc, int options);
 pid_t iox_wait3(int *stat_loc, int options, struct rusage *rusage);
@@ -739,8 +741,8 @@ int iox_epoll_create(int size);
 int iox_epoll_create1(int flags);
 int iox_epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
 int iox_epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
-int iox_epoll_pwait(int epfd, struct epoll_event *events, int maxevents,
-                    int timeout, const struct iox_sigset *sigmask);
+int iox_epoll_pwait(int epfd, struct epoll_event *events, int maxevents, int timeout,
+                    const struct iox_sigset *sigmask);
 int iox_epoll_pwait2(int epfd, struct epoll_event *events, int maxevents,
                      const struct iox_timespec *timeout, const struct iox_sigset *sigmask);
 

@@ -18,6 +18,7 @@ ixland-system/Tests/unit/test_basic.c
 ixland-system/Tests/unit/test_poll_syscalls.c
 ixland-system/Tests/unit/test_simple.c
 ixland-system/Tests/unit/test_identity_syscalls.c
+ixland-system/Tests/unit/test_process_relationships.c
 ixland-system/Tests/unit/test_signal.c
 ixland-system/Tests/unit/test_exec.c
 ixland-system/Tests/unit/test_fork.c
@@ -33,6 +34,8 @@ ixland-system/Tests/unit/test_directory_syscalls.c
 ixland-system/Tests/unit/test_pgrp_session.c
 ixland-system/Tests/unit/test_signal_process.c
 ixland-system/Tests/unit/test_fdtable.c
+ixland-system/Tests/unit/test_zombie_process.c
+ixland-system/Tests/unit/test_orphan_adoption.c
 ixland-system/Tests/iox_test.h
 ixland-system/Tests/harness/harness.c
 ixland-system/Tests/harness/iox_test.h

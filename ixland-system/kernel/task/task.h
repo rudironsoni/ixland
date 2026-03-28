@@ -127,6 +127,10 @@ struct iox_task {
     pthread_mutex_t lock;
 };
 
+/* Task table - exposed for tests */
+extern pthread_mutex_t task_table_lock;
+extern iox_task_t *task_table[IOX_MAX_TASKS];
+
 iox_task_t *iox_task_alloc(void);
 void iox_task_free(iox_task_t *task);
 iox_task_t *iox_current_task(void);
@@ -144,6 +148,11 @@ iox_task_t *iox_task_lookup(pid_t pid);
 /* Process identity functions */
 pid_t iox_getpid(void);
 pid_t iox_getppid(void);
+pid_t iox_getpgrp(void);
+pid_t iox_getpgid(pid_t pid);
+int iox_setpgid(pid_t pid, pid_t pgid);
+pid_t iox_getsid(pid_t pid);
+pid_t iox_setsid(void);
 
 /* Fork functions */
 pid_t iox_fork(void);

@@ -253,6 +253,8 @@ pid_t iox_getpgrp(void);
 int iox_setpgrp(void);
 pid_t iox_getpgid(pid_t pid);
 int iox_setpgid(pid_t pid, pid_t pgid);
+pid_t iox_getsid(pid_t pid);
+pid_t iox_setsid(void);
 pid_t iox_wait(int *stat_loc);
 pid_t iox_waitpid(pid_t pid, int *stat_loc, int options);
 pid_t iox_wait3(int *stat_loc, int options, struct rusage *rusage);
