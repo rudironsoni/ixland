@@ -35,14 +35,14 @@ if(IXLAND_BUILD_LIBC)
     add_subdirectory(ixland-libc)
 endif()
 
-# Component: ixland-system
-if(IXLAND_BUILD_SYSTEM)
-    add_subdirectory(ixland-system)
-endif()
-
-# Component: ixland-wasm
+# Component: ixland-wasm (must come before ixland-system as it provides wasm-contracts)
 if(IXLAND_BUILD_WASM)
     add_subdirectory(ixland-wasm)
+endif()
+
+# Component: ixland-system (consumes wasm-contracts from ixland-wasm)
+if(IXLAND_BUILD_SYSTEM)
+    add_subdirectory(ixland-system)
 endif()
 
 # Component: ixland-packages

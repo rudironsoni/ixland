@@ -110,6 +110,32 @@ typedef struct {
 } ixland_wasm_mem_slice_t;
 
 /* ============================================================================
+ * WASM VALUE TYPES
+ * ============================================================================ */
+
+typedef enum {
+    IXLAND_WASM_VALUE_I32 = 0,
+    IXLAND_WASM_VALUE_I64 = 1,
+    IXLAND_WASM_VALUE_F32 = 2,
+    IXLAND_WASM_VALUE_F64 = 3,
+    IXLAND_WASM_VALUE_EXTERN_REF = 4,
+    IXLAND_WASM_VALUE_FUNC_REF = 5,
+    IXLAND_WASM_VALUE_V128 = 6  /* SIMD */
+} ixland_wasm_value_kind_t;
+
+typedef struct {
+    ixland_wasm_value_kind_t kind;
+    union {
+        int32_t i32;
+        int64_t i64;
+        float f32;
+        double f64;
+        void *extern_ref;
+        void *func_ref;
+    } value;
+} ixland_wasm_value_t;
+
+/* ============================================================================
  * CALLBACK TYPES
  * ============================================================================ */
 

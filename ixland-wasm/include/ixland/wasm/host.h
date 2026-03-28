@@ -12,6 +12,10 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+/* Forward declarations for system types used in callback signatures */
+struct stat;
+struct sockaddr;
+
 /* socklen_t may not be defined on all platforms */
 #ifndef _SOCKLEN_T_DEFINED
 typedef uint32_t socklen_t;
@@ -27,6 +31,19 @@ extern "C" {
 
 /* Forward declaration - implementation-defined */
 typedef struct ixland_wasm_host_s ixland_wasm_host_t;
+
+/* ============================================================================
+ * HOST FUNCTION IMPORT
+ * ============================================================================ */
+
+/* Host function import descriptor */
+typedef struct {
+    const char *module_name;       /* Module name (e.g., "wasi_snapshot_preview1") */
+    const char *field_name;        /* Function name (e.g., "fd_write") */
+    void *func_ptr;                /* Native function pointer */
+    const char *signature;         /* WAMR-style signature string (e.g., "(i)ii") */
+    void *userdata;                /* Optional userdata passed to function */
+} ixland_wasm_host_import_t;
 
 /* ============================================================================
  * FILE DESCRIPTOR I/O

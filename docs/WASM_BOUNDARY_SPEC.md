@@ -156,10 +156,61 @@ The public contract is defined in these headers:
 
 | Header | Path | Purpose |
 |--------|------|---------|
-| `types.h` | `ixland-wasm/include/ixland/wasm/types.h` | Fundamental types, opaque handles |
+| `types.h` | `ixland-wasm/include/ixland/wasm/types.h` | Fundamental types, opaque handles, value types |
 | `engine.h` | `ixland-wasm/include/ixland/wasm/engine.h` | Engine-neutral runtime contract |
-| `host.h` | `ixland-wasm/include/ixland/wasm/host.h` | Host-service areas (vtable) |
+| `host.h` | `ixland-wasm/include/ixland/wasm/host.h` | Host-service areas (vtable), host imports |
 | `wasi.h` | `ixland-wasm/include/ixland/wasm/wasi.h` | WASI policy and mapping |
+
+## Contract Adoption in Runtime
+
+The runtime implementation (`ixland-system/runtime/wasi/wasm_adapter.c`) consumes the public contract:
+
+### From types.h
+- `ixland_wasm_value_t` - WASM values for function calls
+- `ixland_wasm_value_kind_t` - Value type enumeration (i32, i64, f32, f64, etc.)
+- `ixland_wasm_engine_t` - Engine handle (opaque)
+- `ixland_wasm_module_t` - Module handle (opaque)
+- `ixland_wasm_module_info_t` - Module metadata
+- `ixland_wasm_instance_t` - Instance handle (opaque)
+- `ixland_wasm_backend_kind_t` - Backend enumeration
+- `ixland_wasm_error_t` - Error codes
+
+### From engine.h
+- `ixland_wasm_engine_config_t` - Engine configuration structure
+- `IXLAND_WASM_BACKEND_WAMR` - Backend kind constant
+- `ixland_wasm_module_get_info()` pattern (via adapter wrapper)
+
+### From host.h
+- `ixland_wasm_host_import_t` - Host function import descriptor
+- Host callback function type signatures
+
+### From wasi.h
+- `ixland_wasi_errno_t` - WASI error codes
+- `ixland_wasi_preopen_t` - Preopened directory structure
+- `IXLAND_WASI_RIGHT_*` - Capability rights constants
+- WASI-to-system errno conversion functions
+
+## Adapter Implementation Pattern
+
+The `wasm_adapter.c` implements a **consumer** of the contract (not a replacement):
+
+```c
+/* Engine configuration using contract types */
+static ixland_wasm_engine_config_t config = {
+    .backend = IXLAND_WASM_BACKEND_WAMR,
+    .enable_wasi = true,
+    ...
+};
+
+/* WASI preopens using contract constants */
+static ixland_wasi_preopen_t default_preopens[] = {
+    {0, "/", IXLAND_WASI_RIGHT_PATH_OPEN | ..., 0},
+    ...
+};
+
+/* Error conversion using contract errno mapping */
+ixland_wasi_errno_t ixland_wasm_adapter_convert_errno(int system_errno);
+```
 
 ## What This Spec Does Not Do Yet
 
