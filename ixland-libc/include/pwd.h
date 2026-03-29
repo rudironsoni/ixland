@@ -156,7 +156,6 @@ extern void iox_endpwent(void);
 #define setpwent() iox_setpwent()
 #define getpwent() iox_getpwent()
 #define endpwent() iox_endpwent()
-
 #ifdef __cplusplus
 }
 #endif

@@ -70,17 +70,19 @@ else()
     message(STATUS "Strict type checking disabled")
 endif()
 
-# Component: ixland-libc
+# Component: ixland-libc (no dependencies)
 if(IXLAND_BUILD_LIBC)
     add_subdirectory(ixland-libc)
 endif()
 
-# Component: ixland-wasm (must come before ixland-system as it provides wasm-contracts)
+# Component: ixland-wasm (header-only contracts, no dependencies)
+# Must be processed BEFORE ixland-system because ixland-system/runtime/wasi
+# consumes the ixland-wasm-contracts target.
 if(IXLAND_BUILD_WASM)
     add_subdirectory(ixland-wasm)
 endif()
 
-# Component: ixland-system (consumes wasm-contracts from ixland-wasm)
+# Component: ixland-system (depends on ixland-libc and ixland-wasm)
 if(IXLAND_BUILD_SYSTEM)
     add_subdirectory(ixland-system)
 endif()

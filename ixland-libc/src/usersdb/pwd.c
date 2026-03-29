@@ -10,9 +10,11 @@
  * ixland-libc-usersdb target.
  */
 
-#include <pwd.h>
 #include <errno.h>
+#include <pwd.h>
+#include <stddef.h>
 #include <string.h>
+#include <unistd.h>
 
 /* ============================================================================
  * Static Data (Minimal stub data for mobile environment)
@@ -35,8 +37,8 @@ static const char *iox_default_user_shell = "/bin/sh";
 static void iox_fill_default_passwd(struct passwd *pwd) {
     pwd->pw_name = (char *)iox_default_user_name;
     pwd->pw_passwd = (char *)iox_default_user_passwd;
-    pwd->pw_uid = 501;  /* Standard iOS mobile UID */
-    pwd->pw_gid = 501;  /* Standard iOS mobile GID */
+    pwd->pw_uid = 501; /* Standard iOS mobile UID */
+    pwd->pw_gid = 501; /* Standard iOS mobile GID */
     pwd->pw_gecos = (char *)iox_default_user_gecos;
     pwd->pw_dir = (char *)iox_default_user_dir;
     pwd->pw_shell = (char *)iox_default_user_shell;
@@ -92,8 +94,8 @@ struct passwd *iox_getpwuid(uid_t uid) {
  * Reentrant Versions (Thread-safe)
  * ============================================================================ */
 
-int iox_getpwnam_r(const char *name, struct passwd *pwd,
-                   char *buf, size_t buflen, struct passwd **result) {
+int iox_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t buflen,
+                   struct passwd **result) {
     if (name == NULL || pwd == NULL || buf == NULL || result == NULL) {
         if (result != NULL) {
             *result = NULL;
@@ -149,8 +151,8 @@ int iox_getpwnam_r(const char *name, struct passwd *pwd,
     return 0;
 }
 
-int iox_getpwuid_r(uid_t uid, struct passwd *pwd,
-                   char *buf, size_t buflen, struct passwd **result) {
+int iox_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen,
+                   struct passwd **result) {
     if (pwd == NULL || buf == NULL || result == NULL) {
         if (result != NULL) {
             *result = NULL;
@@ -187,7 +189,7 @@ int iox_getpwuid_r(uid_t uid, struct passwd *pwd,
 
     /* Calculate required buffer size */
     size_t name_len = strlen(user_name) + 1;
-    size_t passwd_len = 2;  /* "*" + null */
+    size_t passwd_len = 2; /* "*" + null */
     size_t gecos_len = strlen(user_gecos) + 1;
     size_t dir_len = strlen(user_dir) + 1;
     size_t shell_len = strlen(user_shell) + 1;

@@ -77,10 +77,9 @@ set(IOX_FS_SOURCES
     Tests/unit/stub_vfs_translate.c
 )
 
-# Runtime sources
-set(IOX_RUNTIME_SOURCES
+# Runtime sources - native (non-WASI)
+set(IOX_RUNTIME_NATIVE_SOURCES
     runtime/native/registry.c
-    runtime/wasi/wasm_adapter.c
 )
 
 # Core syscall sources (VFS-aware implementations)
@@ -90,27 +89,71 @@ set(IOX_SYSCALL_SOURCES
     src/iox/core/iox_poll.c
 )
 
-# Combined sources (without runtime - will be separate target)
+# Runtime sources - WASI adapter implementation
+# This is split into a separate internal target to avoid monolithic build
+set(IOX_RUNTIME_WASI_SOURCES
+    runtime/wasi/wasm_adapter.c
+    src/iox/wamr/iox_wamr.c
+    src/iox/wamr/iox_wamr_simple.c
+)
+
+# Combined core sources (excluding WASI runtime - that's a separate target)
 set(IOX_CORE_SOURCES
     ${IOX_KERNEL_SOURCES}
     ${IOX_FS_SOURCES}
     ${IOX_SYSCALL_SOURCES}
+    ${IOX_RUNTIME_NATIVE_SOURCES}
 )
 
-# Create runtime/wasi library (internal target)
-add_library(iox-runtime STATIC ${IOX_RUNTIME_SOURCES})
+# ============================================================================
+# Internal Target: iox-runtime-wasi
+# ============================================================================
+# This is an internal target within ixland-system for WASI/runtime support.
+# It keeps the WASI adapter and WAMR implementation separate from core.
 
-# Runtime target include directories
-target_include_directories(iox-runtime
+add_library(iox-runtime-wasi STATIC ${IOX_RUNTIME_WASI_SOURCES})
+
+target_include_directories(iox-runtime-wasi
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/native>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/wasi>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    PRIVATE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/wamr/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/wasi>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/iox/wamr>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/native>
 )
 
-# Create core library
+target_compile_options(iox-runtime-wasi PRIVATE
+    -Wall
+    -Wextra
+    -Werror=implicit-function-declaration
+    -fPIC
+)
+
+# Link to boundary targets if available in monorepo build
+if(NOT IOX_STANDALONE_MODE)
+    # Consume public headers from ixland-libc boundary target
+    if(TARGET ixland-libc-headers)
+        target_link_libraries(iox-runtime-wasi PUBLIC ixland-libc-headers)
+        message(STATUS "iox-runtime-wasi: Linked to ixland-libc-headers")
+    endif()
+
+    # Wasm contract headers - consumed by runtime/wasi implementation
+    if(TARGET ixland-wasm-contracts)
+        target_link_libraries(iox-runtime-wasi PUBLIC ixland-wasm-contracts)
+        message(STATUS "iox-runtime-wasi: Linked to ixland-wasm-contracts")
+    endif()
+else()
+    # Standalone: add libc include path directly
+    target_include_directories(iox-runtime-wasi PUBLIC ${IOX_LIBC_INCLUDE_DIR})
+endif()
+
+set_target_properties(iox-runtime-wasi PROPERTIES
+    OUTPUT_NAME "iox-runtime-wasi"
+)
+
+# ============================================================================
+# Core Library: iox-core
+# ============================================================================
+
 add_library(iox-core STATIC ${IOX_CORE_SOURCES})
 
 # Target include directories (NOT global include_directories)
@@ -182,6 +225,11 @@ endif()
 
 target_link_libraries(iox-core PUBLIC pthread)
 
+# Link iox-core to the internal WASI runtime target
+# This creates the dependency: iox-core → iox-runtime-wasi
+target_link_libraries(iox-core PUBLIC iox-runtime-wasi)
+message(STATUS "iox: Linked iox-core to internal iox-runtime-wasi target")
+
 # Set library properties
 set_target_properties(iox-core PROPERTIES
     OUTPUT_NAME "iox"
@@ -191,7 +239,7 @@ set_target_properties(iox-core PROPERTIES
 
 # Installation
 if(IOX_INSTALL)
-    install(TARGETS iox-core
+    install(TARGETS iox-core iox-runtime-wasi
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
     )

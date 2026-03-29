@@ -194,7 +194,6 @@ extern int iox_initgroups(const char *user, gid_t group);
 #define getgroups(size, list) iox_getgroups(size, list)
 #define setgroups(size, list) iox_setgroups(size, list)
 #define initgroups(user, group) iox_initgroups(user, group)
-
 #ifdef __cplusplus
 }
 #endif

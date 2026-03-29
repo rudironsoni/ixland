@@ -56,12 +56,12 @@ The root build includes subdirectories in dependency order:
 
 - **Type**: `INTERFACE` library
 - **Provides**: Wasm contract headers at `ixland-wasm/include/`
-- **Consumers**: None yet (implementation still uses WAMR directly)
+- **Consumers**: `iox-runtime-wasi` (internal target within ixland-system)
 - **Usage**:
   ```cmake
   target_link_libraries(my_target PUBLIC ixland-wasm-contracts)
   ```
-- **Status**: Contract defined, not yet consumed by runtime implementation
+- **Status**: ✅ Consumed by `iox-runtime-wasi` target in ixland-system
 
 ## ixland-system as Consumer
 
@@ -113,8 +113,20 @@ cmake --build .
 ```
 ixland-libc-headers (INTERFACE)
     │
-    ├─ PUBLIC include → iox-runtime
-    └─ PUBLIC include → iox-core
+    ├─ PUBLIC include → iox-core
+    └─ PUBLIC include → iox-runtime-wasi
+
+ixland-wasm-contracts (INTERFACE)
+    │
+    └─ PUBLIC include → iox-runtime-wasi
+
+iox-runtime-wasi (STATIC) - INTERNAL to ixland-system
+    │
+    ├─ PRIVATE sources: runtime/wasi/, src/iox/wamr/
+    ├─ PUBLIC includes: runtime/wasi/, src/iox/wamr/, runtime/native/
+    ├─ PUBLIC link: ixland-libc-headers (boundary consumption)
+    ├─ PUBLIC link: ixland-wasm-contracts (boundary consumption)
+    └─ Note: Internal target, not exposed outside ixland-system
 
 ixland-wasm-contracts (INTERFACE)
     │
@@ -128,17 +140,41 @@ iox-runtime (STATIC)
 
 iox-core (STATIC)
     │
-    ├─ PRIVATE sources: kernel/, fs/
-    ├─ PUBLIC includes: internal/, kernel/, fs/
+    ├─ PRIVATE sources: kernel/, fs/, runtime/native/
+    ├─ PUBLIC includes: internal/, kernel/, fs/, runtime/native/, drivers/tty/
     ├─ PUBLIC link: ixland-libc-headers (boundary consumption)
-    ├─ PUBLIC link: iox-runtime (runtime/wasi layer)
-    └─ PUBLIC link: pthread
+    ├─ PUBLIC link: pthread
+    └─ PUBLIC link: iox-runtime-wasi (internal dependency)
 
 iox-core-tests (MODULE)
     │
     ├─ PRIVATE sources: Tests/
     └─ PRIVATE link: iox-core (inherits includes), XCTest
 ```
+
+## Internal Target Architecture
+
+### iox-runtime-wasi (Internal)
+
+The `iox-runtime-wasi` target is an **internal** target within `ixland-system` that separates the WASI/WebAssembly runtime implementation from the core kernel code.
+
+**Rationale:**
+- Prevents monolithic build where everything is in one giant target
+- Keeps WASI-specific code (WAMR integration, wasm_adapter) isolated
+- Allows clean dependency on `ixland-wasm-contracts` boundary target
+- Internal to ixland-system - consumers only link against `iox-core`
+
+**Sources:**
+- `runtime/wasi/wasm_adapter.c` - Wasm contract adapter
+- `src/iox/wamr/iox_wamr.c` - WAMR integration
+- `src/iox/wamr/iox_wamr_simple.c` - Simplified WAMR interface
+
+**Dependencies:**
+- `ixland-libc-headers` - For iox types
+- `ixland-wasm-contracts` - For wasm contract types
+
+**Consumers:**
+- `iox-core` - Links publicly, so runtime is available to all iox-core consumers
 
 ## Current Limitations
 
