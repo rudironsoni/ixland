@@ -20,9 +20,15 @@ Checks: >
   -modernize-macro-to-enum,
   -cppcoreguidelines-avoid-non-const-global-variables,
   -readability-named-parameter,
-  -misc-unused-parameters
+  -misc-unused-parameters,
+  -modernize-use-trailing-return-type,
+  cppcoreguidelines-*-unused-parameters,
+  misc-unused-*,
+  modernize-unary-static-assert,
+  readability-delete-null-pointer,
+  readability-redundant-*
 
-WarningsAsErrors: ''
+WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
 FormatStyle: file
 

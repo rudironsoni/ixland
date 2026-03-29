@@ -1,0 +1,23 @@
+{
+  "threshold": 20,
+  "reporters": ["console", "html"],
+  "format": ["c", "swift", "shell", "javascript", "typescript", "json", "yaml"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/.dolt/**",
+    "**/build/**",
+    "**/.build/**",
+    "**/build-*/**",
+    "**/Resources/**",
+    "**/Resources_mini/**",
+    "**/wamr/**",
+    "**/vendor/**",
+    "**/*.min.js",
+    "**/*.min.css",
+    "**/dist/**"
+  ],
+  "absolute": false,
+  "gitignore": true,
+  "output": ".jscpd-report"
+}

@@ -188,18 +188,73 @@ This project uses automated linting and formatting to maintain code quality:
 ./scripts/lint.sh --check
 ```
 
+**Type checking only:**
+```bash
+./scripts/lint.sh --type-check
+```
+
+**Strict typing verification:**
+```bash
+./scripts/lint.sh --strict-typing
+```
+
+**Dead code detection:**
+```bash
+./scripts/lint.sh --dead-code
+```
+
+**Duplicate code detection:**
+```bash
+./scripts/check-duplicate-code.sh
+```
+
+**Technical debt scanner:**
+```bash
+./scripts/check-tech-debt.sh
+```
+
 ### C Code (ixland-system, ixland-libc)
 
 **Linting Tools:**
-- **clang-tidy**: Static analysis and bug detection
+- **clang-tidy**: Static analysis, type checking, dead code detection, and bug detection
 - **clang-format**: Code formatting
 
 **Configuration:**
-- `.clang-tidy` - Linting rules and checks
+- `.clang-tidy` - Linting rules and checks (strict mode enabled with `WarningsAsErrors: '*'`)
 - `.clang-format` - Formatting style rules
 
+**Strict Type Checking:**
+When `IXLAND_STRICT_TYPING=ON` (default), CMake adds strict compiler flags:
+- `-Werror` - Treat all warnings as errors
+- `-Werror=implicit-function-declaration` - Catch undefined functions
+- `-Werror=incompatible-pointer-types` - Prevent pointer type mismatches
+- `-Werror=int-conversion` - Catch implicit int conversions
+- `-Werror=return-type` - Ensure functions return correct types
+- `-Werror=uninitialized` - Catch uninitialized variables
+- `-Werror=strict-prototypes` - Enforce proper function prototypes
+- `-Werror=missing-prototypes` - Require function declarations
+- `-Werror=implicit-int` - Require explicit int declarations
+
+**Dead Code Detection:**
+The following tools detect unused/dead code:
+- **clang-tidy checks**: `misc-unused-parameters`, `misc-unused-alias-decls`, `readability-redundant-*`, `cppcoreguidelines-*-unused-parameters`
+- **Compiler flags**: `-Wunused-variable`, `-Wunused-function`, `-Wunused-parameter`
+- **ShellCheck**: Detects unused variables in shell scripts (SC2034)
+- **SwiftLint**: Detects unused imports and declarations
+
+**Technical Debt Tracking:**
+All TODO/FIXME comments must be linked to issues using these formats:
+- `TODO(TICKET-123)` or `FIXME(TICKET-123)`
+- `TODO(#456)` or `FIXME(#456)`
+- `TODO: See issue #123` or `FIXME: See issue #123`
+- `TODO(bd-789)` or `FIXME(bd-789)` (for bd/beads issue tracker)
+
+The technical debt scanner enforces this via CI.
+
 **Key Checks Enabled:**
+- Type checking (clang-analyzer type analysis)
 - Bug detection (null pointer dereference, memory leaks)
+- Dead code detection (unused parameters, variables, functions)
 - Performance optimizations
 - Code style consistency (naming, formatting)
 - Cyclomatic complexity limits
@@ -268,6 +323,11 @@ Linting and formatting checks run automatically on:
 See `.github/workflows/code-quality.yml` for CI configuration.
 
 **CI Jobs:**
+- `type-check-c` - Runs clang-tidy type checking on all C components
+- `strict-typing-c` - Enforces strict type checking with -Werror flags
+- `dead-code-check` - Detects unused/dead code across all components
+- `duplicate-code-check` - Detects copy-paste/duplicate code (jscpd)
+- `tech-debt-check` - Scans TODO/FIXME comments and enforces issue linking
 - `format-c` - Verifies C/C++ code formatting
 - `format-swift` - Verifies Swift code formatting
 - `lint-c` - Runs clang-tidy static analysis

@@ -163,6 +163,23 @@ target_compile_options(iox-core PRIVATE
     -fPIC
 )
 
+# Apply strict type checking if enabled
+if(IXLAND_STRICT_TYPING)
+    target_compile_options(iox-core PRIVATE
+        -Werror
+        -Werror=incompatible-pointer-types
+        -Werror=int-conversion
+        -Werror=return-type
+        -Werror=uninitialized
+        -Werror=strict-prototypes
+        -Werror=old-style-definition
+        -Werror=missing-prototypes
+        -Werror=implicit-int
+        -Werror=pointer-sign
+        -Werror=discarded-qualifiers
+    )
+endif()
+
 target_link_libraries(iox-core PUBLIC pthread)
 
 # Set library properties

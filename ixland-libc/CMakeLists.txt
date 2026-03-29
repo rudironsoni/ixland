@@ -72,6 +72,26 @@ target_include_directories(ixland-libc-core
 # Core depends on headers for public API definitions
 target_link_libraries(ixland-libc-core PUBLIC ixland-libc-headers)
 
+# Apply strict type checking if enabled
+if(IXLAND_STRICT_TYPING)
+    target_compile_options(ixland-libc-core PRIVATE
+        -Wall
+        -Wextra
+        -Werror
+        -Werror=implicit-function-declaration
+        -Werror=incompatible-pointer-types
+        -Werror=int-conversion
+        -Werror=return-type
+        -Werror=uninitialized
+        -Werror=strict-prototypes
+        -Werror=old-style-definition
+        -Werror=missing-prototypes
+        -Werror=implicit-int
+        -Werror=pointer-sign
+        -Werror=discarded-qualifiers
+    )
+endif()
+
 # ============================================================================
 # USERSDB IMPLEMENTATION TARGET
 # ============================================================================
@@ -92,6 +112,26 @@ target_include_directories(ixland-libc-usersdb
 
 # Usersdb depends on headers for public API definitions
 target_link_libraries(ixland-libc-usersdb PUBLIC ixland-libc-headers)
+
+# Apply strict type checking if enabled
+if(IXLAND_STRICT_TYPING)
+    target_compile_options(ixland-libc-usersdb PRIVATE
+        -Wall
+        -Wextra
+        -Werror
+        -Werror=implicit-function-declaration
+        -Werror=incompatible-pointer-types
+        -Werror=int-conversion
+        -Werror=return-type
+        -Werror=uninitialized
+        -Werror=strict-prototypes
+        -Werror=old-style-definition
+        -Werror=missing-prototypes
+        -Werror=implicit-int
+        -Werror=pointer-sign
+        -Werror=discarded-qualifiers
+    )
+endif()
 
 # ============================================================================
 # INSTALLATION
