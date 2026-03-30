@@ -93,7 +93,7 @@ pid_t iox_fork(void) {
         child_count++;
         c = c->next_sibling;
     }
-    if (child_count >= parent->rlimits[RLIMIT_NPROC].rlim_cur) {
+    if (child_count >= (int)parent->rlimits[RLIMIT_NPROC].rlim_cur) {
         pthread_mutex_unlock(&parent->lock);
         errno = EAGAIN;
         return -1;
