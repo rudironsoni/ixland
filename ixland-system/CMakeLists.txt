@@ -323,8 +323,8 @@ if(IOX_BUILD_TESTS)
         Tests/unit/test_cross_integration_headers.c
         Tests/unit/test_process_lifecycle.c
         Tests/unit/test_cross_signals.c
-        # Tests/unit/test_poll_syscalls.c  # TODO: needs type compatibility work
-        # Tests/unit/test_directory_syscalls.c  # TODO: requires directory syscall implementation
+        Tests/unit/test_poll_syscalls.c
+        Tests/unit/test_directory_syscalls.c
     )
 
     # Create standalone test executable

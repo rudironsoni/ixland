@@ -19,51 +19,12 @@
 
 #include "../harness/iox_test.h"
 
-/* Include internal header which has poll/epoll definitions */
+/* Include internal header which has poll/epoll definitions.
+ * This header provides all necessary types and function declarations.
+ * The internal iox_poll() and iox_select() functions use the Linux-compatible
+ * types defined in the internal header (linux_pollfd, linux_fd_set_t, etc.).
+ */
 #include "../../src/iox/internal/iox_internal.h"
-
-/* Use system definitions for compatibility */
-#define IOX_POLLIN POLLIN
-#define IOX_POLLOUT POLLOUT
-#define IOX_POLLERR POLLERR
-#define IOX_POLLHUP POLLHUP
-#define IOX_POLLNVAL POLLNVAL
-
-/* Define linux types for tests - mapped to system types */
-struct linux_pollfd {
-    int fd;
-    short events;
-    short revents;
-};
-
-typedef struct {
-    unsigned long fds_bits[1024 / (8 * sizeof(unsigned long))];
-} linux_fd_set_t;
-
-struct linux_timeval {
-    long tv_sec;
-    long tv_usec;
-};
-
-struct linux_timespec {
-    long tv_sec;
-    long tv_nsec;
-};
-
-typedef struct {
-    unsigned long sig[128 / sizeof(unsigned long)];
-} linux_sigset_t;
-
-/* IOX_FD_SETSIZE */
-#ifndef IOX_FD_SETSIZE
-#define IOX_FD_SETSIZE 1024
-#endif
-
-/* FD_SET macros */
-#define IOX_FD_ZERO(set) memset((set), 0, sizeof(linux_fd_set_t))
-#define IOX_FD_SET(fd, set) ((set)->fds_bits[(fd)/(8*sizeof(unsigned long))] |= (1UL << ((fd) % (8*sizeof(unsigned long)))))
-#define IOX_FD_CLR(fd, set) ((set)->fds_bits[(fd)/(8*sizeof(unsigned long))] &= ~(1UL << ((fd) % (8*sizeof(unsigned long)))))
-#define IOX_FD_ISSET(fd, set) (((set)->fds_bits[(fd)/(8*sizeof(unsigned long))] >> ((fd) % (8*sizeof(unsigned long)))) & 1)
 
 /* Helper: Create a connected socket pair */
 static int create_socket_pair(int fds[2]) {
@@ -145,7 +106,7 @@ IOX_TEST(poll_timeout_no_events) {
     struct linux_pollfd pfd = {pipefd[0], IOX_POLLIN, 0};
     int result = iox_poll(&pfd, 1, 50);
 
-    IOX_ASSERT_EQ(result, 0);  /* Timeout, no events */
+    IOX_ASSERT_EQ(result, 0); /* Timeout, no events */
 
     close(pipefd[0]);
     close(pipefd[1]);
@@ -162,10 +123,7 @@ IOX_TEST(poll_multiple_fds) {
     write(pipe1[1], "a", 1);
     write(pipe2[1], "b", 1);
 
-    struct linux_pollfd fds[2] = {
-        {pipe1[0], IOX_POLLIN, 0},
-        {pipe2[0], IOX_POLLIN, 0}
-    };
+    struct linux_pollfd fds[2] = {{pipe1[0], IOX_POLLIN, 0}, {pipe2[0], IOX_POLLIN, 0}};
 
     int result = iox_poll(fds, 2, 100);
 
@@ -188,10 +146,11 @@ IOX_TEST(poll_clears_revents_for_unready) {
     /* Only write to one pipe (using single pipe with read/write ends) */
     write(pipefd[1], "x", 1);
 
-    /* Poll for write on read end (should not be ready for write) and read on write end (not ready) */
+    /* Poll for write on read end (should not be ready for write) and read on write end (not ready)
+     */
     struct linux_pollfd fds[2] = {
-        {pipefd[0], IOX_POLLOUT, IOX_POLLIN},  /* Pre-set revents */
-        {pipefd[1], IOX_POLLIN, IOX_POLLOUT}   /* Pre-set revents */
+        {pipefd[0], IOX_POLLOUT, IOX_POLLIN}, /* Pre-set revents */
+        {pipefd[1], IOX_POLLIN, IOX_POLLOUT}  /* Pre-set revents */
     };
 
     int result = iox_poll(fds, 2, 0);
@@ -261,7 +220,7 @@ IOX_TEST(select_pipe_read_ready) {
     IOX_FD_ZERO(&readfds);
     IOX_FD_SET(pipefd[0], &readfds);
 
-    struct linux_timeval tv = {0, 100000};  /* 100ms */
+    struct linux_timeval tv = {0, 100000}; /* 100ms */
     int result = iox_select(pipefd[0] + 1, &readfds, NULL, NULL, &tv);
 
     IOX_ASSERT_EQ(result, 1);
@@ -282,7 +241,7 @@ IOX_TEST(select_pipe_write_ready) {
     IOX_FD_ZERO(&writefds);
     IOX_FD_SET(pipefd[1], &writefds);
 
-    struct linux_timeval tv = {0, 100000};  /* 100ms */
+    struct linux_timeval tv = {0, 100000}; /* 100ms */
     int result = iox_select(pipefd[1] + 1, NULL, &writefds, NULL, &tv);
 
     IOX_ASSERT_EQ(result, 1);
@@ -303,11 +262,11 @@ IOX_TEST(select_timeout_no_events) {
     IOX_FD_ZERO(&readfds);
     IOX_FD_SET(pipefd[0], &readfds);
 
-    struct linux_timeval tv = {0, 50000};  /* 50ms */
+    struct linux_timeval tv = {0, 50000}; /* 50ms */
     int result = iox_select(pipefd[0] + 1, &readfds, NULL, NULL, &tv);
 
-    IOX_ASSERT_EQ(result, 0);  /* Timeout */
-    IOX_ASSERT(!IOX_FD_ISSET(pipefd[0], &readfds));  /* Should be cleared */
+    IOX_ASSERT_EQ(result, 0);                       /* Timeout */
+    IOX_ASSERT(!IOX_FD_ISSET(pipefd[0], &readfds)); /* Should be cleared */
 
     close(pipefd[0]);
     close(pipefd[1]);
@@ -329,7 +288,7 @@ IOX_TEST(select_clears_unready_fds) {
     IOX_FD_SET(pipe2[0], &readfds);
 
     int maxfd = (pipe1[0] > pipe2[0]) ? pipe1[0] : pipe2[0];
-    struct linux_timeval tv = {0, 100000};  /* 100ms */
+    struct linux_timeval tv = {0, 100000}; /* 100ms */
     int result = iox_select(maxfd + 1, &readfds, NULL, NULL, &tv);
 
     IOX_ASSERT_EQ(result, 1);
@@ -358,10 +317,10 @@ IOX_TEST(select_multiple_sets) {
     IOX_FD_SET(pipefd[1], &writefds);
 
     int maxfd = (pipefd[0] > pipefd[1]) ? pipefd[0] : pipefd[1];
-    struct linux_timeval tv = {0, 100000};  /* 100ms */
+    struct linux_timeval tv = {0, 100000}; /* 100ms */
     int result = iox_select(maxfd + 1, &readfds, &writefds, NULL, &tv);
 
-    IOX_ASSERT_EQ(result, 2);  /* Both read and write ready */
+    IOX_ASSERT_EQ(result, 2); /* Both read and write ready */
     IOX_ASSERT(IOX_FD_ISSET(pipefd[0], &readfds));
     IOX_ASSERT(IOX_FD_ISSET(pipefd[1], &writefds));
 
@@ -394,7 +353,7 @@ IOX_TEST(epoll_create_returns_valid_epfd) {
 
     /* Close the epoll instance (by doing nothing - epoll has no close yet) */
     /* In real implementation, we would have epoll close */
-    (void)epfd;  /* Mark as used */
+    (void)epfd; /* Mark as used */
 
     return true;
 }
@@ -600,7 +559,7 @@ IOX_TEST(epoll_ctl_invalid_op_returns_einval) {
     IOX_ASSERT_GT(epfd, -1);
 
     struct epoll_event ev = {EPOLLIN, {.fd = pipefd[0]}};
-    int result = iox_epoll_ctl(epfd, 99, pipefd[0], &ev);  /* Invalid op */
+    int result = iox_epoll_ctl(epfd, 99, pipefd[0], &ev); /* Invalid op */
     IOX_ASSERT_EQ(result, -1);
     IOX_ASSERT_EQ(errno, EINVAL);
 
@@ -653,7 +612,7 @@ IOX_TEST(epoll_wait_timeout_no_events) {
     IOX_ASSERT_GT(epfd, -1);
 
     struct epoll_event ev;
-    int result = iox_epoll_wait(epfd, &ev, 1, 50);  /* 50ms timeout */
+    int result = iox_epoll_wait(epfd, &ev, 1, 50); /* 50ms timeout */
     IOX_ASSERT_EQ(result, 0);
 
     return true;
@@ -711,7 +670,7 @@ IOX_TEST(epoll_wait_respects_maxevents) {
     struct epoll_event events[2];
     int result = iox_epoll_wait(epfd, events, 1, 100);
 
-    IOX_ASSERT_EQ(result, 1);  /* Should only return 1 event */
+    IOX_ASSERT_EQ(result, 1); /* Should only return 1 event */
 
     close(pipe1[0]);
     close(pipe1[1]);
@@ -880,10 +839,7 @@ IOX_TEST(io_multiplex_integration) {
     write(pipe_read[1], "data", 4);
 
     /* Test with poll */
-    struct linux_pollfd fds[2] = {
-        {pipe_read[0], IOX_POLLIN, 0},
-        {pipe_write[1], IOX_POLLOUT, 0}
-    };
+    struct linux_pollfd fds[2] = {{pipe_read[0], IOX_POLLIN, 0}, {pipe_write[1], IOX_POLLOUT, 0}};
 
     int result = iox_poll(fds, 2, 100);
     IOX_ASSERT_EQ(result, 2);
