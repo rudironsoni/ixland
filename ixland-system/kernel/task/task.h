@@ -144,6 +144,7 @@ int iox_task_init(void);
 void iox_task_deinit(void);
 
 iox_task_t *iox_task_lookup(pid_t pid);
+int task_hash(pid_t pid);
 
 /* Process identity functions */
 pid_t iox_getpid(void);

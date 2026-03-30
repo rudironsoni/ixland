@@ -19,8 +19,8 @@ iox_task_t *init_task = NULL;
 pthread_mutex_t task_table_lock = PTHREAD_MUTEX_INITIALIZER;
 iox_task_t *task_table[IOX_MAX_TASKS] = {NULL};
 
-size_t task_hash(pid_t pid) {
-    return (size_t)(pid % IOX_MAX_TASKS);
+int task_hash(pid_t pid) {
+    return (int)(pid % IOX_MAX_TASKS);
 }
 
 iox_task_t *iox_current_task(void) {

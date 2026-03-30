@@ -223,7 +223,7 @@ int iox_killpg(pid_t pgrp, int sig) {
 
     extern pthread_mutex_t task_table_lock;
     extern iox_task_t *task_table[];
-    extern size_t task_hash(pid_t pid);
+    extern int task_hash(pid_t pid);
 
     pthread_mutex_lock(&task_table_lock);
 
