@@ -24,6 +24,21 @@ Each Wasm package contains:
 - `metadata.json` - Package metadata with schema defined in WASM_PACKAGE_LAYOUT.md
 - `patches/` - Optional patches directory
 
+## Build Output
+
+Wasm package builds produce artifacts in:
+- `.build/wasm/PKG/staging/` - Build output directory (PKG = package name)
+
+## Wasm Artifact Organization
+
+Wasm packages produce the following artifacts:
+
+| Artifact | Description |
+|----------|-------------|
+| `*.wasm` | Wasm module files (compiled binaries) |
+| `metadata.json` | Package metadata (version, dependencies, etc.) |
+| `.build/wasm/PKG/staging/` | Build output directory |
+
 ## Naming Conventions
 
 - Package directory: lowercase, hyphens allowed (e.g., `coreutils`, `lua-runtime`)
