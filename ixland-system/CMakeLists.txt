@@ -47,15 +47,15 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
 set(CMAKE_XCODE_ATTRIBUTE_VALID_ARCHS "arm64")
 
-# Options
-option(IOX_BUILD_TESTS "Build tests" ON)
-option(IOX_BUILD_TOOLS "Build tools" ON)
-option(IOX_INSTALL "Enable installation" ON)
-
 # Compiler Flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -DNDEBUG")
+
+# Options
+option(IOX_BUILD_TESTS "Build tests" ON)
+option(IOX_BUILD_TOOLS "Build tools" ON)
+option(IOX_INSTALL "Enable installation" ON)
 
 # Core kernel sources
 set(IOX_KERNEL_SOURCES

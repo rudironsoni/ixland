@@ -36,36 +36,6 @@ set(IXLAND_BUILD_ROOT ${CMAKE_BINARY_DIR} CACHE PATH "Root build directory")
 # ============================================================================
 if(IXLAND_STRICT_TYPING)
     message(STATUS "Strict type checking enabled")
-    # Strict type checking flags for C
-    set(IXLAND_STRICT_C_FLAGS
-        -Wall
-        -Wextra
-        -Werror
-        -Werror=implicit-function-declaration
-        -Werror=incompatible-pointer-types
-        -Werror=int-conversion
-        -Werror=return-type
-        -Werror=uninitialized
-        -Werror=strict-prototypes
-        -Werror=old-style-definition
-        -Werror=missing-prototypes
-        -Werror=implicit-int
-        -Werror=pointer-sign
-        -Werror=discarded-qualifiers
-    )
-
-    # Dead code detection flags
-    set(IXLAND_DEAD_CODE_FLAGS
-        -Wunused-variable
-        -Wunused-function
-        -Wunused-parameter
-        -Wunused-value
-        -Wunused-result
-        -Wunused-label
-        -Wunused-local-typedefs
-        -Wunused-macros
-        -Wunused-const-variable
-    )
 else()
     message(STATUS "Strict type checking disabled")
 endif()
