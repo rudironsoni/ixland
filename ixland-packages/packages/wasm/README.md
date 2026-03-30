@@ -1,46 +1,88 @@
-# Wasm Packages
+# ixland-packages WASM Layout
 
-This directory is reserved for future WebAssembly packages.
+This directory contains WebAssembly (WASM) package definitions and validation for iXland packages.
 
-See [docs/WASM_PACKAGE_LAYOUT.md](../../../docs/WASM_PACKAGE_LAYOUT.md) for the full specification.
-
-## Future Layout
+## Directory Structure
 
 ```
-wasm/
-├── README.md
-├── <package-name>/
-│   ├── build.sh          # Package build script
-│   ├── metadata.json     # Package metadata
-│   └── patches/          # Wasm-specific patches
-│       └── 01-fix.patch
-└── ...
+ixland-packages/packages/wasm/
+├── README.md              # This file
+├── layout.json            # WASM layout schema definition
+└── validate.sh            # Layout validation script
 ```
 
-## Package Structure
+## WASM Package Layout
 
-Each Wasm package contains:
-- `build.sh` - Build script (sourced by build system)
-- `metadata.json` - Package metadata with schema defined in WASM_PACKAGE_LAYOUT.md
-- `patches/` - Optional patches directory
+WASM packages in iXland follow a strict layout for consistency and security:
 
-## Build Output
+### Required Structure
 
-Wasm package builds produce artifacts in:
-- `.build/wasm/PKG/staging/` - Build output directory (PKG = package name)
+```
+<package-name>.wasm/
+├── bin/
+│   └── <command-name>     # WASM executable (required)
+├── lib/
+│   └── *.wasm             # WASM library dependencies (optional)
+├── share/
+│   ├── doc/
+│   │   └── README.md      # Package documentation (optional)
+│   └── man/
+│       └── man1/
+│           └── <command>.1 # Man page (optional)
+└── manifest.json          # Package metadata (required)
+```
 
-## Wasm Artifact Organization
+### manifest.json Schema
 
-Wasm packages produce the following artifacts:
+```json
+{
+  "name": "string",           // Package name (required)
+  "version": "string",        // SemVer version (required)
+  "description": "string",    // Brief description (required)
+  "author": "string",         // Author or maintainer (optional)
+  "license": "string",        // SPDX license identifier (required)
+  "homepage": "string",       // Project URL (optional)
+  "entrypoint": "string",     // Relative path to main binary (required)
+  "arch": ["wasm32"],         // Supported architectures (required)
+  "dependencies": {           // Dependency mapping (optional)
+    "<dep-name>": "<version-constraint>"
+  },
+  "capabilities": [           // Required WASI capabilities (optional)
+    "filesystem",
+    "network",
+    "stdio"
+  ]
+}
+```
 
-| Artifact | Description |
-|----------|-------------|
-| `*.wasm` | Wasm module files (compiled binaries) |
-| `metadata.json` | Package metadata (version, dependencies, etc.) |
-| `.build/wasm/PKG/staging/` | Build output directory |
+## Validation Rules
 
-## Naming Conventions
+1. **Binary Integrity**: All WASM binaries must be valid WebAssembly modules
+2. **Manifest Presence**: Every package must include a valid `manifest.json`
+3. **Entrypoint Validity**: The entrypoint must reference an existing executable
+4. **Architecture Check**: Only `wasm32` architecture is supported
+5. **Dependency Resolution**: All declared dependencies must be resolvable
+6. **Capability Whitelist**: Only declared WASI capabilities may be used
 
-- Package directory: lowercase, hyphens allowed (e.g., `coreutils`, `lua-runtime`)
-- Wasm artifacts: `<package>-<version>.wasm` or `<package>.wasm`
-- Metadata: `metadata.json`
+## Running Validation
+
+```bash
+# Validate all WASM packages
+cmake --build --preset local-dev --target ixland-packages-validate
+
+# Validate specific package
+./validate.sh <package-name>
+```
+
+## Security Considerations
+
+- All WASM modules are sandboxed by the iXland runtime
+- File system access is restricted to package-specific directories
+- Network access requires explicit capability declaration
+- Capabilities are enforced at the runtime level
+
+## References
+
+- [WebAssembly Spec](https://webassembly.github.io/spec/)
+- [WASI](https://wasi.dev/)
+- [iXland Package System](../../README.md)
