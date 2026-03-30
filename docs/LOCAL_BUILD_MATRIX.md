@@ -162,9 +162,54 @@ iOS builds require macOS with Xcode.
 | ixland-libc-headers | ✅ | ✅ | N/A | Headers only |
 | ixland-libc-core | ✅ | ✅ | ✅ | Smoke tests |
 | ixland-wasm-contracts | ✅ | ✅ | N/A | Headers only |
+| iox-runtime-native | ✅ | ✅ | N/A | Native runtime library |
+| iox-runtime-wasi | ✅ | ✅ | N/A | WASI/WebAssembly runtime |
 | iox-core | ✅ | ✅ | ⚠️ | XCTest requires Xcode |
 | ixland-packages | ✅ | ✅ | N/A | Validation target |
 | ixland-toolchain | N/A | N/A | N/A | Referenced via `CMAKE_TOOLCHAIN_FILE` |
+
+## Runtime Targets
+
+### iox-runtime-native
+
+**Status:** ✅ Supported (Internal Target)
+
+The `iox-runtime-native` target provides the native command registry:
+
+```bash
+cmake --build . --target iox-runtime-native
+```
+
+**Sources:**
+- `ixland-system/runtime/native/registry.c`
+
+**Dependencies:**
+- `ixland-libc-headers` - Public libc headers
+
+**Consumers:**
+- `iox-core` - Links publicly to provide native runtime support
+
+### iox-runtime-wasi
+
+**Status:** ✅ Supported (Internal Target)
+
+The `iox-runtime-wasi` target provides WASI/WebAssembly runtime support:
+
+```bash
+cmake --build . --target iox-runtime-wasi
+```
+
+**Sources:**
+- `ixland-system/runtime/wasi/wasm_adapter.c`
+- `ixland-system/src/iox/wamr/iox_wamr.c`
+- `ixland-system/src/iox/wamr/iox_wamr_simple.c`
+
+**Dependencies:**
+- `ixland-libc-headers` - Public libc headers
+- `ixland-wasm-contracts` - Wasm contract headers
+
+**Consumers:**
+- `iox-core` - Links publicly to provide WASI runtime support
 
 ## Troubleshooting
 

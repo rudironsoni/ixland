@@ -28,6 +28,32 @@ The root build includes subdirectories in dependency order:
 
 `ixland-packages` provides a validation target (`ixland-packages-validate`). `ixland-toolchain` is referenced via `CMAKE_TOOLCHAIN_FILE`, not via `add_subdirectory`.
 
+## Internal Targets (ixland-system)
+
+### iox-runtime-native (Internal)
+
+- **Type**: `STATIC` library
+- **Provides**: Native command registry for registering and looking up native commands
+- **Consumers**: `iox-core`
+- **Usage**:
+  ```cmake
+  target_link_libraries(my_target PUBLIC iox-runtime-native)
+  ```
+- **Sources**: `runtime/native/registry.c`
+- **Dependencies**: `ixland-libc-headers`
+
+### iox-runtime-wasi (Internal)
+
+- **Type**: `STATIC` library
+- **Provides**: WASI/WebAssembly runtime adapter implementation
+- **Consumers**: `iox-core`
+- **Usage**:
+  ```cmake
+  target_link_libraries(my_target PUBLIC iox-runtime-wasi)
+  ```
+- **Sources**: `runtime/wasi/wasm_adapter.c`, `src/iox/wamr/iox_wamr.c`, `src/iox/wamr/iox_wamr_simple.c`
+- **Dependencies**: `ixland-libc-headers`, `ixland-wasm-contracts`
+
 ## Boundary Targets
 
 ### ixland-libc-headers
@@ -70,9 +96,11 @@ The root build includes subdirectories in dependency order:
 ### Current Consumption
 
 - `ixland-libc-headers` → `iox-core` (via `target_link_libraries`)
-- `ixland-libc-headers` → `iox-runtime` (via `target_link_libraries`)
-- `ixland-wasm-contracts` → `iox-runtime` (via `target_link_libraries`)
-- `iox-runtime` → `iox-core` (runtime layer consumed by core)
+- `ixland-libc-headers` → `iox-runtime-native` (via `target_link_libraries`)
+- `ixland-libc-headers` → `iox-runtime-wasi` (via `target_link_libraries`)
+- `ixland-wasm-contracts` → `iox-runtime-wasi` (via `target_link_libraries`)
+- `iox-runtime-native` → `iox-core` (native runtime layer consumed by core)
+- `iox-runtime-wasi` → `iox-core` (WASI runtime layer consumed by core)
 
 ### Standalone vs Subproject
 
@@ -114,11 +142,19 @@ cmake --build .
 ixland-libc-headers (INTERFACE)
     │
     ├─ PUBLIC include → iox-core
+    ├─ PUBLIC include → iox-runtime-native
     └─ PUBLIC include → iox-runtime-wasi
 
 ixland-wasm-contracts (INTERFACE)
     │
     └─ PUBLIC include → iox-runtime-wasi
+
+iox-runtime-native (STATIC) - INTERNAL to ixland-system
+    │
+    ├─ PRIVATE sources: runtime/native/
+    ├─ PUBLIC includes: runtime/native/, kernel/task/
+    ├─ PUBLIC link: ixland-libc-headers (boundary consumption)
+    └─ Note: Internal target, not exposed outside ixland-system
 
 iox-runtime-wasi (STATIC) - INTERNAL to ixland-system
     │
@@ -128,22 +164,13 @@ iox-runtime-wasi (STATIC) - INTERNAL to ixland-system
     ├─ PUBLIC link: ixland-wasm-contracts (boundary consumption)
     └─ Note: Internal target, not exposed outside ixland-system
 
-ixland-wasm-contracts (INTERFACE)
-    │
-    └─ PUBLIC include → iox-runtime
-
-iox-runtime (STATIC)
-    │
-    ├─ PRIVATE sources: runtime/wasi/, runtime/native/
-    ├─ PUBLIC link: ixland-wasm-contracts
-    └─ PUBLIC link: ixland-libc-headers
-
 iox-core (STATIC)
     │
-    ├─ PRIVATE sources: kernel/, fs/, runtime/native/
+    ├─ PRIVATE sources: kernel/, fs/
     ├─ PUBLIC includes: internal/, kernel/, fs/, runtime/native/, drivers/tty/
     ├─ PUBLIC link: ixland-libc-headers (boundary consumption)
     ├─ PUBLIC link: pthread
+    ├─ PUBLIC link: iox-runtime-native (internal dependency)
     └─ PUBLIC link: iox-runtime-wasi (internal dependency)
 
 iox-core-tests (MODULE)
@@ -153,6 +180,25 @@ iox-core-tests (MODULE)
 ```
 
 ## Internal Target Architecture
+
+### iox-runtime-native (Internal)
+
+The `iox-runtime-native` target is an **internal** target within `ixland-system` that separates the native command registry from the core kernel code.
+
+**Rationale:**
+- Prevents monolithic build where everything is in one giant target
+- Keeps native runtime code (command registry) isolated
+- Allows clean dependency on `ixland-libc-headers` boundary target
+- Internal to ixland-system - consumers only link against `iox-core`
+
+**Sources:**
+- `runtime/native/registry.c` - Native command registry implementation
+
+**Dependencies:**
+- `ixland-libc-headers` - For iox types
+
+**Consumers:**
+- `iox-core` - Links publicly, so native runtime is available to all iox-core consumers
 
 ### iox-runtime-wasi (Internal)
 

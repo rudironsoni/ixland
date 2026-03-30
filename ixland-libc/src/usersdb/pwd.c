@@ -16,6 +16,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "internal_provider.h"
+
 /* ============================================================================
  * Static Data (Minimal stub data for mobile environment)
  * ============================================================================ */
@@ -24,11 +26,11 @@
 static struct passwd iox_static_passwd;
 
 /* Minimal stub user for mobile environment */
-static const char *iox_default_user_name = "mobile";
+static const char *iox_default_user_name = IOX_DEFAULT_USER_NAME;
 static const char *iox_default_user_passwd = "*";
 static const char *iox_default_user_gecos = "Mobile User";
-static const char *iox_default_user_dir = "/var/mobile";
-static const char *iox_default_user_shell = "/bin/sh";
+static const char *iox_default_user_dir = IOX_DEFAULT_USER_DIR;
+static const char *iox_default_user_shell = IOX_DEFAULT_USER_SHELL;
 
 /* ============================================================================
  * Helper Functions
@@ -37,8 +39,8 @@ static const char *iox_default_user_shell = "/bin/sh";
 static void iox_fill_default_passwd(struct passwd *pwd) {
     pwd->pw_name = (char *)iox_default_user_name;
     pwd->pw_passwd = (char *)iox_default_user_passwd;
-    pwd->pw_uid = 501; /* Standard iOS mobile UID */
-    pwd->pw_gid = 501; /* Standard iOS mobile GID */
+    pwd->pw_uid = IOX_DEFAULT_USER_UID; /* Standard iOS mobile UID */
+    pwd->pw_gid = IOX_DEFAULT_USER_GID; /* Standard iOS mobile GID */
     pwd->pw_gecos = (char *)iox_default_user_gecos;
     pwd->pw_dir = (char *)iox_default_user_dir;
     pwd->pw_shell = (char *)iox_default_user_shell;
@@ -55,7 +57,7 @@ struct passwd *iox_getpwnam(const char *name) {
     }
 
     /* Stub: only return data for "mobile" user */
-    if (strcmp(name, "mobile") == 0) {
+    if (strcmp(name, IOX_DEFAULT_USER_NAME) == 0) {
         iox_fill_default_passwd(&iox_static_passwd);
         return &iox_static_passwd;
     }
@@ -66,8 +68,8 @@ struct passwd *iox_getpwnam(const char *name) {
 }
 
 struct passwd *iox_getpwuid(uid_t uid) {
-    /* Stub: only return data for mobile UID (501) */
-    if (uid == 501) {
+    /* Stub: only return data for mobile UID */
+    if (uid == IOX_DEFAULT_USER_UID) {
         iox_fill_default_passwd(&iox_static_passwd);
         return &iox_static_passwd;
     }
@@ -117,7 +119,7 @@ int iox_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t bufle
     }
 
     /* Stub: only return data for "mobile" user */
-    if (strcmp(name, "mobile") != 0) {
+    if (strcmp(name, IOX_DEFAULT_USER_NAME) != 0) {
         *result = NULL;
         return ENOENT;
     }
@@ -133,8 +135,8 @@ int iox_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t bufle
     memcpy(p, iox_default_user_passwd, passwd_len);
     p += passwd_len;
 
-    pwd->pw_uid = 501;
-    pwd->pw_gid = 501;
+    pwd->pw_uid = IOX_DEFAULT_USER_UID;
+    pwd->pw_gid = IOX_DEFAULT_USER_GID;
 
     pwd->pw_gecos = p;
     memcpy(p, iox_default_user_gecos, gecos_len);
@@ -168,10 +170,10 @@ int iox_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen,
     const char *user_dir = NULL;
     const char *user_shell = NULL;
 
-    if (uid == 501) {
+    if (uid == IOX_DEFAULT_USER_UID) {
         user_name = iox_default_user_name;
-        user_uid = 501;
-        user_gid = 501;
+        user_uid = IOX_DEFAULT_USER_UID;
+        user_gid = IOX_DEFAULT_USER_GID;
         user_gecos = iox_default_user_gecos;
         user_dir = iox_default_user_dir;
         user_shell = iox_default_user_shell;

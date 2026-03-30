@@ -14,6 +14,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include "internal_provider.h"
+
 /* ============================================================================
  * Static Data (Minimal stub data for mobile environment)
  * ============================================================================ */
@@ -22,7 +24,7 @@
 static struct group iox_static_group;
 
 /* Minimal stub group for mobile user environment */
-static const char *iox_default_group_name = "mobile";
+static const char *iox_default_group_name = IOX_DEFAULT_GROUP_NAME;
 static const char *iox_default_group_passwd = "*";
 static const char *iox_default_group_members[] = {NULL};
 
@@ -33,7 +35,7 @@ static const char *iox_default_group_members[] = {NULL};
 static void iox_fill_default_group(struct group *grp) {
     grp->gr_name = (char *)iox_default_group_name;
     grp->gr_passwd = (char *)iox_default_group_passwd;
-    grp->gr_gid = 501;  /* Standard iOS mobile GID */
+    grp->gr_gid = IOX_DEFAULT_GROUP_GID;  /* Standard iOS mobile GID */
     grp->gr_mem = (char **)iox_default_group_members;
 }
 
@@ -48,7 +50,7 @@ struct group *iox_getgrnam(const char *name) {
     }
 
     /* Stub: only return data for "mobile" group */
-    if (strcmp(name, "mobile") == 0) {
+    if (strcmp(name, IOX_DEFAULT_GROUP_NAME) == 0) {
         iox_fill_default_group(&iox_static_group);
         return &iox_static_group;
     }
@@ -59,8 +61,8 @@ struct group *iox_getgrnam(const char *name) {
 }
 
 struct group *iox_getgrgid(gid_t gid) {
-    /* Stub: only return data for mobile GID (501) */
-    if (gid == 501) {
+    /* Stub: only return data for mobile GID */
+    if (gid == IOX_DEFAULT_GROUP_GID) {
         iox_fill_default_group(&iox_static_group);
         return &iox_static_group;
     }
@@ -92,7 +94,7 @@ int iox_getgrnam_r(const char *name, struct group *grp,
     }
 
     /* Stub: only return data for "mobile" group */
-    if (strcmp(name, "mobile") != 0) {
+    if (strcmp(name, IOX_DEFAULT_GROUP_NAME) != 0) {
         *result = NULL;
         return ENOENT;
     }
@@ -107,7 +109,7 @@ int iox_getgrnam_r(const char *name, struct group *grp,
     memcpy(p, iox_default_group_passwd, passwd_len);
     p += passwd_len;
 
-    grp->gr_gid = 501;
+    grp->gr_gid = IOX_DEFAULT_GROUP_GID;
 
     /* Empty member list */
     grp->gr_mem = (char **)p;
@@ -134,8 +136,8 @@ int iox_getgrgid_r(gid_t gid, struct group *grp,
         return ERANGE;
     }
 
-    /* Stub: only return data for mobile GID (501) */
-    if (gid != 501) {
+    /* Stub: only return data for mobile GID */
+    if (gid != IOX_DEFAULT_GROUP_GID) {
         *result = NULL;
         return ENOENT;
     }
@@ -150,7 +152,7 @@ int iox_getgrgid_r(gid_t gid, struct group *grp,
     memcpy(p, iox_default_group_passwd, passwd_len);
     p += passwd_len;
 
-    grp->gr_gid = 501;
+    grp->gr_gid = IOX_DEFAULT_GROUP_GID;
 
     /* Empty member list */
     grp->gr_mem = (char **)p;
@@ -206,7 +208,7 @@ int iox_getgroups(int size, gid_t list[]) {
 
     /* Stub: return single group (mobile) */
     if (list != NULL && size >= 1) {
-        list[0] = 501;  /* mobile GID */
+        list[0] = IOX_DEFAULT_GROUP_GID;  /* mobile GID */
     }
 
     return 1;

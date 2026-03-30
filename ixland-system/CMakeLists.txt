@@ -97,12 +97,49 @@ set(IOX_RUNTIME_WASI_SOURCES
     src/iox/wamr/iox_wamr_simple.c
 )
 
-# Combined core sources (excluding WASI runtime - that's a separate target)
+# Combined core sources (excluding runtime targets - they are separate)
 set(IOX_CORE_SOURCES
     ${IOX_KERNEL_SOURCES}
     ${IOX_FS_SOURCES}
     ${IOX_SYSCALL_SOURCES}
-    ${IOX_RUNTIME_NATIVE_SOURCES}
+)
+
+# ============================================================================
+# Internal Target: iox-runtime-native
+# ============================================================================
+# This is an internal target within ixland-system for native runtime support.
+# It keeps the native command registry separate from core.
+
+add_library(iox-runtime-native STATIC ${IOX_RUNTIME_NATIVE_SOURCES})
+
+target_include_directories(iox-runtime-native
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/native>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/kernel/task>
+)
+
+target_compile_options(iox-runtime-native PRIVATE
+    -Wall
+    -Wextra
+    -Werror=implicit-function-declaration
+    -fPIC
+)
+
+# Link to boundary targets if available in monorepo build
+if(NOT IOX_STANDALONE_MODE)
+    # Consume public headers from ixland-libc boundary target
+    if(TARGET ixland-libc-headers)
+        target_link_libraries(iox-runtime-native PUBLIC ixland-libc-headers)
+        message(STATUS "iox-runtime-native: Linked to ixland-libc-headers")
+    endif()
+else()
+    # Standalone: add libc include path directly
+    target_include_directories(iox-runtime-native PUBLIC ${IOX_LIBC_INCLUDE_DIR})
+endif()
+
+set_target_properties(iox-runtime-native PROPERTIES
+    OUTPUT_NAME "iox-runtime-native"
 )
 
 # ============================================================================
@@ -172,32 +209,23 @@ target_include_directories(iox-core
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/wamr/include>
 )
 
-# Link runtime to boundary targets if available in monorepo build
-if(NOT IOX_STANDALONE_MODE)
-    # Wasm contract headers - consumed by runtime/wasi implementation
-    if(TARGET ixland-wasm-contracts)
-        target_link_libraries(iox-runtime PUBLIC ixland-wasm-contracts)
-        message(STATUS "iox-runtime: Linked to ixland-wasm-contracts")
-    endif()
-else()
-    # Standalone: add libc include path directly
-    target_include_directories(iox-runtime PUBLIC ${IOX_LIBC_INCLUDE_DIR})
-endif()
-
 # Link to boundary targets if available in monorepo build
 if(NOT IOX_STANDALONE_MODE)
     # Consume public headers from ixland-libc boundary target
     if(TARGET ixland-libc-headers)
         target_link_libraries(iox-core PUBLIC ixland-libc-headers)
-        target_link_libraries(iox-runtime PUBLIC ixland-libc-headers)
         message(STATUS "iox: Linked to ixland-libc-headers")
     else()
         message(WARNING "iox: ixland-libc-headers target not found, headers may not be available")
     endif()
+else()
+    # Standalone: add libc include path directly
+    target_include_directories(iox-core PUBLIC ${IOX_LIBC_INCLUDE_DIR})
 endif()
 
-# Link core to runtime (core depends on runtime/wasi)
-target_link_libraries(iox-core PUBLIC iox-runtime)
+# Link core to runtime targets (core depends on both native and wasi runtimes)
+target_link_libraries(iox-core PUBLIC iox-runtime-native)
+target_link_libraries(iox-core PUBLIC iox-runtime-wasi)
 
 target_compile_options(iox-core PRIVATE
     -Wall
@@ -225,10 +253,9 @@ endif()
 
 target_link_libraries(iox-core PUBLIC pthread)
 
-# Link iox-core to the internal WASI runtime target
-# This creates the dependency: iox-core → iox-runtime-wasi
-target_link_libraries(iox-core PUBLIC iox-runtime-wasi)
-message(STATUS "iox: Linked iox-core to internal iox-runtime-wasi target")
+# Link iox-core to the internal runtime targets
+# This creates the dependencies: iox-core → iox-runtime-native, iox-core → iox-runtime-wasi
+message(STATUS "iox: Linked iox-core to internal runtime targets")
 
 # Set library properties
 set_target_properties(iox-core PROPERTIES
@@ -239,7 +266,7 @@ set_target_properties(iox-core PROPERTIES
 
 # Installation
 if(IOX_INSTALL)
-    install(TARGETS iox-core iox-runtime-wasi
+    install(TARGETS iox-core iox-runtime-native iox-runtime-wasi
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
     )

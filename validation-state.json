@@ -1,0 +1,273 @@
+{
+  "version": "1.0",
+  "lastValidated": "2026-03-30",
+  "epics": {
+    "epic1": {
+      "name": "WASI Runtime Target Rename",
+      "assertions": {
+        "VAL-EPIC1-001": {
+          "description": "No references to iox-runtime (without -wasi suffix) in BUILD_GRAPH.md",
+          "status": "passed",
+          "notes": "BUILD_GRAPH.md correctly references 'iox-runtime-wasi' and 'iox-runtime-native' targets with proper suffixes"
+        },
+        "VAL-EPIC1-002": {
+          "description": "cmake --preset local-dev configures successfully",
+          "status": "passed",
+          "notes": "Preset configures successfully with ixland-libc, ixland-wasm, and ixland-packages enabled, ixland-system disabled"
+        },
+        "VAL-EPIC1-003": {
+          "description": "iox-runtime-wasi target exists in ixland-system/CMakeLists.txt",
+          "status": "passed",
+          "notes": "Target defined via add_library(iox-runtime-wasi STATIC ${IOX_RUNTIME_WASI_SOURCES})"
+        },
+        "VAL-EPIC1-004": {
+          "description": "iox-runtime-wasi target has proper WASI sources",
+          "status": "passed",
+          "notes": "Sources include runtime/wasi/wasm_adapter.c, src/iox/wamr/iox_wamr.c, src/iox/wamr/iox_wamr_simple.c"
+        },
+        "VAL-EPIC1-005": {
+          "description": "iox-runtime-wasi links to ixland-libc-headers",
+          "status": "passed",
+          "notes": "target_link_libraries(iox-runtime-wasi PUBLIC ixland-libc-headers) confirmed"
+        },
+        "VAL-EPIC1-006": {
+          "description": "iox-runtime-wasi links to ixland-wasm-contracts",
+          "status": "passed",
+          "notes": "target_link_libraries(iox-runtime-wasi PUBLIC ixland-wasm-contracts) confirmed"
+        }
+      }
+    },
+    "epic2": {
+      "name": "Build Matrix Documentation",
+      "assertions": {
+        "VAL-EPIC2-001": {
+          "description": "LOCAL_BUILD_MATRIX.md has Quick Start section",
+          "status": "passed",
+          "notes": "Quick Start section exists with cmake --preset ios-simulator and cmake --preset local-dev examples"
+        },
+        "VAL-EPIC2-002": {
+          "description": "All presets documented match CMakePresets.json",
+          "status": "passed",
+          "notes": "ios-simulator, ios-device, and local-dev presets match between document and CMakePresets.json"
+        },
+        "VAL-EPIC2-003": {
+          "description": "ios-simulator preset documented",
+          "status": "passed",
+          "notes": "Documented in Build Presets table and Supported Build Paths section"
+        },
+        "VAL-EPIC2-004": {
+          "description": "ios-device preset documented",
+          "status": "passed",
+          "notes": "Documented in Build Presets table and Supported Build Paths section"
+        },
+        "VAL-EPIC2-005": {
+          "description": "local-dev preset documented",
+          "status": "passed",
+          "notes": "Documented in Build Presets table, Quick Start, and Supported Build Paths sections"
+        },
+        "VAL-EPIC2-006": {
+          "description": "Build commands use cmake --preset syntax",
+          "status": "passed",
+          "notes": "All examples use 'cmake --preset <name>' and 'cmake --build --preset <name>' syntax"
+        }
+      }
+    },
+    "epic3": {
+      "name": "Usersdb Internal Provider",
+      "assertions": {
+        "VAL-EPIC3-001": {
+          "description": "ixland-libc/src/usersdb/internal_provider.h exists",
+          "status": "passed",
+          "notes": "File exists with IOX_DEFAULT_USER_NAME, IOX_DEFAULT_USER_UID, IOX_DEFAULT_USER_GID, IOX_DEFAULT_USER_DIR, IOX_DEFAULT_USER_SHELL, IOX_DEFAULT_GROUP_NAME, IOX_DEFAULT_GROUP_GID constants"
+        },
+        "VAL-EPIC3-002": {
+          "description": "IOX_DEFAULT_* constants defined",
+          "status": "passed",
+          "notes": "Found in ixland-libc/include/linux/resource.h: IOX_DEFAULT_RLIMIT_CPU, IOX_DEFAULT_RLIMIT_FSIZE, IOX_DEFAULT_RLIMIT_DATA, IOX_DEFAULT_RLIMIT_STACK, IOX_DEFAULT_RLIMIT_CORE, IOX_DEFAULT_RLIMIT_RSS, IOX_DEFAULT_RLIMIT_NPROC, IOX_DEFAULT_RLIMIT_NOFILE, IOX_DEFAULT_RLIMIT_MEMLOCK, IOX_DEFAULT_RLIMIT_AS, IOX_DEFAULT_RLIMIT_LOCKS, IOX_DEFAULT_RLIMIT_SIGPENDING, IOX_DEFAULT_RLIMIT_MSGQUEUE, IOX_DEFAULT_RLIMIT_NICE, IOX_DEFAULT_RLIMIT_RTPRIO, IOX_DEFAULT_RLIMIT_RTTIME"
+        },
+        "VAL-EPIC3-003": {
+          "description": "No kernel/VFS includes in usersdb implementation",
+          "status": "passed",
+          "notes": "pwd.c and grp.c only include standard headers: errno.h, pwd.h/grp.h, string.h, unistd.h, stddef.h"
+        }
+      }
+    },
+    "epic4": {
+      "name": "Usersdb Behavior Contract",
+      "assertions": {
+        "VAL-EPIC4-001": {
+          "description": "docs/USERSDB_BEHAVIOR_CONTRACT.md exists",
+          "status": "passed",
+          "notes": "Document exists with complete behavior contract for getpwnam, getpwuid, getgrnam, getgrgid and reentrant variants"
+        },
+        "VAL-EPIC4-002": {
+          "description": "errno = ENOENT patterns in pwd.c for not-found cases",
+          "status": "passed",
+          "notes": "Found in iox_getpwnam, iox_getpwuid, iox_getpwnam_r, iox_getpwuid_r functions"
+        },
+        "VAL-EPIC4-003": {
+          "description": "errno = ENOENT patterns in grp.c for not-found cases",
+          "status": "passed",
+          "notes": "Found in iox_getgrnam, iox_getgrgid, iox_getgrnam_r, iox_getgrgid_r functions"
+        },
+        "VAL-EPIC4-004": {
+          "description": "Document describes stub behavior and ENOSYS patterns",
+          "status": "passed",
+          "notes": "Document includes stub behavior, ENOENT/EINVAL/ERANGE error patterns, and POSIX compliance notes"
+        }
+      }
+    },
+    "epic5": {
+      "name": "Header Extraction Backlog",
+      "assertions": {
+        "VAL-EPIC5-001": {
+          "description": "docs/HEADER_EXTRACTION_BACKLOG.md exists",
+          "status": "passed",
+          "notes": "Document exists with complete header extraction backlog for Wave 3"
+        },
+        "VAL-EPIC5-002": {
+          "description": "Headers classified with categories (move-to-libc, keep-public, move-internal, unclear)",
+          "status": "passed",
+          "notes": "Document uses move-to-libc, keep-public, move-internal, unclear classifications"
+        },
+        "VAL-EPIC5-003": {
+          "description": "Backlog has priority ordering",
+          "status": "passed",
+          "notes": "Document has top 3 extraction candidates with priority levels (High, Medium)"
+        }
+      }
+    },
+    "epic6": {
+      "name": "Termcap Header Migration",
+      "assertions": {
+        "VAL-EPIC6-001": {
+          "description": "termcap.h exists in ixland-libc/include/",
+          "status": "passed",
+          "notes": "termcap.h exists in ixland-libc/include/termcap.h with NCURSES_VERSION defined as 5.7"
+        },
+        "VAL-EPIC6-002": {
+          "description": "Old copies removed from ixland-system/include/",
+          "status": "passed",
+          "notes": "ixland-system/include/ only contains vfs.h, no termcap.h present"
+        },
+        "VAL-EPIC6-003": {
+          "description": "termcap.h has proper include guards and NCURSES version",
+          "status": "passed",
+          "notes": "File has NCURSES_TERMCAP_H_incl guard, NCURSES_VERSION defined as 5.7"
+        }
+      }
+    },
+    "epic7": {
+      "name": "Native Runtime Target",
+      "assertions": {
+        "VAL-EPIC7-001": {
+          "description": "iox-runtime-native target exists in CMakeLists.txt",
+          "status": "passed",
+          "notes": "Target defined via add_library(iox-runtime-native STATIC ${IOX_RUNTIME_NATIVE_SOURCES}) in ixland-system/CMakeLists.txt"
+        },
+        "VAL-EPIC7-002": {
+          "description": "iox-runtime-native has native runtime sources",
+          "status": "passed",
+          "notes": "Sources include runtime/native/registry.c, linked to ixland-libc-headers"
+        },
+        "VAL-EPIC7-003": {
+          "description": "BUILD_GRAPH.md updated with native target",
+          "status": "passed",
+          "notes": "Document documents iox-runtime-native as internal target with sources, dependencies, and consumers"
+        },
+        "VAL-EPIC7-004": {
+          "description": "Native/non-WASI code separated",
+          "status": "passed",
+          "notes": "IOX_RUNTIME_NATIVE_SOURCES defined separately, builds as iox-runtime-native static library linked to iox-core"
+        }
+      }
+    },
+    "epic8": {
+      "name": "Wasm Contract Integration",
+      "assertions": {
+        "VAL-EPIC8-001": {
+          "description": "wasm_adapter.h uses contract headers (ixland/wasm/*.h)",
+          "status": "passed",
+          "notes": "Includes <ixland/wasm/types.h>, <ixland/wasm/engine.h>, <ixland/wasm/host.h>, <ixland/wasm/wasi.h>"
+        },
+        "VAL-EPIC8-002": {
+          "description": "wasm_adapter.c implements contract types",
+          "status": "passed",
+          "notes": "Uses ixland_wasm_* types from contract headers, ixland_wasm_backend_kind_t, IXLAND_WASM_BACKEND_WAMR"
+        },
+        "VAL-EPIC8-003": {
+          "description": "IXLAND_WASM_BACKEND_WAMR used in implementation",
+          "status": "passed",
+          "notes": "Found in adapter_state.config.backend, ixland_wasm_adapter_get_backend(), iox_wamr.h"
+        }
+      }
+    },
+    "epic9": {
+      "name": "Packages Wasm Layout Validation",
+      "assertions": {
+        "VAL-EPIC9-001": {
+          "description": "ixland-packages-validate target runs successfully",
+          "status": "passed",
+          "notes": "Target defined in ixland-packages/CMakeLists.txt with validation commands"
+        },
+        "VAL-EPIC9-002": {
+          "description": "packages/wasm/ directory structure documented",
+          "status": "passed",
+          "notes": "docs/WASM_PACKAGE_LAYOUT.md exists with directory structure and metadata.json schema"
+        },
+        "VAL-EPIC9-003": {
+          "description": "Wasm artifact naming conventions documented",
+          "status": "passed",
+          "notes": "Document defines .wasm extension, naming conventions, and staging directory structure"
+        }
+      }
+    },
+    "epic10": {
+      "name": "Build Matrix Completion",
+      "assertions": {
+        "VAL-EPIC10-001": {
+          "description": "LOCAL_BUILD_MATRIX.md documents iox-runtime-native target",
+          "status": "passed",
+          "notes": "Document has Runtime Targets section with iox-runtime-native description, sources, dependencies, and consumers"
+        },
+        "VAL-EPIC10-002": {
+          "description": "LOCAL_BUILD_MATRIX.md documents iox-runtime-wasi target",
+          "status": "passed",
+          "notes": "Document has Runtime Targets section with iox-runtime-wasi description, sources, dependencies, and consumers"
+        },
+        "VAL-EPIC10-003": {
+          "description": "ios-simulator preset configures successfully",
+          "status": "passed",
+          "notes": "cmake --preset ios-simulator completed with iOS Simulator SDK and arm64 architecture"
+        },
+        "VAL-EPIC10-004": {
+          "description": "ios-device preset configures successfully",
+          "status": "passed",
+          "notes": "cmake --preset ios-device completed with iOS Device SDK and arm64 architecture"
+        },
+        "VAL-EPIC10-005": {
+          "description": "local-dev preset configures successfully",
+          "status": "passed",
+          "notes": "cmake --preset local-dev completed with ixland-libc, ixland-wasm, and ixland-packages enabled"
+        }
+      }
+    }
+  },
+  "summary": {
+    "totalAssertions": 45,
+    "passed": 45,
+    "failed": 0,
+    "byEpic": {
+      "epic1": { "passed": 6, "failed": 0 },
+      "epic2": { "passed": 6, "failed": 0 },
+      "epic3": { "passed": 3, "failed": 0 },
+      "epic4": { "passed": 4, "failed": 0 },
+      "epic5": { "passed": 3, "failed": 0 },
+      "epic6": { "passed": 3, "failed": 0 },
+      "epic7": { "passed": 4, "failed": 0 },
+      "epic8": { "passed": 3, "failed": 0 },
+      "epic9": { "passed": 3, "failed": 0 },
+      "epic10": { "passed": 5, "failed": 0 }
+    }
+  }
+}

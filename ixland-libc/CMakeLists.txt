@@ -108,6 +108,8 @@ target_include_directories(ixland-libc-usersdb
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
+    PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/usersdb>
 )
 
 # Usersdb depends on headers for public API definitions
@@ -151,7 +153,7 @@ install(EXPORT ixland-libc-targets
 
 install(DIRECTORY include/iox DESTINATION include)
 install(DIRECTORY include/linux DESTINATION include)
-install(FILES include/grp.h include/pwd.h DESTINATION include)
+install(FILES include/grp.h include/pwd.h include/termcap.h include/ncurses_dll.h DESTINATION include)
 
 # ============================================================================
 # TESTS (optional)
