@@ -5,7 +5,7 @@
   "validatorsRun": {
     "test": {
       "passed": true,
-      "command": "/Users/rudironsoni/src/github/rudironsoni/ixland/build-macos/ixland-system/iox-core-tests",
+      "command": "/Users/rudironsoni/src/github/rudironsoni/ixland/build-macos/ixland-system/ixland-core-tests",
       "exitCode": 0,
       "observation": "Test executable runs successfully. Multiple test categories pass: pid (13 tests), exec (4 tests, 2 pre-existing failures in native exec), signal (36 tests), task lifecycle (10 tests), wait (14 tests), pgrp/session (18 tests), zombie (17 tests), process relationships (23 tests), orphan adoption (10 tests). Total 202+ tests passing. 2 pre-existing failures in exec native tests unrelated to process-table milestone."
     },
@@ -61,7 +61,7 @@
     },
     {
       "target": "AGENTS.md",
-      "suggestion": "Add clarification on when to use iox-prefixed headers vs standard system headers in tests. test_zombie_process.c uses <sys/wait.h> while other tests use ixland headers.",
+      "suggestion": "Add clarification on when to use ixland-prefixed headers vs standard system headers in tests. test_zombie_process.c uses <sys/wait.h> while other tests use ixland headers.",
       "evidence": "zombie test uses standard WIFEXITED macros from sys/wait.h to verify Linux compatibility, which is appropriate but not documented as a pattern.",
       "isSystemic": false
     }

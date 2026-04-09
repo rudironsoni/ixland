@@ -43,10 +43,10 @@ Before implementing:
 ### 4. Implement the Feature
 
 **For Headers:**
-1. Create header file with proper include guard (IOX_FILENAME_H)
+1. Create header file with proper include guard (IXLAND_FILENAME_H)
 2. Add Doxygen documentation for all public APIs
-3. Define function prototypes with iox_ prefix
-4. Define macros with IOX_ prefix
+3. Define function prototypes with ixland_ prefix
+4. Define macros with IXLAND_ prefix
 5. Add extern "C" guards for C++ compatibility
 
 **For Syscall Implementations:**
@@ -139,7 +139,7 @@ return_to_orchestrator: false
 
 ## Constraints
 
-1. **Naming**: Must follow iox_/IOX_ conventions
+1. **Naming**: Must follow ixland_/IXLAND_ conventions
 2. **Headers**: Must have include guards and Doxygen docs
 3. **Thread Safety**: Use atomic types for shared state
 4. **Error Handling**: Set errno, return -1 on error
@@ -149,8 +149,8 @@ return_to_orchestrator: false
 
 ### Header Template
 ```c
-#ifndef IOX_FILENAME_H
-#define IOX_FILENAME_H
+#ifndef IXLAND_FILENAME_H
+#define IXLAND_FILENAME_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -161,13 +161,13 @@ extern "C" {
  * @param param Parameter description
  * @return Return value description
  */
-int iox_function_name(int param);
+int ixland_function_name(int param);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* IOX_FILENAME_H */
+#endif /* IXLAND_FILENAME_H */
 ```
 
 ### Syscall Template
@@ -175,7 +175,7 @@ int iox_function_name(int param);
 #include "ixland_kernel.h"
 #include <errno.h>
 
-int iox_syscall_name(int arg) {
+int ixland_syscall_name(int arg) {
     if (invalid_condition) {
         errno = EINVAL;
         return -1;
@@ -191,13 +191,13 @@ int iox_syscall_name(int arg) {
 ```c
 #include "kernel/task/task.h"
 
-iox_task_t *task = iox_task_lookup(pid);
+ixland_task_t *task = ixland_task_lookup(pid);
 if (!task) {
     errno = ESRCH;
     return -1;
 }
 // Use task...
-iox_task_unref(task); // If using reference counting
+ixland_task_unref(task); // If using reference counting
 ```
 
 ## Error Codes to Use

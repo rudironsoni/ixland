@@ -53,11 +53,11 @@
     "totalTests": 155,
     "testsPassed": 150,
     "testsFailed": 5,
-    "testExecution": "Build and test run successful via iox-core-tests executable"
+    "testExecution": "Build and test run successful via ixland-core-tests executable"
   },
   "validationNotes": {
     "testFailures": "5 tests failed due to test environment fixtures (missing test files), not implementation issues. Failed tests: exec_native_happy_path, exec_cloexec_behavior, stat_existing_file_returns_success, fstat_open_file_returns_correct_size, file_syscalls_integration.",
     "coverage": "All 74 syscall assertions validated through unit tests and code inspection. Thread safety validated via mutex usage in fdtable.c and atomic operations in signal handling.",
-    "methodology": "Unit test execution (iox-core-tests) with 150/155 tests passing. Remaining assertions validated through code inspection of implementation files."
+    "methodology": "Unit test execution (ixland-core-tests) with 150/155 tests passing. Remaining assertions validated through code inspection of implementation files."
   }
 }

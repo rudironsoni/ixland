@@ -2,7 +2,7 @@
  * ixland_kernel.h - iXland Kernel Internal Umbrella Header
  *
  * This header includes the internal kernel headers needed by kernel
- * implementation code. It is NOT a public API header - use <iox/iox.h>
+ * implementation code. It is NOT a public API header - use <ixland/ixland.h>
  * for public APIs.
  *
  * This header provides:
@@ -23,27 +23,27 @@ extern "C" {
  * System headers (for types, constants, structs)
  * ============================================================================ */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <time.h>
 #include <pthread.h>
-#include <stdbool.h>
-#include <stdatomic.h>
-#include <stdint.h>
 #include <signal.h>
+#include <stdatomic.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
 
 /* ============================================================================
- * Public iox types (required for kernel implementation)
+ * Public ixland types (required for kernel implementation)
  * ============================================================================ */
 
-#include "iox/iox_types.h"
+#include "ixland/ixland_types.h"
 
 /* ============================================================================
  * VFS Layer
  * ============================================================================ */
 
-#include "vfs.h"
 #include "fdtable.h"
+#include "vfs.h"
 
 /* ============================================================================
  * Version Information

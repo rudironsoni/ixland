@@ -5,11 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-static iox_mount_t *mount_table[IOX_MAX_MOUNTS];
+static ixland_mount_t *mount_table[IXLAND_MAX_MOUNTS];
 static pthread_mutex_t vfs_lock = PTHREAD_MUTEX_INITIALIZER;
 
-iox_fs_t *iox_fs_alloc(void) {
-    iox_fs_t *fs = calloc(1, sizeof(iox_fs_t));
+ixland_fs_t *ixland_fs_alloc(void) {
+    ixland_fs_t *fs = calloc(1, sizeof(ixland_fs_t));
     if (!fs)
         return NULL;
 
@@ -22,7 +22,7 @@ iox_fs_t *iox_fs_alloc(void) {
     return fs;
 }
 
-void iox_fs_free(iox_fs_t *fs) {
+void ixland_fs_free(ixland_fs_t *fs) {
     if (!fs)
         return;
     if (atomic_fetch_sub(&fs->refs, 1) > 1)
@@ -32,11 +32,11 @@ void iox_fs_free(iox_fs_t *fs) {
     free(fs);
 }
 
-iox_fs_t *iox_fs_dup(iox_fs_t *parent) {
+ixland_fs_t *ixland_fs_dup(ixland_fs_t *parent) {
     if (!parent)
         return NULL;
 
-    iox_fs_t *child = iox_fs_alloc();
+    ixland_fs_t *child = ixland_fs_alloc();
     if (!child)
         return NULL;
 
@@ -50,14 +50,14 @@ iox_fs_t *iox_fs_dup(iox_fs_t *parent) {
     return child;
 }
 
-/* VFS init/deinit/mount/umount are implemented in vfs/iox_vfs.c */
+/* VFS init/deinit/mount/umount are implemented in vfs/ixland_vfs.c */
 /* We declare them as external here to avoid duplicate definitions */
-extern int iox_vfs_init(void);
-extern void iox_vfs_deinit(void);
-extern int iox_vfs_mount(const char *source, const char *target, iox_vfs_ops_t *ops);
-extern int iox_vfs_umount(const char *target);
+extern int ixland_vfs_init(void);
+extern void ixland_vfs_deinit(void);
+extern int ixland_vfs_mount(const char *source, const char *target, ixland_vfs_ops_t *ops);
+extern int ixland_vfs_umount(const char *target);
 
-int iox_vfs_path_walk(iox_fs_t *fs, const char *path, iox_vnode_t **vnode) {
+int ixland_vfs_path_walk(ixland_fs_t *fs, const char *path, ixland_vnode_t **vnode) {
     if (!fs || !path) {
         errno = EINVAL;
         return -1;

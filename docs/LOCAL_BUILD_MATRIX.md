@@ -37,7 +37,7 @@ cmake --preset ios-simulator
 - `ixland-libc-headers` - Public libc headers
 - `ixland-libc-core` - Self-contained libc utilities
 - `ixland-wasm-contracts` - Wasm contract headers
-- `iox-core` - Core system implementation
+- `ixland-core` - Core system implementation
 
 ### 2. Root Configure (iOS Device)
 
@@ -90,7 +90,7 @@ cmake --build . --target ixland-wasm-contracts
 ```
 
 Currently consumed by:
-- `runtime/wasi/iox_wamr.h` - WAMR integration
+- `runtime/wasi/ixland_wamr.h` - WAMR integration
 - `runtime/wasi/wasm_adapter.h/c` - Adapter layer
 
 ### 6. ixland-packages Validation
@@ -162,22 +162,22 @@ iOS builds require macOS with Xcode.
 | ixland-libc-headers | ✅ | ✅ | N/A | Headers only |
 | ixland-libc-core | ✅ | ✅ | ✅ | Smoke tests |
 | ixland-wasm-contracts | ✅ | ✅ | N/A | Headers only |
-| iox-runtime-native | ✅ | ✅ | N/A | Native runtime library |
-| iox-runtime-wasi | ✅ | ✅ | N/A | WASI/WebAssembly runtime |
-| iox-core | ✅ | ✅ | ⚠️ | XCTest requires Xcode |
+| ixland-runtime-native | ✅ | ✅ | N/A | Native runtime library |
+| ixland-runtime-wasi | ✅ | ✅ | N/A | WASI/WebAssembly runtime |
+| ixland-core | ✅ | ✅ | ⚠️ | XCTest requires Xcode |
 | ixland-packages | ✅ | ✅ | N/A | Validation target |
 | ixland-toolchain | N/A | N/A | N/A | Referenced via `CMAKE_TOOLCHAIN_FILE` |
 
 ## Runtime Targets
 
-### iox-runtime-native
+### ixland-runtime-native
 
 **Status:** ✅ Supported (Internal Target)
 
-The `iox-runtime-native` target provides the native command registry:
+The `ixland-runtime-native` target provides the native command registry:
 
 ```bash
-cmake --build . --target iox-runtime-native
+cmake --build . --target ixland-runtime-native
 ```
 
 **Sources:**
@@ -187,29 +187,29 @@ cmake --build . --target iox-runtime-native
 - `ixland-libc-headers` - Public libc headers
 
 **Consumers:**
-- `iox-core` - Links publicly to provide native runtime support
+- `ixland-core` - Links publicly to provide native runtime support
 
-### iox-runtime-wasi
+### ixland-runtime-wasi
 
 **Status:** ✅ Supported (Internal Target)
 
-The `iox-runtime-wasi` target provides WASI/WebAssembly runtime support:
+The `ixland-runtime-wasi` target provides WASI/WebAssembly runtime support:
 
 ```bash
-cmake --build . --target iox-runtime-wasi
+cmake --build . --target ixland-runtime-wasi
 ```
 
 **Sources:**
 - `ixland-system/runtime/wasi/wasm_adapter.c`
-- `ixland-system/src/iox/wamr/iox_wamr.c`
-- `ixland-system/src/iox/wamr/iox_wamr_simple.c`
+- `ixland-system/src/ixland/wamr/ixland_wamr.c`
+- `ixland-system/src/ixland/wamr/ixland_wamr_simple.c`
 
 **Dependencies:**
 - `ixland-libc-headers` - Public libc headers
 - `ixland-wasm-contracts` - Wasm contract headers
 
 **Consumers:**
-- `iox-core` - Links publicly to provide WASI runtime support
+- `ixland-core` - Links publicly to provide WASI runtime support
 
 ## Troubleshooting
 

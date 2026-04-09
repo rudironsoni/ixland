@@ -8,21 +8,21 @@
 
 #include "../../fs/fdtable.h"
 #include "../../runtime/native/registry.h"
-#include "../signal/iox_signal.h"
-#include "iox/iox_types.h"
+#include "../signal/ixland_signal.h"
+#include "ixland/ixland_types.h"
 
 /* External declaration for vfork notification */
-extern void __iox_vfork_exec_notify(void);
+extern void __ixland_vfork_exec_notify(void);
 
-iox_image_type_t iox_exec_classify(const char *path) {
+ixland_image_type_t ixland_exec_classify(const char *path) {
     /* First check native registry - registered commands take precedence */
-    if (iox_native_lookup(path)) {
-        return IOX_IMAGE_NATIVE;
+    if (ixland_native_lookup(path)) {
+        return IXLAND_IMAGE_NATIVE;
     }
 
     int fd = open(path, O_RDONLY);
     if (fd < 0) {
-        return IOX_IMAGE_NONE;
+        return IXLAND_IMAGE_NONE;
     }
 
     unsigned char magic[4];
@@ -30,23 +30,23 @@ iox_image_type_t iox_exec_classify(const char *path) {
     close(fd);
 
     if (n < 2) {
-        return IOX_IMAGE_NONE;
+        return IXLAND_IMAGE_NONE;
     }
 
     /* WASM magic: \0asm (0x00 0x61 0x73 0x6d) */
     if (n >= 4 && magic[0] == 0x00 && magic[1] == 0x61 && magic[2] == 0x73 && magic[3] == 0x6d) {
-        return IOX_IMAGE_WASI;
+        return IXLAND_IMAGE_WASI;
     }
 
     /* Script: #! */
     if (magic[0] == '#' && magic[1] == '!') {
-        return IOX_IMAGE_SCRIPT;
+        return IXLAND_IMAGE_SCRIPT;
     }
 
-    return IOX_IMAGE_NONE;
+    return IXLAND_IMAGE_NONE;
 }
 
-int iox_exec_close_cloexec(iox_task_t *task) {
+int ixland_exec_close_cloexec(ixland_task_t *task) {
     if (!task || !task->files) {
         errno = EINVAL;
         return -1;
@@ -55,9 +55,9 @@ int iox_exec_close_cloexec(iox_task_t *task) {
     pthread_mutex_lock(&task->files->lock);
     for (size_t i = 0; i < task->files->max_fds; i++) {
         if (task->files->fd[i] && (task->files->fd[i]->flags & FD_CLOEXEC)) {
-            iox_file_t *file = task->files->fd[i];
+            ixland_file_t *file = task->files->fd[i];
             task->files->fd[i] = NULL;
-            iox_file_free(file);
+            ixland_file_free(file);
         }
     }
     pthread_mutex_unlock(&task->files->lock);
@@ -65,11 +65,11 @@ int iox_exec_close_cloexec(iox_task_t *task) {
     return 0;
 }
 
-void iox_exec_reset_signals(iox_sighand_t *sighand) {
+void ixland_exec_reset_signals(ixland_sighand_t *sighand) {
     if (!sighand)
         return;
 
-    for (int i = 0; i < IOX_NSIG; i++) {
+    for (int i = 0; i < IXLAND_NSIG; i++) {
         /* Reset caught signals to default */
         if (sighand->action[i].sa_handler != SIG_IGN) {
             sighand->action[i].sa_handler = SIG_DFL;
@@ -84,7 +84,7 @@ void iox_exec_reset_signals(iox_sighand_t *sighand) {
 }
 
 /* Internal: Ensure task has an exec_image allocated */
-static int iox_exec_image_ensure(iox_task_t *task) {
+static int ixland_exec_image_ensure(ixland_task_t *task) {
     if (!task) {
         errno = EINVAL;
         return -1;
@@ -94,7 +94,7 @@ static int iox_exec_image_ensure(iox_task_t *task) {
         return 0; /* Already allocated */
     }
 
-    task->exec_image = calloc(1, sizeof(iox_exec_image_t));
+    task->exec_image = calloc(1, sizeof(ixland_exec_image_t));
     if (!task->exec_image) {
         errno = ENOMEM;
         return -1;
@@ -104,7 +104,7 @@ static int iox_exec_image_ensure(iox_task_t *task) {
 }
 
 /* Deep copy argv array */
-static char **iox_exec_copy_argv(char *const argv[]) {
+static char **ixland_exec_copy_argv(char *const argv[]) {
     if (!argv)
         return NULL;
 
@@ -135,7 +135,7 @@ static char **iox_exec_copy_argv(char *const argv[]) {
 }
 
 /* Deep copy envp array */
-static char **iox_exec_copy_envp(char *const envp[]) {
+static char **ixland_exec_copy_envp(char *const envp[]) {
     if (!envp)
         return NULL;
 
@@ -166,7 +166,7 @@ static char **iox_exec_copy_envp(char *const envp[]) {
 }
 
 /* Free copied argv */
-static void iox_exec_free_argv(char **argv) {
+static void ixland_exec_free_argv(char **argv) {
     if (!argv)
         return;
 
@@ -176,7 +176,7 @@ static void iox_exec_free_argv(char **argv) {
     free(argv);
 }
 
-int iox_execve(const char *pathname, char *const argv[], char *const envp[]) {
+int ixland_execve(const char *pathname, char *const argv[], char *const envp[]) {
     if (!pathname) {
         errno = EFAULT;
         return -1;
@@ -188,7 +188,7 @@ int iox_execve(const char *pathname, char *const argv[], char *const envp[]) {
         return -1;
     }
 
-    iox_task_t *task = iox_current_task();
+    ixland_task_t *task = ixland_current_task();
     if (!task) {
         errno = ESRCH;
         return -1;
@@ -201,46 +201,46 @@ int iox_execve(const char *pathname, char *const argv[], char *const envp[]) {
     }
 
     /* Classify image */
-    iox_image_type_t type = iox_exec_classify(pathname);
-    if (type == IOX_IMAGE_NONE) {
+    ixland_image_type_t type = ixland_exec_classify(pathname);
+    if (type == IXLAND_IMAGE_NONE) {
         errno = ENOENT;
         return -1;
     }
 
     /* Copy argv and envp before modifications (POSIX requirement) */
-    char **argv_copy = iox_exec_copy_argv(argv);
-    char **envp_copy = iox_exec_copy_envp(envp);
+    char **argv_copy = ixland_exec_copy_argv(argv);
+    char **envp_copy = ixland_exec_copy_envp(envp);
 
     if (argv && !argv_copy) {
         errno = ENOMEM;
         return -1;
     }
     if (envp && !envp_copy) {
-        iox_exec_free_argv(argv_copy);
+        ixland_exec_free_argv(argv_copy);
         errno = ENOMEM;
         return -1;
     }
 
     /* Ensure exec_image is allocated before any modifications */
-    if (iox_exec_image_ensure(task) < 0) {
-        iox_exec_free_argv(argv_copy);
-        iox_exec_free_argv(envp_copy);
+    if (ixland_exec_image_ensure(task) < 0) {
+        ixland_exec_free_argv(argv_copy);
+        ixland_exec_free_argv(envp_copy);
         /* errno set by helper */
         return -1;
     }
 
     /* Close CLOEXEC fds */
-    iox_exec_close_cloexec(task);
+    ixland_exec_close_cloexec(task);
 
     /* Reset signal handlers */
     if (task->sighand) {
-        iox_exec_reset_signals(task->sighand);
+        ixland_exec_reset_signals(task->sighand);
     }
 
     /* Update process name from argv[0] */
     if (argv_copy && argv_copy[0]) {
-        strncpy(task->comm, argv_copy[0], IOX_MAX_NAME - 1);
-        task->comm[IOX_MAX_NAME - 1] = '\0';
+        strncpy(task->comm, argv_copy[0], IXLAND_MAX_NAME - 1);
+        task->comm[IXLAND_MAX_NAME - 1] = '\0';
     } else {
         /* Use pathname as fallback */
         const char *basename = strrchr(pathname, '/');
@@ -249,13 +249,13 @@ int iox_execve(const char *pathname, char *const argv[], char *const envp[]) {
         } else {
             basename = pathname;
         }
-        strncpy(task->comm, basename, IOX_MAX_NAME - 1);
-        task->comm[IOX_MAX_NAME - 1] = '\0';
+        strncpy(task->comm, basename, IXLAND_MAX_NAME - 1);
+        task->comm[IXLAND_MAX_NAME - 1] = '\0';
     }
 
     /* Store executable path */
-    strncpy(task->exe, pathname, IOX_MAX_PATH - 1);
-    task->exe[IOX_MAX_PATH - 1] = '\0';
+    strncpy(task->exe, pathname, IXLAND_MAX_PATH - 1);
+    task->exe[IXLAND_MAX_PATH - 1] = '\0';
 
     /* Count args */
     int argc = 0;
@@ -266,20 +266,20 @@ int iox_execve(const char *pathname, char *const argv[], char *const envp[]) {
 
     /* Notify vfork parent if this is a vfork child */
     if (task->vfork_parent) {
-        __iox_vfork_exec_notify();
+        __ixland_vfork_exec_notify();
     }
 
     /* Dispatch to handler */
     int ret;
     switch (type) {
-    case IOX_IMAGE_NATIVE:
-        ret = iox_exec_native(task, pathname, argc, argv_copy, envp_copy);
+    case IXLAND_IMAGE_NATIVE:
+        ret = ixland_exec_native(task, pathname, argc, argv_copy, envp_copy);
         break;
-    case IOX_IMAGE_WASI:
-        ret = iox_exec_wasi(task, pathname, argc, argv_copy, envp_copy);
+    case IXLAND_IMAGE_WASI:
+        ret = ixland_exec_wasi(task, pathname, argc, argv_copy, envp_copy);
         break;
-    case IOX_IMAGE_SCRIPT:
-        ret = iox_exec_script(task, pathname, argc, argv_copy, envp_copy);
+    case IXLAND_IMAGE_SCRIPT:
+        ret = ixland_exec_script(task, pathname, argc, argv_copy, envp_copy);
         break;
     default:
         errno = ENOEXEC;
@@ -287,15 +287,15 @@ int iox_execve(const char *pathname, char *const argv[], char *const envp[]) {
     }
 
     /* Free copied arrays */
-    iox_exec_free_argv(argv_copy);
-    iox_exec_free_argv(envp_copy);
+    ixland_exec_free_argv(argv_copy);
+    ixland_exec_free_argv(envp_copy);
 
     /* If exec fails, we return with exec_image still allocated (coherent) */
     return ret;
 }
 
-int iox_exec_native(iox_task_t *task, const char *path, int argc, char **argv, char **envp) {
-    iox_native_entry_t entry = iox_native_lookup(path);
+int ixland_exec_native(ixland_task_t *task, const char *path, int argc, char **argv, char **envp) {
+    ixland_native_entry_t entry = ixland_native_lookup(path);
     if (!entry) {
         errno = ENOENT;
         return -1;
@@ -304,13 +304,13 @@ int iox_exec_native(iox_task_t *task, const char *path, int argc, char **argv, c
     /* Update exec image metadata - by this point exec_image is guaranteed allocated */
     strncpy(task->exec_image->path, path, sizeof(task->exec_image->path) - 1);
     task->exec_image->path[sizeof(task->exec_image->path) - 1] = '\0';
-    task->exec_image->type = IOX_IMAGE_NATIVE;
+    task->exec_image->type = IXLAND_IMAGE_NATIVE;
 
     /* Dispatch to native entry point */
     return entry(task, argc, argv, envp);
 }
 
-int iox_exec_wasi(iox_task_t *task, const char *path, int argc, char **argv, char **envp) {
+int ixland_exec_wasi(ixland_task_t *task, const char *path, int argc, char **argv, char **envp) {
     (void)task;
     (void)path;
     (void)argc;
@@ -320,7 +320,7 @@ int iox_exec_wasi(iox_task_t *task, const char *path, int argc, char **argv, cha
     return -1;
 }
 
-int iox_exec_script(iox_task_t *task, const char *path, int argc, char **argv, char **envp) {
+int ixland_exec_script(ixland_task_t *task, const char *path, int argc, char **argv, char **envp) {
     (void)task;
     (void)path;
     (void)argc;

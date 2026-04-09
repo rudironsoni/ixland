@@ -1,17 +1,17 @@
 /* iXland libc - Linux-compatible wait.h
  *
  * Process waiting operations and status macros.
- * These match Linux syscall signatures with iox_ prefix.
+ * These match Linux syscall signatures with ixland_ prefix.
  */
 
-#ifndef IOX_LINUX_WAIT_H
-#define IOX_LINUX_WAIT_H
+#ifndef IXLAND_LINUX_WAIT_H
+#define IXLAND_LINUX_WAIT_H
 
 #include <sys/resource.h>
 #include <sys/types.h>
 
-/* Forward declaration - iox_siginfo is defined in linux/signal.h */
-struct iox_siginfo;
+/* Forward declaration - ixland_siginfo is defined in linux/signal.h */
+struct ixland_siginfo;
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,20 +24,20 @@ extern "C" {
 /**
  * @brief Wait options for waitpid, waitid, and wait3/4
  */
-#define IOX_WNOHANG 0x00000001    /* Return immediately if no child exited */
-#define IOX_WUNTRACED 0x00000002  /* Report stopped children */
-#define IOX_WCONTINUED 0x00000008 /* Report continued children */
-#define IOX_WEXITED 0x00000004    /* Wait for exited children (waitid) */
-#define IOX_WSTOPPED 0x00000002   /* Wait for stopped children (waitid) */
-#define IOX_WNOWAIT 0x01000000    /* Leave child in waitable state */
+#define IXLAND_WNOHANG 0x00000001    /* Return immediately if no child exited */
+#define IXLAND_WUNTRACED 0x00000002  /* Report stopped children */
+#define IXLAND_WCONTINUED 0x00000008 /* Report continued children */
+#define IXLAND_WEXITED 0x00000004    /* Wait for exited children (waitid) */
+#define IXLAND_WSTOPPED 0x00000002   /* Wait for stopped children (waitid) */
+#define IXLAND_WNOWAIT 0x01000000    /* Leave child in waitable state */
 
 /**
  * @brief Wait for all children (waitid only)
  */
-#define IOX_P_ALL 0   /* Wait for any child */
-#define IOX_P_PID 1   /* Wait for specific PID */
-#define IOX_P_PGID 2  /* Wait for any child in process group */
-#define IOX_P_PIDFD 3 /* Wait for child referred to by PID file descriptor */
+#define IXLAND_P_ALL 0   /* Wait for any child */
+#define IXLAND_P_PID 1   /* Wait for specific PID */
+#define IXLAND_P_PGID 2  /* Wait for any child in process group */
+#define IXLAND_P_PIDFD 3 /* Wait for child referred to by PID file descriptor */
 
 /* ============================================================================
  * PROCESS STATUS MACROS
@@ -51,45 +51,45 @@ extern "C" {
  */
 
 /* Normal exit */
-#define IOX_WIFEXITED(status) (((status) & 0x7f) == 0)
-#define IOX_WEXITSTATUS(status) (((status) >> 8) & 0xff)
+#define IXLAND_WIFEXITED(status) (((status) & 0x7f) == 0)
+#define IXLAND_WEXITSTATUS(status) (((status) >> 8) & 0xff)
 
 /* Signal termination */
-#define IOX_WIFSIGNALED(status) (((signed char)(((status) & 0x7f) + 1) >> 1) > 0)
-#define IOX_WTERMSIG(status) ((status) & 0x7f)
-#define IOX_WCOREDUMP(status) ((status) & 0x80)
+#define IXLAND_WIFSIGNALED(status) (((signed char)(((status) & 0x7f) + 1) >> 1) > 0)
+#define IXLAND_WTERMSIG(status) ((status) & 0x7f)
+#define IXLAND_WCOREDUMP(status) ((status) & 0x80)
 
 /* Stopped processes */
-#define IOX_WIFSTOPPED(status) (((status) & 0xff) == 0x7f)
-#define IOX_WSTOPSIG(status) IOX_WEXITSTATUS(status)
+#define IXLAND_WIFSTOPPED(status) (((status) & 0xff) == 0x7f)
+#define IXLAND_WSTOPSIG(status) IXLAND_WEXITSTATUS(status)
 
 /* Continued processes */
-#define IOX_WIFCONTINUED(status) ((status) == 0xffff)
+#define IXLAND_WIFCONTINUED(status) ((status) == 0xffff)
 
 /* Construct status values (for testing) */
-#define IOX_W_EXITCODE(ret, sig) ((ret) << 8 | (sig))
-#define IOX_W_STOPCODE(sig) ((sig) << 8 | 0x7f)
+#define IXLAND_W_EXITCODE(ret, sig) ((ret) << 8 | (sig))
+#define IXLAND_W_STOPCODE(sig) ((sig) << 8 | 0x7f)
 
 /* ============================================================================
  * IDTYPE VALUES
  * ============================================================================ */
 
 typedef enum {
-    IOX_P_ALL_ID = 0, /* Wait for any child */
-    IOX_P_PID_ID = 1, /* Wait for child with specific PID */
-    IOX_P_PGID_ID = 2 /* Wait for child in specific process group */
-} iox_idtype_t;
+    IXLAND_P_ALL_ID = 0, /* Wait for any child */
+    IXLAND_P_PID_ID = 1, /* Wait for child with specific PID */
+    IXLAND_P_PGID_ID = 2 /* Wait for child in specific process group */
+} ixland_idtype_t;
 
-/* Note: struct iox_siginfo is defined in linux/signal.h */
+/* Note: struct ixland_siginfo is defined in linux/signal.h */
 /* Reuse the signal.h definition for consistency */
 
 /* Signal codes for SIGCHLD */
-#define IOX_CLD_EXITED 1    /* Child has exited */
-#define IOX_CLD_KILLED 2    /* Child was killed */
-#define IOX_CLD_DUMPED 3    /* Child terminated abnormally */
-#define IOX_CLD_TRAPPED 4   /* Traced child has trapped */
-#define IOX_CLD_STOPPED 5   /* Child has stopped */
-#define IOX_CLD_CONTINUED 6 /* Stopped child has continued */
+#define IXLAND_CLD_EXITED 1    /* Child has exited */
+#define IXLAND_CLD_KILLED 2    /* Child was killed */
+#define IXLAND_CLD_DUMPED 3    /* Child terminated abnormally */
+#define IXLAND_CLD_TRAPPED 4   /* Traced child has trapped */
+#define IXLAND_CLD_STOPPED 5   /* Child has stopped */
+#define IXLAND_CLD_CONTINUED 6 /* Stopped child has continued */
 
 /* ============================================================================
  * RUSAGE STRUCTURE
@@ -101,7 +101,7 @@ typedef enum {
  * Used by wait3 and wait4 to return resource usage information.
  * Mirrors struct rusage from sys/resource.h
  */
-struct iox_rusage {
+struct ixland_rusage {
     struct timeval ru_utime; /* User CPU time */
     struct timeval ru_stime; /* System CPU time */
     long ru_maxrss;          /* Maximum resident set size */
@@ -132,7 +132,7 @@ struct iox_rusage {
  * @param stat_loc Pointer to store exit status (can be NULL)
  * @return pid_t Child PID on success, -1 on error
  */
-pid_t iox_wait(int *stat_loc);
+pid_t ixland_wait(int *stat_loc);
 
 /**
  * @brief Wait for specific child process
@@ -148,7 +148,7 @@ pid_t iox_wait(int *stat_loc);
  * @param options Options (WNOHANG, WUNTRACED, WCONTINUED)
  * @return pid_t Child PID on success, 0 with WNOHANG if no status, -1 on error
  */
-pid_t iox_waitpid(pid_t pid, int *stat_loc, int options);
+pid_t ixland_waitpid(pid_t pid, int *stat_loc, int options);
 
 /**
  * @brief Wait for child with detailed info
@@ -161,7 +161,7 @@ pid_t iox_waitpid(pid_t pid, int *stat_loc, int options);
  * @param options Options (WEXITED, WSTOPPED, WCONTINUED, WNOHANG, WNOWAIT)
  * @return int 0 on success, -1 on error
  */
-int iox_waitid(int idtype, id_t id, struct iox_siginfo *infop, int options);
+int ixland_waitid(int idtype, id_t id, struct ixland_siginfo *infop, int options);
 
 /**
  * @brief Wait for child with resource usage
@@ -173,7 +173,7 @@ int iox_waitid(int idtype, id_t id, struct iox_siginfo *infop, int options);
  * @param rusage Pointer to store resource usage (can be NULL)
  * @return pid_t Child PID on success, 0 with WNOHANG, -1 on error
  */
-pid_t iox_wait3(int *stat_loc, int options, struct rusage *rusage);
+pid_t ixland_wait3(int *stat_loc, int options, struct rusage *rusage);
 
 /**
  * @brief Wait for specific child with resource usage
@@ -186,7 +186,7 @@ pid_t iox_wait3(int *stat_loc, int options, struct rusage *rusage);
  * @param rusage Pointer to store resource usage (can be NULL)
  * @return pid_t Child PID on success, 0 with WNOHANG, -1 on error
  */
-pid_t iox_wait4(pid_t pid, int *stat_loc, int options, struct rusage *rusage);
+pid_t ixland_wait4(pid_t pid, int *stat_loc, int options, struct rusage *rusage);
 
 /* ============================================================================
  * PROCESS GROUP FUNCTIONS
@@ -197,7 +197,7 @@ pid_t iox_wait4(pid_t pid, int *stat_loc, int options, struct rusage *rusage);
  *
  * @return pid_t Process group ID
  */
-pid_t iox_getpgrp(void);
+pid_t ixland_getpgrp(void);
 
 /**
  * @brief Set process group
@@ -206,7 +206,7 @@ pid_t iox_getpgrp(void);
  *
  * @return int 0 on success, -1 on error
  */
-int iox_setpgrp(void);
+int ixland_setpgrp(void);
 
 /**
  * @brief Get process group ID for specific process
@@ -214,7 +214,7 @@ int iox_setpgrp(void);
  * @param pid Process ID (0 for current)
  * @return pid_t Process group ID, -1 on error
  */
-pid_t iox_getpgid(pid_t pid);
+pid_t ixland_getpgid(pid_t pid);
 
 /**
  * @brief Set process group ID
@@ -223,7 +223,7 @@ pid_t iox_getpgid(pid_t pid);
  * @param pgid Process group ID (0 to use pid)
  * @return int 0 on success, -1 on error
  */
-int iox_setpgid(pid_t pid, pid_t pgid);
+int ixland_setpgid(pid_t pid, pid_t pgid);
 
 /* ============================================================================
  * UTILITY FUNCTIONS
@@ -235,8 +235,8 @@ int iox_setpgid(pid_t pid, pid_t pgid);
  * @param status Status value from wait/waitpid
  * @return int Non-zero if process exited normally
  */
-static inline int iox_wifexited(int status) {
-    return IOX_WIFEXITED(status);
+static inline int ixland_wifexited(int status) {
+    return IXLAND_WIFEXITED(status);
 }
 
 /**
@@ -245,8 +245,8 @@ static inline int iox_wifexited(int status) {
  * @param status Status value from wait/waitpid
  * @return int Exit status (0-255)
  */
-static inline int iox_wexitstatus(int status) {
-    return IOX_WEXITSTATUS(status);
+static inline int ixland_wexitstatus(int status) {
+    return IXLAND_WEXITSTATUS(status);
 }
 
 /**
@@ -255,8 +255,8 @@ static inline int iox_wexitstatus(int status) {
  * @param status Status value from wait/waitpid
  * @return int Non-zero if process was signaled
  */
-static inline int iox_wifsignaled(int status) {
-    return IOX_WIFSIGNALED(status);
+static inline int ixland_wifsignaled(int status) {
+    return IXLAND_WIFSIGNALED(status);
 }
 
 /**
@@ -265,8 +265,8 @@ static inline int iox_wifsignaled(int status) {
  * @param status Status value from wait/waitpid
  * @return int Signal number
  */
-static inline int iox_wtermsig(int status) {
-    return IOX_WTERMSIG(status);
+static inline int ixland_wtermsig(int status) {
+    return IXLAND_WTERMSIG(status);
 }
 
 /**
@@ -275,8 +275,8 @@ static inline int iox_wtermsig(int status) {
  * @param status Status value from wait/waitpid
  * @return int Non-zero if core was dumped
  */
-static inline int iox_wcoredump(int status) {
-    return IOX_WCOREDUMP(status);
+static inline int ixland_wcoredump(int status) {
+    return IXLAND_WCOREDUMP(status);
 }
 
 /**
@@ -285,8 +285,8 @@ static inline int iox_wcoredump(int status) {
  * @param status Status value from wait/waitpid
  * @return int Non-zero if process was stopped
  */
-static inline int iox_wifstopped(int status) {
-    return IOX_WIFSTOPPED(status);
+static inline int ixland_wifstopped(int status) {
+    return IXLAND_WIFSTOPPED(status);
 }
 
 /**
@@ -295,8 +295,8 @@ static inline int iox_wifstopped(int status) {
  * @param status Status value from wait/waitpid
  * @return int Signal number
  */
-static inline int iox_wstopsig(int status) {
-    return IOX_WSTOPSIG(status);
+static inline int ixland_wstopsig(int status) {
+    return IXLAND_WSTOPSIG(status);
 }
 
 /**
@@ -305,12 +305,12 @@ static inline int iox_wstopsig(int status) {
  * @param status Status value from wait/waitpid
  * @return int Non-zero if process was continued
  */
-static inline int iox_wifcontinued(int status) {
-    return IOX_WIFCONTINUED(status);
+static inline int ixland_wifcontinued(int status) {
+    return IXLAND_WIFCONTINUED(status);
 }
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* IOX_LINUX_WAIT_H */
+#endif /* IXLAND_LINUX_WAIT_H */

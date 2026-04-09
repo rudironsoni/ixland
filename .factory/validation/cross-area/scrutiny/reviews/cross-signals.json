@@ -30,7 +30,7 @@
         "file": "ixland-system/Tests/unit/test_cross_signals.c",
         "line": 51,
         "severity": "non_blocking",
-        "description": "External declarations for `iox_kill` and `iox_killpg` at lines 33-34 duplicate declarations that should be available via `iox_signal.h` include. This redundancy is harmless but could be cleaned up."
+        "description": "External declarations for `ixland_kill` and `ixland_killpg` at lines 33-34 duplicate declarations that should be available via `ixland_signal.h` include. This redundancy is harmless but could be cleaned up."
       }
     ]
   },

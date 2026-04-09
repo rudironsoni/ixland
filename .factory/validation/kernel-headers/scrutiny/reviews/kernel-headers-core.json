@@ -6,33 +6,33 @@
   "diffReviewed": true,
   "status": "pass",
   "codeReview": {
-    "summary": "The kernel-headers-core feature has been successfully implemented. All 5 core Linux-compatible kernel headers (unistd.h, stat.h, fcntl.h, wait.h, signal.h) exist at the correct paths with proper include guards (IOX_LINUX_*_H pattern), function prototypes using iox_ prefix, and signatures matching Linux syscall conventions. Headers compile cleanly with only expected unused-variable warnings in test code. The implementation includes comprehensive Doxygen documentation, C++ extern \"C\" guards, and variadic functions correctly declared with '...' syntax.",
+    "summary": "The kernel-headers-core feature has been successfully implemented. All 5 core Linux-compatible kernel headers (unistd.h, stat.h, fcntl.h, wait.h, signal.h) exist at the correct paths with proper include guards (IXLAND_LINUX_*_H pattern), function prototypes using ixland_ prefix, and signatures matching Linux syscall conventions. Headers compile cleanly with only expected unused-variable warnings in test code. The implementation includes comprehensive Doxygen documentation, C++ extern \"C\" guards, and variadic functions correctly declared with '...' syntax.",
     "issues": []
   },
   "sharedStateObservations": [
     {
       "area": "conventions",
-      "observation": "Some functions are declared in multiple headers (e.g., iox_open, iox_openat appear in both linux/unistd.h and linux/fcntl.h). This appears to be intentional for compatibility (following Linux/POSIX conventions where these functions are available from multiple headers), but should be documented to prevent confusion about which header is canonical.",
-      "evidence": "ixland-libc/include/linux/unistd.h:115-126 and ixland-libc/include/linux/fcntl.h:235-259 both declare iox_open and iox_openat. Same pattern exists for iox_creat, iox_mkdir, etc."
+      "observation": "Some functions are declared in multiple headers (e.g., ixland_open, ixland_openat appear in both linux/unistd.h and linux/fcntl.h). This appears to be intentional for compatibility (following Linux/POSIX conventions where these functions are available from multiple headers), but should be documented to prevent confusion about which header is canonical.",
+      "evidence": "ixland-libc/include/linux/unistd.h:115-126 and ixland-libc/include/linux/fcntl.h:235-259 both declare ixland_open and ixland_openat. Same pattern exists for ixland_creat, ixland_mkdir, etc."
     },
     {
       "area": "knowledge",
-      "observation": "The signal.h header uses a union within struct iox_sigaction for sa_handler/sa_sigaction, which is a correct implementation matching Linux's approach. The naming convention for accessor macros uses iox_ prefix (iox_si_pid, etc.) to avoid conflicts with system headers, which is a good pattern that should be documented.",
-      "evidence": "ixland-libc/include/linux/signal.h:195-216 defines union with sa_handler/sa_sigaction and iox_-prefixed accessors like iox_si_pid, iox_si_status."
+      "observation": "The signal.h header uses a union within struct ixland_sigaction for sa_handler/sa_sigaction, which is a correct implementation matching Linux's approach. The naming convention for accessor macros uses ixland_ prefix (ixland_si_pid, etc.) to avoid conflicts with system headers, which is a good pattern that should be documented.",
+      "evidence": "ixland-libc/include/linux/signal.h:195-216 defines union with sa_handler/sa_sigaction and ixland_-prefixed accessors like ixland_si_pid, ixland_si_status."
     },
     {
       "area": "knowledge",
-      "observation": "The headers use __attribute__((noreturn)) for iox_exit and iox__exit functions. This is appropriate for functions that don't return, and follows GCC/clang attributes. Other function attributes like __attribute__((packed)) are used in related headers (types.h, epoll.h).",
+      "observation": "The headers use __attribute__((noreturn)) for ixland_exit and ixland__exit functions. This is appropriate for functions that don't return, and follows GCC/clang attributes. Other function attributes like __attribute__((packed)) are used in related headers (types.h, epoll.h).",
       "evidence": "ixland-libc/include/linux/unistd.h:77 and :85 have __attribute__((noreturn)). Similar attributes found in ixland-libc/include/linux/types.h for aligned types."
     },
     {
       "area": "knowledge",
-      "observation": "Cross-header dependency handling: linux/wait.h uses forward declaration 'struct iox_siginfo' and includes a comment noting it's defined in linux/signal.h. This prevents circular includes while allowing wait functions to accept siginfo pointers.",
-      "evidence": "ixland-libc/include/linux/wait.h:10 declares 'struct iox_siginfo;' with comment 'Forward declaration - iox_siginfo is defined in linux/signal.h'."
+      "observation": "Cross-header dependency handling: linux/wait.h uses forward declaration 'struct ixland_siginfo' and includes a comment noting it's defined in linux/signal.h. This prevents circular includes while allowing wait functions to accept siginfo pointers.",
+      "evidence": "ixland-libc/include/linux/wait.h:10 declares 'struct ixland_siginfo;' with comment 'Forward declaration - ixland_siginfo is defined in linux/signal.h'."
     }
   ],
   "addressesFailureFrom": null,
-  "summary": "The kernel-headers-core feature has been implemented correctly. All 5 required headers exist with proper IOX_LINUX_*_H include guards, 265+ function declarations using iox_ prefix, Linux-compatible syscall signatures, variadic function declarations using '...', and C++ compatibility guards. Headers compile without errors. No blocking or non-blocking issues found. The implementation follows all documented naming conventions and code quality requirements.",
+  "summary": "The kernel-headers-core feature has been implemented correctly. All 5 required headers exist with proper IXLAND_LINUX_*_H include guards, 265+ function declarations using ixland_ prefix, Linux-compatible syscall signatures, variadic function declarations using '...', and C++ compatibility guards. Headers compile without errors. No blocking or non-blocking issues found. The implementation follows all documented naming conventions and code quality requirements.",
   "verification": {
     "headersExist": {
       "unistd.h": "ixland-libc/include/linux/unistd.h (20.5KB)",
@@ -42,38 +42,38 @@
       "signal.h": "ixland-libc/include/linux/signal.h (18.5KB)"
     },
     "includeGuards": {
-      "pattern": "IOX_LINUX_{NAME}_H",
+      "pattern": "IXLAND_LINUX_{NAME}_H",
       "verified": [
-        "IOX_LINUX_UNISTD_H",
-        "IOX_LINUX_STAT_H",
-        "IOX_LINUX_FCNTL_H",
-        "IOX_LINUX_WAIT_H",
-        "IOX_LINUX_SIGNAL_H"
+        "IXLAND_LINUX_UNISTD_H",
+        "IXLAND_LINUX_STAT_H",
+        "IXLAND_LINUX_FCNTL_H",
+        "IXLAND_LINUX_WAIT_H",
+        "IXLAND_LINUX_SIGNAL_H"
       ]
     },
     "functionPrototypes": {
       "count": 265,
-      "prefix": "iox_",
+      "prefix": "ixland_",
       "verified": [
-        "pid_t iox_fork(void)",
-        "int iox_execve(const char*, char*const[], char*const[])",
-        "pid_t iox_waitpid(pid_t, int*, int)",
-        "int iox_open(const char*, int, ...)",
-        "iox_sighandler_t iox_signal(int, iox_sighandler_t)"
+        "pid_t ixland_fork(void)",
+        "int ixland_execve(const char*, char*const[], char*const[])",
+        "pid_t ixland_waitpid(pid_t, int*, int)",
+        "int ixland_open(const char*, int, ...)",
+        "ixland_sighandler_t ixland_signal(int, ixland_sighandler_t)"
       ]
     },
     "variadicFunctions": {
       "verified": [
-        "int iox_open(const char*, int, ...)",
-        "int iox_openat(int, const char*, int, ...)",
-        "int iox_fcntl(int, int, ...)"
+        "int ixland_open(const char*, int, ...)",
+        "int ixland_openat(int, const char*, int, ...)",
+        "int ixland_fcntl(int, int, ...)"
       ],
       "note": "Correctly use '...' variadic syntax, NOT 'void'"
     },
     "functionAttributes": {
       "verified": [
-        "iox_exit(int) __attribute__((noreturn))",
-        "iox__exit(int) __attribute__((noreturn))"
+        "ixland_exit(int) __attribute__((noreturn))",
+        "ixland__exit(int) __attribute__((noreturn))"
       ]
     },
     "compilation": {
@@ -81,10 +81,10 @@
       "result": "SUCCESS - Only unused-variable warnings from test code, no header errors"
     },
     "namingConventions": {
-      "functions": "iox_lowercase()",
-      "macros": "IOX_UPPER_CASE",
-      "structs": "iox_lowercase_t",
-      "includeGuards": "IOX_LINUX_FILENAME_H"
+      "functions": "ixland_lowercase()",
+      "macros": "IXLAND_UPPER_CASE",
+      "structs": "ixland_lowercase_t",
+      "includeGuards": "IXLAND_LINUX_FILENAME_H"
     }
   }
 }

@@ -11,30 +11,30 @@
 
 #include "../../fs/fdtable.h"
 #include "../../fs/vfs.h"
-#include "../../kernel/signal/iox_signal.h"
+#include "../../kernel/signal/ixland_signal.h"
 #include "../../kernel/task/task.h"
-#include "../harness/iox_test.h"
+#include "../harness/ixland_test.h"
 
 /* External declaration for init_task */
-extern iox_task_t *init_task;
+extern ixland_task_t *init_task;
 
 /* Test basic orphan reparenting to init */
-IOX_TEST(orphan_reparented_to_init_basic) {
-    IOX_ASSERT(iox_task_init() == 0);
+IXLAND_TEST(orphan_reparented_to_init_basic) {
+    IXLAND_ASSERT(ixland_task_init() == 0);
 
-    iox_task_t *init = iox_current_task();
-    IOX_ASSERT_NOT_NULL(init);
+    ixland_task_t *init = ixland_current_task();
+    IXLAND_ASSERT_NOT_NULL(init);
 
     /* Create a "middle" parent */
-    iox_task_t *middle_parent = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(middle_parent);
+    ixland_task_t *middle_parent = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(middle_parent);
 
-    middle_parent->files = iox_files_alloc(IOX_MAX_FD);
-    middle_parent->fs = iox_fs_alloc();
-    middle_parent->sighand = iox_sighand_alloc();
-    IOX_ASSERT_NOT_NULL(middle_parent->files);
-    IOX_ASSERT_NOT_NULL(middle_parent->fs);
-    IOX_ASSERT_NOT_NULL(middle_parent->sighand);
+    middle_parent->files = ixland_files_alloc(IXLAND_MAX_FD);
+    middle_parent->fs = ixland_fs_alloc();
+    middle_parent->sighand = ixland_sighand_alloc();
+    IXLAND_ASSERT_NOT_NULL(middle_parent->files);
+    IXLAND_ASSERT_NOT_NULL(middle_parent->fs);
+    IXLAND_ASSERT_NOT_NULL(middle_parent->sighand);
 
     /* Link middle_parent to init */
     middle_parent->ppid = init->pid;
@@ -45,15 +45,15 @@ IOX_TEST(orphan_reparented_to_init_basic) {
     pthread_mutex_unlock(&init->lock);
 
     /* Create a child of middle_parent */
-    iox_task_t *child = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(child);
+    ixland_task_t *child = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(child);
 
-    child->files = iox_files_alloc(IOX_MAX_FD);
-    child->fs = iox_fs_alloc();
-    child->sighand = iox_sighand_alloc();
-    IOX_ASSERT_NOT_NULL(child->files);
-    IOX_ASSERT_NOT_NULL(child->fs);
-    IOX_ASSERT_NOT_NULL(child->sighand);
+    child->files = ixland_files_alloc(IXLAND_MAX_FD);
+    child->fs = ixland_fs_alloc();
+    child->sighand = ixland_sighand_alloc();
+    IXLAND_ASSERT_NOT_NULL(child->files);
+    IXLAND_ASSERT_NOT_NULL(child->fs);
+    IXLAND_ASSERT_NOT_NULL(child->sighand);
 
     /* Link child to middle_parent */
     child->ppid = middle_parent->pid;
@@ -64,8 +64,8 @@ IOX_TEST(orphan_reparented_to_init_basic) {
     pthread_mutex_unlock(&middle_parent->lock);
 
     /* Verify initial state */
-    IOX_ASSERT_EQ(child->parent, middle_parent);
-    IOX_ASSERT_EQ(child->ppid, middle_parent->pid);
+    IXLAND_ASSERT_EQ(child->parent, middle_parent);
+    IXLAND_ASSERT_EQ(child->ppid, middle_parent->pid);
 
     /* Simulate middle_parent exit - reparent child to init */
     pthread_mutex_lock(&middle_parent->lock);
@@ -88,26 +88,26 @@ IOX_TEST(orphan_reparented_to_init_basic) {
     pthread_mutex_unlock(&middle_parent->lock);
 
     /* Verify child is now child of init */
-    IOX_ASSERT_EQ(child->parent, init);
-    IOX_ASSERT_EQ(child->ppid, init->pid);
+    IXLAND_ASSERT_EQ(child->parent, init);
+    IXLAND_ASSERT_EQ(child->ppid, init->pid);
 
     /* Cleanup */
     pthread_mutex_lock(&init->lock);
     init->children = NULL;
     pthread_mutex_unlock(&init->lock);
 
-    iox_task_free(child);
-    iox_task_free(middle_parent);
+    ixland_task_free(child);
+    ixland_task_free(middle_parent);
 
     return true;
 }
 
 /* Test multiple orphans reparented together */
-IOX_TEST(multiple_orphans_reparented_together) {
-    IOX_ASSERT(iox_task_init() == 0);
+IXLAND_TEST(multiple_orphans_reparented_together) {
+    IXLAND_ASSERT(ixland_task_init() == 0);
 
-    iox_task_t *init = iox_current_task();
-    IOX_ASSERT_NOT_NULL(init);
+    ixland_task_t *init = ixland_current_task();
+    IXLAND_ASSERT_NOT_NULL(init);
 
     /* Clear init's children list first */
     pthread_mutex_lock(&init->lock);
@@ -115,30 +115,30 @@ IOX_TEST(multiple_orphans_reparented_together) {
     pthread_mutex_unlock(&init->lock);
 
     /* Create a parent with multiple children */
-    iox_task_t *parent = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(parent);
+    ixland_task_t *parent = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(parent);
 
-    parent->files = iox_files_alloc(IOX_MAX_FD);
-    parent->fs = iox_fs_alloc();
-    parent->sighand = iox_sighand_alloc();
+    parent->files = ixland_files_alloc(IXLAND_MAX_FD);
+    parent->fs = ixland_fs_alloc();
+    parent->sighand = ixland_sighand_alloc();
 
     /* Create children */
-    iox_task_t *child1 = iox_task_alloc();
-    iox_task_t *child2 = iox_task_alloc();
-    iox_task_t *child3 = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(child1);
-    IOX_ASSERT_NOT_NULL(child2);
-    IOX_ASSERT_NOT_NULL(child3);
+    ixland_task_t *child1 = ixland_task_alloc();
+    ixland_task_t *child2 = ixland_task_alloc();
+    ixland_task_t *child3 = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(child1);
+    IXLAND_ASSERT_NOT_NULL(child2);
+    IXLAND_ASSERT_NOT_NULL(child3);
 
-    child1->files = iox_files_alloc(IOX_MAX_FD);
-    child1->fs = iox_fs_alloc();
-    child1->sighand = iox_sighand_alloc();
-    child2->files = iox_files_alloc(IOX_MAX_FD);
-    child2->fs = iox_fs_alloc();
-    child2->sighand = iox_sighand_alloc();
-    child3->files = iox_files_alloc(IOX_MAX_FD);
-    child3->fs = iox_fs_alloc();
-    child3->sighand = iox_sighand_alloc();
+    child1->files = ixland_files_alloc(IXLAND_MAX_FD);
+    child1->fs = ixland_fs_alloc();
+    child1->sighand = ixland_sighand_alloc();
+    child2->files = ixland_files_alloc(IXLAND_MAX_FD);
+    child2->fs = ixland_fs_alloc();
+    child2->sighand = ixland_sighand_alloc();
+    child3->files = ixland_files_alloc(IXLAND_MAX_FD);
+    child3->fs = ixland_fs_alloc();
+    child3->sighand = ixland_sighand_alloc();
 
     /* Link children to parent */
     pthread_mutex_lock(&parent->lock);
@@ -163,12 +163,12 @@ IOX_TEST(multiple_orphans_reparented_together) {
     /* Verify parent has 3 children */
     pthread_mutex_lock(&parent->lock);
     int count = 0;
-    iox_task_t *c = parent->children;
+    ixland_task_t *c = parent->children;
     while (c) {
         count++;
         c = c->next_sibling;
     }
-    IOX_ASSERT_EQ(count, 3);
+    IXLAND_ASSERT_EQ(count, 3);
     pthread_mutex_unlock(&parent->lock);
 
     /* Simulate parent exit - reparent all children to init */
@@ -188,7 +188,7 @@ IOX_TEST(multiple_orphans_reparented_together) {
     /* Move entire list to init */
     if (parent->children) {
         /* Find last child in parent's list */
-        iox_task_t *last = parent->children;
+        ixland_task_t *last = parent->children;
         while (last->next_sibling) {
             last = last->next_sibling;
         }
@@ -208,11 +208,11 @@ IOX_TEST(multiple_orphans_reparented_together) {
     c = init->children;
     while (c) {
         count++;
-        IOX_ASSERT_EQ(c->parent, init);
-        IOX_ASSERT_EQ(c->ppid, init->pid);
+        IXLAND_ASSERT_EQ(c->parent, init);
+        IXLAND_ASSERT_EQ(c->ppid, init->pid);
         c = c->next_sibling;
     }
-    IOX_ASSERT_EQ(count, 3);
+    IXLAND_ASSERT_EQ(count, 3);
     pthread_mutex_unlock(&init->lock);
 
     /* Cleanup */
@@ -220,35 +220,35 @@ IOX_TEST(multiple_orphans_reparented_together) {
     init->children = NULL;
     pthread_mutex_unlock(&init->lock);
 
-    iox_task_free(child1);
-    iox_task_free(child2);
-    iox_task_free(child3);
-    iox_task_free(parent);
+    ixland_task_free(child1);
+    ixland_task_free(child2);
+    ixland_task_free(child3);
+    ixland_task_free(parent);
 
     return true;
 }
 
 /* Test orphan's ppid is set to init's PID */
-IOX_TEST(orphan_ppid_set_to_init_pid) {
-    IOX_ASSERT(iox_task_init() == 0);
+IXLAND_TEST(orphan_ppid_set_to_init_pid) {
+    IXLAND_ASSERT(ixland_task_init() == 0);
 
-    iox_task_t *init = iox_current_task();
-    IOX_ASSERT_NOT_NULL(init);
+    ixland_task_t *init = ixland_current_task();
+    IXLAND_ASSERT_NOT_NULL(init);
 
     /* Create parent and child */
-    iox_task_t *parent = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(parent);
+    ixland_task_t *parent = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(parent);
 
-    parent->files = iox_files_alloc(IOX_MAX_FD);
-    parent->fs = iox_fs_alloc();
-    parent->sighand = iox_sighand_alloc();
+    parent->files = ixland_files_alloc(IXLAND_MAX_FD);
+    parent->fs = ixland_fs_alloc();
+    parent->sighand = ixland_sighand_alloc();
 
-    iox_task_t *child = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(child);
+    ixland_task_t *child = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(child);
 
-    child->files = iox_files_alloc(IOX_MAX_FD);
-    child->fs = iox_fs_alloc();
-    child->sighand = iox_sighand_alloc();
+    child->files = ixland_files_alloc(IXLAND_MAX_FD);
+    child->fs = ixland_fs_alloc();
+    child->sighand = ixland_sighand_alloc();
 
     /* Link child to parent */
     pthread_mutex_lock(&parent->lock);
@@ -259,7 +259,7 @@ IOX_TEST(orphan_ppid_set_to_init_pid) {
     pthread_mutex_unlock(&parent->lock);
 
     /* Verify initial ppid */
-    IOX_ASSERT_EQ(child->ppid, parent->pid);
+    IXLAND_ASSERT_EQ(child->ppid, parent->pid);
 
     /* Simulate reparenting */
     pthread_mutex_lock(&child->lock);
@@ -268,45 +268,45 @@ IOX_TEST(orphan_ppid_set_to_init_pid) {
     pthread_mutex_unlock(&child->lock);
 
     /* Verify ppid is now init's PID */
-    IOX_ASSERT_EQ(child->ppid, init->pid);
-    IOX_ASSERT_EQ(child->parent, init);
+    IXLAND_ASSERT_EQ(child->ppid, init->pid);
+    IXLAND_ASSERT_EQ(child->parent, init);
 
     /* Cleanup */
     pthread_mutex_lock(&parent->lock);
     parent->children = NULL;
     pthread_mutex_unlock(&parent->lock);
 
-    iox_task_free(child);
-    iox_task_free(parent);
+    ixland_task_free(child);
+    ixland_task_free(parent);
 
     return true;
 }
 
 /* Test orphaned grandchildren scenario */
-IOX_TEST(orphaned_grandchildren_scenario) {
-    IOX_ASSERT(iox_task_init() == 0);
+IXLAND_TEST(orphaned_grandchildren_scenario) {
+    IXLAND_ASSERT(ixland_task_init() == 0);
 
-    iox_task_t *init = iox_current_task();
-    IOX_ASSERT_NOT_NULL(init);
+    ixland_task_t *init = ixland_current_task();
+    IXLAND_ASSERT_NOT_NULL(init);
 
     /* Create grandparent -> parent -> grandchild structure */
-    iox_task_t *grandparent = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(grandparent);
-    grandparent->files = iox_files_alloc(IOX_MAX_FD);
-    grandparent->fs = iox_fs_alloc();
-    grandparent->sighand = iox_sighand_alloc();
+    ixland_task_t *grandparent = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(grandparent);
+    grandparent->files = ixland_files_alloc(IXLAND_MAX_FD);
+    grandparent->fs = ixland_fs_alloc();
+    grandparent->sighand = ixland_sighand_alloc();
 
-    iox_task_t *parent = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(parent);
-    parent->files = iox_files_alloc(IOX_MAX_FD);
-    parent->fs = iox_fs_alloc();
-    parent->sighand = iox_sighand_alloc();
+    ixland_task_t *parent = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(parent);
+    parent->files = ixland_files_alloc(IXLAND_MAX_FD);
+    parent->fs = ixland_fs_alloc();
+    parent->sighand = ixland_sighand_alloc();
 
-    iox_task_t *grandchild = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(grandchild);
-    grandchild->files = iox_files_alloc(IOX_MAX_FD);
-    grandchild->fs = iox_fs_alloc();
-    grandchild->sighand = iox_sighand_alloc();
+    ixland_task_t *grandchild = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(grandchild);
+    grandchild->files = ixland_files_alloc(IXLAND_MAX_FD);
+    grandchild->fs = ixland_fs_alloc();
+    grandchild->sighand = ixland_sighand_alloc();
 
     /* Link grandparent -> parent */
     pthread_mutex_lock(&init->lock);
@@ -333,9 +333,9 @@ IOX_TEST(orphaned_grandchildren_scenario) {
     pthread_mutex_unlock(&grandparent->lock);
 
     /* Verify hierarchy */
-    IOX_ASSERT_EQ(grandchild->parent, parent);
-    IOX_ASSERT_EQ(parent->parent, grandparent);
-    IOX_ASSERT_EQ(grandparent->parent, init);
+    IXLAND_ASSERT_EQ(grandchild->parent, parent);
+    IXLAND_ASSERT_EQ(parent->parent, grandparent);
+    IXLAND_ASSERT_EQ(grandparent->parent, init);
 
     /* Simulate parent exit - grandchild should be reparented to init */
     pthread_mutex_lock(&parent->lock);
@@ -356,40 +356,40 @@ IOX_TEST(orphaned_grandchildren_scenario) {
     pthread_mutex_unlock(&parent->lock);
 
     /* Verify grandchild is now child of init */
-    IOX_ASSERT_EQ(grandchild->parent, init);
-    IOX_ASSERT_EQ(grandchild->ppid, init->pid);
+    IXLAND_ASSERT_EQ(grandchild->parent, init);
+    IXLAND_ASSERT_EQ(grandchild->ppid, init->pid);
 
     /* Cleanup */
     pthread_mutex_lock(&init->lock);
     init->children = NULL;
     pthread_mutex_unlock(&init->lock);
 
-    iox_task_free(grandchild);
-    iox_task_free(parent);
-    iox_task_free(grandparent);
+    ixland_task_free(grandchild);
+    ixland_task_free(parent);
+    ixland_task_free(grandparent);
 
     return true;
 }
 
 /* Test that orphans are findable in init's children list */
-IOX_TEST(orphans_findable_in_init_children) {
-    IOX_ASSERT(iox_task_init() == 0);
+IXLAND_TEST(orphans_findable_in_init_children) {
+    IXLAND_ASSERT(ixland_task_init() == 0);
 
-    iox_task_t *init = iox_current_task();
-    IOX_ASSERT_NOT_NULL(init);
+    ixland_task_t *init = ixland_current_task();
+    IXLAND_ASSERT_NOT_NULL(init);
 
     /* Create parent and orphan */
-    iox_task_t *parent = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(parent);
-    parent->files = iox_files_alloc(IOX_MAX_FD);
-    parent->fs = iox_fs_alloc();
-    parent->sighand = iox_sighand_alloc();
+    ixland_task_t *parent = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(parent);
+    parent->files = ixland_files_alloc(IXLAND_MAX_FD);
+    parent->fs = ixland_fs_alloc();
+    parent->sighand = ixland_sighand_alloc();
 
-    iox_task_t *orphan = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(orphan);
-    orphan->files = iox_files_alloc(IOX_MAX_FD);
-    orphan->fs = iox_fs_alloc();
-    orphan->sighand = iox_sighand_alloc();
+    ixland_task_t *orphan = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(orphan);
+    orphan->files = ixland_files_alloc(IXLAND_MAX_FD);
+    orphan->fs = ixland_fs_alloc();
+    orphan->sighand = ixland_sighand_alloc();
 
     /* Link orphan to parent */
     pthread_mutex_lock(&parent->lock);
@@ -416,9 +416,9 @@ IOX_TEST(orphans_findable_in_init_children) {
     pthread_mutex_unlock(&parent->lock);
 
     /* Find orphan in init's children list */
-    iox_task_t *found = NULL;
+    ixland_task_t *found = NULL;
     pthread_mutex_lock(&init->lock);
-    iox_task_t *c = init->children;
+    ixland_task_t *c = init->children;
     while (c) {
         if (c->pid == orphan->pid) {
             found = c;
@@ -428,27 +428,27 @@ IOX_TEST(orphans_findable_in_init_children) {
     }
     pthread_mutex_unlock(&init->lock);
 
-    IOX_ASSERT_NOT_NULL(found);
-    IOX_ASSERT_EQ(found, orphan);
-    IOX_ASSERT_EQ(found->parent, init);
+    IXLAND_ASSERT_NOT_NULL(found);
+    IXLAND_ASSERT_EQ(found, orphan);
+    IXLAND_ASSERT_EQ(found->parent, init);
 
     /* Cleanup */
     pthread_mutex_lock(&init->lock);
     init->children = NULL;
     pthread_mutex_unlock(&init->lock);
 
-    iox_task_free(orphan);
-    iox_task_free(parent);
+    ixland_task_free(orphan);
+    ixland_task_free(parent);
 
     return true;
 }
 
 /* Test orphan adoption maintains sibling relationships */
-IOX_TEST(orphan_adoption_maintains_siblings) {
-    IOX_ASSERT(iox_task_init() == 0);
+IXLAND_TEST(orphan_adoption_maintains_siblings) {
+    IXLAND_ASSERT(ixland_task_init() == 0);
 
-    iox_task_t *init = iox_current_task();
-    IOX_ASSERT_NOT_NULL(init);
+    ixland_task_t *init = ixland_current_task();
+    IXLAND_ASSERT_NOT_NULL(init);
 
     /* Clear init's children */
     pthread_mutex_lock(&init->lock);
@@ -456,22 +456,22 @@ IOX_TEST(orphan_adoption_maintains_siblings) {
     pthread_mutex_unlock(&init->lock);
 
     /* Create parent with siblings */
-    iox_task_t *parent = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(parent);
-    parent->files = iox_files_alloc(IOX_MAX_FD);
-    parent->fs = iox_fs_alloc();
-    parent->sighand = iox_sighand_alloc();
+    ixland_task_t *parent = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(parent);
+    parent->files = ixland_files_alloc(IXLAND_MAX_FD);
+    parent->fs = ixland_fs_alloc();
+    parent->sighand = ixland_sighand_alloc();
 
-    iox_task_t *child1 = iox_task_alloc();
-    iox_task_t *child2 = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(child1);
-    IOX_ASSERT_NOT_NULL(child2);
-    child1->files = iox_files_alloc(IOX_MAX_FD);
-    child1->fs = iox_fs_alloc();
-    child1->sighand = iox_sighand_alloc();
-    child2->files = iox_files_alloc(IOX_MAX_FD);
-    child2->fs = iox_fs_alloc();
-    child2->sighand = iox_sighand_alloc();
+    ixland_task_t *child1 = ixland_task_alloc();
+    ixland_task_t *child2 = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(child1);
+    IXLAND_ASSERT_NOT_NULL(child2);
+    child1->files = ixland_files_alloc(IXLAND_MAX_FD);
+    child1->fs = ixland_fs_alloc();
+    child1->sighand = ixland_sighand_alloc();
+    child2->files = ixland_files_alloc(IXLAND_MAX_FD);
+    child2->fs = ixland_fs_alloc();
+    child2->sighand = ixland_sighand_alloc();
 
     /* Link siblings */
     pthread_mutex_lock(&parent->lock);
@@ -488,9 +488,9 @@ IOX_TEST(orphan_adoption_maintains_siblings) {
 
     /* Verify sibling chain: child2 -> child1 */
     pthread_mutex_lock(&parent->lock);
-    IOX_ASSERT_EQ(parent->children, child2);
-    IOX_ASSERT_EQ(child2->next_sibling, child1);
-    IOX_ASSERT_NULL(child1->next_sibling);
+    IXLAND_ASSERT_EQ(parent->children, child2);
+    IXLAND_ASSERT_EQ(child2->next_sibling, child1);
+    IXLAND_ASSERT_NULL(child1->next_sibling);
     pthread_mutex_unlock(&parent->lock);
 
     /* Reparent both to init */
@@ -518,9 +518,9 @@ IOX_TEST(orphan_adoption_maintains_siblings) {
 
     /* Verify sibling relationship preserved */
     pthread_mutex_lock(&init->lock);
-    IOX_ASSERT_EQ(init->children, child2);
-    IOX_ASSERT_EQ(child2->next_sibling, child1);
-    IOX_ASSERT_NULL(child1->next_sibling);
+    IXLAND_ASSERT_EQ(init->children, child2);
+    IXLAND_ASSERT_EQ(child2->next_sibling, child1);
+    IXLAND_ASSERT_NULL(child1->next_sibling);
     pthread_mutex_unlock(&init->lock);
 
     /* Cleanup */
@@ -528,26 +528,26 @@ IOX_TEST(orphan_adoption_maintains_siblings) {
     init->children = NULL;
     pthread_mutex_unlock(&init->lock);
 
-    iox_task_free(child1);
-    iox_task_free(child2);
-    iox_task_free(parent);
+    ixland_task_free(child1);
+    ixland_task_free(child2);
+    ixland_task_free(parent);
 
     return true;
 }
 
 /* Test init can wait for orphaned children */
-IOX_TEST(init_can_wait_for_orphans) {
-    IOX_ASSERT(iox_task_init() == 0);
+IXLAND_TEST(init_can_wait_for_orphans) {
+    IXLAND_ASSERT(ixland_task_init() == 0);
 
-    iox_task_t *init = iox_current_task();
-    IOX_ASSERT_NOT_NULL(init);
+    ixland_task_t *init = ixland_current_task();
+    IXLAND_ASSERT_NOT_NULL(init);
 
     /* Create orphan that is already exited */
-    iox_task_t *orphan = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(orphan);
-    orphan->files = iox_files_alloc(IOX_MAX_FD);
-    orphan->fs = iox_fs_alloc();
-    orphan->sighand = iox_sighand_alloc();
+    ixland_task_t *orphan = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(orphan);
+    orphan->files = ixland_files_alloc(IXLAND_MAX_FD);
+    orphan->fs = ixland_fs_alloc();
+    orphan->sighand = ixland_sighand_alloc();
 
     /* Make orphan a child of init */
     orphan->ppid = init->pid;
@@ -562,13 +562,13 @@ IOX_TEST(init_can_wait_for_orphans) {
     pthread_mutex_lock(&orphan->lock);
     orphan->exit_status = 42;
     atomic_store(&orphan->exited, true);
-    atomic_store(&orphan->state, IOX_TASK_ZOMBIE);
+    atomic_store(&orphan->state, IXLAND_TASK_ZOMBIE);
     pthread_mutex_unlock(&orphan->lock);
 
     /* Verify init can find the zombie child */
     pthread_mutex_lock(&init->lock);
-    iox_task_t *found = NULL;
-    iox_task_t *c = init->children;
+    ixland_task_t *found = NULL;
+    ixland_task_t *c = init->children;
     while (c) {
         if (c->pid == orphan->pid && atomic_load(&c->exited)) {
             found = c;
@@ -578,16 +578,16 @@ IOX_TEST(init_can_wait_for_orphans) {
     }
     pthread_mutex_unlock(&init->lock);
 
-    IOX_ASSERT_NOT_NULL(found);
-    IOX_ASSERT_EQ(found->exit_status, 42);
-    IOX_ASSERT(atomic_load(&found->exited));
+    IXLAND_ASSERT_NOT_NULL(found);
+    IXLAND_ASSERT_EQ(found->exit_status, 42);
+    IXLAND_ASSERT(atomic_load(&found->exited));
 
     /* Cleanup */
     pthread_mutex_lock(&init->lock);
     init->children = NULL;
     pthread_mutex_unlock(&init->lock);
 
-    iox_task_free(orphan);
+    ixland_task_free(orphan);
 
     return true;
 }

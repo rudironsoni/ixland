@@ -7,7 +7,7 @@
 
 #include "../../fs/fdtable.h"
 #include "../../fs/vfs.h"
-#include "../signal/iox_signal.h"
+#include "../signal/ixland_signal.h"
 #include "task.h"
 
 /* PTHREAD_STACK_MIN may not be defined on all systems */
@@ -34,8 +34,8 @@
 
 /* Fork context shared between parent and child */
 typedef struct {
-    iox_task_t *parent;
-    iox_task_t *child;
+    ixland_task_t *parent;
+    ixland_task_t *child;
     jmp_buf jmpbuf;           /* Shared jump buffer */
     volatile pid_t result;    /* Result from child perspective */
     volatile int child_ready; /* Synchronization flag */
@@ -51,7 +51,7 @@ static void *fork_child_trampoline(void *arg) {
     fork_ctx_t *ctx = (fork_ctx_t *)arg;
 
     /* Set child as current task in thread-local storage */
-    iox_set_current_task(ctx->child);
+    ixland_set_current_task(ctx->child);
     ctx->child->thread = pthread_self();
 
     /* Copy parent's state from task structure */
@@ -78,8 +78,8 @@ static void *fork_child_trampoline(void *arg) {
     return NULL;
 }
 
-pid_t iox_fork(void) {
-    iox_task_t *parent = iox_current_task();
+pid_t ixland_fork(void) {
+    ixland_task_t *parent = ixland_current_task();
     if (!parent) {
         errno = ESRCH;
         return -1;
@@ -88,7 +88,7 @@ pid_t iox_fork(void) {
     /* Check process limit */
     int child_count = 0;
     pthread_mutex_lock(&parent->lock);
-    iox_task_t *c = parent->children;
+    ixland_task_t *c = parent->children;
     while (c) {
         child_count++;
         c = c->next_sibling;
@@ -101,7 +101,7 @@ pid_t iox_fork(void) {
     pthread_mutex_unlock(&parent->lock);
 
     /* Allocate child task */
-    iox_task_t *child = iox_task_alloc();
+    ixland_task_t *child = ixland_task_alloc();
     if (!child) {
         errno = ENOMEM;
         return -1;
@@ -114,14 +114,14 @@ pid_t iox_fork(void) {
 
     /* Copy parent's working directory */
     if (parent->fs && child->fs) {
-        strncpy(child->fs->cwd, parent->fs->cwd, IOX_MAX_PATH - 1);
-        child->fs->cwd[IOX_MAX_PATH - 1] = '\0';
+        strncpy(child->fs->cwd, parent->fs->cwd, IXLAND_MAX_PATH - 1);
+        child->fs->cwd[IXLAND_MAX_PATH - 1] = '\0';
     }
 
     /* Copy subsystems with proper semantics */
-    child->files = iox_files_dup(parent->files);
+    child->files = ixland_files_dup(parent->files);
     if (!child->files) {
-        iox_task_free(child);
+        ixland_task_free(child);
         errno = ENOMEM;
         return -1;
     }
@@ -179,7 +179,7 @@ pid_t iox_fork(void) {
             pthread_mutex_lock(&parent->lock);
             parent->children = child->next_sibling;
             pthread_mutex_unlock(&parent->lock);
-            iox_task_free(child);
+            ixland_task_free(child);
             active_fork_ctx = NULL;
             pthread_mutex_destroy(&ctx.lock);
             pthread_cond_destroy(&ctx.cond);
@@ -240,8 +240,8 @@ pid_t iox_fork(void) {
 
 /* Vfork context */
 typedef struct {
-    iox_task_t *parent;
-    iox_task_t *child;
+    ixland_task_t *parent;
+    ixland_task_t *child;
     jmp_buf parent_jmp;        /* Parent's saved context */
     jmp_buf child_jmp;         /* Child's entry point */
     volatile int child_done;   /* Set when child execs or exits */
@@ -259,7 +259,7 @@ static void *vfork_child_trampoline(void *arg) {
     vfork_ctx_t *ctx = (vfork_ctx_t *)arg;
 
     /* Set child as current task */
-    iox_set_current_task(ctx->child);
+    ixland_set_current_task(ctx->child);
     ctx->child->thread = pthread_self();
 
     /* Signal that child is ready */
@@ -274,8 +274,8 @@ static void *vfork_child_trampoline(void *arg) {
     return NULL;
 }
 
-int iox_vfork(void) {
-    iox_task_t *parent = iox_current_task();
+int ixland_vfork(void) {
+    ixland_task_t *parent = ixland_current_task();
     if (!parent) {
         errno = ESRCH;
         return -1;
@@ -284,7 +284,7 @@ int iox_vfork(void) {
     /* Check resource limits */
     pthread_mutex_lock(&parent->lock);
     int child_count = 0;
-    iox_task_t *c = parent->children;
+    ixland_task_t *c = parent->children;
     while (c) {
         child_count++;
         c = c->next_sibling;
@@ -297,7 +297,7 @@ int iox_vfork(void) {
     pthread_mutex_unlock(&parent->lock);
 
     /* Allocate child task */
-    iox_task_t *child = iox_task_alloc();
+    ixland_task_t *child = ixland_task_alloc();
     if (!child) {
         errno = ENOMEM;
         return -1;
@@ -311,8 +311,8 @@ int iox_vfork(void) {
 
     /* Copy parent's resources */
     if (parent->fs && child->fs) {
-        strncpy(child->fs->cwd, parent->fs->cwd, IOX_MAX_PATH - 1);
-        child->fs->cwd[IOX_MAX_PATH - 1] = '\0';
+        strncpy(child->fs->cwd, parent->fs->cwd, IXLAND_MAX_PATH - 1);
+        child->fs->cwd[IXLAND_MAX_PATH - 1] = '\0';
     }
 
     /* Share file table (not copy - key vfork semantics) */
@@ -320,12 +320,12 @@ int iox_vfork(void) {
     /* Note: For vfork, we duplicate the file table structure but share the underlying files */
     if (parent->files) {
         /* Duplicate the file table (shallow copy that shares file references) */
-        child->files = iox_files_dup(parent->files);
+        child->files = ixland_files_dup(parent->files);
         if (!child->files) {
             pthread_mutex_lock(&parent->lock);
             parent->children = child->next_sibling;
             pthread_mutex_unlock(&parent->lock);
-            iox_task_free(child);
+            ixland_task_free(child);
             errno = ENOMEM;
             return -1;
         }
@@ -351,7 +351,7 @@ int iox_vfork(void) {
     pthread_mutex_unlock(&parent->lock);
 
     /* Mark parent as suspended (vfork semantics) */
-    atomic_store(&parent->state, IOX_TASK_UNINTERRUPTIBLE);
+    atomic_store(&parent->state, IXLAND_TASK_UNINTERRUPTIBLE);
 
     /* Set up vfork context */
     vfork_ctx_t ctx;
@@ -387,8 +387,8 @@ int iox_vfork(void) {
                 pthread_mutex_lock(&parent->lock);
                 parent->children = child->next_sibling;
                 pthread_mutex_unlock(&parent->lock);
-                atomic_store(&parent->state, IOX_TASK_RUNNING);
-                iox_task_free(child);
+                atomic_store(&parent->state, IXLAND_TASK_RUNNING);
+                ixland_task_free(child);
                 active_vfork_ctx = NULL;
                 pthread_mutex_destroy(&ctx.lock);
                 pthread_cond_destroy(&ctx.cond);
@@ -404,7 +404,7 @@ int iox_vfork(void) {
             pthread_mutex_unlock(&ctx.lock);
 
             /* Child has execed or exited - parent can resume */
-            atomic_store(&parent->state, IOX_TASK_RUNNING);
+            atomic_store(&parent->state, IXLAND_TASK_RUNNING);
 
             pthread_detach(child_thread);
 
@@ -429,8 +429,8 @@ int iox_vfork(void) {
     return 0;
 }
 
-/* Called from iox_execve to notify vfork parent */
-void __iox_vfork_exec_notify(void) {
+/* Called from ixland_execve to notify vfork parent */
+void __ixland_vfork_exec_notify(void) {
     if (active_vfork_ctx) {
         pthread_mutex_lock(&active_vfork_ctx->lock);
         active_vfork_ctx->child_done = 1;
@@ -440,8 +440,8 @@ void __iox_vfork_exec_notify(void) {
     }
 }
 
-/* Called from iox_exit to notify vfork parent */
-void __iox_vfork_exit_notify(void) {
+/* Called from ixland_exit to notify vfork parent */
+void __ixland_vfork_exit_notify(void) {
     if (active_vfork_ctx) {
         pthread_mutex_lock(&active_vfork_ctx->lock);
         active_vfork_ctx->child_done = 1;

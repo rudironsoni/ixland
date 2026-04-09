@@ -15,34 +15,34 @@ iXland uses consistent naming patterns across all languages and components to en
 
 | Pattern | Example | Description |
 |---------|---------|-------------|
-| `iox_` prefix | `iox_task_alloc()`, `iox_vfs_init()` | Core system functions |
+| `ixland_` prefix | `ixland_task_alloc()`, `ixland_vfs_init()` | Core system functions |
 | `ixland_` prefix | `ixland_wasm_engine_create()` | High-level iXland APIs |
 | `vfs_` prefix | `vfs_translate_path()` | VFS-specific functions |
 
-**Rationale:** The `iox_` prefix provides namespace isolation and makes iXland APIs instantly recognizable.
+**Rationale:** The `ixland_` prefix provides namespace isolation and makes iXland APIs instantly recognizable.
 
 ### Types and Structs
 
 | Construct | Pattern | Example |
 |-----------|---------|---------|
-| **Struct types** | `iox_lowercase_t` | `iox_task_t`, `iox_files_t` |
-| **Typedefs** | `iox_lowercase_t` | `iox_pid_t`, `iox_mode_t` |
-| **Enum types** | `iox_lowercase` | `iox_task_state_t` |
+| **Struct types** | `ixland_lowercase_t` | `ixland_task_t`, `ixland_files_t` |
+| **Typedefs** | `ixland_lowercase_t` | `ixland_pid_t`, `ixland_mode_t` |
+| **Enum types** | `ixland_lowercase` | `ixland_task_state_t` |
 
 ### Macros and Constants
 
 | Construct | Pattern | Example |
 |-----------|---------|---------|
-| **Macros** | `IOX_UPPER_CASE` | `IOX_MAX_NAME`, `IOX_NSIG` |
-| **Enum values** | `IOX_PREFIX_VALUE` | `IOX_TASK_RUNNING`, `IOX_MAX_FD` |
-| **Constants** | `IOX_UPPER_CASE` | `IOX_MAX_PATH`, `IOX_MAX_ARGS` |
+| **Macros** | `IXLAND_UPPER_CASE` | `IXLAND_MAX_NAME`, `IXLAND_NSIG` |
+| **Enum values** | `IXLAND_PREFIX_VALUE` | `IXLAND_TASK_RUNNING`, `IXLAND_MAX_FD` |
+| **Constants** | `IXLAND_UPPER_CASE` | `IXLAND_MAX_PATH`, `IXLAND_MAX_ARGS` |
 | **Package variables** | `IXLAND_UPPER_CASE` | `IXLAND_PKG_NAME`, `IXLAND_PREFIX` |
 
 ### Include Guards
 
 | Header Location | Pattern | Example |
 |-------------------|---------|---------|
-| `include/iox/*.h` | `IOX_FILENAME_H` | `IOX_VFS_H`, `IOX_TASK_H` |
+| `include/ixland/*.h` | `IXLAND_FILENAME_H` | `IXLAND_VFS_H`, `IXLAND_TASK_H` |
 | `include/*.h` (standard) | `_IXLAND_FILENAME_H` | `_IXLAND_PWD_H`, `_IXLAND_GRP_H` |
 | `include/linux/*.h` | `_LINUX_FILENAME_H` | `_LINUX_TYPES_H` |
 
@@ -53,7 +53,7 @@ iXland uses consistent naming patterns across all languages and components to en
 | Pattern | Example | Description |
 |---------|---------|-------------|
 | `IXLAND_` prefix | `IXLAND_PREFIX`, `IXLAND_PKG_NAME` | Build system variables |
-| `IOX_` prefix | `IOX_MAX_FDS` | Runtime configuration |
+| `IXLAND_` prefix | `IXLAND_MAX_FDS` | Runtime configuration |
 
 ### Function Names
 
@@ -99,12 +99,12 @@ The following patterns have been deprecated and should not be used:
 
 | Legacy Pattern | Replacement | Status |
 |----------------|-------------|--------|
-| `a_shell_` | `iox_` | ✅ Migrated |
-| `ashell_` | `iox_` | ✅ Migrated |
+| `a_shell_` | `ixland_` | ✅ Migrated |
+| `ashell_` | `ixland_` | ✅ Migrated |
 | `ashell-` | `ixland-` | ✅ Migrated |
 | `a-shell` | `ixland` | ✅ Migrated |
-| `A_SHELL_` | `IXLAND_` or `IOX_` | ✅ Migrated |
-| `_A_SHELL_` | `_IXLAND_` or `IOX_` | ✅ Migrated |
+| `A_SHELL_` | `IXLAND_` or `IXLAND_` | ✅ Migrated |
+| `_A_SHELL_` | `_IXLAND_` or `IXLAND_` | ✅ Migrated |
 | `a_shell_pkg_*` | `ixland_pkg_*` | ✅ Migrated |
 | `A_SHELL_PACKAGES_DIR` | `IXLAND_PACKAGES_DIR` | ✅ Migrated |
 | `A_SHELL_BUILD_TARGET` | `IXLAND_BUILD_TARGET` | ✅ Migrated |
@@ -121,8 +121,8 @@ Naming conventions are enforced via:
 
 When migrating legacy code:
 
-1. Rename functions and variables to use `iox_` or `ixland_` prefixes
-2. Update macro constants to use `IOX_` or `IXLAND_` prefixes
+1. Rename functions and variables to use `ixland_` or `ixland_` prefixes
+2. Update macro constants to use `IXLAND_` or `IXLAND_` prefixes
 3. Update include guards to follow documented patterns
 4. Update shell script variables to use `IXLAND_` prefix
 5. Update package build hooks from `a_shell_pkg_*` to `ixland_pkg_*`
@@ -132,7 +132,7 @@ When migrating legacy code:
 ### C Function
 ```c
 // ✅ Correct
-iox_task_t *iox_task_alloc(const char *name);
+ixland_task_t *ixland_task_alloc(const char *name);
 
 // ❌ Incorrect (legacy)
 a_shell_task_t *a_shell_task_alloc(const char *name);
@@ -165,9 +165,9 @@ a_shell_pkg_configure() {
 
 | Category | Prefix | Example |
 |----------|--------|---------|
-| C Functions | `iox_` | `iox_task_alloc()` |
-| C Types | `iox_` + `_t` | `iox_task_t` |
-| C Macros | `IOX_` | `IOX_MAX_PATH` |
+| C Functions | `ixland_` | `ixland_task_alloc()` |
+| C Types | `ixland_` + `_t` | `ixland_task_t` |
+| C Macros | `IXLAND_` | `IXLAND_MAX_PATH` |
 | Shell Variables | `IXLAND_` | `IXLAND_PKG_NAME` |
 | Shell Functions | `ixland_` | `ixland_pkg_configure()` |
 | Swift Types | `PascalCase` | `TerminalManager` |

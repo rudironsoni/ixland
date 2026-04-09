@@ -12,8 +12,8 @@
   "sharedStateObservations": [
     {
       "area": "conventions",
-      "observation": "The implementation correctly follows the iox_ naming convention for functions (iox_waitpid, iox_wait, iox_wait4, iox_wait3) and uses proper POSIX errno values (ECHILD, ESRCH). The code follows the established pattern in the codebase for task manipulation with proper mutex locking.",
-      "evidence": "ixland-system/kernel/task/wait.c - all functions use iox_ prefix, errno values match POSIX"
+      "observation": "The implementation correctly follows the ixland_ naming convention for functions (ixland_waitpid, ixland_wait, ixland_wait4, ixland_wait3) and uses proper POSIX errno values (ECHILD, ESRCH). The code follows the established pattern in the codebase for task manipulation with proper mutex locking.",
+      "evidence": "ixland-system/kernel/task/wait.c - all functions use ixland_ prefix, errno values match POSIX"
     },
     {
       "area": "skills",

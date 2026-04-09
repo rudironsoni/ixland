@@ -5,10 +5,10 @@
 #include <string.h>
 #include <time.h>
 
-#include "iox_signal.h"
+#include "ixland_signal.h"
 
-iox_sighand_t *iox_sighand_alloc(void) {
-    iox_sighand_t *sighand = calloc(1, sizeof(iox_sighand_t));
+ixland_sighand_t *ixland_sighand_alloc(void) {
+    ixland_sighand_t *sighand = calloc(1, sizeof(ixland_sighand_t));
     if (!sighand)
         return NULL;
 
@@ -16,7 +16,7 @@ iox_sighand_t *iox_sighand_alloc(void) {
     pthread_mutex_init(&sighand->queue.lock, NULL);
 
     /* Initialize default handlers */
-    for (int i = 0; i < IOX_NSIG; i++) {
+    for (int i = 0; i < IXLAND_NSIG; i++) {
         sighand->action[i].sa_handler = SIG_DFL;
         sigemptyset(&sighand->action[i].sa_mask);
         sighand->action[i].sa_flags = 0;
@@ -28,7 +28,7 @@ iox_sighand_t *iox_sighand_alloc(void) {
     return sighand;
 }
 
-void iox_sighand_free(iox_sighand_t *sighand) {
+void ixland_sighand_free(ixland_sighand_t *sighand) {
     if (!sighand)
         return;
     if (atomic_fetch_sub(&sighand->refs, 1) > 1)
@@ -36,9 +36,9 @@ void iox_sighand_free(iox_sighand_t *sighand) {
 
     /* Free queued signals */
     pthread_mutex_lock(&sighand->queue.lock);
-    iox_sigqueue_entry_t *entry = sighand->queue.head;
+    ixland_sigqueue_entry_t *entry = sighand->queue.head;
     while (entry) {
-        iox_sigqueue_entry_t *next = entry->next;
+        ixland_sigqueue_entry_t *next = entry->next;
         free(entry);
         entry = next;
     }
@@ -48,11 +48,11 @@ void iox_sighand_free(iox_sighand_t *sighand) {
     free(sighand);
 }
 
-iox_sighand_t *iox_sighand_dup(iox_sighand_t *parent) {
+ixland_sighand_t *ixland_sighand_dup(ixland_sighand_t *parent) {
     if (!parent)
         return NULL;
 
-    iox_sighand_t *child = iox_sighand_alloc();
+    ixland_sighand_t *child = ixland_sighand_alloc();
     if (!child)
         return NULL;
 
@@ -68,8 +68,8 @@ iox_sighand_t *iox_sighand_dup(iox_sighand_t *parent) {
     return child;
 }
 
-int iox_sigaction(int sig, const struct sigaction *act, struct sigaction *oldact) {
-    if (sig < 1 || sig >= IOX_NSIG) {
+int ixland_sigaction(int sig, const struct sigaction *act, struct sigaction *oldact) {
+    if (sig < 1 || sig >= IXLAND_NSIG) {
         errno = EINVAL;
         return -1;
     }
@@ -79,7 +79,7 @@ int iox_sigaction(int sig, const struct sigaction *act, struct sigaction *oldact
         return -1;
     }
 
-    iox_task_t *task = iox_current_task();
+    ixland_task_t *task = ixland_current_task();
     if (!task || !task->sighand) {
         errno = ESRCH;
         return -1;
@@ -99,21 +99,21 @@ int iox_sigaction(int sig, const struct sigaction *act, struct sigaction *oldact
 /* Apply signal to a single task with state transitions and parent notification.
  * Must be called with task lock held. Does NOT release task reference.
  */
-static void __iox_apply_signal_to_task(iox_task_t *task, int sig) {
+static void __ixland_apply_signal_to_task(ixland_task_t *task, int sig) {
     int terminating = (sig == SIGTERM || sig == SIGKILL || sig == SIGINT);
     /* Add signal to pending */
     sigaddset(&task->sighand->pending, sig);
 
     /* Handle SIGSTOP: transition to STOPPED state (not reaped) */
     if (sig == SIGSTOP) {
-        atomic_store(&task->state, IOX_TASK_STOPPED);
+        atomic_store(&task->state, IXLAND_TASK_STOPPED);
         atomic_store(&task->stopped, true);
         atomic_store(&task->stopsig, SIGSTOP);
     }
 
     /* Handle SIGCONT: transition back to RUNNING (not reaped) */
     if (sig == SIGCONT) {
-        atomic_store(&task->state, IOX_TASK_RUNNING);
+        atomic_store(&task->state, IXLAND_TASK_RUNNING);
         atomic_store(&task->stopped, false);
         atomic_store(&task->continued, true);
     }
@@ -147,8 +147,8 @@ static void __iox_apply_signal_to_task(iox_task_t *task, int sig) {
     pthread_kill(task->thread, SIGUSR1);
 }
 
-int iox_kill(pid_t pid, int sig) {
-    if (sig < 0 || sig >= IOX_NSIG) {
+int ixland_kill(pid_t pid, int sig) {
+    if (sig < 0 || sig >= IXLAND_NSIG) {
         errno = EINVAL;
         return -1;
     }
@@ -157,23 +157,23 @@ int iox_kill(pid_t pid, int sig) {
         /* Process group handling */
         if (pid == 0) {
             /* Current process group */
-            iox_task_t *task = iox_current_task();
+            ixland_task_t *task = ixland_current_task();
             if (!task) {
                 errno = ESRCH;
                 return -1;
             }
-            return iox_killpg(task->pgid, sig);
+            return ixland_killpg(task->pgid, sig);
         } else if (pid == -1) {
             /* All processes (privileged) */
             errno = EPERM;
             return -1;
         } else {
             /* Process group |pid| */
-            return iox_killpg(-pid, sig);
+            return ixland_killpg(-pid, sig);
         }
     }
 
-    iox_task_t *task = iox_task_lookup(pid);
+    ixland_task_t *task = ixland_task_lookup(pid);
     if (!task) {
         errno = ESRCH;
         return -1;
@@ -181,20 +181,20 @@ int iox_kill(pid_t pid, int sig) {
 
     if (sig == 0) {
         /* Just check if process exists */
-        iox_task_free(task);
+        ixland_task_free(task);
         return 0;
     }
 
     /* Apply signal with state transitions and notifications */
     pthread_mutex_lock(&task->lock);
-    __iox_apply_signal_to_task(task, sig);
+    __ixland_apply_signal_to_task(task, sig);
     pthread_mutex_unlock(&task->lock);
 
-    iox_task_free(task);
+    ixland_task_free(task);
     return 0;
 }
 
-int iox_killpg(pid_t pgrp, int sig) {
+int ixland_killpg(pid_t pgrp, int sig) {
     /* Contract:
      * - pgrp <= 0: return -1, errno = EINVAL
      * - no matching tasks: return -1, errno = ESRCH
@@ -202,7 +202,7 @@ int iox_killpg(pid_t pgrp, int sig) {
      */
 
     /* Validate signal number */
-    if (sig < 0 || sig >= IOX_NSIG) {
+    if (sig < 0 || sig >= IXLAND_NSIG) {
         errno = EINVAL;
         return -1;
     }
@@ -217,22 +217,22 @@ int iox_killpg(pid_t pgrp, int sig) {
     int check_only = (sig == 0);
 
 /* Collect matching tasks under lock */
-#define IOX_KILLPG_MAX_MATCHES 256
-    iox_task_t *matches[IOX_KILLPG_MAX_MATCHES];
+#define IXLAND_KILLPG_MAX_MATCHES 256
+    ixland_task_t *matches[IXLAND_KILLPG_MAX_MATCHES];
     int match_count = 0;
 
     extern pthread_mutex_t task_table_lock;
-    extern iox_task_t *task_table[];
+    extern ixland_task_t *task_table[];
     extern int task_hash(pid_t pid);
 
     pthread_mutex_lock(&task_table_lock);
 
     /* Iterate all buckets in task table */
-    for (int i = 0; i < IOX_MAX_TASKS; i++) {
-        iox_task_t *task = task_table[i];
+    for (int i = 0; i < IXLAND_MAX_TASKS; i++) {
+        ixland_task_t *task = task_table[i];
         while (task) {
             if (task->pgid == pgrp) {
-                if (match_count < IOX_KILLPG_MAX_MATCHES) {
+                if (match_count < IXLAND_KILLPG_MAX_MATCHES) {
                     atomic_fetch_add(&task->refs, 1);
                     matches[match_count++] = task;
                 }
@@ -253,27 +253,27 @@ int iox_killpg(pid_t pgrp, int sig) {
     /* Signal 0: just checking existence, don't actually deliver */
     if (check_only) {
         for (int i = 0; i < match_count; i++) {
-            iox_task_free(matches[i]);
+            ixland_task_free(matches[i]);
         }
         return 0;
     }
 
     /* Deliver signal to each matched task using shared helper */
     for (int i = 0; i < match_count; i++) {
-        iox_task_t *task = matches[i];
+        ixland_task_t *task = matches[i];
 
         pthread_mutex_lock(&task->lock);
-        __iox_apply_signal_to_task(task, sig);
+        __ixland_apply_signal_to_task(task, sig);
         pthread_mutex_unlock(&task->lock);
 
-        iox_task_free(matches[i]);
+        ixland_task_free(matches[i]);
     }
 
     return 0;
 }
 
-int iox_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
-    iox_task_t *task = iox_current_task();
+int ixland_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
+    ixland_task_t *task = ixland_current_task();
     if (!task || !task->sighand) {
         errno = ESRCH;
         return -1;
@@ -286,14 +286,14 @@ int iox_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
     if (set) {
         switch (how) {
         case SIG_BLOCK:
-            for (int i = 1; i < IOX_NSIG; i++) {
+            for (int i = 1; i < IXLAND_NSIG; i++) {
                 if (sigismember(set, i)) {
                     sigaddset(&task->sighand->blocked, i);
                 }
             }
             break;
         case SIG_UNBLOCK:
-            for (int i = 1; i < IOX_NSIG; i++) {
+            for (int i = 1; i < IXLAND_NSIG; i++) {
                 if (sigismember(set, i)) {
                     sigdelset(&task->sighand->blocked, i);
                 }
@@ -311,13 +311,13 @@ int iox_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
     return 0;
 }
 
-int iox_sigpending(sigset_t *set) {
+int ixland_sigpending(sigset_t *set) {
     if (!set) {
         errno = EFAULT;
         return -1;
     }
 
-    iox_task_t *task = iox_current_task();
+    ixland_task_t *task = ixland_current_task();
     if (!task || !task->sighand) {
         errno = ESRCH;
         return -1;
@@ -331,8 +331,8 @@ int iox_sigpending(sigset_t *set) {
  * SIGNAL - Simple signal handler installation
  * ============================================================================ */
 
-iox_sighandler_t iox_signal(int signum, iox_sighandler_t handler) {
-    if (signum < 1 || signum >= IOX_NSIG) {
+ixland_sighandler_t ixland_signal(int signum, ixland_sighandler_t handler) {
+    if (signum < 1 || signum >= IXLAND_NSIG) {
         errno = EINVAL;
         return SIG_ERR;
     }
@@ -342,14 +342,14 @@ iox_sighandler_t iox_signal(int signum, iox_sighandler_t handler) {
         return SIG_ERR;
     }
 
-    iox_task_t *task = iox_current_task();
+    ixland_task_t *task = ixland_current_task();
     if (!task || !task->sighand) {
         errno = ESRCH;
         return SIG_ERR;
     }
 
     /* Get old handler */
-    iox_sighandler_t old_handler = task->sighand->action[signum].sa_handler;
+    ixland_sighandler_t old_handler = task->sighand->action[signum].sa_handler;
 
     /* Install new handler */
     task->sighand->action[signum].sa_handler = handler;
@@ -363,13 +363,13 @@ iox_sighandler_t iox_signal(int signum, iox_sighandler_t handler) {
  * RAISE - Send signal to current process
  * ============================================================================ */
 
-int iox_raise(int sig) {
-    iox_task_t *task = iox_current_task();
+int ixland_raise(int sig) {
+    ixland_task_t *task = ixland_current_task();
     if (!task) {
         errno = ESRCH;
         return -1;
     }
-    return iox_kill(task->pid, sig);
+    return ixland_kill(task->pid, sig);
 }
 
 /* ============================================================================
@@ -385,7 +385,7 @@ static unsigned int alarm_remaining = 0;
 static time_t alarm_set_time = 0;
 static int alarm_active = 0;
 
-unsigned int iox_alarm(unsigned int seconds) {
+unsigned int ixland_alarm(unsigned int seconds) {
     pthread_mutex_lock(&alarm_lock);
 
     unsigned int old_remaining = 0;
@@ -426,7 +426,7 @@ unsigned int iox_alarm(unsigned int seconds) {
 
 /* Helper to check if sigset is empty (macOS/iOS doesn't have sigisemptyset) */
 static int sigset_is_empty(const sigset_t *set) {
-    for (int i = 1; i < IOX_NSIG; i++) {
+    for (int i = 1; i < IXLAND_NSIG; i++) {
         if (sigismember(set, i)) {
             return 0;
         }
@@ -438,8 +438,8 @@ static int sigset_is_empty(const sigset_t *set) {
  * PAUSE - Wait for signal
  * ============================================================================ */
 
-int iox_pause(void) {
-    iox_task_t *task = iox_current_task();
+int ixland_pause(void) {
+    ixland_task_t *task = ixland_current_task();
     if (!task) {
         errno = ESRCH;
         return -1;
@@ -468,8 +468,8 @@ int iox_pause(void) {
  * SIGSUSPEND - Atomically replace mask and wait for signal
  * ============================================================================ */
 
-int iox_sigsuspend(const sigset_t *mask) {
-    iox_task_t *task = iox_current_task();
+int ixland_sigsuspend(const sigset_t *mask) {
+    ixland_task_t *task = ixland_current_task();
     if (!task || !task->sighand) {
         errno = ESRCH;
         return -1;

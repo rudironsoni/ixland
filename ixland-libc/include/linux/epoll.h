@@ -24,9 +24,9 @@ extern "C" {
 #define EPOLL_CTL_MOD 3 /* Change file descriptor epoll_event structure */
 
 /* iXland aliases */
-#define IOX_EPOLL_CTL_ADD EPOLL_CTL_ADD
-#define IOX_EPOLL_CTL_DEL EPOLL_CTL_DEL
-#define IOX_EPOLL_CTL_MOD EPOLL_CTL_MOD
+#define IXLAND_EPOLL_CTL_ADD EPOLL_CTL_ADD
+#define IXLAND_EPOLL_CTL_DEL EPOLL_CTL_DEL
+#define IXLAND_EPOLL_CTL_MOD EPOLL_CTL_MOD
 
 /* epoll events (bitmask) - These MUST match Linux kernel values exactly */
 #define EPOLLIN 0x001     /* The associated file is available for read */
@@ -43,24 +43,24 @@ extern "C" {
 #define EPOLLRDHUP 0x2000 /* Stream socket peer closed connection */
 
 /* iXland aliases */
-#define IOX_EPOLLIN EPOLLIN
-#define IOX_EPOLLPRI EPOLLPRI
-#define IOX_EPOLLOUT EPOLLOUT
-#define IOX_EPOLLERR EPOLLERR
-#define IOX_EPOLLHUP EPOLLHUP
-#define IOX_EPOLLNVAL EPOLLNVAL
-#define IOX_EPOLLRDNORM EPOLLRDNORM
-#define IOX_EPOLLRDBAND EPOLLRDBAND
-#define IOX_EPOLLWRNORM EPOLLWRNORM
-#define IOX_EPOLLWRBAND EPOLLWRBAND
-#define IOX_EPOLLMSG EPOLLMSG
-#define IOX_EPOLLRDHUP EPOLLRDHUP
+#define IXLAND_EPOLLIN EPOLLIN
+#define IXLAND_EPOLLPRI EPOLLPRI
+#define IXLAND_EPOLLOUT EPOLLOUT
+#define IXLAND_EPOLLERR EPOLLERR
+#define IXLAND_EPOLLHUP EPOLLHUP
+#define IXLAND_EPOLLNVAL EPOLLNVAL
+#define IXLAND_EPOLLRDNORM EPOLLRDNORM
+#define IXLAND_EPOLLRDBAND EPOLLRDBAND
+#define IXLAND_EPOLLWRNORM EPOLLWRNORM
+#define IXLAND_EPOLLWRBAND EPOLLWRBAND
+#define IXLAND_EPOLLMSG EPOLLMSG
+#define IXLAND_EPOLLRDHUP EPOLLRDHUP
 
 /* epoll_create flags */
 #define EPOLL_CLOEXEC 02000000 /* Close-on-exec flag */
 
 /* iXland aliases */
-#define IOX_EPOLL_CLOEXEC EPOLL_CLOEXEC
+#define IXLAND_EPOLL_CLOEXEC EPOLL_CLOEXEC
 
 /* Set exclusive wakeup mode for epoll_wait */
 #define EPOLL_EXCLUSIVE 0x10000000 /* Wakeup only one epoll */
@@ -69,26 +69,26 @@ extern "C" {
 #define EPOLLET 0x80000000         /* Edge-triggered mode */
 
 /* iXland aliases */
-#define IOX_EPOLL_EXCLUSIVE EPOLL_EXCLUSIVE
-#define IOX_EPOLLWAKEUP EPOLLWAKEUP
-#define IOX_EPOLLONESHOT EPOLLONESHOT
-#define IOX_EPOLLET EPOLLET
+#define IXLAND_EPOLL_EXCLUSIVE EPOLL_EXCLUSIVE
+#define IXLAND_EPOLLWAKEUP EPOLLWAKEUP
+#define IXLAND_EPOLLONESHOT EPOLLONESHOT
+#define IXLAND_EPOLLET EPOLLET
 
 /* Input event mask (events that can be registered) */
-#define IOX_EPOLL_INPUT_EVENTS                                                       \
-    (IOX_EPOLLIN | IOX_EPOLLPRI | IOX_EPOLLOUT | IOX_EPOLLRDNORM | IOX_EPOLLRDBAND | \
-     IOX_EPOLLWRNORM | IOX_EPOLLWRBAND | IOX_EPOLLRDHUP)
+#define IXLAND_EPOLL_INPUT_EVENTS                                              \
+    (IXLAND_EPOLLIN | IXLAND_EPOLLPRI | IXLAND_EPOLLOUT | IXLAND_EPOLLRDNORM | \
+     IXLAND_EPOLLRDBAND | IXLAND_EPOLLWRNORM | IXLAND_EPOLLWRBAND | IXLAND_EPOLLRDHUP)
 
 /* Output event mask (events that can be returned) */
-#define IOX_EPOLL_OUTPUT_EVENTS \
-    (IOX_EPOLL_INPUT_EVENTS | IOX_EPOLLERR | IOX_EPOLLHUP | IOX_EPOLLNVAL)
+#define IXLAND_EPOLL_OUTPUT_EVENTS \
+    (IXLAND_EPOLL_INPUT_EVENTS | IXLAND_EPOLLERR | IXLAND_EPOLLHUP | IXLAND_EPOLLNVAL)
 
 /* Maximum events per epoll_wait call */
-#define IOX_EPOLL_MAX_EVENTS 1024
+#define IXLAND_EPOLL_MAX_EVENTS 1024
 
 /* Default timeout values */
-#define IOX_EPOLL_WAIT_FOREVER (-1) /* Wait indefinitely */
-#define IOX_EPOLL_WAIT_NONE 0       /* Return immediately */
+#define IXLAND_EPOLL_WAIT_FOREVER (-1) /* Wait indefinitely */
+#define IXLAND_EPOLL_WAIT_NONE 0       /* Return immediately */
 
 /* ============================================================================
  * EPOLL EVENT STRUCTURE
@@ -113,22 +113,22 @@ struct epoll_event {
 } __attribute__((packed));
 
 /* iXland compatibility types */
-#ifndef IOX_EPOLL_DATA_DEFINED
-typedef union iox_epoll_data {
+#ifndef IXLAND_EPOLL_DATA_DEFINED
+typedef union ixland_epoll_data {
     void *ptr;
     int fd;
     uint32_t u32;
     uint64_t u64;
-} iox_epoll_data_t;
-#define IOX_EPOLL_DATA_DEFINED
+} ixland_epoll_data_t;
+#define IXLAND_EPOLL_DATA_DEFINED
 #endif
 
-#ifndef IOX_EPOLL_EVENT_DEFINED
-struct iox_epoll_event {
+#ifndef IXLAND_EPOLL_EVENT_DEFINED
+struct ixland_epoll_event {
     uint32_t events;
-    iox_epoll_data_t data;
+    ixland_epoll_data_t data;
 } __attribute__((packed));
-#define IOX_EPOLL_EVENT_DEFINED
+#define IXLAND_EPOLL_EVENT_DEFINED
 #endif
 
 /* ============================================================================
@@ -136,13 +136,13 @@ struct iox_epoll_event {
  * ============================================================================ */
 
 /* Timeout specification for epoll_pwait2 */
-struct iox_timespec {
+struct ixland_timespec {
     int64_t tv_sec;  /* Seconds */
     int64_t tv_nsec; /* Nanoseconds */
 };
 
 /* Signal set for pwait variants */
-struct iox_sigset {
+struct ixland_sigset {
     unsigned long sig[128 / sizeof(unsigned long)];
 };
 
@@ -151,7 +151,7 @@ struct iox_sigset {
  * ============================================================================ */
 
 /* epoll statistics structure */
-struct iox_epoll_stats {
+struct ixland_epoll_stats {
     uint64_t epoll_create_calls;    /* Number of epoll_create calls */
     uint64_t epoll_ctl_calls;       /* Number of epoll_ctl calls */
     uint64_t epoll_wait_calls;      /* Number of epoll_wait calls */
@@ -175,7 +175,7 @@ struct iox_epoll_stats {
  * @param size Size hint (deprecated but required for compatibility)
  * @return int Epoll file descriptor on success, -1 on error with errno set
  */
-int iox_epoll_create(int size);
+int ixland_epoll_create(int size);
 
 /**
  * @brief Create a new epoll instance with flags
@@ -185,7 +185,7 @@ int iox_epoll_create(int size);
  * @param flags EPOLL_CLOEXEC or 0
  * @return int Epoll file descriptor on success, -1 on error with errno set
  */
-int iox_epoll_create1(int flags);
+int ixland_epoll_create1(int flags);
 
 /**
  * @brief Control interface for an epoll file descriptor
@@ -193,12 +193,12 @@ int iox_epoll_create1(int flags);
  * Performs control operations on the epoll instance.
  *
  * @param epfd Epoll file descriptor
- * @param op Operation (IOX_EPOLL_CTL_ADD, IOX_EPOLL_CTL_DEL, IOX_EPOLL_CTL_MOD)
+ * @param op Operation (IXLAND_EPOLL_CTL_ADD, IXLAND_EPOLL_CTL_DEL, IXLAND_EPOLL_CTL_MOD)
  * @param fd Target file descriptor
  * @param event Associated event information (can be NULL for EPOLL_CTL_DEL)
  * @return int 0 on success, -1 on error with errno set
  */
-int iox_epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+int ixland_epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
 
 /**
  * @brief Wait for an I/O event on an epoll file descriptor
@@ -211,7 +211,7 @@ int iox_epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
  * @param timeout Timeout in milliseconds (-1 = wait forever, 0 = non-blocking)
  * @return int Number of ready fds on success, -1 on error with errno set
  */
-int iox_epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
+int ixland_epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
 
 /**
  * @brief Wait for events with signal mask
@@ -225,8 +225,8 @@ int iox_epoll_wait(int epfd, struct epoll_event *events, int maxevents, int time
  * @param sigmask Signal mask to restore during wait (NULL = no change)
  * @return int Number of ready fds on success, -1 on error with errno set
  */
-int iox_epoll_pwait(int epfd, struct epoll_event *events, int maxevents, int timeout,
-                    const struct iox_sigset *sigmask);
+int ixland_epoll_pwait(int epfd, struct epoll_event *events, int maxevents, int timeout,
+                       const struct ixland_sigset *sigmask);
 
 /**
  * @brief Wait for events with nanosecond timeout
@@ -240,15 +240,15 @@ int iox_epoll_pwait(int epfd, struct epoll_event *events, int maxevents, int tim
  * @param sigmask Signal mask to restore during wait (NULL = no change)
  * @return int Number of ready fds on success, -1 on error with errno set
  */
-int iox_epoll_pwait2(int epfd, struct epoll_event *events, int maxevents,
-                     const struct iox_timespec *timeout, const struct iox_sigset *sigmask);
+int ixland_epoll_pwait2(int epfd, struct epoll_event *events, int maxevents,
+                        const struct ixland_timespec *timeout, const struct ixland_sigset *sigmask);
 
 /* ============================================================================
  * EPOLL INSTANCE INFO
  * ============================================================================ */
 
 /* Epoll info structure */
-struct iox_epoll_info {
+struct ixland_epoll_info {
     int epfd;                  /* Epoll file descriptor */
     uint32_t flags;            /* Creation flags */
     uint32_t registered_count; /* Number of registered FDs */
@@ -265,7 +265,7 @@ struct iox_epoll_info {
  * @param info Pointer to info structure
  * @return int 0 on success, -1 on error
  */
-int iox_epoll_get_info(int epfd, struct iox_epoll_info *info);
+int ixland_epoll_get_info(int epfd, struct ixland_epoll_info *info);
 
 /**
  * @brief Check if file descriptor is registered with epoll
@@ -274,7 +274,7 @@ int iox_epoll_get_info(int epfd, struct iox_epoll_info *info);
  * @param fd File descriptor to check
  * @return int 1 if registered, 0 if not, -1 on error
  */
-int iox_epoll_is_registered(int epfd, int fd);
+int ixland_epoll_is_registered(int epfd, int fd);
 
 /**
  * @brief Get registered events for a file descriptor
@@ -284,14 +284,14 @@ int iox_epoll_is_registered(int epfd, int fd);
  * @param event Where to store current registration
  * @return int 0 on success, -1 on error (ENOENT if not registered)
  */
-int iox_epoll_get_registration(int epfd, int fd, struct epoll_event *event);
+int ixland_epoll_get_registration(int epfd, int fd, struct epoll_event *event);
 
 /* ============================================================================
  * EPOLL EVENT BATCH OPERATIONS
  * ============================================================================ */
 
 /* Batch epoll_ctl operation */
-struct iox_epoll_ctl_batch {
+struct ixland_epoll_ctl_batch {
     int op;                   /* Operation (ADD/DEL/MOD) */
     int fd;                   /* File descriptor */
     struct epoll_event event; /* Event specification */
@@ -307,26 +307,26 @@ struct iox_epoll_ctl_batch {
  * @param nops Number of operations
  * @return int 0 on success, -1 on error (all operations failed)
  */
-int iox_epoll_ctl_batch(int epfd, const struct iox_epoll_ctl_batch *ops, int nops);
+int ixland_epoll_ctl_batch(int epfd, const struct ixland_epoll_ctl_batch *ops, int nops);
 
 /* ============================================================================
  * EPOLL INTERNAL STRUCTURES (for kernel use)
  * ============================================================================ */
 
 /* Epoll item (file registration) */
-struct iox_epitem;
+struct ixland_epitem;
 
 /* Epoll ready list item */
-struct iox_epoll_ready {
-    struct iox_epoll_ready *next;
-    struct iox_epoll_ready *prev;
-    struct iox_epitem *epi; /* Associated epoll item */
+struct ixland_epoll_ready {
+    struct ixland_epoll_ready *next;
+    struct ixland_epoll_ready *prev;
+    struct ixland_epitem *epi; /* Associated epoll item */
 };
 
 /* Epoll wait queue */
-struct iox_epoll_wait_queue {
-    struct iox_epoll_wait_queue *next;
-    struct iox_epoll_wait_queue *prev;
+struct ixland_epoll_wait_queue {
+    struct ixland_epoll_wait_queue *next;
+    struct ixland_epoll_wait_queue *prev;
     int waiting; /* Is thread waiting */
 };
 
@@ -335,44 +335,46 @@ struct iox_epoll_wait_queue {
  * ============================================================================ */
 
 /* Check if event has error condition */
-#define IOX_EPOLL_HAS_ERROR(ev) ((ev)->events & (IOX_EPOLLERR | IOX_EPOLLHUP | IOX_EPOLLNVAL))
+#define IXLAND_EPOLL_HAS_ERROR(ev) \
+    ((ev)->events & (IXLAND_EPOLLERR | IXLAND_EPOLLHUP | IXLAND_EPOLLNVAL))
 
 /* Check if event indicates readable data */
-#define IOX_EPOLL_HAS_READ(ev) \
-    ((ev)->events & (IOX_EPOLLIN | IOX_EPOLLRDNORM | IOX_EPOLLRDBAND | IOX_EPOLLRDHUP))
+#define IXLAND_EPOLL_HAS_READ(ev) \
+    ((ev)->events & (IXLAND_EPOLLIN | IXLAND_EPOLLRDNORM | IXLAND_EPOLLRDBAND | IXLAND_EPOLLRDHUP))
 
 /* Check if event indicates writable */
-#define IOX_EPOLL_HAS_WRITE(ev) ((ev)->events & (IOX_EPOLLOUT | IOX_EPOLLWRNORM | IOX_EPOLLWRBAND))
+#define IXLAND_EPOLL_HAS_WRITE(ev) \
+    ((ev)->events & (IXLAND_EPOLLOUT | IXLAND_EPOLLWRNORM | IXLAND_EPOLLWRBAND))
 
 /* Check if event indicates urgent data */
-#define IOX_EPOLL_HAS_URGENT(ev) ((ev)->events & IOX_EPOLLPRI)
+#define IXLAND_EPOLL_HAS_URGENT(ev) ((ev)->events & IXLAND_EPOLLPRI)
 
 /* Check if edge-triggered mode is set */
-#define IOX_EPOLL_IS_EDGE_TRIGGERED(ev) ((ev)->events & IOX_EPOLLET)
+#define IXLAND_EPOLL_IS_EDGE_TRIGGERED(ev) ((ev)->events & IXLAND_EPOLLET)
 
 /* Check if one-shot mode is set */
-#define IOX_EPOLL_IS_ONESHOT(ev) ((ev)->events & IOX_EPOLLONESHOT)
+#define IXLAND_EPOLL_IS_ONESHOT(ev) ((ev)->events & IXLAND_EPOLLONESHOT)
 
 /* Create event with data as file descriptor */
-#define IOX_EPOLL_EVENT_FD(events, fd_val)            \
+#define IXLAND_EPOLL_EVENT_FD(events, fd_val)         \
     (struct epoll_event) {                            \
         .events = (events), .data = {.fd = (fd_val) } \
     }
 
 /* Create event with data as pointer */
-#define IOX_EPOLL_EVENT_PTR(events, ptr_val)            \
+#define IXLAND_EPOLL_EVENT_PTR(events, ptr_val)         \
     (struct epoll_event) {                              \
         .events = (events), .data = {.ptr = (ptr_val) } \
     }
 
 /* Create event with data as 32-bit integer */
-#define IOX_EPOLL_EVENT_U32(events, u32_val)            \
+#define IXLAND_EPOLL_EVENT_U32(events, u32_val)         \
     (struct epoll_event) {                              \
         .events = (events), .data = {.u32 = (u32_val) } \
     }
 
 /* Create event with data as 64-bit integer */
-#define IOX_EPOLL_EVENT_U64(events, u64_val)            \
+#define IXLAND_EPOLL_EVENT_U64(events, u64_val)         \
     (struct epoll_event) {                              \
         .events = (events), .data = {.u64 = (u64_val) } \
     }
@@ -382,7 +384,7 @@ struct iox_epoll_wait_queue {
  * ============================================================================ */
 
 /* Epoll hint structure for advanced usage */
-struct iox_epoll_hint {
+struct ixland_epoll_hint {
     uint32_t expected_events; /* Expected event frequency */
     uint32_t burst_size;      /* Expected burst size */
     uint32_t latency_target;  /* Latency target in microseconds */
@@ -396,7 +398,7 @@ struct iox_epoll_hint {
  * @param hint Optimization hints
  * @return int 0 on success, -1 on error
  */
-int iox_epoll_set_hint(int epfd, int fd, const struct iox_epoll_hint *hint);
+int ixland_epoll_set_hint(int epfd, int fd, const struct ixland_epoll_hint *hint);
 
 /* ============================================================================
  * EPOLL ERROR CODES

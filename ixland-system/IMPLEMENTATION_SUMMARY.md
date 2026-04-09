@@ -1,4 +1,4 @@
-# libiox Implementation Summary
+# libixland Implementation Summary
 
 ## Quality Statement
 
@@ -14,7 +14,7 @@ Every syscall is implemented with:
 ## What's Implemented
 
 ### Process Management (1595 lines)
-**Location:** `src/iox/core/iox_process.c`
+**Location:** `src/ixland/core/ixland_process.c`
 
 **Features:**
 - ✅ Virtual PID allocation with hash-based O(1) lookup
@@ -30,15 +30,15 @@ Every syscall is implemented with:
 - ✅ Atomic operations for counters
 
 **Key Functions:**
-- `iox_fork()` - Thread-based process creation
-- `iox_execve()` - Process execution simulation
-- `iox_waitpid()` - Wait with WNOHANG, WUNTRACED support
-- `iox_getpgid()`/`iox_setpgid()` - Process group management
-- `iox_getsid()`/`iox_setsid()` - Session management
+- `ixland_fork()` - Thread-based process creation
+- `ixland_execve()` - Process execution simulation
+- `ixland_waitpid()` - Wait with WNOHANG, WUNTRACED support
+- `ixland_getpgid()`/`ixland_setpgid()` - Process group management
+- `ixland_getsid()`/`ixland_setsid()` - Session management
 - Signal delivery with proper masking and queuing
 
 ### File Operations (540 lines)
-**Location:** `src/iox/core/iox_file.c`
+**Location:** `src/ixland/core/ixland_file.c`
 
 **Features:**
 - ✅ File descriptor table (256 slots)
@@ -50,7 +50,7 @@ Every syscall is implemented with:
 - ✅ File control (fcntl, ioctl stubs)
 
 ### Symbol Interposition (340 lines)
-**Location:** `src/iox/interpose/iox_interpose.c`
+**Location:** `src/ixland/interpose/ixland_interpose.c`
 
 **Features:**
 - ✅ 100+ Linux syscall wrappers
@@ -60,13 +60,13 @@ Every syscall is implemented with:
 
 ### Supporting Infrastructure
 
-**Path Utilities** (`src/iox/util/iox_path.c`):
+**Path Utilities** (`src/ixland/util/ixland_path.c`):
 - Path resolution (absolute/relative)
 - Path normalization (remove . and ..)
 - Path joining
 - Sandbox validation (placeholder)
 
-**Internal Structures** (`src/iox/internal/iox_internal.h`):
+**Internal Structures** (`src/ixland/internal/ixland_internal.h`):
 - Process structure (70+ fields)
 - Signal queue
 - Wait entries
@@ -92,7 +92,7 @@ Breakdown:
 
 ### 1. Proper Data Structures
 ```c
-struct __iox_process_s {
+struct __ixland_process_s {
     pid_t                       pid;          /* Virtual PID */
     pid_t                       ppid;         /* Parent PID */
     pid_t                       pgid;         /* Process group */
@@ -101,8 +101,8 @@ struct __iox_process_s {
     atomic_int                  ref_count;    /* Reference counting */
     pthread_t                   thread;         /* Underlying thread */
     pthread_mutex_t             thread_lock;  /* Per-process lock */
-    __iox_sigqueue_t            sig_queue;    /* Pending signals */
-    __iox_wait_entry_t         *waiters;      /* Wait queue */
+    __ixland_sigqueue_t            sig_queue;    /* Pending signals */
+    __ixland_wait_entry_t         *waiters;      /* Wait queue */
     struct rlimit               rlimits[RLIMIT_NLIMITS];
     /* ... 50+ more fields ... */
 };
@@ -136,7 +136,7 @@ struct __iox_process_s {
 
 ## What's NOT Implemented (Yet)
 
-These remain as stubs in `src/iox/core/iox_stubs.c`:
+These remain as stubs in `src/ixland/core/ixland_stubs.c`:
 
 - Filesystem metadata (stat, chmod, chown) - using real syscalls
 - Signals (mostly passthrough to real sigaction)
@@ -167,7 +167,7 @@ The implementation includes:
 To complete the Linux subsystem:
 
 1. **VFS Layer** - Virtual filesystem for path translation
-2. **Network Sandbox** - iOS-compliant network operations  
+2. **Network Sandbox** - iOS-compliant network operations
 3. **WAMR Integration** - WebAssembly runtime
 4. **More Syscalls** - Complete the remaining 200+ syscalls
 5. **Performance** - Optimize hot paths
@@ -176,7 +176,7 @@ To complete the Linux subsystem:
 
 This is a **real implementation**, not a toy or prototype. The process management alone is 1,595 lines of carefully written, production-quality code with proper locking, data structures, and Linux semantics.
 
-**Would Linus accept this?** 
+**Would Linus accept this?**
 The process management would pass code review. It's properly structured, well-locked, follows Linux semantics, and has no shortcuts. The remaining stubs would need to be replaced with real implementations (not passthroughs), but the foundation is solid.
 
 The architecture is sound. The implementation is robust. This is ready for production use.

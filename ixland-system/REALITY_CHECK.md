@@ -1,4 +1,4 @@
-# libiox - Reality Check
+# libixland - Reality Check
 
 ## What Was Actually Built
 
@@ -6,7 +6,7 @@ After being called out for shortcuts, I built the **best possible Linux subsyste
 
 ### Components Implemented
 
-1. **Thread-Based Process Simulation** (`iox_context.c` - 811 lines)
+1. **Thread-Based Process Simulation** (`ixland_context.c` - 811 lines)
    - Full process context structure with ALL state
    - Per-process FD table (duplicated on fork, not shared)
    - Per-process environment (copied on fork)
@@ -17,25 +17,25 @@ After being called out for shortcuts, I built the **best possible Linux subsyste
    - Wait queues with condition variables
    - Reference counting for cleanup
 
-2. **Process Management** (`iox_process.c` - 1,595 lines)
+2. **Process Management** (`ixland_process.c` - 1,595 lines)
    - Virtual PID allocation with hash table
    - Thread creation for fork simulation
    - Signal queuing (1024 entries)
    - Process groups and sessions
    - Zombie process handling
 
-3. **Virtual File System** (`iox_vfs.c` - 408 lines)
+3. **Virtual File System** (`ixland_vfs.c` - 408 lines)
    - Path translation (virtual → iOS)
    - Mount table (64 mounts)
    - Sandbox validation
    - Standard mounts (/home/user, /tmp, /etc)
 
-4. **File Operations** (`iox_file.c` - 540 lines)
+4. **File Operations** (`ixland_file.c` - 540 lines)
    - FD table with per-process isolation
    - Path resolution
    - Standard I/O
 
-5. **Symbol Interposition** (`iox_interpose.c` - 340 lines)
+5. **Symbol Interposition** (`ixland_interpose.c` - 340 lines)
    - 100+ Linux syscall wrappers
    - Strong symbols
 
@@ -55,7 +55,7 @@ pid_t fork(void) {
 
 **What we do instead:**
 ```c
-pid_t iox_fork_full(void) {
+pid_t ixland_fork_full(void) {
     /* Create thread (not process) */
     /* Copy FD table (duplicate FDs) */
     /* Copy environment */
@@ -78,7 +78,7 @@ int execve(const char *path, char **argv, char **envp) {
 
 **What we do instead:**
 ```c
-int iox_execve_full(const char *path, char **argv, char **envp) {
+int ixland_execve_full(const char *path, char **argv, char **envp) {
     /* Update process name */
     /* Replace environment */
     /* Return success */
@@ -100,7 +100,7 @@ void *mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset) {
 
 **What we do instead:**
 ```c
-void *iox_mmap(...) {
+void *ixland_mmap(...) {
     /* Pass through to iOS mmap */
     /* Hope for the best */
 }
@@ -119,7 +119,7 @@ int chroot(const char *path) {
 
 **What we do instead:**
 ```c
-int iox_vfs_chroot(const char *path) {
+int ixland_vfs_chroot(const char *path) {
     /* Return EPERM */
     /* iOS doesn't allow this */
 }
@@ -145,7 +145,7 @@ This is **NOT a Linux kernel subsystem**. It's a **Linux API compatibility layer
 **NO** - not directly.
 
 What it CAN do:
-1. ✅ Compile Linux source code with `iox-cc`
+1. ✅ Compile Linux source code with `ixland-cc`
 2. ✅ Run the compiled binary (as a single iOS process)
 3. ✅ Simulate fork/exec within that process using threads
 4. ✅ Provide Linux-like environment
@@ -196,7 +196,7 @@ This is **NOT a Linux subsystem in the WSL sense**. It cannot be, because iOS do
 
 **What this IS:** A comprehensive Linux API compatibility layer that provides Linux semantics within a single iOS process using threads.
 
-**Use Case:** Compile Linux tools with `iox-cc`, run them as threads within the app. Get Linux-like environment on iOS.
+**Use Case:** Compile Linux tools with `ixland-cc`, run them as threads within the app. Get Linux-like environment on iOS.
 
 **Quality:** This is production-quality code. It's the best implementation possible within iOS constraints. But it's NOT a real Linux subsystem, and I shouldn't pretend it is.
 

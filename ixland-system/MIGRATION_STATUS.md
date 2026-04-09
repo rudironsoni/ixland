@@ -1,9 +1,9 @@
-# libiox Migration Status
+# libixland Migration Status
 
 ## Completed ✅
 
 ### Documentation
-- ✅ `docs/LIBIOX_ARCHITECTURE.md` - Complete architecture specification
+- ✅ `docs/LIBIXLAND_ARCHITECTURE.md` - Complete architecture specification
 - ✅ `README.md` - Updated with new project branding
 - ✅ `AGENTS.md` - Updated developer guide
 - ✅ `MIGRATION_STATUS.md` - This file
@@ -11,20 +11,20 @@
 ### Directory Structure
 ```
 a-shell-kernel/
-├── include/iox/              # Public headers
-│   ├── iox.h                 # Master umbrella header
-│   ├── iox_syscalls.h        # 300+ syscall prototypes
-│   ├── iox_types.h           # Type definitions
+├── include/ixland/              # Public headers
+│   ├── ixland.h                 # Master umbrella header
+│   ├── ixland_syscalls.h        # 300+ syscall prototypes
+│   ├── ixland_types.h           # Type definitions
 │   └── sys/
 │       └── types.h           # Linux-compatible types
 │
-├── src/iox/                  # Implementation
+├── src/ixland/                  # Implementation
 │   ├── internal/
-│   │   └── iox_internal.h    # Private data structures
+│   │   └── ixland_internal.h    # Private data structures
 │   └── core/
-│       └── iox_process.c     # Process syscalls (fork, exec, wait, etc.)
+│       └── ixland_process.c     # Process syscalls (fork, exec, wait, etc.)
 │
-├── libiox.a                  # Built static library ✅
+├── libixland.a                  # Built static library ✅
 ├── Makefile                  # Simple build system
 └── .old-backup/              # Backed up old files
 ```
@@ -43,11 +43,11 @@ a-shell-kernel/
 ### Build Status
 ```bash
 $ make clean && make
-rm -f src/iox/core/iox_process.o libiox.a
+rm -f src/ixland/core/ixland_process.o libixland.a
 rm -f test_process
-clang -Wall -Wextra -g -O0 -I./include -I./src/iox/internal -c src/iox/core/iox_process.c -o src/iox/core/iox_process.o
-ar rcs libiox.a src/iox/core/iox_process.o
-Created libiox.a
+clang -Wall -Wextra -g -O0 -I./include -I./src/ixland/internal -c src/ixland/core/ixland_process.c -o src/ixland/core/ixland_process.o
+ar rcs libixland.a src/ixland/core/ixland_process.o
+Created libixland.a
 ```
 
 ✅ **Builds successfully!**
@@ -66,24 +66,24 @@ Created libiox.a
 - [ ] TTY syscalls - 7 functions
 
 ### Phase 2: Runtime Layer
-- [ ] Move libc_replacement.c functions to iox_stdio.c, iox_env.c
-- [ ] C runtime startup (iox_crt0.c)
+- [ ] Move libc_replacement.c functions to ixland_stdio.c, ixland_env.c
+- [ ] C runtime startup (ixland_crt0.c)
 - [ ] Thread-local storage management
 
 ### Phase 3: Symbol Interposition
-- [ ] Create iox_interpose.c with all 300+ syscall wrappers
+- [ ] Create ixland_interpose.c with all 300+ syscall wrappers
 - [ ] Generate weak aliases or strong symbols
 
 ### Phase 4: WAMR Integration
 - [ ] Add WAMR as git submodule
 - [ ] Build WAMR for iOS
-- [ ] Implement WASI-to-iox bridge
-- [ ] Create iox-wamr runner
+- [ ] Implement WASI-to-ixland bridge
+- [ ] Create ixland-wamr runner
 
 ### Phase 5: Build System
 - [ ] Create proper CMakeLists.txt
 - [ ] XCFramework generation
-- [ ] iox-cc compiler wrapper
+- [ ] ixland-cc compiler wrapper
 
 ### Phase 6: Testing
 - [ ] Unit tests for each syscall
@@ -92,30 +92,30 @@ Created libiox.a
 
 ## Next Steps
 
-1. **Implement file syscalls** - Start with iox_file.c
-2. **Create symbol interposition layer** - iox_interpose.c
+1. **Implement file syscalls** - Start with ixland_file.c
+2. **Create symbol interposition layer** - ixland_interpose.c
 3. **Set up WAMR** - Add as submodule, implement bridge
 4. **Test compilation** - Verify Linux programs compile
 
 ## Key Decisions Made
 
-✅ **Naming**: `iox` (iOS eXtension)  
-✅ **Structure**: Internal `__iox_*_impl()` → Public `iox_*()` → Linux names  
-✅ **Migration**: Big bang - no backward compatibility  
-✅ **Architecture**: Static library with symbol interposition  
-✅ **WAMR**: Full integration, AoT mode, WASI bridge  
+✅ **Naming**: `ixland` (iOS eXtension)
+✅ **Structure**: Internal `__ixland_*_impl()` → Public `ixland_*()` → Linux names
+✅ **Migration**: Big bang - no backward compatibility
+✅ **Architecture**: Static library with symbol interposition
+✅ **WAMR**: Full integration, AoT mode, WASI bridge
 
 ## Files Ready for Implementation
 
-- `src/iox/core/iox_file.c` - File operations
-- `src/iox/core/iox_signal.c` - Signal handling  
-- `src/iox/core/iox_memory.c` - Memory management
-- `src/iox/core/iox_time.c` - Time functions
-- `src/iox/core/iox_network.c` - Network passthrough
-- `src/iox/interpose/iox_interpose.c` - Symbol wrappers
+- `src/ixland/core/ixland_file.c` - File operations
+- `src/ixland/core/ixland_signal.c` - Signal handling
+- `src/ixland/core/ixland_memory.c` - Memory management
+- `src/ixland/core/ixland_time.c` - Time functions
+- `src/ixland/core/ixland_network.c` - Network passthrough
+- `src/ixland/interpose/ixland_interpose.c` - Symbol wrappers
 
 ---
 
-**Status**: Foundation Complete  
-**Next Milestone**: Complete core syscalls (file, signal, memory)  
+**Status**: Foundation Complete
+**Next Milestone**: Complete core syscalls (file, signal, memory)
 **Estimated Timeline**: 1-2 weeks for Phase 1 completion

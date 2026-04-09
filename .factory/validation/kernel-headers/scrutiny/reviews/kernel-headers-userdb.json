@@ -6,14 +6,14 @@
   "diffReviewed": true,
   "status": "pass",
   "codeReview": {
-    "summary": "The kernel-headers-userdb feature has been correctly implemented. Both pwd.h and grp.h headers are complete with all required structures, function prototypes using the iox_ prefix, buffer size limits, and legacy compatibility macros. The source files were also updated consistently to match the new naming convention.",
+    "summary": "The kernel-headers-userdb feature has been correctly implemented. Both pwd.h and grp.h headers are complete with all required structures, function prototypes using the ixland_ prefix, buffer size limits, and legacy compatibility macros. The source files were also updated consistently to match the new naming convention.",
     "issues": []
   },
   "sharedStateObservations": [
     {
       "area": "conventions",
-      "observation": "The feature changed include guard style from IOX_FILENAME_H to _IXLAND_FILENAME_H. pwd.h uses _IXLAND_PWD_H and grp.h uses _IXLAND_GRP_H. This is a deviation from AGENTS.md which specifies 'IOX_FILENAME_H' pattern, though both patterns are internally consistent and functionally correct.",
-      "evidence": "pwd.h:2 '#ifndef _IXLAND_PWD_H', grp.h:2 '#ifndef _IXLAND_GRP_H'. AGENTS.md states: 'Must use include guards: IOX_FILENAME_H'"
+      "observation": "The feature changed include guard style from IXLAND_FILENAME_H to _IXLAND_FILENAME_H. pwd.h uses _IXLAND_PWD_H and grp.h uses _IXLAND_GRP_H. This is a deviation from AGENTS.md which specifies 'IXLAND_FILENAME_H' pattern, though both patterns are internally consistent and functionally correct.",
+      "evidence": "pwd.h:2 '#ifndef _IXLAND_PWD_H', grp.h:2 '#ifndef _IXLAND_GRP_H'. AGENTS.md states: 'Must use include guards: IXLAND_FILENAME_H'"
     },
     {
       "area": "skills",
@@ -22,10 +22,10 @@
     },
     {
       "area": "conventions",
-      "observation": "The headers were placed directly in ixland-libc/include/ rather than under ixland-libc/include/iox/ as specified in AGENTS.md for public headers. The umbrella header iox/iox.h includes them via '../pwd.h' which works but deviates from the documented structure.",
-      "evidence": "AGENTS.md states: 'Public Headers (ixland-libc/include/iox/)'. The files are at ixland-libc/include/pwd.h and ixland-libc/include/grp.h. iox.h includes them with '#include \"../pwd.h\"'"
+      "observation": "The headers were placed directly in ixland-libc/include/ rather than under ixland-libc/include/ixland/ as specified in AGENTS.md for public headers. The umbrella header ixland/ixland.h includes them via '../pwd.h' which works but deviates from the documented structure.",
+      "evidence": "AGENTS.md states: 'Public Headers (ixland-libc/include/ixland/)'. The files are at ixland-libc/include/pwd.h and ixland-libc/include/grp.h. ixland.h includes them with '#include \"../pwd.h\"'"
     }
   ],
   "addressesFailureFrom": null,
-  "summary": "The kernel-headers-userdb feature is complete and passes review. Both pwd.h and grp.h headers define the correct POSIX structures (struct passwd with all 7 fields, struct group with all 4 fields), declare all required functions with iox_ prefix, define buffer size limits (IOX_GETPW_R_SIZE_MAX, IOX_GETGR_R_SIZE_MAX), and provide legacy compatibility macros. The implementation files (pwd.c, grp.c) were also updated to use the iox_ prefix consistently. The umbrella header was updated to include both new headers. Minor observations about include guard naming pattern and header location are noted but do not block approval."
+  "summary": "The kernel-headers-userdb feature is complete and passes review. Both pwd.h and grp.h headers define the correct POSIX structures (struct passwd with all 7 fields, struct group with all 4 fields), declare all required functions with ixland_ prefix, define buffer size limits (IXLAND_GETPW_R_SIZE_MAX, IXLAND_GETGR_R_SIZE_MAX), and provide legacy compatibility macros. The implementation files (pwd.c, grp.c) were also updated to use the ixland_ prefix consistently. The umbrella header was updated to include both new headers. Minor observations about include guard naming pattern and header location are noted but do not block approval."
 }

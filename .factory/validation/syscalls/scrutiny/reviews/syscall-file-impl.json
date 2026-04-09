@@ -6,31 +6,31 @@
   "diffReviewed": true,
   "status": "pass",
   "codeReview": {
-    "summary": "The syscall-file-impl feature implements file operation syscalls (iox_open, iox_read, iox_write, iox_close, iox_lseek, iox_stat, iox_fstat, iox_lstat, iox_access) with proper VFS delegation and native iOS fallback. The implementation demonstrates good architectural separation with iox_file_v2.c handling the FD table and iox_vfs.c handling path translation. The code follows project naming conventions and includes comprehensive error handling.",
+    "summary": "The syscall-file-impl feature implements file operation syscalls (ixland_open, ixland_read, ixland_write, ixland_close, ixland_lseek, ixland_stat, ixland_fstat, ixland_lstat, ixland_access) with proper VFS delegation and native iOS fallback. The implementation demonstrates good architectural separation with ixland_file_v2.c handling the FD table and ixland_vfs.c handling path translation. The code follows project naming conventions and includes comprehensive error handling.",
     "issues": [
       {
-        "file": "ixland-system/src/iox/core/iox_file_v2.c",
+        "file": "ixland-system/src/ixland/core/ixland_file_v2.c",
         "line": 140,
         "severity": "non_blocking",
-        "description": "FD table uses a simple linear scan for allocation (O(n)). While fine for IOX_MAX_FD=256, consider documenting this limitation or using a free-list for O(1) allocation if scaling to larger FD tables in the future."
+        "description": "FD table uses a simple linear scan for allocation (O(n)). While fine for IXLAND_MAX_FD=256, consider documenting this limitation or using a free-list for O(1) allocation if scaling to larger FD tables in the future."
       },
       {
-        "file": "ixland-system/src/iox/core/iox_file_v2.c",
+        "file": "ixland-system/src/ixland/core/ixland_file_v2.c",
         "line": 301,
         "severity": "non_blocking",
-        "description": "iox_dup implementation is incomplete (returns same FD). The TODO comment acknowledges this, but dup/dup2 are important syscalls for shell operations. Consider priority for follow-up work."
+        "description": "ixland_dup implementation is incomplete (returns same FD). The TODO comment acknowledges this, but dup/dup2 are important syscalls for shell operations. Consider priority for follow-up work."
       },
       {
-        "file": "ixland-system/src/iox/core/iox_file_v2.c",
+        "file": "ixland-system/src/ixland/core/ixland_file_v2.c",
         "line": 85,
         "severity": "non_blocking",
         "description": "Standard FDs (stdin/stdout/stderr) are initialized with strcpy without checking path length. While /dev/std{in,out,err} are fixed-length strings, consider using strncpy for consistency with other path handling."
       },
       {
-        "file": "ixland-system/fs/vfs/iox_vfs.c",
+        "file": "ixland-system/fs/vfs/ixland_vfs.c",
         "line": 206,
         "severity": "non_blocking",
-        "description": "iox_vfs_chroot always returns EPERM with comment that chroot is not allowed in iOS sandbox. This is correct behavior, but consider documenting this limitation in the public API documentation."
+        "description": "ixland_vfs_chroot always returns EPERM with comment that chroot is not allowed in iOS sandbox. This is correct behavior, but consider documenting this limitation in the public API documentation."
       },
       {
         "file": "ixland-system/Tests/unit/test_file_syscalls.c",
@@ -39,18 +39,18 @@
         "description": "Test file includes function declarations with extern keyword (lines 17-26). These should ideally come from a generated test header or the declarations should be in a shared test header file to avoid duplication and maintenance overhead."
       },
       {
-        "file": "ixland-system/src/iox/core/iox_file_v2.c",
+        "file": "ixland-system/src/ixland/core/ixland_file_v2.c",
         "line": 150,
         "severity": "non_blocking",
-        "description": "__iox_get_fd_entry acquires both table lock and entry lock, then releases table lock before returning. This pattern is correct but complex - consider documenting the lock ordering invariants to prevent future deadlocks."
+        "description": "__ixland_get_fd_entry acquires both table lock and entry lock, then releases table lock before returning. This pattern is correct but complex - consider documenting the lock ordering invariants to prevent future deadlocks."
       }
     ]
   },
   "sharedStateObservations": [
     {
       "area": "conventions",
-      "observation": "The implementation consistently uses iox_ prefix for public functions and IOX_ for macros/constants, matching the documented naming conventions in AGENTS.md. Function implementations use __iox_ prefix with _impl suffix pattern which is consistent across the codebase.",
-      "evidence": "iox_file_v2.c: All public functions (iox_open, iox_read, etc.) use iox_ prefix. Internal implementations use __iox_*_impl pattern. Constants like IOX_MAX_FD, IOX_MAX_PATH follow IOX_ prefix convention."
+      "observation": "The implementation consistently uses ixland_ prefix for public functions and IXLAND_ for macros/constants, matching the documented naming conventions in AGENTS.md. Function implementations use __ixland_ prefix with _impl suffix pattern which is consistent across the codebase.",
+      "evidence": "ixland_file_v2.c: All public functions (ixland_open, ixland_read, etc.) use ixland_ prefix. Internal implementations use __ixland_*_impl pattern. Constants like IXLAND_MAX_FD, IXLAND_MAX_PATH follow IXLAND_ prefix convention."
     },
     {
       "area": "skills",
@@ -69,8 +69,8 @@
     },
     {
       "area": "architecture",
-      "observation": "The VFS layer implementation correctly follows the architecture documented in .factory/library/architecture.md. iox_vfs.c handles path translation and sandboxing while iox_file_v2.c manages the FD table, matching the documented 'File Operation Flow'.",
-      "evidence": "architecture.md File Operation Flow: 'VFS: Translate path' -> 'VFS: Call native open()'. iox_vfs_translate() in iox_vfs.c performs translation, iox_vfs_open() calls native open(). FD table management is in iox_file_v2.c."
+      "observation": "The VFS layer implementation correctly follows the architecture documented in .factory/library/architecture.md. ixland_vfs.c handles path translation and sandboxing while ixland_file_v2.c manages the FD table, matching the documented 'File Operation Flow'.",
+      "evidence": "architecture.md File Operation Flow: 'VFS: Translate path' -> 'VFS: Call native open()'. ixland_vfs_translate() in ixland_vfs.c performs translation, ixland_vfs_open() calls native open(). FD table management is in ixland_file_v2.c."
     }
   ],
   "addressesFailureFrom": null,

@@ -1,4 +1,4 @@
-/* Minimal stub for iox_vfs_translate - only for testing path resolution
+/* Minimal stub for ixland_vfs_translate - only for testing path resolution
  * This stub copies vpath directly to ios_path (passthrough for testing)
  */
 #include <errno.h>
@@ -6,7 +6,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-int iox_vfs_translate(const char *vpath, char *ios_path, size_t ios_path_len) {
+int ixland_vfs_translate(const char *vpath, char *ios_path, size_t ios_path_len) {
     if (!vpath || !ios_path || ios_path_len == 0) {
         errno = EINVAL;
         return -1;
@@ -23,7 +23,7 @@ int iox_vfs_translate(const char *vpath, char *ios_path, size_t ios_path_len) {
     return 0;
 }
 
-int iox_vfs_reverse_translate(const char *ios_path, char *vpath, size_t vpath_len) {
+int ixland_vfs_reverse_translate(const char *ios_path, char *vpath, size_t vpath_len) {
     if (!ios_path || !vpath || vpath_len == 0) {
         errno = EINVAL;
         return -1;

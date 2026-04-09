@@ -1,8 +1,8 @@
 # iXland Kernel System Implementation - Mission Summary
 
-**Project**: iXland - Linux-like Virtual Kernel for iOS  
-**Mission Status**: ✅ COMPLETED  
-**Date**: 2026-03-28  
+**Project**: iXland - Linux-like Virtual Kernel for iOS
+**Mission Status**: ✅ COMPLETED
+**Date**: 2026-03-28
 **Version**: 1.0.0
 
 ---
@@ -65,7 +65,7 @@ flowchart TD
 
 | Component | Files | Assertions |
 |-----------|-------|------------|
-| Signal Handlers | `kernel/signal/signal.c`, `iox_signal.h` | 18 |
+| Signal Handlers | `kernel/signal/signal.c`, `ixland_signal.h` | 18 |
 | Signal Delivery | `kernel/signal/signal.c` | 14 |
 | Pending Signals | `kernel/signal/signal.c` | 10 |
 | Cross-signal Tests | `Tests/unit/test_cross_signals.c` | 10 |
@@ -102,7 +102,7 @@ sequenceDiagram
 |-----------|-------|------------|
 | VFS Path Translation | `fs/vfs.c`, `vfs.h` | 12 |
 | File Descriptor Table | `fs/fdtable.c`, `fdtable.h` | 14 |
-| File Syscalls | `src/iox/core/iox_file_v2.c` | 12 |
+| File Syscalls | `src/ixland/core/ixland_file_v2.c` | 12 |
 
 **Key Achievements**:
 - Virtual filesystem with path translation
@@ -144,13 +144,13 @@ stateDiagram-v2
 
 | Component | Files | Assertions |
 |-----------|-------|------------|
-| Header Integration | `ixland-libc/include/iox/*.h` | 12 |
+| Header Integration | `ixland-libc/include/ixland/*.h` | 12 |
 | Type Consistency | `Tests/unit/test_cross_integration_headers.c` | 10 |
-| libc Integration | `src/iox/core/iox_libc_delegate.c` | 12 |
+| libc Integration | `src/ixland/core/ixland_libc_delegate.c` | 12 |
 
 **Key Achievements**:
 - Clean separation between ixland-libc and ixland-system
-- Public API headers with proper namespacing (`iox_` prefix)
+- Public API headers with proper namespacing (`ixland_` prefix)
 - Integration tests validating header consistency
 
 ---
@@ -204,7 +204,7 @@ flowchart TB
     end
 
     subgraph libc["ixland-libc (Public API)"]
-        PubHeaders["<iox/iox.h><br/><iox/iox_types.h><br/><iox/iox_syscalls.h>"]
+        PubHeaders["<ixland/ixland.h><br/><ixland/ixland_types.h><br/><ixland/ixland_syscalls.h>"]
     end
 
     subgraph System["ixland-system (Kernel)"]
@@ -236,7 +236,7 @@ flowchart TB
         WASI["WASI Runtime"]
     end
 
-    Userspace -->|iox_fork<br/>iox_execve| PubHeaders
+    Userspace -->|ixland_fork<br/>ixland_execve| PubHeaders
     PubHeaders -->|Internal Calls| Task
     PubHeaders -->|Signal Calls| Signal
     PubHeaders -->|File Calls| VFS
@@ -249,15 +249,15 @@ flowchart TB
 ```mermaid
 flowchart TD
     subgraph Public["Public API (ixland-libc)"]
-        IoxH["iox/iox.h"]
-        TypesH["iox/iox_types.h"]
-        SyscallsH["iox/iox_syscalls.h"]
+        IxlandH["ixland/ixland.h"]
+        TypesH["ixland/ixland_types.h"]
+        SyscallsH["ixland/ixland_syscalls.h"]
     end
 
     subgraph Internal["Internal (ixland-system)"]
         KernelH["ixland_kernel.h"]
         TaskH["kernel/task/task.h"]
-        SignalH["kernel/signal/iox_signal.h"]
+        SignalH["kernel/signal/ixland_signal.h"]
         VfsH["fs/vfs.h"]
     end
 
@@ -306,7 +306,7 @@ Full POSIX signal support:
 Established clear separation:
 - `ixland-libc`: Public headers and type definitions
 - `ixland-system`: Implementation details (private)
-- All public APIs use `iox_` prefix for namespacing
+- All public APIs use `ixland_` prefix for namespacing
 
 ### 5. Comprehensive Testing
 
@@ -322,9 +322,9 @@ Established clear separation:
 ### Files Created
 
 1. **Kernel Headers** (`ixland-system/kernel/internal/ixland_kernel.h`)
-2. **Public Type Definitions** (`ixland-libc/include/iox/iox_types.h`)
-3. **Syscall Interface** (`ixland-libc/include/iox/iox_syscalls.h`)
-4. **Signal Subsystem** (`ixland-system/kernel/signal/iox_signal.h`, `signal.c`)
+2. **Public Type Definitions** (`ixland-libc/include/ixland/ixland_types.h`)
+3. **Syscall Interface** (`ixland-libc/include/ixland/ixland_syscalls.h`)
+4. **Signal Subsystem** (`ixland-system/kernel/signal/ixland_signal.h`, `signal.c`)
 5. **Task Management** (`ixland-system/kernel/task/task.h`, `task.c`, `fork.c`, `exit.c`, `wait.c`, `pid.c`)
 6. **VFS Layer** (`ixland-system/fs/vfs.h`, `vfs.c`, `fdtable.c`)
 7. **Exec Subsystem** (`ixland-system/kernel/exec/exec.h`, `exec.c`)
@@ -344,7 +344,7 @@ Established clear separation:
 The iXland kernel system is now ready for:
 
 1. **Package Porting**: Bootstrap packages (bash, coreutils) can now be compiled against the syscall interface
-2. **App Integration**: The Swift layer can call into `iox_fork()`, `iox_execve()`, etc.
+2. **App Integration**: The Swift layer can call into `ixland_fork()`, `ixland_execve()`, etc.
 3. **WASI Integration**: WASM runtime can use the syscall layer for file/process operations
 4. **Performance Tuning**: Profiling and optimization of critical paths
 

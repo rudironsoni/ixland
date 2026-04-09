@@ -1,6 +1,6 @@
 #!/bin/bash
-# Package libiox and libiwasm as XCFrameworks for iOS distribution
-# Creates: LibIOX.xcframework and LibIWasm.xcframework
+# Package libixland and libiwasm as XCFrameworks for iOS distribution
+# Creates: LibIXLAND.xcframework and LibIWasm.xcframework
 
 set -e
 
@@ -17,8 +17,8 @@ echo ""
 mkdir -p "$OUTPUT_DIR"
 
 # Check for required libraries
-if [ ! -f "$PROJECT_ROOT/lib/libiox-device.a" ] || [ ! -f "$PROJECT_ROOT/lib/libiox-sim.a" ]; then
-    echo "Error: libiox libraries not found. Run: make iox-device && make iox-sim"
+if [ ! -f "$PROJECT_ROOT/lib/libixland-device.a" ] || [ ! -f "$PROJECT_ROOT/lib/libixland-sim.a" ]; then
+    echo "Error: libixland libraries not found. Run: make ixland-device && make ixland-sim"
     exit 1
 fi
 
@@ -27,17 +27,17 @@ if [ ! -f "$PROJECT_ROOT/build/wamr-device/libiwasm.a" ] || [ ! -f "$PROJECT_ROO
     exit 1
 fi
 
-echo "Packaging LibIOX.xcframework..."
+echo "Packaging LibIXLAND.xcframework..."
 
-# Create LibIOX.xcframework
+# Create LibIXLAND.xcframework
 xcodebuild -create-xcframework \
-    -library "$PROJECT_ROOT/lib/libiox-device.a" \
+    -library "$PROJECT_ROOT/lib/libixland-device.a" \
     -headers "$PROJECT_ROOT/include" \
-    -library "$PROJECT_ROOT/lib/libiox-sim.a" \
+    -library "$PROJECT_ROOT/lib/libixland-sim.a" \
     -headers "$PROJECT_ROOT/include" \
-    -output "$OUTPUT_DIR/LibIOX.xcframework"
+    -output "$OUTPUT_DIR/LibIXLAND.xcframework"
 
-echo "✓ Created LibIOX.xcframework"
+echo "✓ Created LibIXLAND.xcframework"
 echo ""
 
 echo "Packaging LibIWasm.xcframework..."
@@ -60,11 +60,11 @@ echo ""
 
 # Create distribution package
 echo "Creating distribution package..."
-DIST_DIR="$OUTPUT_DIR/libiox-ios-sdk"
+DIST_DIR="$OUTPUT_DIR/libixland-ios-sdk"
 mkdir -p "$DIST_DIR"
 
 # Copy frameworks
-cp -R "$OUTPUT_DIR/LibIOX.xcframework" "$DIST_DIR/"
+cp -R "$OUTPUT_DIR/LibIXLAND.xcframework" "$DIST_DIR/"
 cp -R "$OUTPUT_DIR/LibIWasm.xcframework" "$DIST_DIR/"
 
 # Copy headers
@@ -72,11 +72,11 @@ cp -R "$PROJECT_ROOT/include" "$DIST_DIR/"
 
 # Create README
 cat > "$DIST_DIR/README.md" << 'EOF'
-# libiox iOS SDK
+# libixland iOS SDK
 
 ## Contents
 
-- **LibIOX.xcframework** - iOS Subsystem for Linux (syscalls, VFS, networking)
+- **LibIXLAND.xcframework** - iOS Subsystem for Linux (syscalls, VFS, networking)
 - **LibIWasm.xcframework** - WebAssembly Micro Runtime (WAMR)
 - **include/** - Public headers
 
@@ -93,8 +93,8 @@ cat > "$DIST_DIR/README.md" << 'EOF'
 2. Add to your target's **Frameworks, Libraries, and Embedded Content**
 3. Import headers:
    ```objc
-   #include <iox/iox.h>
-   #include <iox/iox_wamr.h>
+   #include <ixland/ixland.h>
+   #include <ixland/ixland_wamr.h>
    ```
 
 ### Swift Package Manager
@@ -102,8 +102,8 @@ cat > "$DIST_DIR/README.md" << 'EOF'
 Add to `Package.swift`:
 ```swift
 .binaryTarget(
-    name: "LibIOX",
-    path: "LibIOX.xcframework"
+    name: "LibIXLAND",
+    path: "LibIXLAND.xcframework"
 ),
 .binaryTarget(
     name: "LibIWasm",
@@ -115,35 +115,35 @@ Add to `Package.swift`:
 
 ### Basic Syscalls
 ```c
-#include <iox/iox.h>
+#include <ixland/ixland.h>
 
-pid_t pid = iox_getpid();
+pid_t pid = ixland_getpid();
 char cwd[1024];
-iox_getcwd(cwd, sizeof(cwd));
-iox_chdir("/tmp");
+ixland_getcwd(cwd, sizeof(cwd));
+ixland_chdir("/tmp");
 ```
 
 ### WebAssembly
 ```c
-#include <iox/iox_wamr.h>
+#include <ixland/ixland_wamr.h>
 
-iox_wamr_init();
-iox_wamr_module_t *mod = iox_wamr_load_module(wasm_data, wasm_size);
-int32_t result = iox_wamr_call_function(mod, "main", NULL, 0);
-iox_wamr_unload_module(mod);
-iox_wamr_deinit();
+ixland_wamr_init();
+ixland_wamr_module_t *mod = ixland_wamr_load_module(wasm_data, wasm_size);
+int32_t result = ixland_wamr_call_function(mod, "main", NULL, 0);
+ixland_wamr_unload_module(mod);
+ixland_wamr_deinit();
 ```
 
 ## Architecture
 
-- **LibIOX** - Kernel interposition layer providing Linux syscall compatibility
+- **LibIXLAND** - Kernel interposition layer providing Linux syscall compatibility
 - **LibIWasm** - WebAssembly runtime with WASI support
 - **App** - Your application links both frameworks
 
 ## Notes
 
 - Do not use raw WAMR APIs directly
-- Use only `iox_*` and `iox_wamr_*` functions
+- Use only `ixland_*` and `ixland_wamr_*` functions
 - Both frameworks must be linked together
 EOF
 
@@ -152,19 +152,19 @@ echo "1.0.0" > "$DIST_DIR/VERSION"
 
 # Create zip archive
 cd "$OUTPUT_DIR"
-zip -r "libiox-ios-sdk-1.0.0.zip" "libiox-ios-sdk"
+zip -r "libixland-ios-sdk-1.0.0.zip" "libixland-ios-sdk"
 
 echo ""
 echo "========================================"
 echo "Packaging Complete!"
 echo "========================================"
 echo ""
-echo "Output: $OUTPUT_DIR/libiox-ios-sdk-1.0.0.zip"
+echo "Output: $OUTPUT_DIR/libixland-ios-sdk-1.0.0.zip"
 echo ""
 echo "Contents:"
 ls -lh "$DIST_DIR/"
 echo ""
 echo "To use in Xcode:"
-echo "1. Unzip libiox-ios-sdk-1.0.0.zip"
-echo "2. Drag LibIOX.xcframework and LibIWasm.xcframework to your project"
+echo "1. Unzip libixland-ios-sdk-1.0.0.zip"
+echo "2. Drag LibIXLAND.xcframework and LibIWasm.xcframework to your project"
 echo "3. Add -lpthread to Other Linker Flags"

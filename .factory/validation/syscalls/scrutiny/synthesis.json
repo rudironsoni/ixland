@@ -7,11 +7,11 @@
       "passed": true,
       "command": "cmake -B build && cmake --build build",
       "exitCode": 0,
-      "notes": "Build succeeded with minor fix: removed premature _LINUX_POLL_H define in iox_internal.h that was blocking type definitions"
+      "notes": "Build succeeded with minor fix: removed premature _LINUX_POLL_H define in ixland_internal.h that was blocking type definitions"
     },
     "test": {
       "passed": true,
-      "command": "./build/ixland-system/iox-core-tests",
+      "command": "./build/ixland-system/ixland-core-tests",
       "exitCode": 0,
       "notes": "107/112 tests passing. 5 pre-existing failures in exec tests unrelated to syscall implementations (native exec path issues). All signal, process, file, directory, identity, and poll tests pass."
     },
@@ -51,31 +51,31 @@
     {
       "featureId": "syscall-file-impl",
       "severity": "non_blocking",
-      "description": "iox_dup() implementation incomplete - returns same FD instead of duplicate",
+      "description": "ixland_dup() implementation incomplete - returns same FD instead of duplicate",
       "suggestedFix": "Complete dup/dup2 implementation for proper FD duplication with shared offset"
     },
     {
       "featureId": "syscall-file-impl",
       "severity": "non_blocking",
       "description": "FD table uses O(n) linear scan for allocation",
-      "suggestedFix": "Consider free-list for O(1) allocation if scaling beyond IOX_MAX_FD=256"
+      "suggestedFix": "Consider free-list for O(1) allocation if scaling beyond IXLAND_MAX_FD=256"
     },
     {
       "featureId": "syscall-directory-impl",
       "severity": "non_blocking",
-      "description": "Potential race condition in iox_chdir mutex locking pattern",
+      "description": "Potential race condition in ixland_chdir mutex locking pattern",
       "suggestedFix": "Review lock acquisition order and document invariants"
     },
     {
       "featureId": "syscall-directory-impl",
       "severity": "non_blocking",
-      "description": "POSIX deviation: iox_getcwd() does not support NULL buffer (auto-allocation)",
+      "description": "POSIX deviation: ixland_getcwd() does not support NULL buffer (auto-allocation)",
       "suggestedFix": "Document this design decision or implement NULL buffer support"
     },
     {
       "featureId": "syscall-signal-impl",
       "severity": "non_blocking",
-      "description": "iox_alarm() uses global static variables (not per-process)",
+      "description": "ixland_alarm() uses global static variables (not per-process)",
       "suggestedFix": "Document limitation or implement per-process alarm state"
     },
     {
@@ -94,7 +94,7 @@
       "featureId": "syscall-poll-impl",
       "severity": "non_blocking",
       "description": "No cleanup/close function for epoll instances - resource leak",
-      "suggestedFix": "Implement iox_epoll_close() to free kqueue fd and hash table"
+      "suggestedFix": "Implement ixland_epoll_close() to free kqueue fd and hash table"
     },
     {
       "featureId": "syscall-poll-impl",
@@ -105,14 +105,14 @@
     {
       "featureId": "syscall-poll-impl",
       "severity": "non_blocking",
-      "description": "iox_poll_kqueue creates new kqueue for each poll call - inefficient",
+      "description": "ixland_poll_kqueue creates new kqueue for each poll call - inefficient",
       "suggestedFix": "Cache kqueue for repeated polls on same FDs"
     }
   ],
   "appliedUpdates": [
     {
       "target": "library",
-      "description": "Fixed build issue: Removed premature _LINUX_POLL_H and _LINUX_EPOLL_H defines in iox_internal.h that were blocking type definitions from poll.h header",
+      "description": "Fixed build issue: Removed premature _LINUX_POLL_H and _LINUX_EPOLL_H defines in ixland_internal.h that were blocking type definitions from poll.h header",
       "sourceFeature": "scrutiny-validator-syscalls"
     }
   ],
@@ -125,7 +125,7 @@
     },
     {
       "target": "AGENTS.md",
-      "suggestion": "Add testing convention: Unit tests may use native system calls (open, close, stat) for test setup rather than iox_* wrappers to avoid circular dependencies. Document the VFS stub pattern for isolation testing.",
+      "suggestion": "Add testing convention: Unit tests may use native system calls (open, close, stat) for test setup rather than ixland_* wrappers to avoid circular dependencies. Document the VFS stub pattern for isolation testing.",
       "evidence": "syscall-directory-impl uses native calls in test setup. Test stubs like stub_vfs_translate.c provide isolation pattern.",
       "isSystemic": true
     },

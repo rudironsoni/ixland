@@ -48,6 +48,13 @@ echo ""
 
 EXIT_CODE=0
 VIOLATIONS=0
+LEGACY_NAME_PATTERN='\biox\b|\bIOX\b|\bIox\b|libiox|/iox/|_iox|iox_|IOX_'
+
+# Explicitly documented legacy-token exceptions (detection metadata/docs only)
+LEGACY_NAME_EXCEPTIONS=(
+    "scripts/check-naming.sh"
+    "docs/compatibility-linux/iox-to-ixland-rename-report.md"
+)
 
 # =============================================================================
 # C Code Naming Conventions
@@ -63,7 +70,7 @@ check_c_naming() {
         return 0
     fi
 
-    echo "Checking iox_ prefix enforcement..."
+    echo "Checking ixland_ prefix enforcement..."
 
     # Find all C source files
     find ixland-system ixland-libc ixland-wasm \
@@ -108,11 +115,11 @@ check_c_naming() {
 
     echo ""
     echo "C Naming Standards:"
-    echo "  • Functions: iox_lowercase() (e.g., iox_task_alloc)"
-    echo "  • Types/Structs: iox_lowercase_t (e.g., iox_task_t)"
-    echo "  • Macros/Constants: IOX_UPPER_CASE (e.g., IOX_MAX_NAME)"
-    echo "  • Enums: iox_enum_name with IOX_ENUM_VALUE"
-    echo "  • Global variables: iox_lowercase"
+    echo "  • Functions: ixland_lowercase() (e.g., ixland_task_alloc)"
+    echo "  • Types/Structs: ixland_lowercase_t (e.g., ixland_task_t)"
+    echo "  • Macros/Constants: IXLAND_UPPER_CASE (e.g., IXLAND_MAX_NAME)"
+    echo "  • Enums: ixland_enum_name with IXLAND_ENUM_VALUE"
+    echo "  • Global variables: ixland_lowercase"
 }
 
 # =============================================================================
@@ -174,20 +181,20 @@ check_manual_patterns() {
 
     local issues=0
 
-    echo "Checking for functions without iox_ prefix in public APIs..."
+    echo "Checking for functions without ixland_ prefix in public APIs..."
 
-    # Find potential public functions that should have iox_ prefix
+    # Find potential public functions that should have ixland_ prefix
     # This is a heuristic check for common patterns
     find ixland-libc/src ixland-system/kernel ixland-system/runtime \
         -name "*.c" -not -path "*/wamr/*" \
         -exec grep -l "^[a-z_]*_t\s*\*" {} \; 2>/dev/null | while read -r file; do
-        # Check for function definitions without iox_ prefix
+        # Check for function definitions without ixland_ prefix
         grep -n "^[a-zA-Z_][a-zA-Z0-9_]*\s*(" "$file" 2>/dev/null | \
             grep -v "^\s*//" | \
             grep -v "^\s*/\*" | \
             grep -v "static\|inline\|typedef" | \
             grep -v "^\s*if\|else\|while\|for\|switch\|return" | \
-            grep -v "ios_\|ixland_\|iox_\|main\|test_" | \
+            grep -v "ios_\|ixland_\|ixland_\|main\|test_" | \
             head -5 > /tmp/potential_violations.txt || true
 
         if [ -s /tmp/potential_violations.txt ]; then
@@ -209,6 +216,85 @@ check_manual_patterns() {
 }
 
 # =============================================================================
+# Legacy name eradication checks
+# =============================================================================
+check_legacy_name_eradication() {
+    echo "------------------------------------------"
+    echo "Legacy name eradication checks"
+    echo "------------------------------------------"
+
+    local issues=0
+    local path_hits=0
+    local content_hits=0
+
+    echo "Checking tracked file paths for legacy tokens..."
+    local path_matches
+    path_matches=$(git ls-files | grep -E "$LEGACY_NAME_PATTERN" || true)
+    if [ -n "$path_matches" ]; then
+        local filtered_paths=""
+        while IFS= read -r path; do
+            local skip=false
+            for allowed in "${LEGACY_NAME_EXCEPTIONS[@]}"; do
+                if [ "$path" = "$allowed" ]; then
+                    skip=true
+                    break
+                fi
+            done
+            if [ "$skip" = false ]; then
+                filtered_paths+="$path"$'\n'
+            fi
+        done <<< "$path_matches"
+
+        if [ -n "$filtered_paths" ]; then
+            path_hits=$(printf "%s" "$filtered_paths" | sed '/^$/d' | wc -l | tr -d ' ')
+            echo -e "  ${RED}✗ Found $path_hits tracked path match(es)${NC}"
+            printf "%s" "$filtered_paths"
+            issues=$((issues + path_hits))
+        else
+            echo -e "  ${GREEN}✓ Only documented path exceptions found${NC}"
+        fi
+    else
+        echo -e "  ${GREEN}✓ No tracked path matches${NC}"
+    fi
+
+    echo "Checking tracked file contents for legacy tokens..."
+    local content_matches
+    content_matches=$(git grep -n -I -E "$LEGACY_NAME_PATTERN" || true)
+    if [ -n "$content_matches" ]; then
+        local filtered=""
+        while IFS= read -r line; do
+            local file="${line%%:*}"
+            local skip=false
+            for allowed in "${LEGACY_NAME_EXCEPTIONS[@]}"; do
+                if [ "$file" = "$allowed" ]; then
+                    skip=true
+                    break
+                fi
+            done
+            if [ "$skip" = false ]; then
+                filtered+="$line"$'\n'
+            fi
+        done <<< "$content_matches"
+
+        if [ -n "$filtered" ]; then
+            content_hits=$(printf "%s" "$filtered" | sed '/^$/d' | wc -l | tr -d ' ')
+            echo -e "  ${RED}✗ Found $content_hits tracked content match(es)${NC}"
+            printf "%s" "$filtered"
+            issues=$((issues + content_hits))
+        else
+            echo -e "  ${GREEN}✓ Only documented exception matches found${NC}"
+        fi
+    else
+        echo -e "  ${GREEN}✓ No tracked content matches${NC}"
+    fi
+
+    if [ $issues -gt 0 ]; then
+        VIOLATIONS=$((VIOLATIONS + issues))
+        EXIT_CODE=1
+    fi
+}
+
+# =============================================================================
 # Summary
 # =============================================================================
 
@@ -222,6 +308,9 @@ echo ""
 check_manual_patterns
 echo ""
 
+check_legacy_name_eradication
+echo ""
+
 echo "=========================================="
 echo "Naming Convention Check Complete"
 echo "=========================================="
@@ -233,10 +322,10 @@ else
     echo ""
     echo "Naming Convention Reference:"
     echo "  C Code:"
-    echo "    • Public functions: iox_function_name()"
-    echo "    • Types: iox_type_name_t"
-    echo "    • Constants: IOX_CONSTANT_NAME"
-    echo "    • Macros: IOX_MACRO_NAME"
+    echo "    • Public functions: ixland_function_name()"
+    echo "    • Types: ixland_type_name_t"
+    echo "    • Constants: IXLAND_CONSTANT_NAME"
+    echo "    • Macros: IXLAND_MACRO_NAME"
     echo ""
     echo "  Swift Code:"
     echo "    • Types: PascalCase (MyClass)"

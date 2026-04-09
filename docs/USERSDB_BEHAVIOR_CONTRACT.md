@@ -253,7 +253,7 @@ For reentrant functions, the following minimum buffer sizes are recommended:
 | `getpwnam_r` / `getpwuid_r` | 64 bytes (mobile), 128 bytes (root) |
 | `getgrnam_r` / `getgrgid_r` | 48 bytes |
 
-The implementation defines `IOX_GETPW_R_SIZE_MAX` (1024) and `IOX_GETGR_R_SIZE_MAX` (1024) as safe upper bounds.
+The implementation defines `IXLAND_GETPW_R_SIZE_MAX` (1024) and `IXLAND_GETGR_R_SIZE_MAX` (1024) as safe upper bounds.
 
 ### Thread Safety
 

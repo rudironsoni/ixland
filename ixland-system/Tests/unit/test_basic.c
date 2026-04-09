@@ -1,4 +1,4 @@
-/* Basic test for libiox
+/* Basic test for libixland
  * Tests fundamental syscalls
  */
 
@@ -11,7 +11,7 @@
 #include <unistd.h>
 
 int main() {
-    printf("=== libiox Basic Test ===\n\n");
+    printf("=== libixland Basic Test ===\n\n");
 
     /* Test getpid/getppid */
     printf("Testing getpid/getppid...\n");
@@ -33,9 +33,9 @@ int main() {
 
     /* Test open/write/close */
     printf("Testing open/write/close...\n");
-    int fd = open("/tmp/iox_test.txt", O_CREAT | O_WRONLY | O_TRUNC, 0644);
+    int fd = open("/tmp/ixland_test.txt", O_CREAT | O_WRONLY | O_TRUNC, 0644);
     if (fd >= 0) {
-        const char *msg = "Hello from libiox!\n";
+        const char *msg = "Hello from libixland!\n";
         ssize_t written = write(fd, msg, strlen(msg));
         if (written == (ssize_t)strlen(msg)) {
             printf("  Wrote %zd bytes\n", written);
@@ -50,7 +50,7 @@ int main() {
 
     /* Test read */
     printf("Testing open/read/close...\n");
-    fd = open("/tmp/iox_test.txt", O_RDONLY);
+    fd = open("/tmp/ixland_test.txt", O_RDONLY);
     if (fd >= 0) {
         char buf[256];
         ssize_t n = read(fd, buf, sizeof(buf) - 1);

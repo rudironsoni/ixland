@@ -30,7 +30,7 @@
       "note": "Test failure is test environment issue, not implementation - exec classification tests pass"
     }
   },
-  "toolsUsed": ["iox-core-tests"],
+  "toolsUsed": ["ixland-core-tests"],
   "frictions": [
     "Two exec tests fail due to test environment setup, not implementation issues - exec_native_happy_path and exec_cloexec_behavior require filesystem fixtures that don't exist in test environment"
   ],

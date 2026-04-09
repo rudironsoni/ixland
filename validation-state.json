@@ -6,9 +6,9 @@
       "name": "WASI Runtime Target Rename",
       "assertions": {
         "VAL-EPIC1-001": {
-          "description": "No references to iox-runtime (without -wasi suffix) in BUILD_GRAPH.md",
+          "description": "No references to ixland-runtime (without -wasi suffix) in BUILD_GRAPH.md",
           "status": "passed",
-          "notes": "BUILD_GRAPH.md correctly references 'iox-runtime-wasi' and 'iox-runtime-native' targets with proper suffixes"
+          "notes": "BUILD_GRAPH.md correctly references 'ixland-runtime-wasi' and 'ixland-runtime-native' targets with proper suffixes"
         },
         "VAL-EPIC1-002": {
           "description": "cmake --preset local-dev configures successfully",
@@ -16,24 +16,24 @@
           "notes": "Preset configures successfully with ixland-libc, ixland-wasm, and ixland-packages enabled, ixland-system disabled"
         },
         "VAL-EPIC1-003": {
-          "description": "iox-runtime-wasi target exists in ixland-system/CMakeLists.txt",
+          "description": "ixland-runtime-wasi target exists in ixland-system/CMakeLists.txt",
           "status": "passed",
-          "notes": "Target defined via add_library(iox-runtime-wasi STATIC ${IOX_RUNTIME_WASI_SOURCES})"
+          "notes": "Target defined via add_library(ixland-runtime-wasi STATIC ${IXLAND_RUNTIME_WASI_SOURCES})"
         },
         "VAL-EPIC1-004": {
-          "description": "iox-runtime-wasi target has proper WASI sources",
+          "description": "ixland-runtime-wasi target has proper WASI sources",
           "status": "passed",
-          "notes": "Sources include runtime/wasi/wasm_adapter.c, src/iox/wamr/iox_wamr.c, src/iox/wamr/iox_wamr_simple.c"
+          "notes": "Sources include runtime/wasi/wasm_adapter.c, src/ixland/wamr/ixland_wamr.c, src/ixland/wamr/ixland_wamr_simple.c"
         },
         "VAL-EPIC1-005": {
-          "description": "iox-runtime-wasi links to ixland-libc-headers",
+          "description": "ixland-runtime-wasi links to ixland-libc-headers",
           "status": "passed",
-          "notes": "target_link_libraries(iox-runtime-wasi PUBLIC ixland-libc-headers) confirmed"
+          "notes": "target_link_libraries(ixland-runtime-wasi PUBLIC ixland-libc-headers) confirmed"
         },
         "VAL-EPIC1-006": {
-          "description": "iox-runtime-wasi links to ixland-wasm-contracts",
+          "description": "ixland-runtime-wasi links to ixland-wasm-contracts",
           "status": "passed",
-          "notes": "target_link_libraries(iox-runtime-wasi PUBLIC ixland-wasm-contracts) confirmed"
+          "notes": "target_link_libraries(ixland-runtime-wasi PUBLIC ixland-wasm-contracts) confirmed"
         }
       }
     },
@@ -78,12 +78,12 @@
         "VAL-EPIC3-001": {
           "description": "ixland-libc/src/usersdb/internal_provider.h exists",
           "status": "passed",
-          "notes": "File exists with IOX_DEFAULT_USER_NAME, IOX_DEFAULT_USER_UID, IOX_DEFAULT_USER_GID, IOX_DEFAULT_USER_DIR, IOX_DEFAULT_USER_SHELL, IOX_DEFAULT_GROUP_NAME, IOX_DEFAULT_GROUP_GID constants"
+          "notes": "File exists with IXLAND_DEFAULT_USER_NAME, IXLAND_DEFAULT_USER_UID, IXLAND_DEFAULT_USER_GID, IXLAND_DEFAULT_USER_DIR, IXLAND_DEFAULT_USER_SHELL, IXLAND_DEFAULT_GROUP_NAME, IXLAND_DEFAULT_GROUP_GID constants"
         },
         "VAL-EPIC3-002": {
-          "description": "IOX_DEFAULT_* constants defined",
+          "description": "IXLAND_DEFAULT_* constants defined",
           "status": "passed",
-          "notes": "Found in ixland-libc/include/linux/resource.h: IOX_DEFAULT_RLIMIT_CPU, IOX_DEFAULT_RLIMIT_FSIZE, IOX_DEFAULT_RLIMIT_DATA, IOX_DEFAULT_RLIMIT_STACK, IOX_DEFAULT_RLIMIT_CORE, IOX_DEFAULT_RLIMIT_RSS, IOX_DEFAULT_RLIMIT_NPROC, IOX_DEFAULT_RLIMIT_NOFILE, IOX_DEFAULT_RLIMIT_MEMLOCK, IOX_DEFAULT_RLIMIT_AS, IOX_DEFAULT_RLIMIT_LOCKS, IOX_DEFAULT_RLIMIT_SIGPENDING, IOX_DEFAULT_RLIMIT_MSGQUEUE, IOX_DEFAULT_RLIMIT_NICE, IOX_DEFAULT_RLIMIT_RTPRIO, IOX_DEFAULT_RLIMIT_RTTIME"
+          "notes": "Found in ixland-libc/include/linux/resource.h: IXLAND_DEFAULT_RLIMIT_CPU, IXLAND_DEFAULT_RLIMIT_FSIZE, IXLAND_DEFAULT_RLIMIT_DATA, IXLAND_DEFAULT_RLIMIT_STACK, IXLAND_DEFAULT_RLIMIT_CORE, IXLAND_DEFAULT_RLIMIT_RSS, IXLAND_DEFAULT_RLIMIT_NPROC, IXLAND_DEFAULT_RLIMIT_NOFILE, IXLAND_DEFAULT_RLIMIT_MEMLOCK, IXLAND_DEFAULT_RLIMIT_AS, IXLAND_DEFAULT_RLIMIT_LOCKS, IXLAND_DEFAULT_RLIMIT_SIGPENDING, IXLAND_DEFAULT_RLIMIT_MSGQUEUE, IXLAND_DEFAULT_RLIMIT_NICE, IXLAND_DEFAULT_RLIMIT_RTPRIO, IXLAND_DEFAULT_RLIMIT_RTTIME"
         },
         "VAL-EPIC3-003": {
           "description": "No kernel/VFS includes in usersdb implementation",
@@ -103,12 +103,12 @@
         "VAL-EPIC4-002": {
           "description": "errno = ENOENT patterns in pwd.c for not-found cases",
           "status": "passed",
-          "notes": "Found in iox_getpwnam, iox_getpwuid, iox_getpwnam_r, iox_getpwuid_r functions"
+          "notes": "Found in ixland_getpwnam, ixland_getpwuid, ixland_getpwnam_r, ixland_getpwuid_r functions"
         },
         "VAL-EPIC4-003": {
           "description": "errno = ENOENT patterns in grp.c for not-found cases",
           "status": "passed",
-          "notes": "Found in iox_getgrnam, iox_getgrgid, iox_getgrnam_r, iox_getgrgid_r functions"
+          "notes": "Found in ixland_getgrnam, ixland_getgrgid, ixland_getgrnam_r, ixland_getgrgid_r functions"
         },
         "VAL-EPIC4-004": {
           "description": "Document describes stub behavior and ENOSYS patterns",
@@ -161,24 +161,24 @@
       "name": "Native Runtime Target",
       "assertions": {
         "VAL-EPIC7-001": {
-          "description": "iox-runtime-native target exists in CMakeLists.txt",
+          "description": "ixland-runtime-native target exists in CMakeLists.txt",
           "status": "passed",
-          "notes": "Target defined via add_library(iox-runtime-native STATIC ${IOX_RUNTIME_NATIVE_SOURCES}) in ixland-system/CMakeLists.txt"
+          "notes": "Target defined via add_library(ixland-runtime-native STATIC ${IXLAND_RUNTIME_NATIVE_SOURCES}) in ixland-system/CMakeLists.txt"
         },
         "VAL-EPIC7-002": {
-          "description": "iox-runtime-native has native runtime sources",
+          "description": "ixland-runtime-native has native runtime sources",
           "status": "passed",
           "notes": "Sources include runtime/native/registry.c, linked to ixland-libc-headers"
         },
         "VAL-EPIC7-003": {
           "description": "BUILD_GRAPH.md updated with native target",
           "status": "passed",
-          "notes": "Document documents iox-runtime-native as internal target with sources, dependencies, and consumers"
+          "notes": "Document documents ixland-runtime-native as internal target with sources, dependencies, and consumers"
         },
         "VAL-EPIC7-004": {
           "description": "Native/non-WASI code separated",
           "status": "passed",
-          "notes": "IOX_RUNTIME_NATIVE_SOURCES defined separately, builds as iox-runtime-native static library linked to iox-core"
+          "notes": "IXLAND_RUNTIME_NATIVE_SOURCES defined separately, builds as ixland-runtime-native static library linked to ixland-core"
         }
       }
     },
@@ -198,7 +198,7 @@
         "VAL-EPIC8-003": {
           "description": "IXLAND_WASM_BACKEND_WAMR used in implementation",
           "status": "passed",
-          "notes": "Found in adapter_state.config.backend, ixland_wasm_adapter_get_backend(), iox_wamr.h"
+          "notes": "Found in adapter_state.config.backend, ixland_wasm_adapter_get_backend(), ixland_wamr.h"
         }
       }
     },
@@ -226,14 +226,14 @@
       "name": "Build Matrix Completion",
       "assertions": {
         "VAL-EPIC10-001": {
-          "description": "LOCAL_BUILD_MATRIX.md documents iox-runtime-native target",
+          "description": "LOCAL_BUILD_MATRIX.md documents ixland-runtime-native target",
           "status": "passed",
-          "notes": "Document has Runtime Targets section with iox-runtime-native description, sources, dependencies, and consumers"
+          "notes": "Document has Runtime Targets section with ixland-runtime-native description, sources, dependencies, and consumers"
         },
         "VAL-EPIC10-002": {
-          "description": "LOCAL_BUILD_MATRIX.md documents iox-runtime-wasi target",
+          "description": "LOCAL_BUILD_MATRIX.md documents ixland-runtime-wasi target",
           "status": "passed",
-          "notes": "Document has Runtime Targets section with iox-runtime-wasi description, sources, dependencies, and consumers"
+          "notes": "Document has Runtime Targets section with ixland-runtime-wasi description, sources, dependencies, and consumers"
         },
         "VAL-EPIC10-003": {
           "description": "ios-simulator preset configures successfully",

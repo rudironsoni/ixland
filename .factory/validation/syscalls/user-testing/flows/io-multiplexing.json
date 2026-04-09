@@ -23,7 +23,7 @@
         "Poll infrastructure validated through file operations",
         "Poll syscall implementation present"
       ],
-      "note": "poll() syscall implementation present in iox_poll.c"
+      "note": "poll() syscall implementation present in ixland_poll.c"
     },
     "VAL-SYSCALL-053": {
       "status": "pass",
@@ -46,7 +46,7 @@
       ]
     }
   },
-  "toolsUsed": ["iox-core-tests", "code inspection"],
+  "toolsUsed": ["ixland-core-tests", "code inspection"],
   "frictions": [],
   "blockers": []
 }

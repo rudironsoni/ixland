@@ -8,8 +8,8 @@
 #ifndef IXLAND_WAMR_H
 #define IXLAND_WAMR_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 /* Include public wasm contract types */
 #include <ixland/wasm/types.h>

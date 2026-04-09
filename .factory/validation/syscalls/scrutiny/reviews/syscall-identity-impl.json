@@ -6,34 +6,34 @@
   "diffReviewed": true,
   "status": "pass",
   "codeReview": {
-    "summary": "The identity syscall implementation is well-structured and correct. All six required functions (iox_getuid, iox_geteuid, iox_getgid, iox_getegid, iox_setuid, iox_setgid) are implemented with proper iOS compatibility. The implementation uses dlsym delegation to system libc with fallback to iOS defaults (UID/GID 501), and correctly returns EPERM for setuid/setgid operations since iOS apps cannot change identity. Comprehensive unit tests with 12 test cases cover consistency, error handling, and iOS-specific behavior.",
+    "summary": "The identity syscall implementation is well-structured and correct. All six required functions (ixland_getuid, ixland_geteuid, ixland_getgid, ixland_getegid, ixland_setuid, ixland_setgid) are implemented with proper iOS compatibility. The implementation uses dlsym delegation to system libc with fallback to iOS defaults (UID/GID 501), and correctly returns EPERM for setuid/setgid operations since iOS apps cannot change identity. Comprehensive unit tests with 12 test cases cover consistency, error handling, and iOS-specific behavior.",
     "issues": [
       {
-        "file": "ixland-system/src/iox/core/iox_identity.c",
+        "file": "ixland-system/src/ixland/core/ixland_identity.c",
         "line": 28,
         "severity": "non_blocking",
         "description": "Static initialization pattern is not thread-safe. Multiple threads could race to call dlsym simultaneously. While dlsym is documented as thread-safe on most platforms, using atomic or pthread_once would be more robust."
       },
       {
-        "file": "ixland-system/src/iox/core/iox_identity.c",
+        "file": "ixland-system/src/ixland/core/ixland_identity.c",
         "line": 44,
         "severity": "non_blocking",
-        "description": "Same thread-safety concern for iox_geteuid static initialization."
+        "description": "Same thread-safety concern for ixland_geteuid static initialization."
       },
       {
-        "file": "ixland-system/src/iox/core/iox_identity.c",
+        "file": "ixland-system/src/ixland/core/ixland_identity.c",
         "line": 60,
         "severity": "non_blocking",
-        "description": "Same thread-safety concern for iox_getgid static initialization."
+        "description": "Same thread-safety concern for ixland_getgid static initialization."
       },
       {
-        "file": "ixland-system/src/iox/core/iox_identity.c",
+        "file": "ixland-system/src/ixland/core/ixland_identity.c",
         "line": 76,
         "severity": "non_blocking",
-        "description": "Same thread-safety concern for iox_getegid static initialization."
+        "description": "Same thread-safety concern for ixland_getegid static initialization."
       },
       {
-        "file": "ixland-system/src/iox/internal/iox_internal.h",
+        "file": "ixland-system/src/ixland/internal/ixland_internal.h",
         "line": 764,
         "severity": "non_blocking",
         "description": "Function declarations should include brief Doxygen comments for consistency with other declarations in the header."
@@ -44,7 +44,7 @@
     {
       "area": "conventions",
       "observation": "The static initialization pattern using 'static int initialized' is used throughout the codebase for lazy dlsym resolution. While this works, it's not thread-safe and could lead to redundant dlsym calls. Consider documenting a preferred pattern (e.g., pthread_once) in AGENTS.md for future implementations.",
-      "evidence": "ixland-system/src/iox/core/iox_identity.c:28 - Pattern appears in all 4 get functions (getuid, geteuid, getgid, getegid)"
+      "evidence": "ixland-system/src/ixland/core/ixland_identity.c:28 - Pattern appears in all 4 get functions (getuid, geteuid, getgid, getegid)"
     },
     {
       "area": "knowledge",
@@ -53,5 +53,5 @@
     }
   ],
   "addressesFailureFrom": null,
-  "summary": "PASS - The syscall-identity-impl feature is correctly implemented. All six identity syscalls (getuid, geteuid, getgid, getegid, setuid, setgid) follow the naming conventions (iox_ prefix), handle errors correctly (EPERM for set operations on iOS), and include comprehensive unit tests. Minor non-blocking issues noted around thread-safety of static initialization, but these don't prevent the feature from meeting its requirements. The commit fulfills VAL-SYSCALL-038 through VAL-SYSCALL-043 as documented in the validation contract."
+  "summary": "PASS - The syscall-identity-impl feature is correctly implemented. All six identity syscalls (getuid, geteuid, getgid, getegid, setuid, setgid) follow the naming conventions (ixland_ prefix), handle errors correctly (EPERM for set operations on iOS), and include comprehensive unit tests. Minor non-blocking issues noted around thread-safety of static initialization, but these don't prevent the feature from meeting its requirements. The commit fulfills VAL-SYSCALL-038 through VAL-SYSCALL-043 as documented in the validation contract."
 }

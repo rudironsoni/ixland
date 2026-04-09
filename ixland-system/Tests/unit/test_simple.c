@@ -1,4 +1,4 @@
-/* Simple test for libiox */
+/* Simple test for libixland */
 
 #include <errno.h>
 #include <fcntl.h>

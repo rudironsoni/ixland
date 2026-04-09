@@ -1,8 +1,8 @@
-# Building libiox for iOS
+# Building libixland for iOS
 
 ## Overview
 
-**libiox** is designed exclusively for iOS. Building for macOS will result in runtime failures due to iOS-specific APIs and constraints.
+**libixland** is designed exclusively for iOS. Building for macOS will result in runtime failures due to iOS-specific APIs and constraints.
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@
 make ios-sim
 ```
 
-Builds `libiox-sim.a` targeting iOS Simulator.
+Builds `libixland-sim.a` targeting iOS Simulator.
 - Architecture: arm64 (Apple Silicon Macs) or x86_64 (Intel Macs)
 - Target: `arm64-apple-ios16.0-simulator` or `x86_64-apple-ios16.0-simulator`
 
@@ -27,7 +27,7 @@ Builds `libiox-sim.a` targeting iOS Simulator.
 make ios-device
 ```
 
-Builds `libiox-device.a` targeting physical iOS devices.
+Builds `libixland-device.a` targeting physical iOS devices.
 - Architecture: arm64
 - Target: `arm64-apple-ios16.0`
 
@@ -44,9 +44,9 @@ make info
 ## Build Output
 
 After successful build:
-- `libiox-sim.a` - iOS Simulator static library (~213KB)
-- `libiox-device.a` - iOS Device static library (~213KB)
-- `src/iox/*/*.o` - Object files (cleaned by `make clean`)
+- `libixland-sim.a` - iOS Simulator static library (~213KB)
+- `libixland-device.a` - iOS Device static library (~213KB)
+- `src/ixland/*/*.o` - Object files (cleaned by `make clean`)
 
 ## iOS SDK Detection
 
@@ -61,12 +61,12 @@ If SDKs are not found, the build will fail with an error message.
 ### iOS Simulator
 - `-target arm64-apple-ios16.0-simulator` (or x86_64)
 - `-isysroot <iPhoneSimulator.sdk>`
-- `-DIOX_IOS_BUILD -DIOX_SIMULATOR_BUILD`
+- `-DIXLAND_IOS_BUILD -DIXLAND_SIMULATOR_BUILD`
 
 ### iOS Device
 - `-target arm64-apple-ios16.0`
 - `-isysroot <iPhoneOS.sdk>`
-- `-DIOX_IOS_BUILD`
+- `-DIXLAND_IOS_BUILD`
 
 ## Important Notes
 
@@ -98,7 +98,7 @@ All warnings have been fixed. If you see new warnings, please report them.
 ## Integration with Xcode
 
 1. Build the library: `make ios-sim` or `make ios-device`
-2. Add `libiox-sim.a` or `libiox-device.a` to your Xcode project
+2. Add `libixland-sim.a` or `libixland-device.a` to your Xcode project
 3. Add header search path: `$(PROJECT_DIR)/include`
 4. Link with `-lpthread`
 5. Ensure deployment target is iOS 16.0+
@@ -109,8 +109,8 @@ Tests are located in `tests/` directory but **cannot run on macOS**.
 
 To run tests:
 1. Create an iOS test app target in Xcode
-2. Link against `libiox-sim.a` (Simulator) or `libiox-device.a` (Device)
+2. Link against `libixland-sim.a` (Simulator) or `libixland-device.a` (Device)
 3. Include test files from `tests/`
 4. Build and run on iOS Simulator or Device
 
-See `tests/iox_test.h` for the test framework API.
+See `tests/ixland_test.h` for the test framework API.

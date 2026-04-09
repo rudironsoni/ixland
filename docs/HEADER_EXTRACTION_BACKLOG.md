@@ -44,21 +44,21 @@ This document tracks the backlog of header files that need classification and po
 | `kernel/internal/ixland_kernel.h` | Kernel internal structures | **move-internal** |
 | `kernel/exec/exec.h` | Process execution internals | **move-internal** |
 | `kernel/task/task.h` | Task/thread management | **move-internal** |
-| `kernel/signal/iox_signal.h` | Signal handling internals | **move-internal** |
+| `kernel/signal/ixland_signal.h` | Signal handling internals | **move-internal** |
 
 ### ixland-system/runtime/ (Runtime Layer)
 
 | Header | Description | Classification Needed |
 |--------|-------------|----------------------|
 | `runtime/native/registry.h` | Native command registry | **keep-public** |
-| `runtime/wasi/iox_wamr.h` | WAMR WASM runtime integration | **move-internal** |
+| `runtime/wasi/ixland_wamr.h` | WAMR WASM runtime integration | **move-internal** |
 | `runtime/wasi/wasm_adapter.h` | WASI adapter layer | **move-internal** |
 
 ### ixland-system/src/ (Implementation Layer)
 
 | Header | Description | Classification Needed |
 |--------|-------------|----------------------|
-| `src/iox/internal/iox_internal.h` | Internal iox system header | **move-internal** |
+| `src/ixland/internal/ixland_internal.h` | Internal ixland system header | **move-internal** |
 
 ---
 
@@ -70,7 +70,7 @@ Headers that should move to `ixland-libc/include/`:
 
 - Standard C library extensions
 - POSIX compatibility headers
-- Public, stable APIs with iox_ prefixes
+- Public, stable APIs with ixland_ prefixes
 - Database APIs (pwd, grp - already done)
 
 **Candidates:**
@@ -104,9 +104,9 @@ Headers that should become internal (move to `src/` or mark as private):
 - `kernel/internal/ixland_kernel.h` - Already internal
 - `kernel/exec/exec.h` - Move to kernel/internal/
 - `kernel/task/task.h` - Move to kernel/internal/
-- `kernel/signal/iox_signal.h` - Move to kernel/internal/
+- `kernel/signal/ixland_signal.h` - Move to kernel/internal/
 - `runtime/wasi/*.h` - Already effectively internal
-- `src/iox/internal/iox_internal.h` - Already internal
+- `src/ixland/internal/ixland_internal.h` - Already internal
 
 ### unclear
 
@@ -130,16 +130,16 @@ Extracted to `ixland-libc/include/`:
 | `grp.h` | Group database operations | ✅ Complete |
 | `pwd.h` | User password database | ✅ Complete |
 
-### Wave 2: iox Umbrella Headers
+### Wave 2: ixland Umbrella Headers
 
-Extracted to `ixland-libc/include/iox/`:
+Extracted to `ixland-libc/include/ixland/`:
 
 | Header | Description | Status |
 |--------|-------------|--------|
-| `iox/iox.h` | Master umbrella header | ✅ Complete |
-| `iox/iox_types.h` | Public type definitions | ✅ Complete |
-| `iox/iox_syscalls.h` | Syscall declarations | ✅ Complete |
-| `iox/sys/types.h` | System types wrapper | ✅ Complete |
+| `ixland/ixland.h` | Master umbrella header | ✅ Complete |
+| `ixland/ixland_types.h` | Public type definitions | ✅ Complete |
+| `ixland/ixland_syscalls.h` | Syscall declarations | ✅ Complete |
+| `ixland/sys/types.h` | System types wrapper | ✅ Complete |
 
 ### Wave 2: Linux-Compatible Headers
 
@@ -165,8 +165,8 @@ Extracted to `ixland-libc/include/linux/`:
 
 ### 1. Consolidate VFS Headers
 
-**Priority:** Medium  
-**Complexity:** Medium  
+**Priority:** Medium
+**Complexity:** Medium
 **Action:** Merge old `include/vfs.h` with `fs/vfs.h`
 
 **Details:**
@@ -178,12 +178,12 @@ Extracted to `ixland-libc/include/linux/`:
 - [ ] Audit all consumers of old `include/vfs.h`
 - [ ] Decide on backward compatibility strategy
 - [ ] Either delete old header or provide compatibility shim
-- [ ] Move `fs/vfs.h` to `include/iox_vfs.h` or keep in fs/
+- [ ] Move `fs/vfs.h` to `include/ixland_vfs.h` or keep in fs/
 
 ### 2. Classify ixland_error.h
 
-**Priority:** High  
-**Complexity:** Low  
+**Priority:** High
+**Complexity:** Low
 **Action:** Decide on final location for ixland_error.h
 
 **Details:**
@@ -193,15 +193,15 @@ Extracted to `ixland-libc/include/linux/`:
 
 **Decision Options:**
 - **Option A:** Keep in `ixland-system/` (system-level API)
-- **Option B:** Move to `ixland-libc/include/iox/` (public libc API)
+- **Option B:** Move to `ixland-libc/include/ixland/` (public libc API)
 - **Option C:** Split into public API + internal implementation
 
 **Recommendation:** Option A - keep as system-level API since it's tightly coupled with the runtime implementation.
 
 ### 3. Internalize Kernel Headers
 
-**Priority:** Medium  
-**Complexity:** Low  
+**Priority:** Medium
+**Complexity:** Low
 **Action:** Move kernel internals to `kernel/internal/`
 
 **Details:**
@@ -211,7 +211,7 @@ Several kernel headers are implementation details that should not be public:
 |--------|-----------------|-----------------|
 | `exec.h` | `kernel/exec/` | `kernel/internal/` |
 | `task.h` | `kernel/task/` | `kernel/internal/` |
-| `iox_signal.h` | `kernel/signal/` | `kernel/internal/` |
+| `ixland_signal.h` | `kernel/signal/` | `kernel/internal/` |
 
 **Tasks:**
 - [ ] Move headers to internal/ subdirectories
@@ -226,7 +226,7 @@ Several kernel headers are implementation details that should not be public:
 ixland-system/
 ├── include/
 │   ├── ixland_error.h          # Keep: System error/stdio API
-│   └── iox_vfs.h               # Rename from fs/vfs.h
+│   └── ixland_vfs.h               # Rename from fs/vfs.h
 │
 ├── kernel/
 │   ├── internal/               # Private kernel headers
@@ -247,12 +247,12 @@ ixland-system/
 │   │   └── registry.c
 │   └── wasi/
 │       └── internal/           # Private WASI headers
-│           ├── iox_wamr.h
+│           ├── ixland_wamr.h
 │           └── wasm_adapter.h
 │
 └── src/
     └── internal/
-        └── iox_internal.h      # Already internal
+        └── ixland_internal.h      # Already internal
 ```
 
 ---
@@ -265,7 +265,7 @@ ixland-system/
    - [ ] Create `kernel/internal/` and move private headers
 
 2. **Short-term (Wave 3B):**
-   - [ ] Move `fs/vfs.h` to `include/iox_vfs.h`
+   - [ ] Move `fs/vfs.h` to `include/ixland_vfs.h`
    - [ ] Move `fs/fdtable.h` to `fs/internal/`
    - [ ] Move WASI headers to `runtime/wasi/internal/`
 

@@ -6,18 +6,18 @@
   "diffReviewed": true,
   "status": "pass",
   "codeReview": {
-    "summary": "Comprehensive implementation of session and process group management APIs. All 5 functions (iox_setsid, iox_getsid, iox_getpgrp, iox_getpgid, iox_setpgid) are correctly implemented with proper Linux semantics, error handling (ESRCH, EPERM), and 11 unit tests covering positive and negative cases.",
+    "summary": "Comprehensive implementation of session and process group management APIs. All 5 functions (ixland_setsid, ixland_getsid, ixland_getpgrp, ixland_getpgid, ixland_setpgid) are correctly implemented with proper Linux semantics, error handling (ESRCH, EPERM), and 11 unit tests covering positive and negative cases.",
     "issues": []
   },
   "sharedStateObservations": [
     {
       "area": "conventions",
-      "observation": "Code follows naming conventions consistently: iox_ prefix for functions, IOX_ for macros, proper errno setting pattern. All functions validate input and set errno appropriately.",
-      "evidence": "ixland-system/kernel/task/task.c:198-313 - All functions follow iox_ naming, set errno=ESRCH for invalid tasks and errno=EPERM for permission violations"
+      "observation": "Code follows naming conventions consistently: ixland_ prefix for functions, IXLAND_ for macros, proper errno setting pattern. All functions validate input and set errno appropriately.",
+      "evidence": "ixland-system/kernel/task/task.c:198-313 - All functions follow ixland_ naming, set errno=ESRCH for invalid tasks and errno=EPERM for permission violations"
     },
     {
       "area": "services",
-      "observation": "Build and test infrastructure works correctly. Tests run via ./build-macos/ixland-system/iox-core-tests.",
+      "observation": "Build and test infrastructure works correctly. Tests run via ./build-macos/ixland-system/ixland-core-tests.",
       "evidence": "Handoff shows build succeeded and all 18 session/process group tests passed"
     }
   ],

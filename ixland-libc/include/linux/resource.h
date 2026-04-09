@@ -21,9 +21,9 @@ extern "C" {
  * ============================================================================ */
 
 /* Resource limit values */
-#define IOX_RLIM_INFINITY ((uint64_t)-1)     /* No limit */
-#define IOX_RLIM_SAVED_MAX IOX_RLIM_INFINITY /* Saved max value */
-#define IOX_RLIM_SAVED_CUR IOX_RLIM_INFINITY /* Saved current value */
+#define IXLAND_RLIM_INFINITY ((uint64_t)-1)        /* No limit */
+#define IXLAND_RLIM_SAVED_MAX IXLAND_RLIM_INFINITY /* Saved max value */
+#define IXLAND_RLIM_SAVED_CUR IXLAND_RLIM_INFINITY /* Saved current value */
 
 /* Resource limit structure (64-bit) */
 struct linux_rlimit {
@@ -42,23 +42,23 @@ struct linux_rlimit64 {
  * ============================================================================ */
 
 /* Resource numbers for getrlimit/setrlimit/prlimit */
-#define IOX_RLIMIT_CPU 0         /* CPU time in seconds */
-#define IOX_RLIMIT_FSIZE 1       /* Maximum file size */
-#define IOX_RLIMIT_DATA 2        /* Maximum data size */
-#define IOX_RLIMIT_STACK 3       /* Maximum stack size */
-#define IOX_RLIMIT_CORE 4        /* Maximum core file size */
-#define IOX_RLIMIT_RSS 5         /* Maximum resident set size */
-#define IOX_RLIMIT_NPROC 6       /* Maximum number of processes */
-#define IOX_RLIMIT_NOFILE 7      /* Maximum number of open files */
-#define IOX_RLIMIT_MEMLOCK 8     /* Maximum locked-in-memory address space */
-#define IOX_RLIMIT_AS 9          /* Maximum address space */
-#define IOX_RLIMIT_LOCKS 10      /* Maximum file locks */
-#define IOX_RLIMIT_SIGPENDING 11 /* Maximum queued signals */
-#define IOX_RLIMIT_MSGQUEUE 12   /* Maximum bytes in POSIX message queues */
-#define IOX_RLIMIT_NICE 13       /* Maximum nice priority */
-#define IOX_RLIMIT_RTPRIO 14     /* Maximum real-time priority */
-#define IOX_RLIMIT_RTTIME 15     /* Maximum real-time timeout */
-#define IOX_RLIMIT_NLIMITS 16    /* Number of resource limits */
+#define IXLAND_RLIMIT_CPU 0         /* CPU time in seconds */
+#define IXLAND_RLIMIT_FSIZE 1       /* Maximum file size */
+#define IXLAND_RLIMIT_DATA 2        /* Maximum data size */
+#define IXLAND_RLIMIT_STACK 3       /* Maximum stack size */
+#define IXLAND_RLIMIT_CORE 4        /* Maximum core file size */
+#define IXLAND_RLIMIT_RSS 5         /* Maximum resident set size */
+#define IXLAND_RLIMIT_NPROC 6       /* Maximum number of processes */
+#define IXLAND_RLIMIT_NOFILE 7      /* Maximum number of open files */
+#define IXLAND_RLIMIT_MEMLOCK 8     /* Maximum locked-in-memory address space */
+#define IXLAND_RLIMIT_AS 9          /* Maximum address space */
+#define IXLAND_RLIMIT_LOCKS 10      /* Maximum file locks */
+#define IXLAND_RLIMIT_SIGPENDING 11 /* Maximum queued signals */
+#define IXLAND_RLIMIT_MSGQUEUE 12   /* Maximum bytes in POSIX message queues */
+#define IXLAND_RLIMIT_NICE 13       /* Maximum nice priority */
+#define IXLAND_RLIMIT_RTPRIO 14     /* Maximum real-time priority */
+#define IXLAND_RLIMIT_RTTIME 15     /* Maximum real-time timeout */
+#define IXLAND_RLIMIT_NLIMITS 16    /* Number of resource limits */
 
 /* ============================================================================
  * RESOURCE USAGE
@@ -105,9 +105,9 @@ struct linux_rusage_64 {
 };
 
 /* Who parameter for getrusage */
-#define IOX_RUSAGE_SELF 0      /* Calling process */
-#define IOX_RUSAGE_CHILDREN -1 /* Terminated children */
-#define IOX_RUSAGE_THREAD 1    /* Calling thread (Linux-specific) */
+#define IXLAND_RUSAGE_SELF 0      /* Calling process */
+#define IXLAND_RUSAGE_CHILDREN -1 /* Terminated children */
+#define IXLAND_RUSAGE_THREAD 1    /* Calling thread (Linux-specific) */
 
 /* ============================================================================
  * PRUSAGE (Process Resource Usage) - Linux extension
@@ -130,14 +130,14 @@ struct linux_prusage {
  * ============================================================================ */
 
 /* Priority ranges */
-#define IOX_PRIO_MIN (-20) /* Highest priority */
-#define IOX_PRIO_MAX 19    /* Lowest priority */
-#define IOX_NICE_WIDTH 40  /* Nice width (MAX - MIN + 1) */
+#define IXLAND_PRIO_MIN (-20) /* Highest priority */
+#define IXLAND_PRIO_MAX 19    /* Lowest priority */
+#define IXLAND_NICE_WIDTH 40  /* Nice width (MAX - MIN + 1) */
 
 /* getpriority/setpriority which parameter */
-#define IOX_PRIO_PROCESS 0 /* Process */
-#define IOX_PRIO_PGRP 1    /* Process group */
-#define IOX_PRIO_USER 2    /* User */
+#define IXLAND_PRIO_PROCESS 0 /* Process */
+#define IXLAND_PRIO_PGRP 1    /* Process group */
+#define IXLAND_PRIO_USER 2    /* User */
 
 /* ============================================================================
  * VM STATISTICS
@@ -159,11 +159,11 @@ struct linux_vmstat {
 /**
  * @brief Get resource limits
  *
- * @param resource Resource to query (IOX_RLIMIT_*)
+ * @param resource Resource to query (IXLAND_RLIMIT_*)
  * @param rlim Where to store the limits
  * @return int 0 on success, -1 on error with errno set
  */
-int iox_getrlimit(int resource, struct linux_rlimit *rlim);
+int ixland_getrlimit(int resource, struct linux_rlimit *rlim);
 
 /**
  * @brief Get resource limits (64-bit version)
@@ -172,7 +172,7 @@ int iox_getrlimit(int resource, struct linux_rlimit *rlim);
  * @param rlim Where to store the limits
  * @return int 0 on success, -1 on error
  */
-int iox_getrlimit64(int resource, struct linux_rlimit64 *rlim);
+int ixland_getrlimit64(int resource, struct linux_rlimit64 *rlim);
 
 /**
  * @brief Set resource limits
@@ -181,7 +181,7 @@ int iox_getrlimit64(int resource, struct linux_rlimit64 *rlim);
  * @param rlim New limits (rlim_cur <= rlim_max)
  * @return int 0 on success, -1 on error with errno set
  */
-int iox_setrlimit(int resource, const struct linux_rlimit *rlim);
+int ixland_setrlimit(int resource, const struct linux_rlimit *rlim);
 
 /**
  * @brief Set resource limits (64-bit version)
@@ -190,7 +190,7 @@ int iox_setrlimit(int resource, const struct linux_rlimit *rlim);
  * @param rlim New limits
  * @return int 0 on success, -1 on error
  */
-int iox_setrlimit64(int resource, const struct linux_rlimit64 *rlim);
+int ixland_setrlimit64(int resource, const struct linux_rlimit64 *rlim);
 
 /**
  * @brief Extended get/set resource limits (Linux-specific)
@@ -201,8 +201,8 @@ int iox_setrlimit64(int resource, const struct linux_rlimit64 *rlim);
  * @param old_limit Where to store old limits (NULL to not retrieve)
  * @return int 0 on success, -1 on error
  */
-int iox_prlimit(pid_t pid, int resource, const struct linux_rlimit *new_limit,
-                struct linux_rlimit *old_limit);
+int ixland_prlimit(pid_t pid, int resource, const struct linux_rlimit *new_limit,
+                   struct linux_rlimit *old_limit);
 
 /**
  * @brief Extended get/set resource limits (64-bit)
@@ -213,17 +213,17 @@ int iox_prlimit(pid_t pid, int resource, const struct linux_rlimit *new_limit,
  * @param old_limit Where to store old limits (NULL to not retrieve)
  * @return int 0 on success, -1 on error
  */
-int iox_prlimit64(pid_t pid, int resource, const struct linux_rlimit64 *new_limit,
-                  struct linux_rlimit64 *old_limit);
+int ixland_prlimit64(pid_t pid, int resource, const struct linux_rlimit64 *new_limit,
+                     struct linux_rlimit64 *old_limit);
 
 /**
  * @brief Get resource usage
  *
- * @param who IOX_RUSAGE_SELF, IOX_RUSAGE_CHILDREN, or IOX_RUSAGE_THREAD
+ * @param who IXLAND_RUSAGE_SELF, IXLAND_RUSAGE_CHILDREN, or IXLAND_RUSAGE_THREAD
  * @param usage Where to store usage statistics
  * @return int 0 on success, -1 on error with errno set
  */
-int iox_getrusage(int who, struct linux_rusage *usage);
+int ixland_getrusage(int who, struct linux_rusage *usage);
 
 /**
  * @brief Get resource usage (64-bit version)
@@ -232,26 +232,26 @@ int iox_getrusage(int who, struct linux_rusage *usage);
  * @param usage Where to store usage statistics
  * @return int 0 on success, -1 on error
  */
-int iox_getrusage64(int who, struct linux_rusage_64 *usage);
+int ixland_getrusage64(int who, struct linux_rusage_64 *usage);
 
 /**
  * @brief Get scheduling priority
  *
- * @param which IOX_PRIO_PROCESS, IOX_PRIO_PGRP, or IOX_PRIO_USER
+ * @param which IXLAND_PRIO_PROCESS, IXLAND_PRIO_PGRP, or IXLAND_PRIO_USER
  * @param who Process/pgrp/user ID (0 for current)
  * @return int Priority value on success, -1 on error
  */
-int iox_getpriority(int which, id_t who);
+int ixland_getpriority(int which, id_t who);
 
 /**
  * @brief Set scheduling priority
  *
- * @param which IOX_PRIO_PROCESS, IOX_PRIO_PGRP, or IOX_PRIO_USER
+ * @param which IXLAND_PRIO_PROCESS, IXLAND_PRIO_PGRP, or IXLAND_PRIO_USER
  * @param who Process/pgrp/user ID (0 for current)
- * @param prio New priority (IOX_PRIO_MIN to IOX_PRIO_MAX)
+ * @param prio New priority (IXLAND_PRIO_MIN to IXLAND_PRIO_MAX)
  * @return int 0 on success, -1 on error
  */
-int iox_setpriority(int which, id_t who, int prio);
+int ixland_setpriority(int which, id_t who, int prio);
 
 /* ============================================================================
  * TIMES STRUCTURE
@@ -271,102 +271,102 @@ struct linux_tms {
  * @param tms Where to store times
  * @return clock_t Elapsed real time in clock ticks
  */
-clock_t iox_times(struct linux_tms *tms);
+clock_t ixland_times(struct linux_tms *tms);
 
 /* ============================================================================
  * IOPRIO (I/O Priority) - Linux extension
  * ============================================================================ */
 
 /* I/O priority classes */
-#define IOX_IOPRIO_CLASS_NONE 0 /* No priority */
-#define IOX_IOPRIO_CLASS_RT 1   /* Real-time class */
-#define IOX_IOPRIO_CLASS_BE 2   /* Best-effort class */
-#define IOX_IOPRIO_CLASS_IDLE 3 /* Idle class */
+#define IXLAND_IOPRIO_CLASS_NONE 0 /* No priority */
+#define IXLAND_IOPRIO_CLASS_RT 1   /* Real-time class */
+#define IXLAND_IOPRIO_CLASS_BE 2   /* Best-effort class */
+#define IXLAND_IOPRIO_CLASS_IDLE 3 /* Idle class */
 
 /* I/O priority levels */
-#define IOX_IOPRIO_NCLASS 4
-#define IOX_IOPRIO_BITS 13
-#define IOX_IOPRIO_MASK ((1UL << IOX_IOPRIO_BITS) - 1)
-#define IOX_IOPRIO_PRIO_MASK IOX_IOPRIO_MASK
-#define IOX_IOPRIO_PRIO_CLASS_MASK (~IOX_IOPRIO_MASK)
+#define IXLAND_IOPRIO_NCLASS 4
+#define IXLAND_IOPRIO_BITS 13
+#define IXLAND_IOPRIO_MASK ((1UL << IXLAND_IOPRIO_BITS) - 1)
+#define IXLAND_IOPRIO_PRIO_MASK IXLAND_IOPRIO_MASK
+#define IXLAND_IOPRIO_PRIO_CLASS_MASK (~IXLAND_IOPRIO_MASK)
 
 /* I/O priority shift */
-#define IOX_IOPRIO_CLASS_SHIFT 13
+#define IXLAND_IOPRIO_CLASS_SHIFT 13
 
 /* I/O priority helpers */
-#define IOX_IOPRIO_PRIO_NUMBITS 13
-#define IOX_IOPRIO_PRIO_CLASS(x) ((x) >> IOX_IOPRIO_CLASS_SHIFT)
-#define IOX_IOPRIO_PRIO_DATA(x) ((x) & IOX_IOPRIO_PRIO_MASK)
-#define IOX_IOPRIO_PRIO_VALUE(class, data) (((class) << IOX_IOPRIO_CLASS_SHIFT) | (data))
+#define IXLAND_IOPRIO_PRIO_NUMBITS 13
+#define IXLAND_IOPRIO_PRIO_CLASS(x) ((x) >> IXLAND_IOPRIO_CLASS_SHIFT)
+#define IXLAND_IOPRIO_PRIO_DATA(x) ((x) & IXLAND_IOPRIO_PRIO_MASK)
+#define IXLAND_IOPRIO_PRIO_VALUE(class, data) (((class) << IXLAND_IOPRIO_CLASS_SHIFT) | (data))
 
 /* I/O priority which values */
-#define IOX_IOPRIO_WHO_PROCESS 0 /* Process */
-#define IOX_IOPRIO_WHO_PGRP 1    /* Process group */
-#define IOX_IOPRIO_WHO_USER 2    /* User */
+#define IXLAND_IOPRIO_WHO_PROCESS 0 /* Process */
+#define IXLAND_IOPRIO_WHO_PGRP 1    /* Process group */
+#define IXLAND_IOPRIO_WHO_USER 2    /* User */
 
 /**
  * @brief Get I/O priority
  *
- * @param which IOX_IOPRIO_WHO_*
+ * @param which IXLAND_IOPRIO_WHO_*
  * @param who PID/PGID/UID (0 for current)
  * @return int I/O priority on success, -1 on error
  */
-int iox_ioprio_get(int which, int who);
+int ixland_ioprio_get(int which, int who);
 
 /**
  * @brief Set I/O priority
  *
- * @param which IOX_IOPRIO_WHO_*
+ * @param which IXLAND_IOPRIO_WHO_*
  * @param who PID/PGID/UID (0 for current)
  * @param ioprio New I/O priority
  * @return int 0 on success, -1 on error
  */
-int iox_ioprio_set(int which, int who, int ioprio);
+int ixland_ioprio_set(int which, int who, int ioprio);
 
 /* ============================================================================
  * GETRLIMIT HELPER MACROS
  * ============================================================================ */
 
 /* Helper to get soft limit */
-#define IOX_RLIMIT_SOFT(res)                       \
-    ({                                             \
-        struct linux_rlimit __rlim;                \
-        int __ret = iox_getrlimit((res), &__rlim); \
-        (__ret == 0 ? __rlim.rlim_cur : 0);        \
+#define IXLAND_RLIMIT_SOFT(res)                       \
+    ({                                                \
+        struct linux_rlimit __rlim;                   \
+        int __ret = ixland_getrlimit((res), &__rlim); \
+        (__ret == 0 ? __rlim.rlim_cur : 0);           \
     })
 
 /* Helper to get hard limit */
-#define IOX_RLIMIT_HARD(res)                       \
-    ({                                             \
-        struct linux_rlimit __rlim;                \
-        int __ret = iox_getrlimit((res), &__rlim); \
-        (__ret == 0 ? __rlim.rlim_max : 0);        \
+#define IXLAND_RLIMIT_HARD(res)                       \
+    ({                                                \
+        struct linux_rlimit __rlim;                   \
+        int __ret = ixland_getrlimit((res), &__rlim); \
+        (__ret == 0 ? __rlim.rlim_max : 0);           \
     })
 
 /* Check if limit is infinite */
-#define IOX_RLIMIT_IS_INFINITY(lim) ((lim) == IOX_RLIM_INFINITY)
+#define IXLAND_RLIMIT_IS_INFINITY(lim) ((lim) == IXLAND_RLIM_INFINITY)
 
 /* ============================================================================
  * DEFAULT LIMITS
  * ============================================================================ */
 
 /* iXland default limits */
-#define IOX_DEFAULT_RLIMIT_CPU IOX_RLIM_INFINITY
-#define IOX_DEFAULT_RLIMIT_FSIZE IOX_RLIM_INFINITY
-#define IOX_DEFAULT_RLIMIT_DATA (512 * 1024 * 1024) /* 512 MB */
-#define IOX_DEFAULT_RLIMIT_STACK (8 * 1024 * 1024)  /* 8 MB */
-#define IOX_DEFAULT_RLIMIT_CORE 0                   /* No core dumps */
-#define IOX_DEFAULT_RLIMIT_RSS IOX_RLIM_INFINITY
-#define IOX_DEFAULT_RLIMIT_NPROC 1024                 /* Max processes */
-#define IOX_DEFAULT_RLIMIT_NOFILE 256                 /* Max open files */
-#define IOX_DEFAULT_RLIMIT_MEMLOCK (64 * 1024 * 1024) /* 64 MB */
-#define IOX_DEFAULT_RLIMIT_AS IOX_RLIM_INFINITY
-#define IOX_DEFAULT_RLIMIT_LOCKS 256
-#define IOX_DEFAULT_RLIMIT_SIGPENDING 128
-#define IOX_DEFAULT_RLIMIT_MSGQUEUE (8192 * 1024) /* 8 MB */
-#define IOX_DEFAULT_RLIMIT_NICE 0
-#define IOX_DEFAULT_RLIMIT_RTPRIO 0
-#define IOX_DEFAULT_RLIMIT_RTTIME IOX_RLIM_INFINITY
+#define IXLAND_DEFAULT_RLIMIT_CPU IXLAND_RLIM_INFINITY
+#define IXLAND_DEFAULT_RLIMIT_FSIZE IXLAND_RLIM_INFINITY
+#define IXLAND_DEFAULT_RLIMIT_DATA (512 * 1024 * 1024) /* 512 MB */
+#define IXLAND_DEFAULT_RLIMIT_STACK (8 * 1024 * 1024)  /* 8 MB */
+#define IXLAND_DEFAULT_RLIMIT_CORE 0                   /* No core dumps */
+#define IXLAND_DEFAULT_RLIMIT_RSS IXLAND_RLIM_INFINITY
+#define IXLAND_DEFAULT_RLIMIT_NPROC 1024                 /* Max processes */
+#define IXLAND_DEFAULT_RLIMIT_NOFILE 256                 /* Max open files */
+#define IXLAND_DEFAULT_RLIMIT_MEMLOCK (64 * 1024 * 1024) /* 64 MB */
+#define IXLAND_DEFAULT_RLIMIT_AS IXLAND_RLIM_INFINITY
+#define IXLAND_DEFAULT_RLIMIT_LOCKS 256
+#define IXLAND_DEFAULT_RLIMIT_SIGPENDING 128
+#define IXLAND_DEFAULT_RLIMIT_MSGQUEUE (8192 * 1024) /* 8 MB */
+#define IXLAND_DEFAULT_RLIMIT_NICE 0
+#define IXLAND_DEFAULT_RLIMIT_RTPRIO 0
+#define IXLAND_DEFAULT_RLIMIT_RTTIME IXLAND_RLIM_INFINITY
 
 #ifdef __cplusplus
 }

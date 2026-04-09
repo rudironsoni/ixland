@@ -33,7 +33,7 @@ The current implementation uses WAMR (WebAssembly Micro Runtime) as the backend.
 └──────────────────────────┬──────────────────────────────────┘
                            │ Engine-specific calls
 ┌──────────────────────────▼──────────────────────────────────┐
-│                     iox kernel                              │
+│                     ixland kernel                              │
 │           (current implementation in ixland-system)         │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -48,27 +48,27 @@ Abstract interface that allows iXland to work with different WebAssembly engines
 
 ```c
 /* Engine lifecycle */
-int iox_wasm_engine_init(iox_wasm_engine_t **engine, const iox_wasm_config_t *config);
-void iox_wasm_engine_destroy(iox_wasm_engine_t *engine);
+int ixland_wasm_engine_init(ixland_wasm_engine_t **engine, const ixland_wasm_config_t *config);
+void ixland_wasm_engine_destroy(ixland_wasm_engine_t *engine);
 
 /* Module management */
-int iox_wasm_module_load(iox_wasm_engine_t *engine, const uint8_t *wasm_bytes,
-                         size_t wasm_size, iox_wasm_module_t **module);
-void iox_wasm_module_unload(iox_wasm_module_t *module);
+int ixland_wasm_module_load(ixland_wasm_engine_t *engine, const uint8_t *wasm_bytes,
+                         size_t wasm_size, ixland_wasm_module_t **module);
+void ixland_wasm_module_unload(ixland_wasm_module_t *module);
 
 /* Instance management */
-int iox_wasm_instance_create(iox_wasm_module_t *module,
-                              iox_wasm_instance_t **instance);
-void iox_wasm_instance_destroy(iox_wasm_instance_t *instance);
+int ixland_wasm_instance_create(ixland_wasm_module_t *module,
+                              ixland_wasm_instance_t **instance);
+void ixland_wasm_instance_destroy(ixland_wasm_instance_t *instance);
 
 /* Execution */
-int iox_wasm_instance_run(iox_wasm_instance_t *instance,
+int ixland_wasm_instance_run(ixland_wasm_instance_t *instance,
                           const char *entry_point,
                           int argc, char *argv[]);
 
 /* Memory access */
-void *iox_wasm_memory_get(iox_wasm_instance_t *instance, uint32_t offset);
-uint32_t iox_wasm_memory_size(iox_wasm_instance_t *instance);
+void *ixland_wasm_memory_get(ixland_wasm_instance_t *instance, uint32_t offset);
+uint32_t ixland_wasm_memory_size(ixland_wasm_instance_t *instance);
 ```
 
 ### Implementation Notes
@@ -89,94 +89,94 @@ Define the contract between guest runtimes and iXland host semantics.
 
 ```c
 /* Read from file descriptor */
-ssize_t iox_host_fd_read(int fd, void *buf, size_t count);
+ssize_t ixland_host_fd_read(int fd, void *buf, size_t count);
 
 /* Write to file descriptor */
-ssize_t iox_host_fd_write(int fd, const void *buf, size_t count);
+ssize_t ixland_host_fd_write(int fd, const void *buf, size_t count);
 
 /* Close file descriptor */
-int iox_host_fd_close(int fd);
+int ixland_host_fd_close(int fd);
 
 /* Seek in file descriptor */
-off_t iox_host_fd_seek(int fd, off_t offset, int whence);
+off_t ixland_host_fd_seek(int fd, off_t offset, int whence);
 ```
 
 #### 2. Path and Filesystem
 
 ```c
 /* Open file at path */
-int iox_host_path_open(const char *path, int flags, mode_t mode);
+int ixland_host_path_open(const char *path, int flags, mode_t mode);
 
 /* Get file status */
-int iox_host_path_stat(const char *path, struct stat *statbuf);
+int ixland_host_path_stat(const char *path, struct stat *statbuf);
 
 /* Create directory */
-int iox_host_path_mkdir(const char *path, mode_t mode);
+int ixland_host_path_mkdir(const char *path, mode_t mode);
 
 /* Remove file/directory */
-int iox_host_path_unlink(const char *path);
+int ixland_host_path_unlink(const char *path);
 
 /* Read symbolic link */
-ssize_t iox_host_path_readlink(const char *path, char *buf, size_t bufsiz);
+ssize_t ixland_host_path_readlink(const char *path, char *buf, size_t bufsiz);
 ```
 
 #### 3. Clocks and Timers
 
 ```c
 /* Get wall clock time */
-int iox_host_clock_gettime(clockid_t clk_id, struct timespec *tp);
+int ixland_host_clock_gettime(clockid_t clk_id, struct timespec *tp);
 
 /* Get monotonic clock time */
-int iox_host_clock_getres(clockid_t clk_id, struct timespec *tp);
+int ixland_host_clock_getres(clockid_t clk_id, struct timespec *tp);
 
 /* Sleep */
-int iox_host_nanosleep(const struct timespec *req, struct timespec *rem);
+int ixland_host_nanosleep(const struct timespec *req, struct timespec *rem);
 ```
 
 #### 4. Random Number Generation
 
 ```c
 /* Get cryptographically secure random bytes */
-int iox_host_random_get(void *buf, size_t buflen);
+int ixland_host_random_get(void *buf, size_t buflen);
 ```
 
 #### 5. Sockets and Networking
 
 ```c
 /* Create socket */
-int iox_host_socket(int domain, int type, int protocol);
+int ixland_host_socket(int domain, int type, int protocol);
 
 /* Connect socket */
-int iox_host_connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+int ixland_host_connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 
 /* Bind socket */
-int iox_host_bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+int ixland_host_bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 
 /* Listen for connections */
-int iox_host_listen(int sockfd, int backlog);
+int ixland_host_listen(int sockfd, int backlog);
 
 /* Accept connection */
-int iox_host_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+int ixland_host_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 
 /* Send/receive */
-ssize_t iox_host_send(int sockfd, const void *buf, size_t len, int flags);
-ssize_t iox_host_recv(int sockfd, void *buf, size_t len, int flags);
+ssize_t ixland_host_send(int sockfd, const void *buf, size_t len, int flags);
+ssize_t ixland_host_recv(int sockfd, void *buf, size_t len, int flags);
 ```
 
 #### 6. Process Semantics
 
 ```c
 /* Exit process */
-noreturn void iox_host_proc_exit(int status);
+noreturn void ixland_host_proc_exit(int status);
 
 /* Get process ID */
-pid_t iox_host_proc_getpid(void);
+pid_t ixland_host_proc_getpid(void);
 
 /* Get parent process ID */
-pid_t iox_host_proc_getppid(void);
+pid_t ixland_host_proc_getppid(void);
 
 /* Send signal to process */
-int iox_host_proc_kill(pid_t pid, int sig);
+int ixland_host_proc_kill(pid_t pid, int sig);
 ```
 
 ### Design Principles
@@ -195,31 +195,31 @@ Define how WASI syscalls map to iXland host semantics.
 
 | WASI Function | iXland Host Service | Notes |
 |--------------|---------------------|-------|
-| `fd_read` | `iox_host_fd_read` | Uses iox file descriptor table |
-| `fd_write` | `iox_host_fd_write` | Uses iox file descriptor table |
-| `fd_close` | `iox_host_fd_close` | Uses iox file descriptor table |
-| `path_open` | `iox_host_path_open` | Resolves through iox VFS |
-| `path_filestat_get` | `iox_host_path_stat` | Returns iox VFS metadata |
-| `clock_time_get` | `iox_host_clock_gettime` | iox kernel clocks |
-| `random_get` | `iox_host_random_get` | iox secure random |
-| `proc_exit` | `iox_host_proc_exit` | Triggers iox process cleanup |
+| `fd_read` | `ixland_host_fd_read` | Uses ixland file descriptor table |
+| `fd_write` | `ixland_host_fd_write` | Uses ixland file descriptor table |
+| `fd_close` | `ixland_host_fd_close` | Uses ixland file descriptor table |
+| `path_open` | `ixland_host_path_open` | Resolves through ixland VFS |
+| `path_filestat_get` | `ixland_host_path_stat` | Returns ixland VFS metadata |
+| `clock_time_get` | `ixland_host_clock_gettime` | ixland kernel clocks |
+| `random_get` | `ixland_host_random_get` | ixland secure random |
+| `proc_exit` | `ixland_host_proc_exit` | Triggers ixland process cleanup |
 
 ### Capability Model
 
 WASI capabilities map to iXland resource limits:
 
-- File access rights → iox file descriptor rights
-- Directory rights → iox VFS mount permissions
-- Network rights → iox socket policy
+- File access rights → ixland file descriptor rights
+- Directory rights → ixland VFS mount permissions
+- Network rights → ixland socket policy
 
 ### Preopens
 
 WASI preopened directories map to iXland bind mounts:
 
 ```
-WASI preopen "/"    → iox VFS root
-WASI preopen "."    → iox current working directory
-WASI preopen "/tmp" → iox temp directory
+WASI preopen "/"    → ixland VFS root
+WASI preopen "."    → ixland current working directory
+WASI preopen "/tmp" → ixland temp directory
 ```
 
 ## Implementation Path
@@ -233,9 +233,9 @@ WASI preopen "/tmp" → iox temp directory
 ### Phase 2: Header Extraction
 
 - Move public interfaces to `ixland-wasm/*/include/`
-- `ixland-wasm-engine/include/iox/wasm_engine.h`
-- `ixland-wasm-host/include/iox/wasm_host.h`
-- `ixland-wasm-wasi/include/iox/wasm_wasi.h`
+- `ixland-wasm-engine/include/ixland/wasm_engine.h`
+- `ixland-wasm-host/include/ixland/wasm_host.h`
+- `ixland-wasm-wasi/include/ixland/wasm_wasi.h`
 - Use symlinks in `ixland-system` during transition
 
 ### Phase 3: Code Extraction
@@ -254,7 +254,7 @@ WASI preopen "/tmp" → iox temp directory
 
 - **No JIT**: iOS forbids dynamic code generation; WASM interpreted or AOT compiled
 - **Sandbox**: WASI capabilities must respect iOS App Sandbox
-- **No raw syscalls**: WASI must go through iox host services
+- **No raw syscalls**: WASI must go through ixland host services
 - **Single address space**: All WASM runs in app process; no real process isolation
 
 ## Future Considerations

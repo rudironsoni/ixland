@@ -4,7 +4,7 @@ C library and ABI boundary for iXland.
 
 ## Status
 
-**Authoritative boundary for public iox headers and self-contained libc utilities.**
+**Authoritative boundary for public ixland headers and self-contained libc utilities.**
 
 This component owns:
 - Public libc/ABI header boundary
@@ -13,18 +13,18 @@ This component owns:
 ## Contents
 
 ### Headers
-- `include/iox/iox.h` - Master umbrella header
-- `include/iox/iox_types.h` - Public type definitions
-- `include/iox/iox_syscalls.h` - Public syscall API
-- `include/iox/sys/types.h` - Linux-compatible types
+- `include/ixland/ixland.h` - Master umbrella header
+- `include/ixland/ixland_types.h` - Public type definitions
+- `include/ixland/ixland_syscalls.h` - Public syscall API
+- `include/ixland/sys/types.h` - Linux-compatible types
 - `include/grp.h` - POSIX group database operations
 - `include/pwd.h` - POSIX user database operations
 
 ### Implementation
-- `src/iox_version.c` - Version and error string utilities
-  - `iox_version()` - Library version string
-  - `iox_strerror()` - Error code to string conversion
-  - `iox_perror()` - Print error message
+- `src/ixland_version.c` - Version and error string utilities
+  - `ixland_version()` - Library version string
+  - `ixland_strerror()` - Error code to string conversion
+  - `ixland_perror()` - Print error message
 
 ## What Stays in ixland-system
 
@@ -40,7 +40,7 @@ This component provides:
 - `ixland-libc-core` - STATIC library with self-contained utilities
 - `ixland-libc-usersdb` - STATIC library with user/group database stubs
 
-Include this component to get access to public iox headers and utilities.
+Include this component to get access to public ixland headers and utilities.
 
 ## Build Modes
 

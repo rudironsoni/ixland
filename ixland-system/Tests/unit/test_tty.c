@@ -4,9 +4,9 @@
 
 #include "../../fs/fdtable.h"
 #include "../../fs/vfs.h"
-#include "../../kernel/signal/iox_signal.h"
+#include "../../kernel/signal/ixland_signal.h"
 #include "../../kernel/task/task.h"
-#include "../harness/iox_test.h"
+#include "../harness/ixland_test.h"
 
 /* Minimal TTY bookkeeping tests
  *
@@ -14,61 +14,61 @@
  * Only basic TTY inheritance on fork is tested.
  */
 
-IOX_TEST(tty_initial_task_no_tty) {
-    IOX_ASSERT(iox_task_init() == 0);
+IXLAND_TEST(tty_initial_task_no_tty) {
+    IXLAND_ASSERT(ixland_task_init() == 0);
 
-    iox_task_t *task = iox_current_task();
+    ixland_task_t *task = ixland_current_task();
 
     /* Initial task has no controlling TTY */
-    IOX_ASSERT_NULL(task->tty);
+    IXLAND_ASSERT_NULL(task->tty);
 
     return true;
 }
 
-IOX_TEST(tty_allocation_basic) {
+IXLAND_TEST(tty_allocation_basic) {
     /* Allocate a TTY structure */
-    iox_tty_t *tty = calloc(1, sizeof(iox_tty_t));
-    IOX_ASSERT_NOT_NULL(tty);
+    ixland_tty_t *tty = calloc(1, sizeof(ixland_tty_t));
+    IXLAND_ASSERT_NOT_NULL(tty);
 
     /* Initialize */
     tty->tty_id = 1;
     tty->foreground_pgrp = 0; /* No foreground process group yet */
     atomic_init(&tty->refs, 1);
 
-    IOX_ASSERT_EQ(tty->tty_id, 1);
-    IOX_ASSERT_EQ(tty->foreground_pgrp, 0);
-    IOX_ASSERT_EQ(atomic_load(&tty->refs), 1);
+    IXLAND_ASSERT_EQ(tty->tty_id, 1);
+    IXLAND_ASSERT_EQ(tty->foreground_pgrp, 0);
+    IXLAND_ASSERT_EQ(atomic_load(&tty->refs), 1);
 
     free(tty);
     return true;
 }
 
-IOX_TEST(tty_refcount_increment) {
-    iox_tty_t *tty = calloc(1, sizeof(iox_tty_t));
-    IOX_ASSERT_NOT_NULL(tty);
+IXLAND_TEST(tty_refcount_increment) {
+    ixland_tty_t *tty = calloc(1, sizeof(ixland_tty_t));
+    IXLAND_ASSERT_NOT_NULL(tty);
 
     atomic_init(&tty->refs, 1);
 
     /* Simulate reference increment (like fork would do) */
     atomic_fetch_add(&tty->refs, 1);
-    IOX_ASSERT_EQ(atomic_load(&tty->refs), 2);
+    IXLAND_ASSERT_EQ(atomic_load(&tty->refs), 2);
 
     /* Decrement */
     atomic_fetch_sub(&tty->refs, 1);
-    IOX_ASSERT_EQ(atomic_load(&tty->refs), 1);
+    IXLAND_ASSERT_EQ(atomic_load(&tty->refs), 1);
 
     free(tty);
     return true;
 }
 
-IOX_TEST(tty_task_assignment) {
-    IOX_ASSERT(iox_task_init() == 0);
+IXLAND_TEST(tty_task_assignment) {
+    IXLAND_ASSERT(ixland_task_init() == 0);
 
-    iox_task_t *task = iox_current_task();
+    ixland_task_t *task = ixland_current_task();
 
     /* Allocate and assign TTY */
-    iox_tty_t *tty = calloc(1, sizeof(iox_tty_t));
-    IOX_ASSERT_NOT_NULL(tty);
+    ixland_tty_t *tty = calloc(1, sizeof(ixland_tty_t));
+    IXLAND_ASSERT_NOT_NULL(tty);
 
     tty->tty_id = 5;
     tty->foreground_pgrp = task->pgid; /* Task's process group is foreground */
@@ -76,8 +76,8 @@ IOX_TEST(tty_task_assignment) {
 
     task->tty = tty;
 
-    IOX_ASSERT_EQ(task->tty->tty_id, 5);
-    IOX_ASSERT_EQ(task->tty->foreground_pgrp, task->pgid);
+    IXLAND_ASSERT_EQ(task->tty->tty_id, 5);
+    IXLAND_ASSERT_EQ(task->tty->foreground_pgrp, task->pgid);
 
     /* Cleanup */
     task->tty = NULL;
@@ -86,14 +86,14 @@ IOX_TEST(tty_task_assignment) {
     return true;
 }
 
-IOX_TEST(tty_fork_inheritance) {
-    IOX_ASSERT(iox_task_init() == 0);
+IXLAND_TEST(tty_fork_inheritance) {
+    IXLAND_ASSERT(ixland_task_init() == 0);
 
-    iox_task_t *parent = iox_current_task();
+    ixland_task_t *parent = ixland_current_task();
 
     /* Give parent a TTY */
-    iox_tty_t *tty = calloc(1, sizeof(iox_tty_t));
-    IOX_ASSERT_NOT_NULL(tty);
+    ixland_tty_t *tty = calloc(1, sizeof(ixland_tty_t));
+    IXLAND_ASSERT_NOT_NULL(tty);
 
     tty->tty_id = 10;
     tty->foreground_pgrp = parent->pgid;
@@ -101,16 +101,16 @@ IOX_TEST(tty_fork_inheritance) {
     parent->tty = tty;
 
     /* Simulate fork - create child */
-    iox_task_t *child = iox_task_alloc();
-    IOX_ASSERT_NOT_NULL(child);
+    ixland_task_t *child = ixland_task_alloc();
+    IXLAND_ASSERT_NOT_NULL(child);
 
     child->ppid = parent->pid;
     child->pgid = parent->pgid;
     child->sid = parent->sid;
 
-    child->files = iox_files_alloc(IOX_MAX_FD);
-    child->fs = iox_fs_alloc();
-    child->sighand = iox_sighand_alloc();
+    child->files = ixland_files_alloc(IXLAND_MAX_FD);
+    child->fs = ixland_fs_alloc();
+    child->sighand = ixland_sighand_alloc();
 
     /* TTY inheritance (from fork.c logic) */
     if (parent->tty) {
@@ -119,10 +119,10 @@ IOX_TEST(tty_fork_inheritance) {
     }
 
     /* Verify child inherited TTY */
-    IOX_ASSERT_NOT_NULL(child->tty);
-    IOX_ASSERT_EQ(child->tty, parent->tty);
-    IOX_ASSERT_EQ(child->tty->tty_id, 10);
-    IOX_ASSERT_EQ(atomic_load(&child->tty->refs), 2); /* Parent + child */
+    IXLAND_ASSERT_NOT_NULL(child->tty);
+    IXLAND_ASSERT_EQ(child->tty, parent->tty);
+    IXLAND_ASSERT_EQ(child->tty->tty_id, 10);
+    IXLAND_ASSERT_EQ(atomic_load(&child->tty->refs), 2); /* Parent + child */
 
     /* Link to parent for proper cleanup */
     pthread_mutex_lock(&parent->lock);
@@ -139,7 +139,7 @@ IOX_TEST(tty_fork_inheritance) {
     /* Decrement refs for child */
     atomic_fetch_sub(&tty->refs, 1);
 
-    iox_task_free(child);
+    ixland_task_free(child);
 
     /* Decrement refs for parent */
     atomic_fetch_sub(&tty->refs, 1);
@@ -149,14 +149,14 @@ IOX_TEST(tty_fork_inheritance) {
     return true;
 }
 
-IOX_TEST(tty_foreground_pgrp_change) {
-    IOX_ASSERT(iox_task_init() == 0);
+IXLAND_TEST(tty_foreground_pgrp_change) {
+    IXLAND_ASSERT(ixland_task_init() == 0);
 
-    iox_task_t *task = iox_current_task();
+    ixland_task_t *task = ixland_current_task();
 
     /* Allocate TTY */
-    iox_tty_t *tty = calloc(1, sizeof(iox_tty_t));
-    IOX_ASSERT_NOT_NULL(tty);
+    ixland_tty_t *tty = calloc(1, sizeof(ixland_tty_t));
+    IXLAND_ASSERT_NOT_NULL(tty);
 
     tty->tty_id = 1;
     tty->foreground_pgrp = task->pgid;
@@ -167,7 +167,7 @@ IOX_TEST(tty_foreground_pgrp_change) {
     pid_t new_pgrp = task->pid + 100;
     tty->foreground_pgrp = new_pgrp;
 
-    IOX_ASSERT_EQ(task->tty->foreground_pgrp, new_pgrp);
+    IXLAND_ASSERT_EQ(task->tty->foreground_pgrp, new_pgrp);
 
     /* Cleanup */
     task->tty = NULL;

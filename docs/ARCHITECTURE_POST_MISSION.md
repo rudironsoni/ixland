@@ -1,7 +1,7 @@
 # iXland Architecture - Post Mission Documentation
 
-**Version**: 1.0.0  
-**Date**: 2026-03-28  
+**Version**: 1.0.0
+**Date**: 2026-03-28
 **Status**: Implementation Complete
 
 ---
@@ -30,9 +30,9 @@ flowchart TB
 
     subgraph libc["ixland-libc (Public API)"]
         direction TB
-        IoxH["iox/iox.h<br/>Umbrella Header"]
-        Types["iox/iox_types.h<br/>Type Definitions"]
-        Syscalls["iox/iox_syscalls.h<br/>Syscall Declarations"]
+        IxlandH["ixland/ixland.h<br/>Umbrella Header"]
+        Types["ixland/ixland_types.h<br/>Type Definitions"]
+        Syscalls["ixland/ixland_syscalls.h<br/>Syscall Declarations"]
         Pwd["pwd.h<br/>User Database"]
         Grp["grp.h<br/>Group Database"]
     end
@@ -41,9 +41,9 @@ flowchart TB
         direction TB
 
         subgraph Core["Core Subsystems"]
-            Init["iox_init.c<br/>Initialization"]
-            Identity["iox_identity.c<br/>UID/GID Management"]
-            Poll["iox_poll.c<br/>Poll/Select"]
+            Init["ixland_init.c<br/>Initialization"]
+            Identity["ixland_identity.c<br/>UID/GID Management"]
+            Poll["ixland_poll.c<br/>Poll/Select"]
         end
 
         subgraph Task["Task Subsystem"]
@@ -62,7 +62,7 @@ flowchart TB
         subgraph VFS["VFS Subsystem"]
             VfsCore["vfs.c<br/>Path Translation"]
             Fdtable["fdtable.c<br/>FD Management"]
-            Path["iox_path.c<br/>Path Operations"]
+            Path["ixland_path.c<br/>Path Operations"]
         end
 
         subgraph Exec["Exec Subsystem"]
@@ -72,7 +72,7 @@ flowchart TB
 
         subgraph WASI["WASI Runtime"]
             WamrAdapter["wasm_adapter.c<br/>WAMR Integration"]
-            WamrSimple["iox_wamr_simple.c<br/>Simple WAMR"]
+            WamrSimple["ixland_wamr_simple.c<br/>Simple WAMR"]
         end
     end
 
@@ -82,7 +82,7 @@ flowchart TB
         Script["Script Interpreter"]
     end
 
-    App -->|@_cdecl("iox_*)"| libc
+    App -->|@_cdecl("ixland_*)"| libc
     libc -->|Internal Calls| System
     System -->|Execute| Runtime
 
@@ -154,16 +154,16 @@ sequenceDiagram
 
     Note over App,VFS: Process Creation Sequence
 
-    App->>Libc: iox_fork()
-    Libc->>Task: iox_task_alloc()
-    Task->>Pid: iox_alloc_pid()
+    App->>Libc: ixland_fork()
+    Libc->>Task: ixland_task_alloc()
+    Task->>Pid: ixland_alloc_pid()
     Pid-->>Task: pid = 1000
 
     Task->>Task: Initialize task structure
-    Task->>Sig: iox_sighand_alloc()
+    Task->>Sig: ixland_sighand_alloc()
     Sig-->>Task: sighand
 
-    Task->>VFS: iox_files_alloc()
+    Task->>VFS: ixland_files_alloc()
     VFS-->>Task: files (fdtable)
 
     Task->>Task: Set parent-child links
@@ -172,8 +172,8 @@ sequenceDiagram
 
     Note over App,VFS: Process Execution Sequence
 
-    App->>Libc: iox_execve(path, argv, envp)
-    Libc->>Task: iox_current_task()
+    App->>Libc: ixland_execve(path, argv, envp)
+    Libc->>Task: ixland_current_task()
 
     Task->>VFS: vfs_translate_path(path)
     VFS-->>Task: real_path
@@ -197,14 +197,14 @@ sequenceDiagram
 
     Note over Sender,Wait: Signal Delivery Sequence
 
-    Sender->>Sig: iox_kill(pid, SIGINT)
-    Sig->>recipient: iox_task_lookup(pid)
+    Sender->>Sig: ixland_kill(pid, SIGINT)
+    Sig->>recipient: ixland_task_lookup(pid)
     recipient-->>Sig: task
 
     Sig->>recipient: Check sigprocmask
 
     alt Signal Blocked
-        Sig->>Queue: iox_sigqueue_entry_alloc()
+        Sig->>Queue: ixland_sigqueue_entry_alloc()
         Queue->>recipient: Add to pending
         Sig-->>Sender: Return 0
     else Signal Not Blocked
@@ -242,7 +242,7 @@ sequenceDiagram
 
     Note over Parent,Task: waitpid(pid, &status, options)
 
-    Parent->>Wait: iox_waitpid(pid, wstatus, options)
+    Parent->>Wait: ixland_waitpid(pid, wstatus, options)
     Wait->>Task: Find child processes
 
     alt WNOHANG set
@@ -250,7 +250,7 @@ sequenceDiagram
 
         alt Zombie found
             Task->>Wait: Return exit status
-            Wait->>Task: iox_task_free(child)
+            Wait->>Task: ixland_task_free(child)
             Wait-->>Parent: Return child PID
         else No zombies
             Wait-->>Parent: Return 0 (no block)
@@ -265,13 +265,13 @@ sequenceDiagram
         end
 
         Task->>Wait: Child exited
-        Wait->>Task: iox_task_free(child)
+        Wait->>Task: ixland_task_free(child)
         Wait-->>Parent: Return child PID
     end
 
     Note over Parent,Task: Child Exit Sequence
 
-    Child->>Task: iox_exit(status)
+    Child->>Task: ixland_exit(status)
     Task->>Task: Set zombie state
     Task->>Task: exit_status = status
 
@@ -294,7 +294,7 @@ sequenceDiagram
 
     Note over App,Kernel: Open File Flow
 
-    App->>Libc: iox_open(path, flags, mode)
+    App->>Libc: ixland_open(path, flags, mode)
     Libc->>VFS: vfs_translate_path(path)
     VFS->>VFS: Check if system path
 
@@ -308,7 +308,7 @@ sequenceDiagram
     Libc->>Kernel: open(real_path, flags, mode)
     Kernel-->>Libc: fd = 3
 
-    Libc->>FDT: iox_fdtable_alloc()
+    Libc->>FDT: ixland_fdtable_alloc()
     FDT->>FDT: Store fd in task's fdtable
     FDT-->>Libc: ok
 
@@ -316,14 +316,14 @@ sequenceDiagram
 
     Note over App,Kernel: Close File Flow
 
-    App->>Libc: iox_close(fd)
-    Libc->>FDT: iox_fdtable_get(fd)
+    App->>Libc: ixland_close(fd)
+    Libc->>FDT: ixland_fdtable_get(fd)
     FDT-->>Libc: fd_entry
 
     Libc->>Kernel: close(real_fd)
     Kernel-->>Libc: ok
 
-    Libc->>FDT: iox_fdtable_free(fd)
+    Libc->>FDT: ixland_fdtable_free(fd)
     FDT-->>Libc: ok
     Libc-->>App: Return 0
 ```
@@ -339,7 +339,7 @@ sequenceDiagram
 
     Note over Parent,Exec: Vfork Sequence
 
-    Parent->>Task: iox_vfork()
+    Parent->>Task: ixland_vfork()
     Task->>Task: Create child task
     Task->>Task: Child shares parent's memory
     Task->>Task: Mark vfork_parent
@@ -349,7 +349,7 @@ sequenceDiagram
 
     Note over Parent,Exec: Child Executes
 
-    Child->>Exec: iox_execve(program, argv, envp)
+    Child->>Exec: ixland_execve(program, argv, envp)
     Exec->>Task: Load new image
     Exec->>Task: Unblock parent
 
@@ -360,7 +360,7 @@ sequenceDiagram
     Parent->>Parent: Continue execution
 
     alt Child exits without exec
-        Child->>Task: iox_exit()
+        Child->>Task: ixland_exit()
         Task->>Task: Unblock parent
         Task->>Task: Child resources freed
     end
@@ -374,13 +374,13 @@ sequenceDiagram
 
 ```mermaid
 stateDiagram-v2
-    [*] --> ALLOCATED: iox_task_alloc()
-    ALLOCATED --> RUNNING: iox_fork() completes
+    [*] --> ALLOCATED: ixland_task_alloc()
+    ALLOCATED --> RUNNING: ixland_fork() completes
     RUNNING --> INTERRUPTIBLE: Waiting for I/O
     RUNNING --> UNINTERRUPTIBLE: Disk wait (uninterruptible)
     RUNNING --> STOPPED: SIGSTOP received
     STOPPED --> RUNNING: SIGCONT received
-    RUNNING --> ZOMBIE: iox_exit() called
+    RUNNING --> ZOMBIE: ixland_exit() called
     ZOMBIE --> DEAD: wait() collected
     RUNNING --> DEAD: SIGKILL (immediate)
     INTERRUPTIBLE --> RUNNING: I/O complete
@@ -424,11 +424,11 @@ stateDiagram-v2
 ```mermaid
 flowchart TD
     subgraph TaskMem["Task Memory"]
-        TaskStruct["iox_task_t<br/>~2KB"]
-        SigHand["iox_sighand_t<br/>~1KB"]
-        Files["iox_files_t<br/>~2KB"]
-        Fs["iox_fs_t<br/>~512B"]
-        MM["iox_mm_emu_t<br/>~256B"]
+        TaskStruct["ixland_task_t<br/>~2KB"]
+        SigHand["ixland_sighand_t<br/>~1KB"]
+        Files["ixland_files_t<br/>~2KB"]
+        Fs["ixland_fs_t<br/>~512B"]
+        MM["ixland_mm_emu_t<br/>~256B"]
     end
 
     subgraph Shared["Shared Resources"]
@@ -514,15 +514,15 @@ flowchart BT
     end
 
     subgraph Public["Public API"]
-        IoxTypes["iox/iox_types.h"]
-        IoxSyscalls["iox/iox_syscalls.h"]
-        IoxUmbrella["iox/iox.h"]
+        IxlandTypes["ixland/ixland_types.h"]
+        IxlandSyscalls["ixland/ixland_syscalls.h"]
+        IxlandUmbrella["ixland/ixland.h"]
     end
 
     subgraph Private["Private Headers"]
         IxlandKernel["ixland_kernel.h"]
         TaskH["task.h"]
-        SignalH["iox_signal.h"]
+        SignalH["ixland_signal.h"]
         VfsH["vfs.h"]
     end
 
@@ -532,14 +532,14 @@ flowchart BT
         VfsC["vfs.c"]
     end
 
-    SysTypes -->|includes| IoxTypes
-    SysStat -->|includes| IoxTypes
-    Signal -->|includes| IoxTypes
+    SysTypes -->|includes| IxlandTypes
+    SysStat -->|includes| IxlandTypes
+    Signal -->|includes| IxlandTypes
 
-    IoxTypes -->|included by| IoxSyscalls
-    IoxSyscalls -->|included by| IoxUmbrella
+    IxlandTypes -->|included by| IxlandSyscalls
+    IxlandSyscalls -->|included by| IxlandUmbrella
 
-    IoxTypes -->|included by| IxlandKernel
+    IxlandTypes -->|included by| IxlandKernel
     IxlandKernel -->|includes| TaskH
     IxlandKernel -->|includes| SignalH
     IxlandKernel -->|includes| VfsH
@@ -568,68 +568,68 @@ flowchart LR
     end
 
     subgraph Level1["Level 1: Types"]
-        IoxTypes["iox/iox_types.h"]
+        IxlandTypes["ixland/ixland_types.h"]
     end
 
     subgraph Level2["Level 2: Syscalls"]
-        IoxSyscalls["iox/iox_syscalls.h"]
+        IxlandSyscalls["ixland/ixland_syscalls.h"]
     end
 
     subgraph Level3["Level 3: Umbrella"]
-        IoxH["iox/iox.h"]
+        IxlandH["ixland/ixland.h"]
     end
 
     subgraph Level4["Level 4: Internal"]
         IxlandKernel["ixland_kernel.h"]
         TaskH["task/task.h"]
-        SignalH["signal/iox_signal.h"]
+        SignalH["signal/ixland_signal.h"]
     end
 
-    Stdint -->|provides types| IoxTypes
-    SysTypes -->|provides pid_t| IoxTypes
-    SignalStd -->|provides sigset_t| IoxTypes
+    Stdint -->|provides types| IxlandTypes
+    SysTypes -->|provides pid_t| IxlandTypes
+    SignalStd -->|provides sigset_t| IxlandTypes
 
-    IoxTypes -->|required by| IoxSyscalls
-    IoxTypes -->|required by| IoxH
+    IxlandTypes -->|required by| IxlandSyscalls
+    IxlandTypes -->|required by| IxlandH
 
-    IoxSyscalls -->|required by| IxlandKernel
-    IoxTypes -->|required by| TaskH
-    IoxTypes -->|required by| SignalH
+    IxlandSyscalls -->|required by| IxlandKernel
+    IxlandTypes -->|required by| TaskH
+    IxlandTypes -->|required by| SignalH
 ```
 
 ### Public API Surface
 
 ```mermaid
 classDiagram
-    class iox_types_h {
-        +IOX_VERSION_STRING
-        +iox_error_t
-        +iox_config_t
-        +iox_proc_info_t
-        +iox_thread_info_t
-        +iox_sys_info_t
-        +iox_syscall_t
-        +IOX_MAX_PATH
+    class ixland_types_h {
+        +IXLAND_VERSION_STRING
+        +ixland_error_t
+        +ixland_config_t
+        +ixland_proc_info_t
+        +ixland_thread_info_t
+        +ixland_sys_info_t
+        +ixland_syscall_t
+        +IXLAND_MAX_PATH
     }
 
-    class iox_syscalls_h {
-        +iox_fork()
-        +iox_execve()
-        +iox_exit()
-        +iox_waitpid()
-        +iox_kill()
-        +iox_sigaction()
-        +iox_open()
-        +iox_read()
-        +iox_write()
-        +iox_close()
-        +iox_mmap()
-        +iox_munmap()
-        +iox_init()
-        +iox_cleanup()
+    class ixland_syscalls_h {
+        +ixland_fork()
+        +ixland_execve()
+        +ixland_exit()
+        +ixland_waitpid()
+        +ixland_kill()
+        +ixland_sigaction()
+        +ixland_open()
+        +ixland_read()
+        +ixland_write()
+        +ixland_close()
+        +ixland_mmap()
+        +ixland_munmap()
+        +ixland_init()
+        +ixland_cleanup()
     }
 
-    class iox_h {
+    class ixland_h {
         Convenience umbrella header
         includes both above
     }
@@ -648,10 +648,10 @@ classDiagram
         +struct group
     }
 
-    iox_h --> iox_types_h
-    iox_h --> iox_syscalls_h
-    iox_h --> pwd_h
-    iox_h --> grp_h
+    ixland_h --> ixland_types_h
+    ixland_h --> ixland_syscalls_h
+    ixland_h --> pwd_h
+    ixland_h --> grp_h
 ```
 
 ### Internal Header Relationships
@@ -664,18 +664,18 @@ classDiagram
     }
 
     class task_h {
-        iox_task_t
-        iox_task_alloc()
-        iox_task_free()
-        iox_fork()
-        iox_waitpid()
+        ixland_task_t
+        ixland_task_alloc()
+        ixland_task_free()
+        ixland_fork()
+        ixland_waitpid()
     }
 
-    class iox_signal_h {
-        iox_sighand_t
-        iox_sigaction()
-        iox_kill()
-        iox_sigprocmask()
+    class ixland_signal_h {
+        ixland_sighand_t
+        ixland_sigaction()
+        ixland_kill()
+        ixland_sigprocmask()
     }
 
     class vfs_h {
@@ -684,22 +684,22 @@ classDiagram
     }
 
     class fdtable_h {
-        iox_files_t
-        iox_fdtable_alloc()
-        iox_fdtable_get()
+        ixland_files_t
+        ixland_fdtable_alloc()
+        ixland_fdtable_get()
     }
 
     class exec_h {
-        iox_execve()
-        iox_exec_image_t
+        ixland_execve()
+        ixland_exec_image_t
     }
 
     ixland_kernel_h --> task_h
-    ixland_kernel_h --> iox_signal_h
+    ixland_kernel_h --> ixland_signal_h
     ixland_kernel_h --> vfs_h
     ixland_kernel_h --> fdtable_h
 
-    task_h --> iox_signal_h : uses sighand
+    task_h --> ixland_signal_h : uses sighand
     task_h --> fdtable_h : uses files
     exec_h --> task_h : uses tasks
 ```

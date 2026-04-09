@@ -10,7 +10,7 @@ Since this is a kernel library (ixland-system, ixland-libc), validation is perfo
 
 1. **Unit Tests** - Located in `ixland-system/Tests/unit/`
 2. **CTest Integration** - CMake test runner
-3. **Direct Test Execution** - `iox-core-tests` binary
+3. **Direct Test Execution** - `ixland-core-tests` binary
 
 ## Test Organization
 
@@ -33,20 +33,20 @@ Since this is a kernel library (ixland-system, ixland-libc), validation is perfo
 ```bash
 mkdir -p build && cd build
 cmake .. -DCMAKE_SYSTEM_NAME=Darwin  # macOS for testing
-cmake --build . --target iox-core-tests
+cmake --build . --target ixland-core-tests
 ```
 
 ### Run All Tests
 ```bash
 cd build/ixland-system
-./iox-core-tests
+./ixland-core-tests
 ```
 
 ### Run Specific Test Category
 ```bash
-./iox-core-tests fork      # Run fork-related tests
-./iox-core-tests signal    # Run signal-related tests
-./iox-core-tests file      # Run file-related tests
+./ixland-core-tests fork      # Run fork-related tests
+./ixland-core-tests signal    # Run signal-related tests
+./ixland-core-tests file      # Run file-related tests
 ```
 
 ### Via CTest
@@ -66,7 +66,7 @@ Since this is a unit test-based validation, tests run in a single process and mu
 For flow validators testing this milestone:
 
 1. **No browser/TUI automation needed** - Tests are C unit tests
-2. **Test execution is the validation method** - Run `iox-core-tests`
+2. **Test execution is the validation method** - Run `ixland-core-tests`
 3. **Test pass/fail maps to assertion pass/fail**
 4. **Evidence is test output** - Capture full test output
 

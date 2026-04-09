@@ -1,22 +1,22 @@
-# WAMR Integration for libiox
+# WAMR Integration for libixland
 
 ## Overview
 
-libiox integrates WebAssembly Micro Runtime (WAMR) on iOS through a **libiox-owned adapter layer** and an **externally built upstream runtime**.
+libixland integrates WebAssembly Micro Runtime (WAMR) on iOS through a **libixland-owned adapter layer** and an **externally built upstream runtime**.
 
 This repository follows these rules:
 
 - `deps/wamr/` is upstream source and must remain read-only
 - WAMR is built **out-of-tree** for iOS device and simulator
-- libiox and libiwasm are separate artifacts
-- app customers must use **`iox_wamr_*` only**
+- libixland and libiwasm are separate artifacts
+- app customers must use **`ixland_wamr_*` only**
 
 ## Artifact Model
 
 Expected build outputs:
 
-- `lib/libiox-sim.a`
-- `lib/libiox-device.a`
+- `lib/libixland-sim.a`
+- `lib/libixland-device.a`
 - `build/wamr-simulator/libiwasm.a`
 - `build/wamr-device/libiwasm.a`
 
@@ -24,11 +24,11 @@ App/test targets link both libraries explicitly.
 
 ## Ownership Boundary
 
-### libiox-owned
+### libixland-owned
 
-- `include/iox/iox_wamr.h`
-- `src/iox/wamr/iox_wamr_simple.c`
-- any WASI-to-libiox bridge code
+- `include/ixland/ixland_wamr.h`
+- `src/ixland/wamr/ixland_wamr_simple.c`
+- any WASI-to-libixland bridge code
 - all iOS toolchain/build policy outside `deps/wamr`
 
 ### upstream WAMR-owned
@@ -53,7 +53,7 @@ Or build both:
 
 This script configures upstream WAMR with iOS settings **without editing the submodule**.
 
-## Building libiox and WAMR Together
+## Building libixland and WAMR Together
 
 ```bash
 make sdk-sim
@@ -65,20 +65,20 @@ make sdk
 
 Applications should use only these adapter APIs:
 
-- `iox_wamr_init()`
-- `iox_wamr_deinit()`
-- `iox_wamr_is_initialized()`
-- `iox_wamr_load_module()`
-- `iox_wamr_unload_module()`
-- `iox_wamr_validate_wasm()`
-- `iox_wamr_call_function()`
-- `iox_wamr_function_exists()`
-- `iox_wamr_get_memory_size()`
-- `iox_wamr_memory_read()`
-- `iox_wamr_memory_write()`
-- `iox_wamr_get_export_list()`
-- `iox_wamr_free_export_list()`
-- `iox_wamr_get_error()`
+- `ixland_wamr_init()`
+- `ixland_wamr_deinit()`
+- `ixland_wamr_is_initialized()`
+- `ixland_wamr_load_module()`
+- `ixland_wamr_unload_module()`
+- `ixland_wamr_validate_wasm()`
+- `ixland_wamr_call_function()`
+- `ixland_wamr_function_exists()`
+- `ixland_wamr_get_memory_size()`
+- `ixland_wamr_memory_read()`
+- `ixland_wamr_memory_write()`
+- `ixland_wamr_get_export_list()`
+- `ixland_wamr_free_export_list()`
+- `ixland_wamr_get_error()`
 
 ## Unsupported Consumer Usage
 
@@ -94,4 +94,4 @@ The following are not part of the supported app-facing contract:
 - no JIT
 - no AOT/JIT runtime code generation
 - sandbox-aware file and WASI behavior
-- validate all crossings between WASI and libiox
+- validate all crossings between WASI and libixland

@@ -5,7 +5,7 @@
 
 #include "task.h"
 
-static int task_to_status(iox_task_t *task) {
+static int task_to_status(ixland_task_t *task) {
     int status = 0;
 
     if (atomic_load(&task->signaled)) {
@@ -29,14 +29,14 @@ static int task_to_status(iox_task_t *task) {
 #define W_STOPPED(status) (((status) & 0xff) == 0x7f)
 #define W_CONTINUED(status) ((status) == 0xffff)
 
-pid_t iox_waitpid(pid_t pid, int *wstatus, int options) {
-    iox_task_t *parent = iox_current_task();
+pid_t ixland_waitpid(pid_t pid, int *wstatus, int options) {
+    ixland_task_t *parent = ixland_current_task();
     if (!parent) {
         errno = ESRCH;
         return -1;
     }
 
-    iox_task_t *child = NULL;
+    ixland_task_t *child = NULL;
 
     pthread_mutex_lock(&parent->lock);
     parent->waiters++;
@@ -139,7 +139,7 @@ pid_t iox_waitpid(pid_t pid, int *wstatus, int options) {
 
     /* Only unlink and free terminated children */
     if (should_reap) {
-        iox_task_t **pp = &parent->children;
+        ixland_task_t **pp = &parent->children;
         while (*pp && *pp != child) {
             pp = &(*pp)->next_sibling;
         }
@@ -160,22 +160,22 @@ pid_t iox_waitpid(pid_t pid, int *wstatus, int options) {
 
     /* Only free terminated children */
     if (should_reap) {
-        iox_task_free(child);
+        ixland_task_free(child);
     }
 
     return child_pid;
 }
 
-pid_t iox_wait4(pid_t pid, int *wstatus, int options, struct rusage *rusage) {
+pid_t ixland_wait4(pid_t pid, int *wstatus, int options, struct rusage *rusage) {
     /* rusage not implemented yet - just call waitpid */
     (void)rusage;
-    return iox_waitpid(pid, wstatus, options);
+    return ixland_waitpid(pid, wstatus, options);
 }
 
-pid_t iox_wait(int *wstatus) {
-    return iox_waitpid(-1, wstatus, 0);
+pid_t ixland_wait(int *wstatus) {
+    return ixland_waitpid(-1, wstatus, 0);
 }
 
-pid_t iox_wait3(int *wstatus, int options, struct rusage *rusage) {
-    return iox_wait4(-1, wstatus, options, rusage);
+pid_t ixland_wait3(int *wstatus, int options, struct rusage *rusage) {
+    return ixland_wait4(-1, wstatus, options, rusage);
 }

@@ -66,7 +66,7 @@
     "VAL-CROSS-002": {
       "test": "cross_integration_headers",
       "result": "PASS",
-      "evidence": "Type consistency verified: iox_task_t, iox_error_t, IOX_MAX_PATH, system types, function declarations"
+      "evidence": "Type consistency verified: ixland_task_t, ixland_error_t, IXLAND_MAX_PATH, system types, function declarations"
     },
     "VAL-CROSS-014": {
       "test": "cross_signal_kill_delivers_to_child",
@@ -81,7 +81,7 @@
     "VAL-CROSS-016": {
       "test": "cross_signal_sigstop_stops_process, cross_signal_sigcont_resumes_process",
       "result": "PASS",
-      "evidence": "SIGSTOP changes state to IOX_TASK_STOPPED, SIGCONT resumes to IOX_TASK_RUNNING"
+      "evidence": "SIGSTOP changes state to IXLAND_TASK_STOPPED, SIGCONT resumes to IXLAND_TASK_RUNNING"
     },
     "VAL-CROSS-017": {
       "test": "cross_signal_inheritance_across_fork, signal_reset_on_exec",
@@ -138,7 +138,7 @@
   "blockers": [],
   "toolsUsed": [
     "cmake",
-    "iox-core-tests",
+    "ixland-core-tests",
     "make"
   ],
   "appliedUpdates": [],

@@ -37,13 +37,13 @@
   "sharedStateObservations": [
     {
       "area": "conventions",
-      "observation": "The implementation correctly follows the iox_ naming convention for functions (iox_alloc_pid, iox_free_pid, iox_pid_init) and IOX_ prefix for macros (IOX_MIN_PID, IOX_MAX_PID). This matches AGENTS.md naming conventions.",
-      "evidence": "ixland-system/kernel/task/pid.c - all functions use iox_ prefix, all macros use IOX_ prefix"
+      "observation": "The implementation correctly follows the ixland_ naming convention for functions (ixland_alloc_pid, ixland_free_pid, ixland_pid_init) and IXLAND_ prefix for macros (IXLAND_MIN_PID, IXLAND_MAX_PID). This matches AGENTS.md naming conventions.",
+      "evidence": "ixland-system/kernel/task/pid.c - all functions use ixland_ prefix, all macros use IXLAND_ prefix"
     },
     {
       "area": "conventions",
       "observation": "Header organization follows the pattern: internal implementation headers in ixland-system/kernel/task/, with public declarations in task.h. This aligns with AGENTS.md guidelines for header organization.",
-      "evidence": "pid.c includes task.h; iox_pid_init() declared in task.h with other public task APIs"
+      "evidence": "pid.c includes task.h; ixland_pid_init() declared in task.h with other public task APIs"
     },
     {
       "area": "conventions",

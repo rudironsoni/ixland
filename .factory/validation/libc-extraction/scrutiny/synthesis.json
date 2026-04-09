@@ -13,7 +13,7 @@
       "passed": true,
       "command": "cmake --build build",
       "exitCode": 0,
-      "observation": "Build completed successfully. All targets built: ixland-libc-core, ixland-libc-usersdb, ixland-libc-test, ixland-libc-usersdb-test, iox-runtime, iox-core, iox-core-tests"
+      "observation": "Build completed successfully. All targets built: ixland-libc-core, ixland-libc-usersdb, ixland-libc-test, ixland-libc-usersdb-test, ixland-runtime, ixland-core, ixland-core-tests"
     },
     "test": {
       "passed": true,
@@ -56,7 +56,7 @@
         "featureId": "libc-api-functions",
         "status": "pass",
         "commitId": "409a06e5-0101-47c0-89d5-b79790595700",
-        "summary": "All three core API functions implemented correctly: iox_version() returns version string, iox_strerror() converts error codes (fixed to use errno), iox_perror() outputs to stderr. Thread-safe implementations. Comprehensive tests added."
+        "summary": "All three core API functions implemented correctly: ixland_version() returns version string, ixland_strerror() converts error codes (fixed to use errno), ixland_perror() outputs to stderr. Thread-safe implementations. Comprehensive tests added."
       },
       {
         "featureId": "libc-build-modes",
@@ -81,7 +81,7 @@
   "sharedStateObservations": [
     {
       "area": "conventions",
-      "observation": "CMake target-based dependency pattern works well: ixland-system consumes ixland-libc-headers via target_link_libraries(iox-core PUBLIC ixland-libc-headers), propagating include paths transitively.",
+      "observation": "CMake target-based dependency pattern works well: ixland-system consumes ixland-libc-headers via target_link_libraries(ixland-core PUBLIC ixland-libc-headers), propagating include paths transitively.",
       "sourceFeature": "libc-boundary-targets"
     },
     {
@@ -96,7 +96,7 @@
     },
     {
       "area": "knowledge",
-      "observation": "iox_strerror maps positive errno values (Linux convention) to negative iox_error codes for compatibility.",
+      "observation": "ixland_strerror maps positive errno values (Linux convention) to negative ixland_error codes for compatibility.",
       "sourceFeature": "libc-api-functions"
     },
     {

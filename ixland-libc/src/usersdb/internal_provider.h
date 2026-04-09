@@ -16,28 +16,28 @@
  * ============================================================================ */
 
 /* Default user name for mobile environment */
-#define IOX_DEFAULT_USER_NAME "mobile"
+#define IXLAND_DEFAULT_USER_NAME "mobile"
 
 /* Default user UID (standard iOS mobile UID) */
-#define IOX_DEFAULT_USER_UID 501
+#define IXLAND_DEFAULT_USER_UID 501
 
 /* Default user GID (standard iOS mobile GID) */
-#define IOX_DEFAULT_USER_GID 501
+#define IXLAND_DEFAULT_USER_GID 501
 
 /* Default user home directory */
-#define IOX_DEFAULT_USER_DIR "/var/mobile"
+#define IXLAND_DEFAULT_USER_DIR "/var/mobile"
 
 /* Default user shell */
-#define IOX_DEFAULT_USER_SHELL "/bin/sh"
+#define IXLAND_DEFAULT_USER_SHELL "/bin/sh"
 
 /* ============================================================================
  * Default Group Constants
  * ============================================================================ */
 
 /* Default group name for mobile environment */
-#define IOX_DEFAULT_GROUP_NAME "mobile"
+#define IXLAND_DEFAULT_GROUP_NAME "mobile"
 
 /* Default group GID (standard iOS mobile GID) */
-#define IOX_DEFAULT_GROUP_GID 501
+#define IXLAND_DEFAULT_GROUP_GID 501
 
 #endif /* _IXLAND_USERSDB_INTERNAL_H_ */

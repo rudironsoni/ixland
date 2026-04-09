@@ -12,13 +12,13 @@
   "sharedStateObservations": [
     {
       "area": "conventions",
-      "observation": "The test file follows the established IOX_TEST framework pattern with proper naming conventions (lifecycle_* prefix for test functions). Uses iox_ prefix for internal functions and IOX_ prefix for macros consistently. All 13 tests properly use IOX_ASSERT* macros from the test harness.",
-      "evidence": "ixland-system/Tests/unit/test_process_lifecycle.c - All test functions use IOX_TEST() macro and assertion macros; helper functions use iox_ naming (iox_waitpid, iox_exit, etc.)"
+      "observation": "The test file follows the established IXLAND_TEST framework pattern with proper naming conventions (lifecycle_* prefix for test functions). Uses ixland_ prefix for internal functions and IXLAND_ prefix for macros consistently. All 13 tests properly use IXLAND_ASSERT* macros from the test harness.",
+      "evidence": "ixland-system/Tests/unit/test_process_lifecycle.c - All test functions use IXLAND_TEST() macro and assertion macros; helper functions use ixland_ naming (ixland_waitpid, ixland_exit, etc.)"
     },
     {
       "area": "knowledge",
-      "observation": "The worker correctly understood that iOS forbids actual fork() and created tests using simulated process creation via iox_task_alloc(). The create_test_child() helper properly simulates fork behavior by duplicating file descriptors, filesystem context, and signal handlers - which is the correct approach for iXland's thread-based process simulation architecture.",
-      "evidence": "test_process_lifecycle.c:55-82 create_test_child() helper - correctly calls iox_files_dup(), iox_fs_dup(), iox_sighand_dup() and sets up parent/child relationships"
+      "observation": "The worker correctly understood that iOS forbids actual fork() and created tests using simulated process creation via ixland_task_alloc(). The create_test_child() helper properly simulates fork behavior by duplicating file descriptors, filesystem context, and signal handlers - which is the correct approach for iXland's thread-based process simulation architecture.",
+      "evidence": "test_process_lifecycle.c:55-82 create_test_child() helper - correctly calls ixland_files_dup(), ixland_fs_dup(), ixland_sighand_dup() and sets up parent/child relationships"
     },
     {
       "area": "knowledge",
@@ -32,8 +32,8 @@
     },
     {
       "area": "knowledge",
-      "observation": "The worker discovered and correctly used the existing test harness (iox_test.h) and test runner infrastructure. The tests integrate properly with the iox-core-tests binary and support filtering by test name pattern ('lifecycle').",
-      "evidence": "Handoff shows: './build-macos/ixland-system/iox-core-tests lifecycle' - exitCode: 0, 'All 13 lifecycle tests passed'"
+      "observation": "The worker discovered and correctly used the existing test harness (ixland_test.h) and test runner infrastructure. The tests integrate properly with the ixland-core-tests binary and support filtering by test name pattern ('lifecycle').",
+      "evidence": "Handoff shows: './build-macos/ixland-system/ixland-core-tests lifecycle' - exitCode: 0, 'All 13 lifecycle tests passed'"
     }
   ],
   "addressesFailureFrom": null,

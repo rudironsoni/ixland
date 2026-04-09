@@ -19,19 +19,19 @@ extern "C" {
  * ============================================================================ */
 
 /** Maximum buffer size for getpwuid_r and getpwnam_r */
-#define IOX_GETPW_R_SIZE_MAX 1024
+#define IXLAND_GETPW_R_SIZE_MAX 1024
 
 /** Maximum length of user name */
-#define IOX_MAX_USER_NAME 32
+#define IXLAND_MAX_USER_NAME 32
 
 /** Maximum length of password field */
-#define IOX_MAX_PASSWD_FIELD 256
+#define IXLAND_MAX_PASSWD_FIELD 256
 
 /** Maximum length of home directory path */
-#define IOX_MAX_HOME_DIR 256
+#define IXLAND_MAX_HOME_DIR 256
 
 /** Maximum length of shell path */
-#define IOX_MAX_SHELL_PATH 256
+#define IXLAND_MAX_SHELL_PATH 256
 
 /* ============================================================================
  * Data Structures
@@ -67,7 +67,7 @@ struct passwd {
  * @param name User name to search for
  * @return Pointer to passwd structure, or NULL if not found
  */
-extern struct passwd *iox_getpwnam(const char *name);
+extern struct passwd *ixland_getpwnam(const char *name);
 
 /**
  * @brief Get password file entry by user ID
@@ -79,7 +79,7 @@ extern struct passwd *iox_getpwnam(const char *name);
  * @param uid User ID to search for
  * @return Pointer to passwd structure, or NULL if not found
  */
-extern struct passwd *iox_getpwuid(uid_t uid);
+extern struct passwd *ixland_getpwuid(uid_t uid);
 
 /* ============================================================================
  * Reentrant Versions (thread-safe)
@@ -97,8 +97,8 @@ extern struct passwd *iox_getpwuid(uid_t uid);
  * @param result Pointer to store result pointer (or NULL on error/not found)
  * @return 0 on success, error code on failure
  */
-extern int iox_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t buflen,
-                          struct passwd **result);
+extern int ixland_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t buflen,
+                             struct passwd **result);
 
 /**
  * @brief Get password file entry by UID (reentrant)
@@ -112,8 +112,8 @@ extern int iox_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_
  * @param result Pointer to store result pointer (or NULL on error/not found)
  * @return 0 on success, error code on failure
  */
-extern int iox_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen,
-                          struct passwd **result);
+extern int ixland_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen,
+                             struct passwd **result);
 
 /* ============================================================================
  * Database Iteration
@@ -124,7 +124,7 @@ extern int iox_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t bufle
  *
  * Rewinds the password database iterator to the beginning.
  */
-extern void iox_setpwent(void);
+extern void ixland_setpwent(void);
 
 /**
  * @brief Get next password file entry
@@ -134,28 +134,28 @@ extern void iox_setpwent(void);
  *
  * @return Pointer to passwd structure, or NULL on EOF/error
  */
-extern struct passwd *iox_getpwent(void);
+extern struct passwd *ixland_getpwent(void);
 
 /**
  * @brief Close password database iterator
  *
  * Closes any open resources associated with password database iteration.
  */
-extern void iox_endpwent(void);
+extern void ixland_endpwent(void);
 
 /* ============================================================================
  * Legacy Compatibility Macros
  * ============================================================================ */
 
-#define getpwnam(name) iox_getpwnam(name)
-#define getpwuid(uid) iox_getpwuid(uid)
+#define getpwnam(name) ixland_getpwnam(name)
+#define getpwuid(uid) ixland_getpwuid(uid)
 
-#define getpwnam_r(name, pwd, buf, buflen, result) iox_getpwnam_r(name, pwd, buf, buflen, result)
-#define getpwuid_r(uid, pwd, buf, buflen, result) iox_getpwuid_r(uid, pwd, buf, buflen, result)
+#define getpwnam_r(name, pwd, buf, buflen, result) ixland_getpwnam_r(name, pwd, buf, buflen, result)
+#define getpwuid_r(uid, pwd, buf, buflen, result) ixland_getpwuid_r(uid, pwd, buf, buflen, result)
 
-#define setpwent() iox_setpwent()
-#define getpwent() iox_getpwent()
-#define endpwent() iox_endpwent()
+#define setpwent() ixland_setpwent()
+#define getpwent() ixland_getpwent()
+#define endpwent() ixland_endpwent()
 #ifdef __cplusplus
 }
 #endif

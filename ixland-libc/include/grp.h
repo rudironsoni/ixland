@@ -19,16 +19,16 @@ extern "C" {
  * ============================================================================ */
 
 /** Maximum buffer size for getgrgid_r and getgrnam_r */
-#define IOX_GETGR_R_SIZE_MAX 1024
+#define IXLAND_GETGR_R_SIZE_MAX 1024
 
 /** Maximum number of groups per user (NGROUPS_MAX) */
-#define IOX_NGROUPS_MAX 16
+#define IXLAND_NGROUPS_MAX 16
 
 /** Maximum length of group name */
-#define IOX_MAX_GROUP_NAME 32
+#define IXLAND_MAX_GROUP_NAME 32
 
 /** Maximum number of members in a group */
-#define IOX_MAX_GROUP_MEMBERS 64
+#define IXLAND_MAX_GROUP_MEMBERS 64
 
 /* ============================================================================
  * Data Structures
@@ -61,7 +61,7 @@ struct group {
  * @param name Group name to search for
  * @return Pointer to group structure, or NULL if not found
  */
-extern struct group *iox_getgrnam(const char *name);
+extern struct group *ixland_getgrnam(const char *name);
 
 /**
  * @brief Get group file entry by group ID
@@ -73,7 +73,7 @@ extern struct group *iox_getgrnam(const char *name);
  * @param gid Group ID to search for
  * @return Pointer to group structure, or NULL if not found
  */
-extern struct group *iox_getgrgid(gid_t gid);
+extern struct group *ixland_getgrgid(gid_t gid);
 
 /* ============================================================================
  * Reentrant Versions (thread-safe)
@@ -91,8 +91,8 @@ extern struct group *iox_getgrgid(gid_t gid);
  * @param result Pointer to store result pointer (or NULL on error/not found)
  * @return 0 on success, error code on failure
  */
-extern int iox_getgrnam_r(const char *name, struct group *grp, char *buf, size_t buflen,
-                          struct group **result);
+extern int ixland_getgrnam_r(const char *name, struct group *grp, char *buf, size_t buflen,
+                             struct group **result);
 
 /**
  * @brief Get group file entry by GID (reentrant)
@@ -106,8 +106,8 @@ extern int iox_getgrnam_r(const char *name, struct group *grp, char *buf, size_t
  * @param result Pointer to store result pointer (or NULL on error/not found)
  * @return 0 on success, error code on failure
  */
-extern int iox_getgrgid_r(gid_t gid, struct group *grp, char *buf, size_t buflen,
-                          struct group **result);
+extern int ixland_getgrgid_r(gid_t gid, struct group *grp, char *buf, size_t buflen,
+                             struct group **result);
 
 /* ============================================================================
  * Database Iteration
@@ -118,7 +118,7 @@ extern int iox_getgrgid_r(gid_t gid, struct group *grp, char *buf, size_t buflen
  *
  * Rewinds the group database iterator to the beginning.
  */
-extern void iox_setgrent(void);
+extern void ixland_setgrent(void);
 
 /**
  * @brief Get next group file entry
@@ -128,14 +128,14 @@ extern void iox_setgrent(void);
  *
  * @return Pointer to group structure, or NULL on EOF/error
  */
-extern struct group *iox_getgrent(void);
+extern struct group *ixland_getgrent(void);
 
 /**
  * @brief Close group database iterator
  *
  * Closes any open resources associated with group database iteration.
  */
-extern void iox_endgrent(void);
+extern void ixland_endgrent(void);
 
 /* ============================================================================
  * Group Membership
@@ -150,7 +150,7 @@ extern void iox_endgrent(void);
  * @param list Array to store group IDs
  * @return Number of groups on success, -1 on error
  */
-extern int iox_getgroups(int size, gid_t list[]);
+extern int ixland_getgroups(int size, gid_t list[]);
 
 /**
  * @brief Set supplementary group IDs
@@ -162,7 +162,7 @@ extern int iox_getgroups(int size, gid_t list[]);
  * @param list Array of group IDs
  * @return 0 on success, -1 on error
  */
-extern int iox_setgroups(size_t size, const gid_t *list);
+extern int ixland_setgroups(size_t size, const gid_t *list);
 
 /**
  * @brief Initialize supplementary group access list
@@ -175,25 +175,25 @@ extern int iox_setgroups(size_t size, const gid_t *list);
  * @param group Group ID to add
  * @return 0 on success, -1 on error
  */
-extern int iox_initgroups(const char *user, gid_t group);
+extern int ixland_initgroups(const char *user, gid_t group);
 
 /* ============================================================================
  * Legacy Compatibility Macros
  * ============================================================================ */
 
-#define getgrnam(name) iox_getgrnam(name)
-#define getgrgid(gid) iox_getgrgid(gid)
+#define getgrnam(name) ixland_getgrnam(name)
+#define getgrgid(gid) ixland_getgrgid(gid)
 
-#define getgrnam_r(name, grp, buf, buflen, result) iox_getgrnam_r(name, grp, buf, buflen, result)
-#define getgrgid_r(gid, grp, buf, buflen, result) iox_getgrgid_r(gid, grp, buf, buflen, result)
+#define getgrnam_r(name, grp, buf, buflen, result) ixland_getgrnam_r(name, grp, buf, buflen, result)
+#define getgrgid_r(gid, grp, buf, buflen, result) ixland_getgrgid_r(gid, grp, buf, buflen, result)
 
-#define setgrent() iox_setgrent()
-#define getgrent() iox_getgrent()
-#define endgrent() iox_endgrent()
+#define setgrent() ixland_setgrent()
+#define getgrent() ixland_getgrent()
+#define endgrent() ixland_endgrent()
 
-#define getgroups(size, list) iox_getgroups(size, list)
-#define setgroups(size, list) iox_setgroups(size, list)
-#define initgroups(user, group) iox_initgroups(user, group)
+#define getgroups(size, list) ixland_getgroups(size, list)
+#define setgroups(size, list) ixland_setgroups(size, list)
+#define initgroups(user, group) ixland_initgroups(user, group)
 #ifdef __cplusplus
 }
 #endif

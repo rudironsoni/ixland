@@ -37,7 +37,7 @@ BreakStringLiterals: true
 # Includes
 IncludeBlocks: Regroup
 IncludeCategories:
-  - Regex: '^<iox/'
+  - Regex: '^<ixland/'
     Priority: 1
   - Regex: '^<.*\.h>'
     Priority: 2

@@ -36,15 +36,15 @@ CheckOptions:
   # ============================================================================
   # Naming Conventions - Enforced for iXland Code Consistency
   # ============================================================================
-  # All public APIs must use iox_ prefix
+  # All public APIs must use ixland_ prefix
   - key:   readability-identifier-naming.StructCase
     value: lower_case
   - key:   readability-identifier-naming.StructPrefix
-    value: iox_
+    value: ixland_
   - key:   readability-identifier-naming.FunctionCase
     value: lower_case
   - key:   readability-identifier-naming.FunctionPrefix
-    value: iox_
+    value: ixland_
   - key:   readability-identifier-naming.FunctionIgnoredRegexp
     value: "^(main|test_|ios_|ios_system_|executeInC)"
   - key:   readability-identifier-naming.VariableCase
@@ -56,21 +56,21 @@ CheckOptions:
   - key:   readability-identifier-naming.EnumCase
     value: lower_case
   - key:   readability-identifier-naming.EnumPrefix
-    value: iox_
+    value: ixland_
   - key:   readability-identifier-naming.EnumConstantCase
     value: UPPER_CASE
   - key:   readability-identifier-naming.EnumConstantPrefix
-    value: IOX_
+    value: IXLAND_
   - key:   readability-identifier-naming.TypedefCase
     value: lower_case
   - key:   readability-identifier-naming.TypedefSuffix
     value: _t
   - key:   readability-identifier-naming.TypedefPrefix
-    value: iox_
+    value: ixland_
   - key:   readability-identifier-naming.GlobalConstantCase
     value: UPPER_CASE
   - key:   readability-identifier-naming.GlobalConstantPrefix
-    value: IOX_
+    value: IXLAND_
   - key:   readability-identifier-naming.LocalConstantCase
     value: UPPER_CASE
   - key:   readability-identifier-naming.ParameterCase

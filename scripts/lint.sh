@@ -99,7 +99,7 @@ if [ "$TYPE_CHECK_MODE" = true ] || [ "$CHECK_MODE" = true ]; then
                 if [[ "$file" == *"ixland-libc"* ]]; then
                     INCLUDES="-I./ixland-libc/include"
                 elif [[ "$file" == *"ixland-system"* ]]; then
-                    INCLUDES="-I./ixland-system/include -I./ixland-system/src/iox/internal"
+                    INCLUDES="-I./ixland-system/include -I./ixland-system/src/ixland/internal"
                 elif [[ "$file" == *"ixland-wasm"* ]]; then
                     INCLUDES="-I./ixland-wasm/include"
                 fi
@@ -200,7 +200,7 @@ if [ "$DEAD_CODE_MODE" = true ] || [ "$CHECK_MODE" = true ]; then
                 if [[ "$file" == *"ixland-libc"* ]]; then
                     INCLUDES="-I./ixland-libc/include"
                 elif [[ "$file" == *"ixland-system"* ]]; then
-                    INCLUDES="-I./ixland-system/include -I./ixland-system/src/iox/internal"
+                    INCLUDES="-I./ixland-system/include -I./ixland-system/src/ixland/internal"
                 elif [[ "$file" == *"ixland-wasm"* ]]; then
                     INCLUDES="-I./ixland-wasm/include"
                 fi

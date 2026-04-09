@@ -1,8 +1,8 @@
-# libiox Implementation Status
+# libixland Implementation Status
 
 ## Overview
 
-**libiox** is a production-quality Linux syscall compatibility layer for iOS.
+**libixland** is a production-quality Linux syscall compatibility layer for iOS.
 
 **Current Status:** Core Implementation Complete ✅
 
@@ -18,7 +18,7 @@ Build Status:       ✅ Compiles successfully
 ## Completed Components
 
 ### 1. Process Management ✅ (1,595 lines)
-**File:** `src/iox/core/iox_process.c`
+**File:** `src/ixland/core/ixland_process.c`
 
 **Features:**
 - ✅ Virtual PID allocation with hash-based O(1) lookup
@@ -45,9 +45,9 @@ Build Status:       ✅ Compiles successfully
 - alarm, setitimer, getitimer, pause
 
 ### 2. File Operations ✅ (540 lines + 380 lines)
-**Files:** 
-- `src/iox/core/iox_file.c` - Original implementation
-- `src/iox/core/iox_file_v2.c` - VFS-aware version
+**Files:**
+- `src/ixland/core/ixland_file.c` - Original implementation
+- `src/ixland/core/ixland_file_v2.c` - VFS-aware version
 
 **Features:**
 - ✅ File descriptor table (256 slots) with per-FD locking
@@ -67,7 +67,7 @@ Build Status:       ✅ Compiles successfully
 - access, faccessat
 
 ### 3. Virtual File System (VFS) ✅ (408 lines)
-**File:** `src/iox/core/iox_vfs.c`
+**File:** `src/ixland/core/ixland_vfs.c`
 
 **Features:**
 - ✅ Path translation (virtual → iOS)
@@ -87,7 +87,7 @@ Build Status:       ✅ Compiles successfully
 - All VFS-aware file operations
 
 ### 4. Symbol Interposition ✅ (340 lines)
-**File:** `src/iox/interpose/iox_interpose.c`
+**File:** `src/ixland/interpose/ixland_interpose.c`
 
 **Features:**
 - ✅ 100+ Linux syscall wrappers
@@ -97,13 +97,13 @@ Build Status:       ✅ Compiles successfully
 
 ### 5. Supporting Infrastructure ✅
 
-**Path Utilities** (`src/iox/util/iox_path.c`):
+**Path Utilities** (`src/ixland/util/ixland_path.c`):
 - ✅ Path resolution
 - ✅ Path normalization
 - ✅ Path joining
 - ✅ Sandbox validation
 
-**Stub Functions** (`src/iox/core/iox_stubs.c`):
+**Stub Functions** (`src/ixland/core/ixland_stubs.c`):
 - Filesystem operations (stat, chmod, chown)
 - Directory operations (mkdir, rmdir, chdir)
 - Link operations (link, symlink, readlink)
@@ -121,14 +121,14 @@ Build Status:       ✅ Compiles successfully
 ┌─────────────────────────────────────────────────────────┐
 │ LAYER 3: Standard Linux Names                           │
 │ fork(), open(), read(), write(), etc.                    │
-│ (Strong symbols in iox_interpose.o)                     │
+│ (Strong symbols in ixland_interpose.o)                     │
 ├─────────────────────────────────────────────────────────┤
 │ LAYER 2: Public API                                       │
-│ iox_fork(), iox_open(), iox_read(), etc.                 │
-│ (Public interface in libiox.a)                            │
+│ ixland_fork(), ixland_open(), ixland_read(), etc.                 │
+│ (Public interface in libixland.a)                            │
 ├─────────────────────────────────────────────────────────┤
 │ LAYER 1: Internal Implementation                          │
-│ __iox_fork_impl(), __iox_open_impl(), etc.               │
+│ __ixland_fork_impl(), __ixland_open_impl(), etc.               │
 │ (Core logic with proper locking)                          │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -216,7 +216,7 @@ make clean && make
 - Proper mount management
 - Sandbox enforcement
 
-**Overall:** The architecture is sound. The implementation is production-quality. 
+**Overall:** The architecture is sound. The implementation is production-quality.
 This is not a prototype - it's ready for real use.
 
 ## Next Steps
@@ -229,8 +229,8 @@ This is not a prototype - it's ready for real use.
 
 ## Conclusion
 
-libiox is a **real, production-quality Linux subsystem for iOS**. 
-It's not a toy. It's not a prototype. It's a serious implementation 
+libixland is a **real, production-quality Linux subsystem for iOS**.
+It's not a toy. It's not a prototype. It's a serious implementation
 that follows Linux semantics while respecting iOS constraints.
 
 The foundation is solid. The architecture is sound. The code is clean.

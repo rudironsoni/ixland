@@ -23,43 +23,43 @@
  * ============================================================================ */
 
 /* Static buffer for non-reentrant functions */
-static struct passwd iox_static_passwd;
+static struct passwd ixland_static_passwd;
 
 /* Minimal stub user for mobile environment */
-static const char *iox_default_user_name = IOX_DEFAULT_USER_NAME;
-static const char *iox_default_user_passwd = "*";
-static const char *iox_default_user_gecos = "Mobile User";
-static const char *iox_default_user_dir = IOX_DEFAULT_USER_DIR;
-static const char *iox_default_user_shell = IOX_DEFAULT_USER_SHELL;
+static const char *ixland_default_user_name = IXLAND_DEFAULT_USER_NAME;
+static const char *ixland_default_user_passwd = "*";
+static const char *ixland_default_user_gecos = "Mobile User";
+static const char *ixland_default_user_dir = IXLAND_DEFAULT_USER_DIR;
+static const char *ixland_default_user_shell = IXLAND_DEFAULT_USER_SHELL;
 
 /* ============================================================================
  * Helper Functions
  * ============================================================================ */
 
-static void iox_fill_default_passwd(struct passwd *pwd) {
-    pwd->pw_name = (char *)iox_default_user_name;
-    pwd->pw_passwd = (char *)iox_default_user_passwd;
-    pwd->pw_uid = IOX_DEFAULT_USER_UID; /* Standard iOS mobile UID */
-    pwd->pw_gid = IOX_DEFAULT_USER_GID; /* Standard iOS mobile GID */
-    pwd->pw_gecos = (char *)iox_default_user_gecos;
-    pwd->pw_dir = (char *)iox_default_user_dir;
-    pwd->pw_shell = (char *)iox_default_user_shell;
+static void ixland_fill_default_passwd(struct passwd *pwd) {
+    pwd->pw_name = (char *)ixland_default_user_name;
+    pwd->pw_passwd = (char *)ixland_default_user_passwd;
+    pwd->pw_uid = IXLAND_DEFAULT_USER_UID; /* Standard iOS mobile UID */
+    pwd->pw_gid = IXLAND_DEFAULT_USER_GID; /* Standard iOS mobile GID */
+    pwd->pw_gecos = (char *)ixland_default_user_gecos;
+    pwd->pw_dir = (char *)ixland_default_user_dir;
+    pwd->pw_shell = (char *)ixland_default_user_shell;
 }
 
 /* ============================================================================
  * User Information Retrieval
  * ============================================================================ */
 
-struct passwd *iox_getpwnam(const char *name) {
+struct passwd *ixland_getpwnam(const char *name) {
     if (name == NULL) {
         errno = EINVAL;
         return NULL;
     }
 
     /* Stub: only return data for "mobile" user */
-    if (strcmp(name, IOX_DEFAULT_USER_NAME) == 0) {
-        iox_fill_default_passwd(&iox_static_passwd);
-        return &iox_static_passwd;
+    if (strcmp(name, IXLAND_DEFAULT_USER_NAME) == 0) {
+        ixland_fill_default_passwd(&ixland_static_passwd);
+        return &ixland_static_passwd;
     }
 
     /* Not found - this is expected for stub implementation */
@@ -67,24 +67,24 @@ struct passwd *iox_getpwnam(const char *name) {
     return NULL;
 }
 
-struct passwd *iox_getpwuid(uid_t uid) {
+struct passwd *ixland_getpwuid(uid_t uid) {
     /* Stub: only return data for mobile UID */
-    if (uid == IOX_DEFAULT_USER_UID) {
-        iox_fill_default_passwd(&iox_static_passwd);
-        return &iox_static_passwd;
+    if (uid == IXLAND_DEFAULT_USER_UID) {
+        ixland_fill_default_passwd(&ixland_static_passwd);
+        return &ixland_static_passwd;
     }
 
     /* Also accept root (0) for compatibility */
     if (uid == 0) {
         /* Return root user data */
-        iox_static_passwd.pw_name = (char *)"root";
-        iox_static_passwd.pw_passwd = (char *)"*";
-        iox_static_passwd.pw_uid = 0;
-        iox_static_passwd.pw_gid = 0;
-        iox_static_passwd.pw_gecos = (char *)"System Administrator";
-        iox_static_passwd.pw_dir = (char *)"/var/root";
-        iox_static_passwd.pw_shell = (char *)"/bin/sh";
-        return &iox_static_passwd;
+        ixland_static_passwd.pw_name = (char *)"root";
+        ixland_static_passwd.pw_passwd = (char *)"*";
+        ixland_static_passwd.pw_uid = 0;
+        ixland_static_passwd.pw_gid = 0;
+        ixland_static_passwd.pw_gecos = (char *)"System Administrator";
+        ixland_static_passwd.pw_dir = (char *)"/var/root";
+        ixland_static_passwd.pw_shell = (char *)"/bin/sh";
+        return &ixland_static_passwd;
     }
 
     /* Not found - this is expected for stub implementation */
@@ -96,8 +96,8 @@ struct passwd *iox_getpwuid(uid_t uid) {
  * Reentrant Versions (Thread-safe)
  * ============================================================================ */
 
-int iox_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t buflen,
-                   struct passwd **result) {
+int ixland_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t buflen,
+                      struct passwd **result) {
     if (name == NULL || pwd == NULL || buf == NULL || result == NULL) {
         if (result != NULL) {
             *result = NULL;
@@ -106,11 +106,11 @@ int iox_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t bufle
     }
 
     /* Calculate required buffer size */
-    size_t name_len = strlen(iox_default_user_name) + 1;
-    size_t passwd_len = strlen(iox_default_user_passwd) + 1;
-    size_t gecos_len = strlen(iox_default_user_gecos) + 1;
-    size_t dir_len = strlen(iox_default_user_dir) + 1;
-    size_t shell_len = strlen(iox_default_user_shell) + 1;
+    size_t name_len = strlen(ixland_default_user_name) + 1;
+    size_t passwd_len = strlen(ixland_default_user_passwd) + 1;
+    size_t gecos_len = strlen(ixland_default_user_gecos) + 1;
+    size_t dir_len = strlen(ixland_default_user_dir) + 1;
+    size_t shell_len = strlen(ixland_default_user_shell) + 1;
     size_t total_len = name_len + passwd_len + gecos_len + dir_len + shell_len;
 
     if (buflen < total_len) {
@@ -119,7 +119,7 @@ int iox_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t bufle
     }
 
     /* Stub: only return data for "mobile" user */
-    if (strcmp(name, IOX_DEFAULT_USER_NAME) != 0) {
+    if (strcmp(name, IXLAND_DEFAULT_USER_NAME) != 0) {
         *result = NULL;
         return ENOENT;
     }
@@ -128,33 +128,33 @@ int iox_getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t bufle
     char *p = buf;
 
     pwd->pw_name = p;
-    memcpy(p, iox_default_user_name, name_len);
+    memcpy(p, ixland_default_user_name, name_len);
     p += name_len;
 
     pwd->pw_passwd = p;
-    memcpy(p, iox_default_user_passwd, passwd_len);
+    memcpy(p, ixland_default_user_passwd, passwd_len);
     p += passwd_len;
 
-    pwd->pw_uid = IOX_DEFAULT_USER_UID;
-    pwd->pw_gid = IOX_DEFAULT_USER_GID;
+    pwd->pw_uid = IXLAND_DEFAULT_USER_UID;
+    pwd->pw_gid = IXLAND_DEFAULT_USER_GID;
 
     pwd->pw_gecos = p;
-    memcpy(p, iox_default_user_gecos, gecos_len);
+    memcpy(p, ixland_default_user_gecos, gecos_len);
     p += gecos_len;
 
     pwd->pw_dir = p;
-    memcpy(p, iox_default_user_dir, dir_len);
+    memcpy(p, ixland_default_user_dir, dir_len);
     p += dir_len;
 
     pwd->pw_shell = p;
-    memcpy(p, iox_default_user_shell, shell_len);
+    memcpy(p, ixland_default_user_shell, shell_len);
 
     *result = pwd;
     return 0;
 }
 
-int iox_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen,
-                   struct passwd **result) {
+int ixland_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen,
+                      struct passwd **result) {
     if (pwd == NULL || buf == NULL || result == NULL) {
         if (result != NULL) {
             *result = NULL;
@@ -170,13 +170,13 @@ int iox_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen,
     const char *user_dir = NULL;
     const char *user_shell = NULL;
 
-    if (uid == IOX_DEFAULT_USER_UID) {
-        user_name = iox_default_user_name;
-        user_uid = IOX_DEFAULT_USER_UID;
-        user_gid = IOX_DEFAULT_USER_GID;
-        user_gecos = iox_default_user_gecos;
-        user_dir = iox_default_user_dir;
-        user_shell = iox_default_user_shell;
+    if (uid == IXLAND_DEFAULT_USER_UID) {
+        user_name = ixland_default_user_name;
+        user_uid = IXLAND_DEFAULT_USER_UID;
+        user_gid = IXLAND_DEFAULT_USER_GID;
+        user_gecos = ixland_default_user_gecos;
+        user_dir = ixland_default_user_dir;
+        user_shell = ixland_default_user_shell;
     } else if (uid == 0) {
         user_name = "root";
         user_uid = 0;
@@ -236,37 +236,37 @@ int iox_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen,
  * ============================================================================ */
 
 /* Iterator state for sequential access */
-static int iox_pwent_index = 0;
+static int ixland_pwent_index = 0;
 
-void iox_setpwent(void) {
+void ixland_setpwent(void) {
     /* Reset iteration */
-    iox_pwent_index = 0;
+    ixland_pwent_index = 0;
 }
 
-struct passwd *iox_getpwent(void) {
+struct passwd *ixland_getpwent(void) {
     /* Stub: iterate through known users (root, then mobile) */
-    if (iox_pwent_index == 0) {
-        iox_pwent_index = 1;
+    if (ixland_pwent_index == 0) {
+        ixland_pwent_index = 1;
         /* Return root user */
-        iox_static_passwd.pw_name = (char *)"root";
-        iox_static_passwd.pw_passwd = (char *)"*";
-        iox_static_passwd.pw_uid = 0;
-        iox_static_passwd.pw_gid = 0;
-        iox_static_passwd.pw_gecos = (char *)"System Administrator";
-        iox_static_passwd.pw_dir = (char *)"/var/root";
-        iox_static_passwd.pw_shell = (char *)"/bin/sh";
-        return &iox_static_passwd;
-    } else if (iox_pwent_index == 1) {
-        iox_pwent_index = 2;
-        iox_fill_default_passwd(&iox_static_passwd);
-        return &iox_static_passwd;
+        ixland_static_passwd.pw_name = (char *)"root";
+        ixland_static_passwd.pw_passwd = (char *)"*";
+        ixland_static_passwd.pw_uid = 0;
+        ixland_static_passwd.pw_gid = 0;
+        ixland_static_passwd.pw_gecos = (char *)"System Administrator";
+        ixland_static_passwd.pw_dir = (char *)"/var/root";
+        ixland_static_passwd.pw_shell = (char *)"/bin/sh";
+        return &ixland_static_passwd;
+    } else if (ixland_pwent_index == 1) {
+        ixland_pwent_index = 2;
+        ixland_fill_default_passwd(&ixland_static_passwd);
+        return &ixland_static_passwd;
     }
 
     /* No more entries */
     return NULL;
 }
 
-void iox_endpwent(void) {
+void ixland_endpwent(void) {
     /* Reset iteration state */
-    iox_pwent_index = 0;
+    ixland_pwent_index = 0;
 }

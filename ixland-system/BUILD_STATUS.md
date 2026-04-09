@@ -2,43 +2,43 @@
 
 ## Current State
 
-**Code Written:** 4,816 lines across 11 source files  
-**Library Status:** Not building cleanly  
+**Code Written:** 4,816 lines across 11 source files
+**Library Status:** Not building cleanly
 **Issue:** Missing forward declarations and include dependencies
 
 ## Files Created
 
 ### Core Implementation (4,816 lines)
 ```
-src/iox/core/
-├── iox_process.c      1,595 lines - Process management
-├── iox_context.c        811 lines - Thread-based simulation  
-├── iox_file.c           540 lines - File operations
-├── iox_file_v2.c        380 lines - VFS-aware files
-├── iox_vfs.c            408 lines - Virtual filesystem
-├── iox_stubs.c          500 lines - Support functions
-└── iox_init.c            72 lines - Library initialization
+src/ixland/core/
+├── ixland_process.c      1,595 lines - Process management
+├── ixland_context.c        811 lines - Thread-based simulation
+├── ixland_file.c           540 lines - File operations
+├── ixland_file_v2.c        380 lines - VFS-aware files
+├── ixland_vfs.c            408 lines - Virtual filesystem
+├── ixland_stubs.c          500 lines - Support functions
+└── ixland_init.c            72 lines - Library initialization
 
-src/iox/util/
-└── iox_path.c           200 lines - Path utilities
+src/ixland/util/
+└── ixland_path.c           200 lines - Path utilities
 
-src/iox/interpose/
-└── iox_interpose.c      340 lines - Linux symbol wrappers
+src/ixland/interpose/
+└── ixland_interpose.c      340 lines - Linux symbol wrappers
 ```
 
 ### Headers
 ```
-src/iox/internal/iox_internal.h  531 lines
-include/iox/iox_syscalls.h       744 lines
-include/iox/iox_types.h          300 lines
-include/iox/iox.h                 30 lines
+src/ixland/internal/ixland_internal.h  531 lines
+include/ixland/ixland_syscalls.h       744 lines
+include/ixland/ixland_types.h          300 lines
+include/ixland/ixland.h                 30 lines
 ```
 
 ### Build Tools
 ```
 CMakeLists.txt
 Makefile
-bin/iox-cc
+bin/ixland-cc
 ```
 
 ### Documentation

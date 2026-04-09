@@ -1,11 +1,11 @@
-# iox: iOS Linux-Like Virtual Subsystem
+# ixland: iOS Linux-Like Virtual Subsystem
 
 <p align="center">
 <img src="https://img.shields.io/badge/Platform-iOS%2016.0+-lightgrey.svg" alt="Platform: iOS">
 <img src="https://img.shields.io/badge/arch-arm64%20device%20%7C%20arm64%2Fx86__64%20sim-blue.svg" alt="Architecture: iOS only">
 </p>
 
-**iox** is a Linux-like virtual kernel subsystem for iOS, designed for maximum practical Linux userland compatibility within App Store constraints. It provides:
+**ixland** is a Linux-like virtual kernel subsystem for iOS, designed for maximum practical Linux userland compatibility within App Store constraints. It provides:
 
 - Virtual `fork()`, `execve()`, and `waitpid()` without host process creation
 - Unified task model for native commands and WAMR WASI modules
@@ -16,7 +16,7 @@
 
 ## Status
 
-⚠️ **Work In Progress**: Transforming from compatibility layer to Linux-like subsystem. See `docs/IOX_ARCHITECTURAL_ANALYSIS.md` for details.
+⚠️ **Work In Progress**: Transforming from compatibility layer to Linux-like subsystem. See `docs/IXLAND_ARCHITECTURAL_ANALYSIS.md` for details.
 
 **Current Role**: This component (`ixland-system`) is the current home of the main iXland implementation. Most kernel, runtime, and syscall code lives here. Future narrow extractions will move public headers to `ixland-libc` and Wasm interfaces to `ixland-wasm`, but those boundaries are not yet populated.
 
@@ -30,7 +30,7 @@
 
 ## Architecture Overview
 
-iox implements Linux userland semantics through a virtual kernel substrate:
+ixland implements Linux userland semantics through a virtual kernel substrate:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -42,7 +42,7 @@ iox implements Linux userland semantics through a virtual kernel substrate:
 │                 POSIX Syscall Interface                     │
 │               fork, execve, open, signal, etc.            │
 ├─────────────────────────────────────────────────────────────┤
-│                    iox Virtual Kernel                       │
+│                    ixland Virtual Kernel                       │
 │  ┌─────────┬─────────┬─────────┬─────────┬─────────┐       │
 │  │  Task   │ Signal  │  Exec   │   VFS   │  TTY    │       │
 │  │Manager  │Handler  │Dispatch │ Filesys │Driver   │       │
@@ -60,12 +60,12 @@ iox implements Linux userland semantics through a virtual kernel substrate:
 
 ### Key Objects
 
-- **`iox_task`**: Single canonical execution object with PID, PGID, SID
-- **`iox_files`**: Per-task file descriptor table
-- **`iox_fs`**: Per-task filesystem context (cwd, root, mounts)
-- **`iox_sighand`**: Per-task signal handlers
-- **`iox_tty`**: Controlling terminal and foreground pgrp
-- **`iox_exec_image`**: Currently executing image (native/WASI/script)
+- **`ixland_task`**: Single canonical execution object with PID, PGID, SID
+- **`ixland_files`**: Per-task file descriptor table
+- **`ixland_fs`**: Per-task filesystem context (cwd, root, mounts)
+- **`ixland_sighand`**: Per-task signal handlers
+- **`ixland_tty`**: Controlling terminal and foreground pgrp
+- **`ixland_exec_image`**: Currently executing image (native/WASI/script)
 
 ## Compatibility Target
 
@@ -132,10 +132,10 @@ ctest --preset ios-simulator-test
 ```
 ixland-system/
 ├── include/
-│   ├── iox/               # Public headers
-│   │   ├── iox.h
-│   │   ├── iox_syscalls.h
-│   │   └── iox_wamr.h
+│   ├── ixland/               # Public headers
+│   │   ├── ixland.h
+│   │   ├── ixland_syscalls.h
+│   │   └── ixland_wamr.h
 │   └── uapi/linux/        # Linux-compatible UAPI
 ├── kernel/                # Kernel subsystems
 │   ├── task/              # fork, exit, wait, PID
@@ -186,11 +186,11 @@ Native commands are pre-registered, not dynamically loaded:
 
 ```c
 // Register a native command
-IOX_NATIVE_CMD("/bin/ls", iox_ls_main);
-IOX_NATIVE_CMD("/bin/cat", iox_cat_main);
+IXLAND_NATIVE_CMD("/bin/ls", ixland_ls_main);
+IXLAND_NATIVE_CMD("/bin/cat", ixland_cat_main);
 
 // Entry ABI
-int iox_ls_main(iox_task_t *task, int argc, char **argv, char **envp) {
+int ixland_ls_main(ixland_task_t *task, int argc, char **argv, char **envp) {
     // Implementation
     return 0;
 }
@@ -205,12 +205,12 @@ WAMR is an execution backend, not a separate universe:
 - WASI operations use same `task->files` as native code
 - WASI paths resolve through same VFS
 - WASI stdio uses same descriptors
-- WASI clocks/random through iox kernel abstractions
+- WASI clocks/random through ixland kernel abstractions
 
 ```c
 // Load and run WASM module
-iox_wamr_load_module(wasm_buffer, wasm_size);
-iox_wamr_call_function("_start", argc, argv);
+ixland_wamr_load_module(wasm_buffer, wasm_size);
+ixland_wamr_call_function("_start", argc, argv);
 ```
 
 ## Testing Doctrine
@@ -253,7 +253,7 @@ ctest --preset ios-simulator-test
 
 ## Documentation
 
-- `docs/IOX_ARCHITECTURAL_ANALYSIS.md` - Architecture details
+- `docs/IXLAND_ARCHITECTURAL_ANALYSIS.md` - Architecture details
 - `docs/ARCHITECTURE.md` - Monorepo-level architecture
 - `docs/BOUNDARIES.md` - Component boundary definitions
 - `AGENTS.md` - Developer guidelines
@@ -272,7 +272,7 @@ ctest --preset ios-simulator-test
 - **Phase 6**: Test infrastructure
 - **Phase 7**: Bash compatibility validation
 
-See `docs/IOX_ARCHITECTURAL_ANALYSIS.md` for detailed implementation order.
+See `docs/IXLAND_ARCHITECTURAL_ANALYSIS.md` for detailed implementation order.
 
 ## License
 

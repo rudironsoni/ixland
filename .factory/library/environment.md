@@ -48,9 +48,9 @@
 
 | Variable | Description |
 |----------|-------------|
-| `IOX_PREFIX` | Installation prefix |
-| `IOX_PATH` | Command search path |
-| `IOX_HOME` | User home directory |
+| `IXLAND_PREFIX` | Installation prefix |
+| `IXLAND_PATH` | Command search path |
+| `IXLAND_HOME` | User home directory |
 
 ## Platform-Specific Notes
 

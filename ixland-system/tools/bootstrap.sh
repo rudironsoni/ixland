@@ -1,10 +1,10 @@
 #!/bin/bash
-# iox Bootstrap Script
+# ixland Bootstrap Script
 # Fresh clone setup
 
 set -e
 
-echo "=== iox Bootstrap ==="
+echo "=== ixland Bootstrap ==="
 echo ""
 
 # Check prerequisites

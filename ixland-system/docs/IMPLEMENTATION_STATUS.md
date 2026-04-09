@@ -1,25 +1,25 @@
-# iox Implementation Status
+# ixland Implementation Status
 
-**Date**: 2026-03-23  
+**Date**: 2026-03-23
 **Status**: Core Architecture Complete - Foundation Ready
 
 ## Summary
 
-The iox project has been transformed from a fragmented compatibility layer into a coherent Linux-like virtual kernel subsystem for iOS. All critical architectural debt has been addressed, and the foundation is ready for incremental feature development.
+The ixland project has been transformed from a fragmented compatibility layer into a coherent Linux-like virtual kernel subsystem for iOS. All critical architectural debt has been addressed, and the foundation is ready for incremental feature development.
 
 ## Completed Phases
 
 ### Phase 0: Repository Reorganization (COMPLETE)
 - [x] Created canonical directory structure (kernel/, fs/, drivers/, runtime/, compat/, tests/)
-- [x] Deleted competing models (iox_context.c, iox_file.c)
+- [x] Deleted competing models (ixland_context.c, ixland_file.c)
 - [x] Migrated existing files to new locations
 - [x] Updated README.md and AGENTS.md
 
 **Files Created:**
-- `docs/IOX_ARCHITECTURAL_ANALYSIS.md` - Complete migration plan
+- `docs/IXLAND_ARCHITECTURAL_ANALYSIS.md` - Complete migration plan
 - `kernel/task/task.h` - Canonical task structure
 - `fs/fdtable.h` - FD table header
-- `tests/harness/iox_test.h` - Test framework
+- `tests/harness/ixland_test.h` - Test framework
 - `tests/harness/harness.c` - Test runner
 - `tests/unit/test_pid.c` - PID tests
 - `tests/unit/test_fd.c` - FD table tests
@@ -57,7 +57,7 @@ The iox project has been transformed from a fragmented compatibility layer into 
 ### Phase 3: Filesystem Foundation (COMPLETE)
 - [x] VFS header with vnode and mount structures (vfs.h)
 - [x] VFS implementation with mount table (vfs.c)
-- [x] Per-task filesystem context (iox_fs)
+- [x] Per-task filesystem context (ixland_fs)
 - [x] Mount/umount operations
 
 **Key Features:**
@@ -111,8 +111,8 @@ The iox project has been transformed from a fragmented compatibility layer into 
 
 ### Phase 8: Test Infrastructure (COMPLETE)
 - [x] C-level test harness
-- [x] IOX_TEST macro for test registration
-- [x] Assertion macros (IOX_ASSERT, IOX_ASSERT_EQ, etc.)
+- [x] IXLAND_TEST macro for test registration
+- [x] Assertion macros (IXLAND_ASSERT, IXLAND_ASSERT_EQ, etc.)
 - [x] Test runner with filtering
 - [x] Unit tests for PID and FD table
 
@@ -126,8 +126,8 @@ The iox project has been transformed from a fragmented compatibility layer into 
 ## Architecture Compliance
 
 ### Canonical Object Model (COMPLIANT)
-- Single `iox_task` is the only execution object
-- `iox_context.c` deleted
+- Single `ixland_task` is the only execution object
+- `ixland_context.c` deleted
 - Global FD table eliminated
 - All FDs live under `task->files`
 
@@ -144,12 +144,12 @@ The iox project has been transformed from a fragmented compatibility layer into 
 ### Ownership Rules (IMPLEMENTED)
 | Concept | Owner | Location |
 |---------|-------|----------|
-| PID | iox_task | task->pid |
-| FDs | iox_files | task->files->fd[] |
-| CWD | iox_fs | task->fs->cwd |
-| Signals | iox_sighand | task->sighand->action[] |
-| TTY | iox_tty | task->tty |
-| Mounts | iox_mount | task->fs->root_mount |
+| PID | ixland_task | task->pid |
+| FDs | ixland_files | task->files->fd[] |
+| CWD | ixland_fs | task->fs->cwd |
+| Signals | ixland_sighand | task->sighand->action[] |
+| TTY | ixland_tty | task->tty |
+| Mounts | ixland_mount | task->fs->root_mount |
 
 ### iOS-Only Policy (ENFORCED)
 - CMAKE_SYSTEM_NAME hardcoded to iOS
@@ -220,7 +220,7 @@ The iox project has been transformed from a fragmented compatibility layer into 
 ```
 kernel/
 ├── task/
-│   ├── task.h          (struct iox_task)
+│   ├── task.h          (struct ixland_task)
 │   ├── task.c          (task allocation)
 │   ├── pid.c           (PID allocator)
 │   ├── fork.c          (virtual fork)
@@ -250,14 +250,14 @@ tools/
 
 tests/
 ├── harness/
-│   ├── iox_test.h      (test macros)
+│   ├── ixland_test.h      (test macros)
 │   └── harness.c       (runner)
 └── unit/
     ├── test_pid.c      (PID tests)
     └── test_fd.c       (FD tests)
 
 docs/
-├── IOX_ARCHITECTURAL_ANALYSIS.md
+├── IXLAND_ARCHITECTURAL_ANALYSIS.md
 └── IMPLEMENTATION_STATUS.md (this file)
 ```
 
@@ -268,27 +268,27 @@ docs/
 ## Migration Status
 
 ### Deleted (Safe):
-- `src/iox/core/iox_context.c` (competing model)
-- `src/iox/core/iox_file.c` (global FD table)
+- `src/ixland/core/ixland_context.c` (competing model)
+- `src/ixland/core/ixland_file.c` (global FD table)
 - All .o files (object files)
 
 ### Migrated:
-- `iox_vfs.c` → `fs/vfs/iox_vfs.c`
-- `iox_network.c` → `net/iox_network.c`
-- `iox_path.c` → `fs/iox_path.c`
-- `iox_interpose.c` → `compat/interpose/iox_interpose.c`
+- `ixland_vfs.c` → `fs/vfs/ixland_vfs.c`
+- `ixland_network.c` → `net/ixland_network.c`
+- `ixland_path.c` → `fs/ixland_path.c`
+- `ixland_interpose.c` → `compat/interpose/ixland_interpose.c`
 
 ### Needs Migration (Contains Logic):
-- `src/iox/core/iox_process.c` (1,628 lines) - Contains useful process logic
-- `src/iox/core/iox_init.c` (108 lines) - Initialization
-- `src/iox/core/iox_file_v2.c` (568 lines) - VFS-aware file ops
-- `src/iox/internal/iox_internal.h` (749 lines) - Still referenced
+- `src/ixland/core/ixland_process.c` (1,628 lines) - Contains useful process logic
+- `src/ixland/core/ixland_init.c` (108 lines) - Initialization
+- `src/ixland/core/ixland_file_v2.c` (568 lines) - VFS-aware file ops
+- `src/ixland/internal/ixland_internal.h` (749 lines) - Still referenced
 
 ## Conclusion
 
-The iox project now has a solid architectural foundation that meets all requirements:
+The ixland project now has a solid architectural foundation that meets all requirements:
 
-1. Single canonical execution object (iox_task) ✓
+1. Single canonical execution object (ixland_task) ✓
 2. Per-task FD ownership ✓
 3. Virtual fork/exec implementation ✓
 4. iOS-only build system ✓

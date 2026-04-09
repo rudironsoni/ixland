@@ -37,5 +37,5 @@
     }
   ],
   "addressesFailureFrom": null,
-  "summary": "PASS - The cross-build-verify feature successfully validated that the complete iXland monorepo build works end-to-end. CMake configuration succeeds, all components build without errors (ixland-libc, ixland-system, ixland-wasm), 4 static libraries are created (libiox.a 96KB, libiox-runtime.a 7KB, libixland-libc-core.a 4KB, libixland-libc-usersdb.a 9KB), iOS Simulator build works, and all test executables link successfully with no undefined symbol errors. The few issues identified (missing test-simulator.sh, standalone build limitations, macro redefinition warnings) are pre-existing, non-blocking, and documented."
+  "summary": "PASS - The cross-build-verify feature successfully validated that the complete iXland monorepo build works end-to-end. CMake configuration succeeds, all components build without errors (ixland-libc, ixland-system, ixland-wasm), 4 static libraries are created (libixland.a 96KB, libixland-runtime.a 7KB, libixland-libc-core.a 4KB, libixland-libc-usersdb.a 9KB), iOS Simulator build works, and all test executables link successfully with no undefined symbol errors. The few issues identified (missing test-simulator.sh, standalone build limitations, macro redefinition warnings) are pre-existing, non-blocking, and documented."
 }

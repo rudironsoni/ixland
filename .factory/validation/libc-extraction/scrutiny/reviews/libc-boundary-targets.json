@@ -12,7 +12,7 @@
   "sharedStateObservations": [
     {
       "area": "conventions",
-      "observation": "The project uses a clean CMake target-based dependency pattern where ixland-system consumes ixland-libc-headers via target_link_libraries(iox-core PUBLIC ixland-libc-headers). This propagates include paths transitively without requiring global include_directories() calls.",
+      "observation": "The project uses a clean CMake target-based dependency pattern where ixland-system consumes ixland-libc-headers via target_link_libraries(ixland-core PUBLIC ixland-libc-headers). This propagates include paths transitively without requiring global include_directories() calls.",
       "evidence": "ixland-system/CMakeLists.txt:109-113 shows conditional linking to ixland-libc-headers target when available in monorepo builds"
     },
     {
@@ -22,7 +22,7 @@
     },
     {
       "area": "knowledge",
-      "observation": "The relative path includes (../../../ixland-libc/include) were replaced with system-style includes (<linux/poll.h>, <linux/epoll.h>) in iox_internal.h and iox_poll.c. This ensures proper separation between public headers and internal implementation.",
+      "observation": "The relative path includes (../../../ixland-libc/include) were replaced with system-style includes (<linux/poll.h>, <linux/epoll.h>) in ixland_internal.h and ixland_poll.c. This ensures proper separation between public headers and internal implementation.",
       "evidence": "Commit 1dabb2f69 shows cleanup of relative path includes in favor of CMake-configured include paths"
     },
     {

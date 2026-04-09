@@ -5,13 +5,13 @@
 #include "task.h"
 
 /* External declaration for vfork notification */
-extern void __iox_vfork_exit_notify(void);
+extern void __ixland_vfork_exit_notify(void);
 
 /* External declaration for init task */
-extern iox_task_t *init_task;
+extern ixland_task_t *init_task;
 
-void iox_exit(int status) {
-    iox_task_t *task = iox_current_task();
+void ixland_exit(int status) {
+    ixland_task_t *task = ixland_current_task();
     if (!task) {
         _Exit(status);
     }
@@ -21,7 +21,7 @@ void iox_exit(int status) {
     /* Set exit status */
     task->exit_status = status;
     atomic_store(&task->exited, true);
-    atomic_store(&task->state, IOX_TASK_ZOMBIE);
+    atomic_store(&task->state, IXLAND_TASK_ZOMBIE);
 
     /* Reparent children to init (orphan adoption) */
     if (task->children && init_task && init_task != task) {
@@ -29,7 +29,7 @@ void iox_exit(int status) {
         pthread_mutex_lock(&init_task->lock);
 
         /* Iterate through all children and reparent them */
-        iox_task_t *child = task->children;
+        ixland_task_t *child = task->children;
         while (child) {
             pthread_mutex_lock(&child->lock);
 
@@ -43,7 +43,7 @@ void iox_exit(int status) {
 
         /* Link entire children list to init's children list */
         /* Find the last child in our list */
-        iox_task_t *last_child = task->children;
+        ixland_task_t *last_child = task->children;
         while (last_child->next_sibling) {
             last_child = last_child->next_sibling;
         }
@@ -63,7 +63,7 @@ void iox_exit(int status) {
         pthread_mutex_unlock(&init_task->lock);
     } else if (task->children) {
         /* No init task available, just update ppid to 1 */
-        iox_task_t *child = task->children;
+        ixland_task_t *child = task->children;
         while (child) {
             pthread_mutex_lock(&child->lock);
             child->ppid = 1;
@@ -81,7 +81,7 @@ void iox_exit(int status) {
 
     /* Notify vfork parent if this is a vfork child */
     if (task->vfork_parent) {
-        __iox_vfork_exit_notify();
+        __ixland_vfork_exit_notify();
     }
 
     /* Notify parent via SIGCHLD */
@@ -98,7 +98,7 @@ void iox_exit(int status) {
     pthread_exit(NULL);
 }
 
-void iox__exit(int status) {
+void ixland__exit(int status) {
     /* Immediate exit without cleanup */
     _Exit(status);
 }

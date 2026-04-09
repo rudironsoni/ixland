@@ -19,13 +19,13 @@
   "sharedStateObservations": [
     {
       "area": "conventions",
-      "observation": "Test harness uses Mach-O section-based test registration (__DATA,iox_test_cases) which is macOS/iOS specific. This is well-documented in the harness code but AGENTS.md doesn't mention this platform-specific test discovery mechanism.",
+      "observation": "Test harness uses Mach-O section-based test registration (__DATA,ixland_test_cases) which is macOS/iOS specific. This is well-documented in the harness code but AGENTS.md doesn't mention this platform-specific test discovery mechanism.",
       "evidence": "ixland-system/Tests/harness/harness.c:27-37 uses getsectiondata() to discover tests from Mach-O sections"
     },
     {
       "area": "conventions",
       "observation": "Test filter mechanism allows running subsets of tests by name pattern matching. This is used effectively to run specific test categories (lifecycle, cross, signal_process, group) during validation.",
-      "evidence": "Transcript shows: ./build-macos/ixland-system/iox-core-tests lifecycle - filters tests by substring match"
+      "evidence": "Transcript shows: ./build-macos/ixland-system/ixland-core-tests lifecycle - filters tests by substring match"
     },
     {
       "area": "knowledge",
@@ -34,5 +34,5 @@
     }
   ],
   "addressesFailureFrom": null,
-  "summary": "Cross-tests feature completed successfully. 106 tests executed with 104 passing (98% pass rate). The 2 failures are pre-existing exec implementation issues documented as out of scope. All 36 VAL-CROSS assertions validated with evidence in validation-state.json. Test coverage includes unit tests for PID allocation (13), process lifecycle (13), signal handling (cross-signals: 26 tests), process groups (12), and integration flows. Code quality is high with consistent test patterns using IOX_TEST/IOX_ASSERT macros."
+  "summary": "Cross-tests feature completed successfully. 106 tests executed with 104 passing (98% pass rate). The 2 failures are pre-existing exec implementation issues documented as out of scope. All 36 VAL-CROSS assertions validated with evidence in validation-state.json. Test coverage includes unit tests for PID allocation (13), process lifecycle (13), signal handling (cross-signals: 26 tests), process groups (12), and integration flows. Code quality is high with consistent test patterns using IXLAND_TEST/IXLAND_ASSERT macros."
 }

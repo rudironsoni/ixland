@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Build WAMR for iOS Device and Simulator
-# Creates libwamr.a for linking with libiox
+# Creates libwamr.a for linking with libixland
 
 set -e
 

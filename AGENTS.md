@@ -383,14 +383,14 @@ All C code follows strict naming conventions enforced by clang-tidy:
 
 | Construct | Pattern | Example |
 |-----------|---------|---------|
-| **Functions** | `iox_lowercase()` | `iox_task_alloc()`, `iox_pid_alloc()` |
-| **Structs/Types** | `iox_lowercase_t` | `iox_task_t`, `iox_files_t` |
-| **Typedefs** | `iox_lowercase_t` | `iox_pid_t`, `iox_mode_t` |
-| **Macros** | `IOX_UPPER_CASE` | `IOX_MAX_NAME`, `IOX_NSIG` |
-| **Enum Types** | `iox_lowercase` | `iox_task_state_t` |
-| **Enum Values** | `IOX_PREFIX_VALUE` | `IOX_TASK_RUNNING`, `IOX_MAX_FD` |
-| **Constants** | `IOX_UPPER_CASE` | `IOX_MAX_PATH`, `IOX_MAX_ARGS` |
-| **Global Variables** | `iox_lowercase` | `iox_current_task` |
+| **Functions** | `ixland_lowercase()` | `ixland_task_alloc()`, `ixland_pid_alloc()` |
+| **Structs/Types** | `ixland_lowercase_t` | `ixland_task_t`, `ixland_files_t` |
+| **Typedefs** | `ixland_lowercase_t` | `ixland_pid_t`, `ixland_mode_t` |
+| **Macros** | `IXLAND_UPPER_CASE` | `IXLAND_MAX_NAME`, `IXLAND_NSIG` |
+| **Enum Types** | `ixland_lowercase` | `ixland_task_state_t` |
+| **Enum Values** | `IXLAND_PREFIX_VALUE` | `IXLAND_TASK_RUNNING`, `IXLAND_MAX_FD` |
+| **Constants** | `IXLAND_UPPER_CASE` | `IXLAND_MAX_PATH`, `IXLAND_MAX_ARGS` |
+| **Global Variables** | `ixland_lowercase` | `ixland_current_task` |
 | **Parameters** | `lowercase` | `task`, `pid`, `fd` |
 
 **Enforcement:**
@@ -434,7 +434,7 @@ Swift code follows standard Swift guidelines enforced by SwiftLint:
 
 ### Naming Convention Rationale
 
-**Why `iox_` prefix for C APIs?**
+**Why `ixland_` prefix for C APIs?**
 1. **Namespace isolation**: Prevents symbol collisions
 2. **Clarity**: Makes iXland APIs instantly recognizable
 3. **Consistency**: All public APIs follow same pattern

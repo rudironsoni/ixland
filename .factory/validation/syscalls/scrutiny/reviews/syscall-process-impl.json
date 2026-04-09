@@ -6,7 +6,7 @@
   "diffReviewed": true,
   "status": "pass",
   "codeReview": {
-    "summary": "The syscall-process-impl feature implements process management syscalls (iox_fork, iox_vfork, iox_execve, iox_exit, iox_waitpid, iox_getpid, iox_getppid) using pthread-based simulation with setjmp/longjmp for child continuation. The implementation is well-structured, follows naming conventions, handles errors appropriately, and includes comprehensive unit tests. The approach correctly works around iOS fork() restrictions while maintaining Linux-compatible semantics.",
+    "summary": "The syscall-process-impl feature implements process management syscalls (ixland_fork, ixland_vfork, ixland_execve, ixland_exit, ixland_waitpid, ixland_getpid, ixland_getppid) using pthread-based simulation with setjmp/longjmp for child continuation. The implementation is well-structured, follows naming conventions, handles errors appropriately, and includes comprehensive unit tests. The approach correctly works around iOS fork() restrictions while maintaining Linux-compatible semantics.",
     "issues": [
       {
         "file": "ixland-system/kernel/task/fork.c",
@@ -42,15 +42,15 @@
         "file": "ixland-system/kernel/exec/exec.c",
         "line": 115,
         "severity": "non_blocking",
-        "description": "iox_exec_copy_argv and iox_exec_copy_envp duplicate similar logic. Consider extracting a common helper function to reduce code duplication."
+        "description": "ixland_exec_copy_argv and ixland_exec_copy_envp duplicate similar logic. Consider extracting a common helper function to reduce code duplication."
       }
     ]
   },
   "sharedStateObservations": [
     {
       "area": "conventions",
-      "observation": "The implementation correctly follows all naming conventions documented in AGENTS.md: iox_ prefix for functions, IOX_ prefix for macros/types, lowercase for parameters. All 7 syscalls use proper naming.",
-      "evidence": "ixland-system/kernel/task/fork.c defines iox_fork(), iox_vfork(); task.c defines iox_getpid(), iox_getppid(); exec.c defines iox_execve(); exit.c defines iox_exit(); wait.c defines iox_waitpid()"
+      "observation": "The implementation correctly follows all naming conventions documented in AGENTS.md: ixland_ prefix for functions, IXLAND_ prefix for macros/types, lowercase for parameters. All 7 syscalls use proper naming.",
+      "evidence": "ixland-system/kernel/task/fork.c defines ixland_fork(), ixland_vfork(); task.c defines ixland_getpid(), ixland_getppid(); exec.c defines ixland_execve(); exit.c defines ixland_exit(); wait.c defines ixland_waitpid()"
     },
     {
       "area": "conventions",
@@ -74,10 +74,10 @@
     },
     {
       "area": "knowledge",
-      "observation": "The vfork implementation marks parent as IOX_TASK_UNINTERRUPTIBLE (line 254) which matches Linux vfork semantics, but this pattern of task state management should be documented in the architecture knowledge base.",
-      "evidence": "fork.c line 254: atomic_store(&parent->state, IOX_TASK_UNINTERRUPTIBLE); - parent suspended until child execs/exits"
+      "observation": "The vfork implementation marks parent as IXLAND_TASK_UNINTERRUPTIBLE (line 254) which matches Linux vfork semantics, but this pattern of task state management should be documented in the architecture knowledge base.",
+      "evidence": "fork.c line 254: atomic_store(&parent->state, IXLAND_TASK_UNINTERRUPTIBLE); - parent suspended until child execs/exits"
     }
   ],
   "addressesFailureFrom": null,
-  "summary": "The syscall-process-impl feature has been successfully implemented. All 7 required syscalls (fork, vfork, execve, exit, waitpid, getpid, getppid) are functional with proper error handling, thread safety, and Linux-compatible semantics. The pthread-based simulation with setjmp/longjmp correctly works around iOS fork() restrictions. Comprehensive unit tests cover fork behavior, parent-child relationships, resource limits, and signal inheritance. The implementation follows naming conventions (iox_ functions, IOX_ macros), uses atomic operations for thread safety, and properly sets errno on errors. Minor non-blocking issues identified include longjmp across threads (architectural constraint), redundant WNOHANG check, and potential init task adoption gap for orphaned processes. All fulfillments for VAL-SYSCALL-001 through VAL-SYSCALL-010 are satisfied."
+  "summary": "The syscall-process-impl feature has been successfully implemented. All 7 required syscalls (fork, vfork, execve, exit, waitpid, getpid, getppid) are functional with proper error handling, thread safety, and Linux-compatible semantics. The pthread-based simulation with setjmp/longjmp correctly works around iOS fork() restrictions. Comprehensive unit tests cover fork behavior, parent-child relationships, resource limits, and signal inheritance. The implementation follows naming conventions (ixland_ functions, IXLAND_ macros), uses atomic operations for thread safety, and properly sets errno on errors. Minor non-blocking issues identified include longjmp across threads (architectural constraint), redundant WNOHANG check, and potential init task adoption gap for orphaned processes. All fulfillments for VAL-SYSCALL-001 through VAL-SYSCALL-010 are satisfied."
 }

@@ -60,7 +60,7 @@ target_include_directories(ixland-libc-headers INTERFACE
 # First real extracted implementation target
 # Contains only self-contained libc-facing utilities (no kernel/VFS/runtime)
 add_library(ixland-libc-core STATIC
-    src/iox_version.c
+    src/ixland_version.c
 )
 
 target_include_directories(ixland-libc-core
@@ -151,7 +151,7 @@ install(EXPORT ixland-libc-targets
     DESTINATION lib/cmake/ixland-libc
 )
 
-install(DIRECTORY include/iox DESTINATION include)
+install(DIRECTORY include/ixland DESTINATION include)
 install(DIRECTORY include/linux DESTINATION include)
 install(FILES include/grp.h include/pwd.h include/termcap.h include/ncurses_dll.h DESTINATION include)
 

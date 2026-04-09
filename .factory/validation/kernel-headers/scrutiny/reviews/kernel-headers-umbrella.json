@@ -6,10 +6,10 @@
   "diffReviewed": true,
   "status": "pass",
   "codeReview": {
-    "summary": "The umbrella headers implementation successfully creates a clean, well-documented single-include mechanism for the iXland kernel system. Both iox/iox.h (public API) and ixland_kernel.h (kernel internal) are properly structured with C++ compatibility guards, comprehensive documentation, and no circular dependencies.",
+    "summary": "The umbrella headers implementation successfully creates a clean, well-documented single-include mechanism for the iXland kernel system. Both ixland/ixland.h (public API) and ixland_kernel.h (kernel internal) are properly structured with C++ compatibility guards, comprehensive documentation, and no circular dependencies.",
     "issues": []
   },
   "sharedStateObservations": [],
   "addressesFailureFrom": null,
-  "summary": "Feature 'kernel-headers-umbrella' successfully implemented comprehensive umbrella headers. iox/iox.h provides single-include access to all public APIs with version macros (IOX_VERSION_MAJOR=1, MINOR=0, PATCH=0), C++ compatibility guards, and initialization function declarations. ixland_kernel.h properly includes only essential system headers plus iox/iox_types.h and VFS headers, avoiding circular dependencies. CMakeLists.txt updated to add ixland-libc-headers dependency to iox-runtime target. All validation assertions fulfilled: VAL-HEADERS-004 (umbrella completeness), VAL-HEADERS-070 through VAL-HEADERS-078 (various header quality assertions)."
+  "summary": "Feature 'kernel-headers-umbrella' successfully implemented comprehensive umbrella headers. ixland/ixland.h provides single-include access to all public APIs with version macros (IXLAND_VERSION_MAJOR=1, MINOR=0, PATCH=0), C++ compatibility guards, and initialization function declarations. ixland_kernel.h properly includes only essential system headers plus ixland/ixland_types.h and VFS headers, avoiding circular dependencies. CMakeLists.txt updated to add ixland-libc-headers dependency to ixland-runtime target. All validation assertions fulfilled: VAL-HEADERS-004 (umbrella completeness), VAL-HEADERS-070 through VAL-HEADERS-078 (various header quality assertions)."
 }

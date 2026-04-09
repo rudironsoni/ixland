@@ -1,7 +1,7 @@
 # iXland Kernel API Reference
 
-**Version**: 1.0.0  
-**Date**: 2026-03-28  
+**Version**: 1.0.0
+**Date**: 2026-03-28
 **Status**: Stable
 
 ---
@@ -19,7 +19,7 @@
 9. [Identity Functions](#identity-functions)
 10. [Environment Functions](#environment-functions)
 11. [Network Functions](#network-functions)
-12. [IOX-Specific Extensions](#iox-specific-extensions)
+12. [IXLAND-Specific Extensions](#ixland-specific-extensions)
 
 ---
 
@@ -29,18 +29,18 @@ The iXland public API consists of three main headers:
 
 | Header | Purpose |
 |--------|---------|
-| `<iox/iox_types.h>` | Type definitions, constants, structures |
-| `<iox/iox_syscalls.h>` | Syscall function declarations |
-| `<iox/iox.h>` | Umbrella header (includes both above) |
+| `<ixland/ixland_types.h>` | Type definitions, constants, structures |
+| `<ixland/ixland_syscalls.h>` | Syscall function declarations |
+| `<ixland/ixland.h>` | Umbrella header (includes both above) |
 
 ### Usage
 
 ```c
-#include <iox/iox.h>  // Include all public APIs
+#include <ixland/ixland.h>  // Include all public APIs
 
 // Or individually:
-#include <iox/iox_types.h>
-#include <iox/iox_syscalls.h>
+#include <ixland/ixland_types.h>
+#include <ixland/ixland_syscalls.h>
 ```
 
 ---
@@ -64,31 +64,31 @@ typedef int64_t  ssize_t;   /* Signed size */
 
 ```c
 typedef enum {
-    IOX_OK           = 0,      /* Success */
-    IOX_ERROR        = -1,     /* Generic error */
-    IOX_EINVAL       = -22,    /* Invalid argument */
-    IOX_ENOMEM       = -12,    /* Out of memory */
-    IOX_EACCES       = -13,    /* Permission denied */
-    IOX_EEXIST       = -17,    /* File exists */
-    IOX_ENOENT       = -2,     /* No such file or directory */
-    IOX_EAGAIN       = -11,    /* Resource temporarily unavailable */
-    IOX_EBUSY        = -16,    /* Device or resource busy */
-    IOX_ECHILD       = -10,    /* No child processes */
-    IOX_EINTR        = -4,     /* Interrupted system call */
-    IOX_EIO          = -5,     /* I/O error */
-    IOX_EISDIR       = -21,    /* Is a directory */
-    IOX_EMFILE       = -24,    /* Too many open files */
-    IOX_ENAMETOOLONG = -63,    /* File name too long */
-    IOX_ENOTDIR      = -20,    /* Not a directory */
-    IOX_ENOTEMPTY    = -39,    /* Directory not empty */
-    IOX_EOPNOTSUPP   = -95,    /* Operation not supported */
-    IOX_EOVERFLOW    = -75,    /* Value too large */
-    IOX_EPERM        = -1,     /* Operation not permitted */
-    IOX_ERANGE       = -34,    /* Result too large */
-    IOX_ESPIPE       = -29,    /* Invalid seek */
-    IOX_ESRCH        = -3,     /* No such process */
-    IOX_ETIMEDOUT    = -60,    /* Connection timed out */
-} iox_error_t;
+    IXLAND_OK           = 0,      /* Success */
+    IXLAND_ERROR        = -1,     /* Generic error */
+    IXLAND_EINVAL       = -22,    /* Invalid argument */
+    IXLAND_ENOMEM       = -12,    /* Out of memory */
+    IXLAND_EACCES       = -13,    /* Permission denied */
+    IXLAND_EEXIST       = -17,    /* File exists */
+    IXLAND_ENOENT       = -2,     /* No such file or directory */
+    IXLAND_EAGAIN       = -11,    /* Resource temporarily unavailable */
+    IXLAND_EBUSY        = -16,    /* Device or resource busy */
+    IXLAND_ECHILD       = -10,    /* No child processes */
+    IXLAND_EINTR        = -4,     /* Interrupted system call */
+    IXLAND_EIO          = -5,     /* I/O error */
+    IXLAND_EISDIR       = -21,    /* Is a directory */
+    IXLAND_EMFILE       = -24,    /* Too many open files */
+    IXLAND_ENAMETOOLONG = -63,    /* File name too long */
+    IXLAND_ENOTDIR      = -20,    /* Not a directory */
+    IXLAND_ENOTEMPTY    = -39,    /* Directory not empty */
+    IXLAND_EOPNOTSUPP   = -95,    /* Operation not supported */
+    IXLAND_EOVERFLOW    = -75,    /* Value too large */
+    IXLAND_EPERM        = -1,     /* Operation not permitted */
+    IXLAND_ERANGE       = -34,    /* Result too large */
+    IXLAND_ESPIPE       = -29,    /* Invalid seek */
+    IXLAND_ESRCH        = -3,     /* No such process */
+    IXLAND_ETIMEDOUT    = -60,    /* Connection timed out */
+} ixland_error_t;
 ```
 
 ### Configuration Structure
@@ -103,7 +103,7 @@ typedef struct {
     size_t max_memory;          /* Maximum memory per process */
     const char *home_directory; /* Home directory path */
     const char *tmp_directory;  /* Temporary directory path */
-} iox_config_t;
+} ixland_config_t;
 ```
 
 ### Process Information
@@ -121,7 +121,7 @@ typedef struct {
     uint64_t memory_vms; /* Virtual memory (bytes) */
     uint64_t cpu_time;   /* CPU time (nanoseconds) */
     uint64_t start_time; /* Start time (epoch nanoseconds) */
-} iox_proc_info_t;
+} ixland_proc_info_t;
 ```
 
 ### System Information
@@ -144,82 +144,82 @@ typedef struct {
     uint32_t cpu_online; /* Online CPUs */
     uint64_t cpu_freq;   /* CPU frequency (Hz) */
     char cpu_arch[64];   /* CPU architecture (arm64) */
-} iox_sys_info_t;
+} ixland_sys_info_t;
 ```
 
 ### Resource Limits
 
 ```c
-#define IOX_RLIM_INFINITY ((uint64_t)-1)
+#define IXLAND_RLIM_INFINITY ((uint64_t)-1)
 
 typedef struct {
     uint64_t rlim_cur; /* Current (soft) limit */
     uint64_t rlim_max; /* Hard limit */
-} iox_rlimit_t;
+} ixland_rlimit_t;
 
 typedef enum {
-    IOX_RLIMIT_CPU = 0,         /* CPU time in seconds */
-    IOX_RLIMIT_FSIZE = 1,       /* Maximum file size */
-    IOX_RLIMIT_DATA = 2,        /* Maximum data size */
-    IOX_RLIMIT_STACK = 3,       /* Maximum stack size */
-    IOX_RLIMIT_CORE = 4,        /* Maximum core file size */
-    IOX_RLIMIT_RSS = 5,         /* Maximum resident set size */
-    IOX_RLIMIT_NPROC = 6,       /* Maximum number of processes */
-    IOX_RLIMIT_NOFILE = 7,      /* Maximum number of open files */
-    IOX_RLIMIT_MEMLOCK = 8,     /* Maximum locked-in-memory space */
-    IOX_RLIMIT_AS = 9,          /* Maximum address space */
-    IOX_RLIMIT_LOCKS = 10,      /* Maximum file locks */
-    IOX_RLIMIT_SIGPENDING = 11, /* Maximum queued signals */
-    IOX_RLIMIT_MSGQUEUE = 12,   /* Maximum POSIX message queue bytes */
-    IOX_RLIMIT_NICE = 13,       /* Maximum nice priority */
-    IOX_RLIMIT_RTPRIO = 14,     /* Maximum real-time priority */
-    IOX_RLIMIT_RTTIME = 15,     /* Maximum real-time timeout */
-    IOX_RLIMIT_NLIMITS = 16     /* Number of resource limits */
-} iox_rlimit_resource_t;
+    IXLAND_RLIMIT_CPU = 0,         /* CPU time in seconds */
+    IXLAND_RLIMIT_FSIZE = 1,       /* Maximum file size */
+    IXLAND_RLIMIT_DATA = 2,        /* Maximum data size */
+    IXLAND_RLIMIT_STACK = 3,       /* Maximum stack size */
+    IXLAND_RLIMIT_CORE = 4,        /* Maximum core file size */
+    IXLAND_RLIMIT_RSS = 5,         /* Maximum resident set size */
+    IXLAND_RLIMIT_NPROC = 6,       /* Maximum number of processes */
+    IXLAND_RLIMIT_NOFILE = 7,      /* Maximum number of open files */
+    IXLAND_RLIMIT_MEMLOCK = 8,     /* Maximum locked-in-memory space */
+    IXLAND_RLIMIT_AS = 9,          /* Maximum address space */
+    IXLAND_RLIMIT_LOCKS = 10,      /* Maximum file locks */
+    IXLAND_RLIMIT_SIGPENDING = 11, /* Maximum queued signals */
+    IXLAND_RLIMIT_MSGQUEUE = 12,   /* Maximum POSIX message queue bytes */
+    IXLAND_RLIMIT_NICE = 13,       /* Maximum nice priority */
+    IXLAND_RLIMIT_RTPRIO = 14,     /* Maximum real-time priority */
+    IXLAND_RLIMIT_RTTIME = 15,     /* Maximum real-time timeout */
+    IXLAND_RLIMIT_NLIMITS = 16     /* Number of resource limits */
+} ixland_rlimit_resource_t;
 ```
 
 ### Callback Types
 
 ```c
 /* Process state change callback */
-typedef void (*iox_proc_callback_t)(pid_t pid, int event, void *userdata);
+typedef void (*ixland_proc_callback_t)(pid_t pid, int event, void *userdata);
 
 /* Thread state change callback */
-typedef void (*iox_thread_callback_t)(pthread_t tid, int event, void *userdata);
+typedef void (*ixland_thread_callback_t)(pthread_t tid, int event, void *userdata);
 
 /* Signal delivery callback */
-typedef void (*iox_signal_callback_t)(pid_t pid, int sig, void *userdata);
+typedef void (*ixland_signal_callback_t)(pid_t pid, int sig, void *userdata);
 
 /* File operation callback */
-typedef void (*iox_file_callback_t)(const char *path, int op, void *userdata);
+typedef void (*ixland_file_callback_t)(const char *path, int op, void *userdata);
 ```
 
 ### Callback Events
 
 ```c
 /* Process events */
-#define IOX_PROC_CREATE   0x01
-#define IOX_PROC_START    0x02
-#define IOX_PROC_EXIT     0x04
-#define IOX_PROC_SIGNAL   0x08
-#define IOX_PROC_STOP     0x10
-#define IOX_PROC_CONTINUE 0x20
+#define IXLAND_PROC_CREATE   0x01
+#define IXLAND_PROC_START    0x02
+#define IXLAND_PROC_EXIT     0x04
+#define IXLAND_PROC_SIGNAL   0x08
+#define IXLAND_PROC_STOP     0x10
+#define IXLAND_PROC_CONTINUE 0x20
 
 /* Thread events */
-#define IOX_THREAD_CREATE 0x01
-#define IOX_THREAD_START  0x02
-#define IOX_THREAD_EXIT   0x04
-#define IOX_THREAD_DETACH 0x08
+#define IXLAND_THREAD_CREATE 0x01
+#define IXLAND_THREAD_START  0x02
+#define IXLAND_THREAD_EXIT   0x04
+#define IXLAND_THREAD_DETACH 0x08
 
 /* File operation events */
-#define IOX_FILE_OPEN     0x01
-#define IOX_FILE_CLOSE    0x02
-#define IOX_FILE_READ     0x04
-#define IOX_FILE_WRITE    0x08
-#define IOX_FILE_TRUNCATE 0x10
-#define IOX_FILE_DELETE   0x20
-#define IOX_FILE_RENAME   0x40
-#define IOX_FILE_CHMOD    0x80
+#define IXLAND_FILE_OPEN     0x01
+#define IXLAND_FILE_CLOSE    0x02
+#define IXLAND_FILE_READ     0x04
+#define IXLAND_FILE_WRITE    0x08
+#define IXLAND_FILE_TRUNCATE 0x10
+#define IXLAND_FILE_DELETE   0x20
+#define IXLAND_FILE_RENAME   0x40
+#define IXLAND_FILE_CHMOD    0x80
 ```
 
 ---
@@ -230,37 +230,37 @@ Standard Linux/POSIX error codes are returned as negative values:
 
 | Constant | Value | Description |
 |----------|-------|-------------|
-| `IOX_OK` | 0 | Success |
-| `IOX_EPERM` | -1 | Operation not permitted |
-| `IOX_ENOENT` | -2 | No such file or directory |
-| `IOX_ESRCH` | -3 | No such process |
-| `IOX_EINTR` | -4 | Interrupted system call |
-| `IOX_EIO` | -5 | I/O error |
-| `IOX_ENXIO` | -6 | No such device or address |
-| `IOX_E2BIG` | -7 | Argument list too long |
-| `IOX_ENOEXEC` | -8 | Exec format error |
-| `IOX_EBADF` | -9 | Bad file number |
-| `IOX_ECHILD` | -10 | No child processes |
-| `IOX_EAGAIN` | -11 | Try again |
-| `IOX_ENOMEM` | -12 | Out of memory |
-| `IOX_EACCES` | -13 | Permission denied |
-| `IOX_EFAULT` | -14 | Bad address |
-| `IOX_ENOTBLK` | -15 | Block device required |
-| `IOX_EBUSY` | -16 | Device or resource busy |
-| `IOX_EEXIST` | -17 | File exists |
-| `IOX_EXDEV` | -18 | Cross-device link |
-| `IOX_ENODEV` | -19 | No such device |
-| `IOX_ENOTDIR` | -20 | Not a directory |
-| `IOX_EISDIR` | -21 | Is a directory |
-| `IOX_EINVAL` | -22 | Invalid argument |
-| `IOX_ENFILE` | -23 | File table overflow |
-| `IOX_EMFILE` | -24 | Too many open files |
-| `IOX_ENOTTY` | -25 | Not a typewriter |
+| `IXLAND_OK` | 0 | Success |
+| `IXLAND_EPERM` | -1 | Operation not permitted |
+| `IXLAND_ENOENT` | -2 | No such file or directory |
+| `IXLAND_ESRCH` | -3 | No such process |
+| `IXLAND_EINTR` | -4 | Interrupted system call |
+| `IXLAND_EIO` | -5 | I/O error |
+| `IXLAND_ENXIO` | -6 | No such device or address |
+| `IXLAND_E2BIG` | -7 | Argument list too long |
+| `IXLAND_ENOEXEC` | -8 | Exec format error |
+| `IXLAND_EBADF` | -9 | Bad file number |
+| `IXLAND_ECHILD` | -10 | No child processes |
+| `IXLAND_EAGAIN` | -11 | Try again |
+| `IXLAND_ENOMEM` | -12 | Out of memory |
+| `IXLAND_EACCES` | -13 | Permission denied |
+| `IXLAND_EFAULT` | -14 | Bad address |
+| `IXLAND_ENOTBLK` | -15 | Block device required |
+| `IXLAND_EBUSY` | -16 | Device or resource busy |
+| `IXLAND_EEXIST` | -17 | File exists |
+| `IXLAND_EXDEV` | -18 | Cross-device link |
+| `IXLAND_ENODEV` | -19 | No such device |
+| `IXLAND_ENOTDIR` | -20 | Not a directory |
+| `IXLAND_EISDIR` | -21 | Is a directory |
+| `IXLAND_EINVAL` | -22 | Invalid argument |
+| `IXLAND_ENFILE` | -23 | File table overflow |
+| `IXLAND_EMFILE` | -24 | Too many open files |
+| `IXLAND_ENOTTY` | -25 | Not a typewriter |
 
 ### Checking for Errors
 
 ```c
-pid_t pid = iox_fork();
+pid_t pid = ixland_fork();
 if (pid < 0) {
     // Error occurred
     perror("fork");  // Uses errno
@@ -272,12 +272,12 @@ if (pid < 0) {
 
 ## Process Management
 
-### iox_fork
+### ixland_fork
 
 Create a new process by duplicating the calling process.
 
 ```c
-pid_t iox_fork(void);
+pid_t ixland_fork(void);
 ```
 
 **Returns**:
@@ -286,26 +286,26 @@ pid_t iox_fork(void);
 
 **Example**:
 ```c
-pid_t pid = iox_fork();
+pid_t pid = ixland_fork();
 if (pid == 0) {
     // Child process
-    printf("Child PID: %d\n", iox_getpid());
-    iox_exit(0);
+    printf("Child PID: %d\n", ixland_getpid());
+    ixland_exit(0);
 } else if (pid > 0) {
     // Parent process
     printf("Child created: %d\n", pid);
-    iox_waitpid(pid, NULL, 0);
+    ixland_waitpid(pid, NULL, 0);
 }
 ```
 
 ---
 
-### iox_vfork
+### ixland_vfork
 
 Create a child process and block parent until child execs or exits.
 
 ```c
-int iox_vfork(void);
+int ixland_vfork(void);
 ```
 
 **Returns**:
@@ -314,24 +314,24 @@ int iox_vfork(void);
 
 **Example**:
 ```c
-pid_t pid = iox_vfork();
+pid_t pid = ixland_vfork();
 if (pid == 0) {
     // Child - shares parent's memory
     char *argv[] = {"/bin/ls", NULL};
-    iox_execve("/bin/ls", argv, NULL);
-    iox_exit(1);
+    ixland_execve("/bin/ls", argv, NULL);
+    ixland_exit(1);
 }
 // Parent resumes after child execs/exits
 ```
 
 ---
 
-### iox_execve
+### ixland_execve
 
 Execute a program.
 
 ```c
-int iox_execve(const char *pathname, char *const argv[], char *const envp[]);
+int ixland_execve(const char *pathname, char *const argv[], char *const envp[]);
 ```
 
 **Parameters**:
@@ -347,35 +347,35 @@ int iox_execve(const char *pathname, char *const argv[], char *const envp[]);
 ```c
 char *argv[] = {"/bin/ls", "-la", NULL};
 char *envp[] = {"PATH=/bin:/usr/bin", NULL};
-iox_execve("/bin/ls", argv, envp);
+ixland_execve("/bin/ls", argv, envp);
 // If we get here, execve failed
 perror("execve");
 ```
 
 ---
 
-### iox_execv
+### ixland_execv
 
 Execute a program with current environment.
 
 ```c
-int iox_execv(const char *pathname, char *const argv[]);
+int ixland_execv(const char *pathname, char *const argv[]);
 ```
 
 **Example**:
 ```c
 char *argv[] = {"ls", "-la", NULL};
-iox_execv("/bin/ls", argv);
+ixland_execv("/bin/ls", argv);
 ```
 
 ---
 
-### iox_exit
+### ixland_exit
 
 Terminate the calling process.
 
 ```c
-void iox_exit(int status);
+void ixland_exit(int status);
 ```
 
 **Parameters**:
@@ -383,87 +383,87 @@ void iox_exit(int status);
 
 **Example**:
 ```c
-iox_exit(0);  // Success
-iox_exit(1);  // Error
+ixland_exit(0);  // Success
+ixland_exit(1);  // Error
 ```
 
 ---
 
-### iox__exit
+### ixland__exit
 
 Terminate immediately without cleanup.
 
 ```c
-void iox__exit(int status) __attribute__((noreturn));
+void ixland__exit(int status) __attribute__((noreturn));
 ```
 
 **Example**:
 ```c
 // Use in signal handlers or after fork failure
-iox__exit(1);
+ixland__exit(1);
 ```
 
 ---
 
-### iox_getpid
+### ixland_getpid
 
 Get process ID.
 
 ```c
-pid_t iox_getpid(void);
+pid_t ixland_getpid(void);
 ```
 
 **Returns**: Process ID (always >= 1000 for iXland processes)
 
 **Example**:
 ```c
-printf("PID: %d\n", iox_getpid());
+printf("PID: %d\n", ixland_getpid());
 ```
 
 ---
 
-### iox_getppid
+### ixland_getppid
 
 Get parent process ID.
 
 ```c
-pid_t iox_getppid(void);
+pid_t ixland_getppid(void);
 ```
 
 **Returns**: Parent process ID
 
 ---
 
-### iox_getpgrp
+### ixland_getpgrp
 
 Get process group ID.
 
 ```c
-pid_t iox_getpgrp(void);
+pid_t ixland_getpgrp(void);
 ```
 
 **Returns**: Process group ID
 
 ---
 
-### iox_setpgrp
+### ixland_setpgrp
 
 Set process group ID.
 
 ```c
-int iox_setpgrp(void);
+int ixland_setpgrp(void);
 ```
 
 **Returns**: 0 on success, -1 on error
 
 ---
 
-### iox_getpgid
+### ixland_getpgid
 
 Get process group ID of a process.
 
 ```c
-pid_t iox_getpgid(pid_t pid);
+pid_t ixland_getpgid(pid_t pid);
 ```
 
 **Parameters**:
@@ -473,12 +473,12 @@ pid_t iox_getpgid(pid_t pid);
 
 ---
 
-### iox_setpgid
+### ixland_setpgid
 
 Set process group ID.
 
 ```c
-int iox_setpgid(pid_t pid, pid_t pgid);
+int ixland_setpgid(pid_t pid, pid_t pgid);
 ```
 
 **Parameters**:
@@ -490,17 +490,17 @@ int iox_setpgid(pid_t pid, pid_t pgid);
 **Example**:
 ```c
 // Create new process group
-iox_setpgid(0, 0);
+ixland_setpgid(0, 0);
 ```
 
 ---
 
-### iox_getsid
+### ixland_getsid
 
 Get session ID.
 
 ```c
-pid_t iox_getsid(pid_t pid);
+pid_t ixland_getsid(pid_t pid);
 ```
 
 **Parameters**:
@@ -510,19 +510,19 @@ pid_t iox_getsid(pid_t pid);
 
 ---
 
-### iox_setsid
+### ixland_setsid
 
 Create a new session and set process group ID.
 
 ```c
-pid_t iox_setsid(void);
+pid_t ixland_setsid(void);
 ```
 
 **Returns**: New session ID on success, -1 on error
 
 **Example**:
 ```c
-pid_t sid = iox_setsid();
+pid_t sid = ixland_setsid();
 if (sid < 0) {
     perror("setsid");
 }
@@ -530,12 +530,12 @@ if (sid < 0) {
 
 ---
 
-### iox_wait
+### ixland_wait
 
 Wait for any child process to terminate.
 
 ```c
-pid_t iox_wait(int *stat_loc);
+pid_t ixland_wait(int *stat_loc);
 ```
 
 **Parameters**:
@@ -546,7 +546,7 @@ pid_t iox_wait(int *stat_loc);
 **Example**:
 ```c
 int status;
-pid_t pid = iox_wait(&status);
+pid_t pid = ixland_wait(&status);
 if (pid > 0) {
     printf("Child %d exited with status %d\n",
            pid, WEXITSTATUS(status));
@@ -555,12 +555,12 @@ if (pid > 0) {
 
 ---
 
-### iox_waitpid
+### ixland_waitpid
 
 Wait for a specific child process.
 
 ```c
-pid_t iox_waitpid(pid_t pid, int *stat_loc, int options);
+pid_t ixland_waitpid(pid_t pid, int *stat_loc, int options);
 ```
 
 **Parameters**:
@@ -579,7 +579,7 @@ pid_t iox_waitpid(pid_t pid, int *stat_loc, int options);
 **Example**:
 ```c
 // Non-blocking wait
-pid_t pid = iox_waitpid(-1, &status, WNOHANG);
+pid_t pid = ixland_waitpid(-1, &status, WNOHANG);
 if (pid > 0) {
     // Child exited
 } else if (pid == 0) {
@@ -589,12 +589,12 @@ if (pid > 0) {
 
 ---
 
-### iox_wait3
+### ixland_wait3
 
 Wait for child, with resource usage.
 
 ```c
-pid_t iox_wait3(int *stat_loc, int options, struct rusage *rusage);
+pid_t ixland_wait3(int *stat_loc, int options, struct rusage *rusage);
 ```
 
 **Parameters**:
@@ -604,30 +604,30 @@ pid_t iox_wait3(int *stat_loc, int options, struct rusage *rusage);
 
 ---
 
-### iox_wait4
+### ixland_wait4
 
 Wait for specific child, with resource usage.
 
 ```c
-pid_t iox_wait4(pid_t pid, int *stat_loc, int options, struct rusage *rusage);
+pid_t ixland_wait4(pid_t pid, int *stat_loc, int options, struct rusage *rusage);
 ```
 
 **Example**:
 ```c
 struct rusage rusage;
-pid_t child = iox_wait4(-1, &status, 0, &rusage);
+pid_t child = ixland_wait4(-1, &status, 0, &rusage);
 printf("User time: %ld.%06d\n",
        rusage.ru_utime.tv_sec, rusage.ru_utime.tv_usec);
 ```
 
 ---
 
-### iox_system
+### ixland_system
 
 Execute a shell command.
 
 ```c
-int iox_system(const char *command);
+int ixland_system(const char *command);
 ```
 
 **Parameters**:
@@ -637,19 +637,19 @@ int iox_system(const char *command);
 
 **Example**:
 ```c
-int status = iox_system("ls -la");
+int status = ixland_system("ls -la");
 ```
 
 ---
 
 ## File Operations
 
-### iox_open
+### ixland_open
 
 Open a file.
 
 ```c
-int iox_open(const char *pathname, int flags, ...);
+int ixland_open(const char *pathname, int flags, ...);
 ```
 
 **Parameters**:
@@ -661,7 +661,7 @@ int iox_open(const char *pathname, int flags, ...);
 
 **Example**:
 ```c
-int fd = iox_open("/tmp/file.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+int fd = ixland_open("/tmp/file.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
 if (fd < 0) {
     perror("open");
 }
@@ -669,12 +669,12 @@ if (fd < 0) {
 
 ---
 
-### iox_openat
+### ixland_openat
 
 Open a file relative to directory.
 
 ```c
-int iox_openat(int dirfd, const char *pathname, int flags, ...);
+int ixland_openat(int dirfd, const char *pathname, int flags, ...);
 ```
 
 **Parameters**:
@@ -682,27 +682,27 @@ int iox_openat(int dirfd, const char *pathname, int flags, ...);
 
 ---
 
-### iox_creat
+### ixland_creat
 
 Create a file.
 
 ```c
-int iox_creat(const char *pathname, mode_t mode);
+int ixland_creat(const char *pathname, mode_t mode);
 ```
 
 **Example**:
 ```c
-int fd = iox_creat("/tmp/newfile", 0644);
+int fd = ixland_creat("/tmp/newfile", 0644);
 ```
 
 ---
 
-### iox_read
+### ixland_read
 
 Read from a file descriptor.
 
 ```c
-ssize_t iox_read(int fd, void *buf, size_t count);
+ssize_t ixland_read(int fd, void *buf, size_t count);
 ```
 
 **Parameters**:
@@ -715,7 +715,7 @@ ssize_t iox_read(int fd, void *buf, size_t count);
 **Example**:
 ```c
 char buffer[1024];
-ssize_t n = iox_read(fd, buffer, sizeof(buffer));
+ssize_t n = ixland_read(fd, buffer, sizeof(buffer));
 if (n > 0) {
     // Process buffer[0..n-1]
 }
@@ -723,12 +723,12 @@ if (n > 0) {
 
 ---
 
-### iox_write
+### ixland_write
 
 Write to a file descriptor.
 
 ```c
-ssize_t iox_write(int fd, const void *buf, size_t count);
+ssize_t ixland_write(int fd, const void *buf, size_t count);
 ```
 
 **Parameters**:
@@ -741,29 +741,29 @@ ssize_t iox_write(int fd, const void *buf, size_t count);
 **Example**:
 ```c
 const char *msg = "Hello\n";
-iox_write(fd, msg, strlen(msg));
+ixland_write(fd, msg, strlen(msg));
 ```
 
 ---
 
-### iox_close
+### ixland_close
 
 Close a file descriptor.
 
 ```c
-int iox_close(int fd);
+int ixland_close(int fd);
 ```
 
 **Returns**: 0 on success, -1 on error
 
 ---
 
-### iox_lseek
+### ixland_lseek
 
 Reposition read/write file offset.
 
 ```c
-off_t iox_lseek(int fd, off_t offset, int whence);
+off_t ixland_lseek(int fd, off_t offset, int whence);
 ```
 
 **Parameters**:
@@ -773,46 +773,46 @@ off_t iox_lseek(int fd, off_t offset, int whence);
 
 **Example**:
 ```c
-iox_lseek(fd, 0, SEEK_SET);   // Seek to beginning
-iox_lseek(fd, -100, SEEK_END); // Seek 100 bytes from end
+ixland_lseek(fd, 0, SEEK_SET);   // Seek to beginning
+ixland_lseek(fd, -100, SEEK_END); // Seek 100 bytes from end
 ```
 
 ---
 
-### iox_dup
+### ixland_dup
 
 Duplicate a file descriptor.
 
 ```c
-int iox_dup(int oldfd);
+int ixland_dup(int oldfd);
 ```
 
 **Returns**: New file descriptor, -1 on error
 
 ---
 
-### iox_dup2
+### ixland_dup2
 
 Duplicate a file descriptor to a specific number.
 
 ```c
-int iox_dup2(int oldfd, int newfd);
+int ixland_dup2(int oldfd, int newfd);
 ```
 
 **Example**:
 ```c
 // Redirect stdout
-iox_dup2(fd, STDOUT_FILENO);
+ixland_dup2(fd, STDOUT_FILENO);
 ```
 
 ---
 
-### iox_dup3
+### ixland_dup3
 
 Duplicate file descriptor with flags.
 
 ```c
-int iox_dup3(int oldfd, int newfd, int flags);
+int ixland_dup3(int oldfd, int newfd, int flags);
 ```
 
 **Parameters**:
@@ -820,12 +820,12 @@ int iox_dup3(int oldfd, int newfd, int flags);
 
 ---
 
-### iox_fcntl
+### ixland_fcntl
 
 File control operations.
 
 ```c
-int iox_fcntl(int fd, int cmd, ...);
+int ixland_fcntl(int fd, int cmd, ...);
 ```
 
 **Commands**:
@@ -838,52 +838,52 @@ int iox_fcntl(int fd, int cmd, ...);
 **Example**:
 ```c
 // Set close-on-exec
-int flags = iox_fcntl(fd, F_GETFD);
-iox_fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
+int flags = ixland_fcntl(fd, F_GETFD);
+ixland_fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
 
 // Set non-blocking
-flags = iox_fcntl(fd, F_GETFL);
-iox_fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+flags = ixland_fcntl(fd, F_GETFL);
+ixland_fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 ```
 
 ---
 
-### iox_ioctl
+### ixland_ioctl
 
 Device control.
 
 ```c
-int iox_ioctl(int fd, unsigned long request, ...);
+int ixland_ioctl(int fd, unsigned long request, ...);
 ```
 
 ---
 
-### iox_chdir
+### ixland_chdir
 
 Change working directory.
 
 ```c
-int iox_chdir(const char *path);
+int ixland_chdir(const char *path);
 ```
 
 ---
 
-### iox_fchdir
+### ixland_fchdir
 
 Change working directory via file descriptor.
 
 ```c
-int iox_fchdir(int fd);
+int ixland_fchdir(int fd);
 ```
 
 ---
 
-### iox_getcwd
+### ixland_getcwd
 
 Get current working directory.
 
 ```c
-char *iox_getcwd(char *buf, size_t size);
+char *ixland_getcwd(char *buf, size_t size);
 ```
 
 **Returns**: Pointer to buf, or NULL on error
@@ -891,19 +891,19 @@ char *iox_getcwd(char *buf, size_t size);
 **Example**:
 ```c
 char cwd[1024];
-if (iox_getcwd(cwd, sizeof(cwd))) {
+if (ixland_getcwd(cwd, sizeof(cwd))) {
     printf("CWD: %s\n", cwd);
 }
 ```
 
 ---
 
-### iox_access
+### ixland_access
 
 Check file accessibility.
 
 ```c
-int iox_access(const char *pathname, int mode);
+int ixland_access(const char *pathname, int mode);
 ```
 
 **Parameters**:
@@ -913,24 +913,24 @@ int iox_access(const char *pathname, int mode);
 
 ---
 
-### iox_faccessat
+### ixland_faccessat
 
 Check file accessibility relative to directory.
 
 ```c
-int iox_faccessat(int dirfd, const char *pathname, int mode, int flags);
+int ixland_faccessat(int dirfd, const char *pathname, int mode, int flags);
 ```
 
 ---
 
 ## Signal Handling
 
-### iox_signal
+### ixland_signal
 
 Set signal handler (simplified interface).
 
 ```c
-__sighandler_t iox_signal(int signum, __sighandler_t handler);
+__sighandler_t ixland_signal(int signum, __sighandler_t handler);
 ```
 
 **Parameters**:
@@ -945,18 +945,18 @@ void handler(int sig) {
     printf("Caught signal %d\n", sig);
 }
 
-iox_signal(SIGINT, handler);
-iox_signal(SIGTERM, SIG_IGN);  // Ignore SIGTERM
+ixland_signal(SIGINT, handler);
+ixland_signal(SIGTERM, SIG_IGN);  // Ignore SIGTERM
 ```
 
 ---
 
-### iox_kill
+### ixland_kill
 
 Send signal to a process.
 
 ```c
-int iox_kill(pid_t pid, int sig);
+int ixland_kill(pid_t pid, int sig);
 ```
 
 **Parameters**:
@@ -972,50 +972,50 @@ int iox_kill(pid_t pid, int sig);
 **Example**:
 ```c
 // Check if process exists
-if (iox_kill(pid, 0) == 0) {
+if (ixland_kill(pid, 0) == 0) {
     // Process exists
 }
 
 // Send SIGTERM
-iox_kill(pid, SIGTERM);
+ixland_kill(pid, SIGTERM);
 
 // Kill process group
-iox_kill(-pgid, SIGTERM);
+ixland_kill(-pgid, SIGTERM);
 ```
 
 ---
 
-### iox_killpg
+### ixland_killpg
 
 Send signal to a process group.
 
 ```c
-int iox_killpg(int pgrp, int sig);
+int ixland_killpg(int pgrp, int sig);
 ```
 
 **Example**:
 ```c
-iox_killpg(pgid, SIGHUP);
+ixland_killpg(pgid, SIGHUP);
 ```
 
 ---
 
-### iox_raise
+### ixland_raise
 
 Send signal to self.
 
 ```c
-int iox_raise(int sig);
+int ixland_raise(int sig);
 ```
 
 ---
 
-### iox_sigaction
+### ixland_sigaction
 
 Examine and change signal action.
 
 ```c
-int iox_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact);
+int ixland_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact);
 ```
 
 **Parameters**:
@@ -1029,22 +1029,22 @@ struct sigaction sa;
 sa.sa_handler = SIG_IGN;
 sigemptyset(&sa.sa_mask);
 sa.sa_flags = 0;
-iox_sigaction(SIGPIPE, &sa, NULL);
+ixland_sigaction(SIGPIPE, &sa, NULL);
 
 // With SA_SIGINFO
 sa.sa_sigaction = advanced_handler;
 sa.sa_flags = SA_SIGINFO;
-iox_sigaction(SIGUSR1, &sa, NULL);
+ixland_sigaction(SIGUSR1, &sa, NULL);
 ```
 
 ---
 
-### iox_sigprocmask
+### ixland_sigprocmask
 
 Examine and change blocked signals.
 
 ```c
-int iox_sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
+int ixland_sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
 ```
 
 **Parameters**:
@@ -1055,26 +1055,26 @@ int iox_sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
 sigset_t set;
 sigemptyset(&set);
 sigaddset(&set, SIGINT);
-iox_sigprocmask(SIG_BLOCK, &set, NULL);  // Block SIGINT
+ixland_sigprocmask(SIG_BLOCK, &set, NULL);  // Block SIGINT
 
 // Later...
-iox_sigprocmask(SIG_UNBLOCK, &set, NULL); // Unblock
+ixland_sigprocmask(SIG_UNBLOCK, &set, NULL); // Unblock
 ```
 
 ---
 
-### iox_sigpending
+### ixland_sigpending
 
 Get set of pending signals.
 
 ```c
-int iox_sigpending(sigset_t *set);
+int ixland_sigpending(sigset_t *set);
 ```
 
 **Example**:
 ```c
 sigset_t pending;
-iox_sigpending(&pending);
+ixland_sigpending(&pending);
 if (sigismember(&pending, SIGINT)) {
     printf("SIGINT is pending\n");
 }
@@ -1082,12 +1082,12 @@ if (sigismember(&pending, SIGINT)) {
 
 ---
 
-### iox_sigsuspend
+### ixland_sigsuspend
 
 Wait for signal.
 
 ```c
-int iox_sigsuspend(const sigset_t *mask);
+int ixland_sigsuspend(const sigset_t *mask);
 ```
 
 **Parameters**:
@@ -1100,11 +1100,11 @@ int iox_sigsuspend(const sigset_t *mask);
 ### Signal Set Operations
 
 ```c
-int iox_sigemptyset(sigset_t *set);
-int iox_sigfillset(sigset_t *set);
-int iox_sigaddset(sigset_t *set, int signum);
-int iox_sigdelset(sigset_t *set, int signum);
-int iox_sigismember(const sigset_t *set, int signum);
+int ixland_sigemptyset(sigset_t *set);
+int ixland_sigfillset(sigset_t *set);
+int ixland_sigaddset(sigset_t *set, int signum);
+int ixland_sigdelset(sigset_t *set, int signum);
+int ixland_sigismember(const sigset_t *set, int signum);
 ```
 
 **Example**:
@@ -1120,30 +1120,30 @@ if (sigismember(&set, SIGINT)) {
 
 ---
 
-### iox_alarm
+### ixland_alarm
 
 Set an alarm clock for delivery of a signal.
 
 ```c
-unsigned int iox_alarm(unsigned int seconds);
+unsigned int ixland_alarm(unsigned int seconds);
 ```
 
 **Returns**: Seconds remaining from previous alarm, or 0
 
 **Example**:
 ```c
-iox_signal(SIGALRM, timeout_handler);
-iox_alarm(5);  // 5 second timeout
+ixland_signal(SIGALRM, timeout_handler);
+ixland_alarm(5);  // 5 second timeout
 ```
 
 ---
 
-### iox_setitimer
+### ixland_setitimer
 
 Set value of an interval timer.
 
 ```c
-int iox_setitimer(int which, const struct itimerval *new_value,
+int ixland_setitimer(int which, const struct itimerval *new_value,
                   struct itimerval *old_value);
 ```
 
@@ -1152,22 +1152,22 @@ int iox_setitimer(int which, const struct itimerval *new_value,
 
 ---
 
-### iox_getitimer
+### ixland_getitimer
 
 Get value of an interval timer.
 
 ```c
-int iox_getitimer(int which, struct itimerval *curr_value);
+int ixland_getitimer(int which, struct itimerval *curr_value);
 ```
 
 ---
 
-### iox_pause
+### ixland_pause
 
 Wait for signal.
 
 ```c
-int iox_pause(void);
+int ixland_pause(void);
 ```
 
 **Returns**: -1 with errno EINTR
@@ -1176,12 +1176,12 @@ int iox_pause(void);
 
 ## Memory Management
 
-### iox_mmap
+### ixland_mmap
 
 Map files or devices into memory.
 
 ```c
-void *iox_mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
+void *ixland_mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
 ```
 
 **Parameters**:
@@ -1197,7 +1197,7 @@ void *iox_mmap(void *addr, size_t length, int prot, int flags, int fd, off_t off
 **Example**:
 ```c
 // Anonymous mapping
-void *mem = iox_mmap(NULL, 4096, PROT_READ | PROT_WRITE,
+void *mem = ixland_mmap(NULL, 4096, PROT_READ | PROT_WRITE,
                      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 if (mem == MAP_FAILED) {
     perror("mmap");
@@ -1206,140 +1206,140 @@ if (mem == MAP_FAILED) {
 
 ---
 
-### iox_munmap
+### ixland_munmap
 
 Unmap memory.
 
 ```c
-int iox_munmap(void *addr, size_t length);
+int ixland_munmap(void *addr, size_t length);
 ```
 
 ---
 
-### iox_mprotect
+### ixland_mprotect
 
 Set protection on a region of memory.
 
 ```c
-int iox_mprotect(void *addr, size_t len, int prot);
+int ixland_mprotect(void *addr, size_t len, int prot);
 ```
 
 **Example**:
 ```c
 // Make memory read-only
-iox_mprotect(mem, len, PROT_READ);
+ixland_mprotect(mem, len, PROT_READ);
 ```
 
 ---
 
-### iox_msync
+### ixland_msync
 
 Synchronize a file with a memory map.
 
 ```c
-int iox_msync(void *addr, size_t length, int flags);
+int ixland_msync(void *addr, size_t length, int flags);
 ```
 
 ---
 
-### iox_mlock
+### ixland_mlock
 
 Lock memory.
 
 ```c
-int iox_mlock(const void *addr, size_t len);
+int ixland_mlock(const void *addr, size_t len);
 ```
 
 ---
 
-### iox_munlock
+### ixland_munlock
 
 Unlock memory.
 
 ```c
-int iox_munlock(const void *addr, size_t len);
+int ixland_munlock(const void *addr, size_t len);
 ```
 
 ---
 
 ## Time Functions
 
-### iox_sleep
+### ixland_sleep
 
 Sleep for specified seconds.
 
 ```c
-unsigned int iox_sleep(unsigned int seconds);
+unsigned int ixland_sleep(unsigned int seconds);
 ```
 
 **Returns**: 0 on success, seconds remaining if interrupted
 
 ---
 
-### iox_usleep
+### ixland_usleep
 
 Sleep for specified microseconds.
 
 ```c
-int iox_usleep(useconds_t usec);
+int ixland_usleep(useconds_t usec);
 ```
 
 ---
 
-### iox_nanosleep
+### ixland_nanosleep
 
 High-resolution sleep.
 
 ```c
-int iox_nanosleep(const struct timespec *req, struct timespec *rem);
+int ixland_nanosleep(const struct timespec *req, struct timespec *rem);
 ```
 
 **Example**:
 ```c
 struct timespec req = {1, 500000000};  // 1.5 seconds
-iox_nanosleep(&req, NULL);
+ixland_nanosleep(&req, NULL);
 ```
 
 ---
 
-### iox_gettimeofday
+### ixland_gettimeofday
 
 Get time.
 
 ```c
-int iox_gettimeofday(struct timeval *tv, struct timezone *tz);
+int ixland_gettimeofday(struct timeval *tv, struct timezone *tz);
 ```
 
 **Example**:
 ```c
 struct timeval tv;
-iox_gettimeofday(&tv, NULL);
+ixland_gettimeofday(&tv, NULL);
 printf("Seconds: %ld\n", tv.tv_sec);
 ```
 
 ---
 
-### iox_time
+### ixland_time
 
 Get time in seconds.
 
 ```c
-time_t iox_time(time_t *tloc);
+time_t ixland_time(time_t *tloc);
 ```
 
 **Example**:
 ```c
-time_t now = iox_time(NULL);
+time_t now = ixland_time(NULL);
 ```
 
 ---
 
-### iox_clock_gettime
+### ixland_clock_gettime
 
 Get time from a clock.
 
 ```c
-int iox_clock_gettime(clockid_t clk_id, struct timespec *tp);
+int ixland_clock_gettime(clockid_t clk_id, struct timespec *tp);
 ```
 
 **Clock IDs**:
@@ -1351,121 +1351,121 @@ int iox_clock_gettime(clockid_t clk_id, struct timespec *tp);
 
 ## Identity Functions
 
-### iox_getuid
+### ixland_getuid
 
 Get real user ID.
 
 ```c
-uid_t iox_getuid(void);
+uid_t ixland_getuid(void);
 ```
 
 ---
 
-### iox_geteuid
+### ixland_geteuid
 
 Get effective user ID.
 
 ```c
-uid_t iox_geteuid(void);
+uid_t ixland_geteuid(void);
 ```
 
 ---
 
-### iox_getgid
+### ixland_getgid
 
 Get real group ID.
 
 ```c
-gid_t iox_getgid(void);
+gid_t ixland_getgid(void);
 ```
 
 ---
 
-### iox_getegid
+### ixland_getegid
 
 Get effective group ID.
 
 ```c
-gid_t iox_getegid(void);
+gid_t ixland_getegid(void);
 ```
 
 ---
 
-### iox_setuid
+### ixland_setuid
 
 Set user ID.
 
 ```c
-int iox_setuid(uid_t uid);
+int ixland_setuid(uid_t uid);
 ```
 
 **Note**: Returns EPERM on iOS (not permitted)
 
 ---
 
-### iox_seteuid
+### ixland_seteuid
 
 Set effective user ID.
 
 ```c
-int iox_seteuid(uid_t uid);
+int ixland_seteuid(uid_t uid);
 ```
 
 ---
 
-### iox_setgid
+### ixland_setgid
 
 Set group ID.
 
 ```c
-int iox_setgid(gid_t gid);
+int ixland_setgid(gid_t gid);
 ```
 
 ---
 
-### iox_setegid
+### ixland_setegid
 
 Set effective group ID.
 
 ```c
-int iox_setegid(gid_t gid);
+int ixland_setegid(gid_t gid);
 ```
 
 ---
 
-### iox_getgroups
+### ixland_getgroups
 
 Get supplementary group IDs.
 
 ```c
-int iox_getgroups(int size, gid_t list[]);
+int ixland_getgroups(int size, gid_t list[]);
 ```
 
 ---
 
-### iox_setgroups
+### ixland_setgroups
 
 Set supplementary group IDs.
 
 ```c
-int iox_setgroups(size_t size, const gid_t *list);
+int ixland_setgroups(size_t size, const gid_t *list);
 ```
 
 ---
 
 ## Environment Functions
 
-### iox_getenv
+### ixland_getenv
 
 Get environment variable.
 
 ```c
-char *iox_getenv(const char *name);
+char *ixland_getenv(const char *name);
 ```
 
 **Example**:
 ```c
-char *path = iox_getenv("PATH");
+char *path = ixland_getenv("PATH");
 if (path) {
     printf("PATH=%s\n", path);
 }
@@ -1473,176 +1473,176 @@ if (path) {
 
 ---
 
-### iox_setenv
+### ixland_setenv
 
 Set environment variable.
 
 ```c
-int iox_setenv(const char *name, const char *value, int overwrite);
+int ixland_setenv(const char *name, const char *value, int overwrite);
 ```
 
 **Example**:
 ```c
-iox_setenv("MYVAR", "myvalue", 1);  // Overwrite if exists
+ixland_setenv("MYVAR", "myvalue", 1);  // Overwrite if exists
 ```
 
 ---
 
-### iox_unsetenv
+### ixland_unsetenv
 
 Unset environment variable.
 
 ```c
-int iox_unsetenv(const char *name);
+int ixland_unsetenv(const char *name);
 ```
 
 ---
 
-### iox_clearenv
+### ixland_clearenv
 
 Clear environment.
 
 ```c
-int iox_clearenv(void);
+int ixland_clearenv(void);
 ```
 
 ---
 
-### iox_environ
+### ixland_environ
 
 Get environment pointer.
 
 ```c
-char **iox_environ(void);
+char **ixland_environ(void);
 ```
 
 ---
 
 ## Network Functions
 
-### iox_socket
+### ixland_socket
 
 Create a socket.
 
 ```c
-int iox_socket(int domain, int type, int protocol);
+int ixland_socket(int domain, int type, int protocol);
 ```
 
 **Example**:
 ```c
-int sock = iox_socket(AF_INET, SOCK_STREAM, 0);
+int sock = ixland_socket(AF_INET, SOCK_STREAM, 0);
 ```
 
 ---
 
-### iox_connect
+### ixland_connect
 
 Connect to a socket.
 
 ```c
-int iox_connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+int ixland_connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 ```
 
 ---
 
-### iox_bind
+### ixland_bind
 
 Bind a socket.
 
 ```c
-int iox_bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+int ixland_bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 ```
 
 ---
 
-### iox_listen
+### ixland_listen
 
 Listen for connections.
 
 ```c
-int iox_listen(int sockfd, int backlog);
+int ixland_listen(int sockfd, int backlog);
 ```
 
 ---
 
-### iox_accept
+### ixland_accept
 
 Accept a connection.
 
 ```c
-int iox_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+int ixland_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 ```
 
 ---
 
-### iox_send / iox_recv
+### ixland_send / ixland_recv
 
 Send/receive data.
 
 ```c
-ssize_t iox_send(int sockfd, const void *buf, size_t len, int flags);
-ssize_t iox_recv(int sockfd, void *buf, size_t len, int flags);
+ssize_t ixland_send(int sockfd, const void *buf, size_t len, int flags);
+ssize_t ixland_recv(int sockfd, void *buf, size_t len, int flags);
 ```
 
 ---
 
-### iox_sendto / iox_recvfrom
+### ixland_sendto / ixland_recvfrom
 
 Send/receive datagrams.
 
 ```c
-ssize_t iox_sendto(int sockfd, const void *buf, size_t len, int flags,
+ssize_t ixland_sendto(int sockfd, const void *buf, size_t len, int flags,
                    const struct sockaddr *dest_addr, socklen_t addrlen);
-ssize_t iox_recvfrom(int sockfd, void *buf, size_t len, int flags,
+ssize_t ixland_recvfrom(int sockfd, void *buf, size_t len, int flags,
                      struct sockaddr *src_addr, socklen_t *addrlen);
 ```
 
 ---
 
-### iox_shutdown
+### ixland_shutdown
 
 Shutdown socket.
 
 ```c
-int iox_shutdown(int sockfd, int how);
+int ixland_shutdown(int sockfd, int how);
 ```
 
 ---
 
-### iox_setsockopt / iox_getsockopt
+### ixland_setsockopt / ixland_getsockopt
 
 Socket options.
 
 ```c
-int iox_setsockopt(int sockfd, int level, int optname,
+int ixland_setsockopt(int sockfd, int level, int optname,
                    const void *optval, socklen_t optlen);
-int iox_getsockopt(int sockfd, int level, int optname,
+int ixland_getsockopt(int sockfd, int level, int optname,
                    void *optval, socklen_t *optlen);
 ```
 
 ---
 
-## IOX-Specific Extensions
+## IXLAND-Specific Extensions
 
 ### Initialization and Cleanup
 
 ```c
-int iox_init(const iox_config_t *config);
-void iox_cleanup(void);
+int ixland_init(const ixland_config_t *config);
+void ixland_cleanup(void);
 ```
 
 **Example**:
 ```c
-iox_config_t config = {
+ixland_config_t config = {
     .debug_enabled = true,
     .home_directory = "/home/user",
     .max_processes = 256
 };
-iox_init(&config);
+ixland_init(&config);
 
-// ... use iox syscalls ...
+// ... use ixland syscalls ...
 
-iox_cleanup();
+ixland_cleanup();
 ```
 
 ---
@@ -1650,13 +1650,13 @@ iox_cleanup();
 ### Version Information
 
 ```c
-const char *iox_version(void);
-int iox_is_initialized(void);
+const char *ixland_version(void);
+int ixland_is_initialized(void);
 ```
 
 **Example**:
 ```c
-printf("iXland version: %s\n", iox_version());
+printf("iXland version: %s\n", ixland_version());
 // Output: iXland version: 1.0.0
 ```
 
@@ -1665,12 +1665,12 @@ printf("iXland version: %s\n", iox_version());
 ### System Information
 
 ```c
-iox_sys_info_t iox_get_sys_info(void);
+ixland_sys_info_t ixland_get_sys_info(void);
 ```
 
 **Example**:
 ```c
-iox_sys_info_t info = iox_get_sys_info();
+ixland_sys_info_t info = ixland_get_sys_info();
 printf("OS: %s %s\n", info.sysname, info.release);
 printf("Memory: %llu MB total\n", info.total_memory / (1024 * 1024));
 ```
@@ -1680,17 +1680,17 @@ printf("Memory: %llu MB total\n", info.total_memory / (1024 * 1024));
 ### Process Information
 
 ```c
-iox_proc_info_t *iox_get_proc_info(pid_t pid);
-void iox_free_proc_info(iox_proc_info_t *info);
+ixland_proc_info_t *ixland_get_proc_info(pid_t pid);
+void ixland_free_proc_info(ixland_proc_info_t *info);
 ```
 
 **Example**:
 ```c
-iox_proc_info_t *info = iox_get_proc_info(iox_getpid());
+ixland_proc_info_t *info = ixland_get_proc_info(ixland_getpid());
 if (info) {
     printf("Process: %s (PID %d)\n", info->name, info->pid);
     printf("State: %c\n", info->state);
-    iox_free_proc_info(info);
+    ixland_free_proc_info(info);
 }
 ```
 
@@ -1699,15 +1699,15 @@ if (info) {
 ### Statistics
 
 ```c
-void iox_get_syscall_stats(iox_syscall_t syscall, iox_syscall_stat_t *stats);
-void iox_get_memory_stats(iox_memory_stat_t *stats);
-void iox_get_process_stats(iox_process_stat_t *stats);
+void ixland_get_syscall_stats(ixland_syscall_t syscall, ixland_syscall_stat_t *stats);
+void ixland_get_memory_stats(ixland_memory_stat_t *stats);
+void ixland_get_process_stats(ixland_process_stat_t *stats);
 ```
 
 **Example**:
 ```c
-iox_syscall_stat_t stats;
-iox_get_syscall_stats(IOX_SYSCALL_FORK, &stats);
+ixland_syscall_stat_t stats;
+ixland_get_syscall_stats(IXLAND_SYSCALL_FORK, &stats);
 printf("fork() called %llu times\n", stats.calls);
 ```
 
@@ -1716,23 +1716,23 @@ printf("fork() called %llu times\n", stats.calls);
 ### Callbacks
 
 ```c
-void iox_set_proc_callback(iox_proc_callback_t callback, void *userdata);
-void iox_set_thread_callback(iox_thread_callback_t callback, void *userdata);
-void iox_set_file_callback(iox_file_callback_t callback, void *userdata);
+void ixland_set_proc_callback(ixland_proc_callback_t callback, void *userdata);
+void ixland_set_thread_callback(ixland_thread_callback_t callback, void *userdata);
+void ixland_set_file_callback(ixland_file_callback_t callback, void *userdata);
 ```
 
 **Example**:
 ```c
 void on_proc_change(pid_t pid, int event, void *userdata) {
-    if (event & IOX_PROC_CREATE) {
+    if (event & IXLAND_PROC_CREATE) {
         printf("Process %d created\n", pid);
     }
-    if (event & IOX_PROC_EXIT) {
+    if (event & IXLAND_PROC_EXIT) {
         printf("Process %d exited\n", pid);
     }
 }
 
-iox_set_proc_callback(on_proc_change, NULL);
+ixland_set_proc_callback(on_proc_change, NULL);
 ```
 
 ---
@@ -1740,54 +1740,54 @@ iox_set_proc_callback(on_proc_change, NULL);
 ### Debugging
 
 ```c
-void iox_debug_dump(FILE *stream);
-void iox_set_tracing(int enabled);
+void ixland_debug_dump(FILE *stream);
+void ixland_set_tracing(int enabled);
 ```
 
 **Example**:
 ```c
-iox_set_tracing(1);  // Enable syscall tracing
+ixland_set_tracing(1);  // Enable syscall tracing
 // ... syscalls are logged ...
-iox_set_tracing(0);  // Disable
+ixland_set_tracing(0);  // Disable
 
-iox_debug_dump(stderr);  // Dump internal state
+ixland_debug_dump(stderr);  // Dump internal state
 ```
 
 ---
 
 ## Error Handling
 
-### iox_strerror
+### ixland_strerror
 
 Get error description.
 
 ```c
-const char *iox_strerror(int errnum);
+const char *ixland_strerror(int errnum);
 ```
 
 **Example**:
 ```c
-int fd = iox_open("/nonexistent", O_RDONLY);
+int fd = ixland_open("/nonexistent", O_RDONLY);
 if (fd < 0) {
-    printf("Error: %s\n", iox_strerror(errno));
+    printf("Error: %s\n", ixland_strerror(errno));
     // Output: Error: No such file or directory
 }
 ```
 
 ---
 
-### iox_perror
+### ixland_perror
 
 Print error message.
 
 ```c
-void iox_perror(const char *s);
+void ixland_perror(const char *s);
 ```
 
 **Example**:
 ```c
-if (iox_open("/file", O_RDONLY) < 0) {
-    iox_perror("open");
+if (ixland_open("/file", O_RDONLY) < 0) {
+    ixland_perror("open");
     // Output: open: No such file or directory
 }
 ```
@@ -1800,7 +1800,7 @@ The iXland API provides:
 
 - **100+ syscalls** covering process, file, signal, memory, and network operations
 - **POSIX compatibility** with Linux-compatible semantics
-- **Clean naming** with `iox_` prefix for all functions
+- **Clean naming** with `ixland_` prefix for all functions
 - **iOS-specific extensions** for initialization, debugging, and introspection
 - **Type safety** with proper struct definitions
 - **Error handling** using standard errno conventions

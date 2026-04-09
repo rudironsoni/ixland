@@ -1,8 +1,8 @@
-# Agent Guide: iox
+# Agent Guide: ixland
 
 ## Overview
 
-**iox** is a Linux-like virtual kernel subsystem for iOS, designed for maximum practical Linux userland compatibility within App Store constraints. It is not a compatibility shim—it is a virtual kernel substrate that implements Linux process, filesystem, signal, and terminal semantics.
+**ixland** is a Linux-like virtual kernel subsystem for iOS, designed for maximum practical Linux userland compatibility within App Store constraints. It is not a compatibility shim—it is a virtual kernel substrate that implements Linux process, filesystem, signal, and terminal semantics.
 
 ## Mission Statement
 
@@ -29,10 +29,10 @@ Transform the current project from a fragmented compatibility layer into one coh
 
 ### Single Canonical Execution Object
 
-There is exactly one canonical execution object: **`iox_task`**.
+There is exactly one canonical execution object: **`ixland_task`**.
 
-- `iox_context.c` is a competing model—**must be eliminated**
-- Global FD table in `iox_file.c`—**must be eliminated**
+- `ixland_context.c` is a competing model—**must be eliminated**
+- Global FD table in `ixland_file.c`—**must be eliminated**
 - All FDs live only under `task->files`
 
 ### WAMR as Execution Backend
@@ -41,66 +41,66 @@ WAMR is a secondary execution backend, not a separate universe:
 
 - WASI uses same `task->files`, `task->fs`, `task->sighand`
 - WAMR does not define independent process, fs, or signal models
-- App customers access WAMR only through `iox_wamr_*`
+- App customers access WAMR only through `ixland_wamr_*`
 - `deps/wamr/` remains pristine (read-only upstream)
 
 ### Virtual Process Model
 
 No reliance on host `fork()` or `execve()`:
 
-- `fork()`: Virtual process creation inside iox task system
+- `fork()`: Virtual process creation inside ixland task system
 - `execve()`: Virtual image replacement (native/WASI/script)
-- Parent and child are separate `iox_task` objects
-- All semantics implemented by iox, not host kernel
+- Parent and child are separate `ixland_task` objects
+- All semantics implemented by ixland, not host kernel
 
 ### Native Command Registry
 
 Native commands execute through a registry, not arbitrary loading:
 
 - Pre-registered at build time
-- Entry ABI: `int iox_native_main(iox_task_t *task, int argc, char **argv, char **envp)`
+- Entry ABI: `int ixland_native_main(ixland_task_t *task, int argc, char **argv, char **envp)`
 - Examples: `/bin/bash`, `/bin/ls`, `/usr/bin/env`
 
 ## Core Objects
 
-### iox_task
+### ixland_task
 
 The single canonical task structure:
 
 ```c
-typedef struct iox_task {
+typedef struct ixland_task {
     pid_t pid, ppid, tgid, pgid, sid;
     atomic_int state;
     int exit_status;
     pthread_t thread;
-    
-    iox_files_t *files;     /* FD table (per-task) */
-    iox_fs_t *fs;           /* Filesystem context */
-    iox_sighand_t *sighand; /* Signal handlers */
-    iox_tty_t *tty;         /* Controlling terminal */
-    iox_exec_image_t *exec_image; /* Current executable */
-    
-    struct iox_task *parent, *children, *next_sibling;
-} iox_task_t;
+
+    ixland_files_t *files;     /* FD table (per-task) */
+    ixland_fs_t *fs;           /* Filesystem context */
+    ixland_sighand_t *sighand; /* Signal handlers */
+    ixland_tty_t *tty;         /* Controlling terminal */
+    ixland_exec_image_t *exec_image; /* Current executable */
+
+    struct ixland_task *parent, *children, *next_sibling;
+} ixland_task_t;
 ```
 
 ### Ownership Rules
 
 | Concept | Owner | Location |
 |---------|-------|----------|
-| PID | iox_task | `task->pid` |
-| FDs | iox_files | `task->files->fd[]` |
-| CWD | iox_fs | `task->fs->cwd` |
-| Signal handlers | iox_sighand | `task->sighand->action[]` |
-| TTY | iox_tty | `task->tty` |
-| Mounts | iox_mount_ns | `task->fs->mnt_ns` |
+| PID | ixland_task | `task->pid` |
+| FDs | ixland_files | `task->files->fd[]` |
+| CWD | ixland_fs | `task->fs->cwd` |
+| Signal handlers | ixland_sighand | `task->sighand->action[]` |
+| TTY | ixland_tty | `task->tty` |
+| Mounts | ixland_mount_ns | `task->fs->mnt_ns` |
 
 **No global state** for these concepts.
 
 ## Repository Layout
 
 ```
-iox/
+ixland/
 ├── kernel/              # Kernel subsystems
 │   ├── task/            # Process management
 │   ├── signal/          # Signal delivery
@@ -197,15 +197,15 @@ ctest --preset ios-simulator-test
 
 | Level | Pattern | Purpose | Example |
 |-------|---------|---------|---------|
-| Internal | `__iox_*_impl()` | Implementation | `__iox_fork_impl()` |
-| Public | `iox_*()` | Public API | `iox_fork()` |
+| Internal | `__ixland_*_impl()` | Implementation | `__ixland_fork_impl()` |
+| Public | `ixland_*()` | Public API | `ixland_fork()` |
 | Interposed | Standard names | Interposition | `fork()` |
 
 ### WAMR Naming
 
 | Layer | Pattern | Purpose |
 |-------|---------|---------|
-| Public | `iox_wamr_*` | App-facing API |
+| Public | `ixland_wamr_*` | App-facing API |
 | Internal | `runtime/wasi/*` | Bridge logic |
 | Upstream | `deps/wamr/*` | Read-only (no edits) |
 
@@ -214,8 +214,8 @@ ctest --preset ios-simulator-test
 ### Always Do
 
 1. Keep `deps/wamr/` pristine—no edits
-2. Implement Linux semantics in iox, not passthrough
-3. Use `iox_task` as single execution model
+2. Implement Linux semantics in ixland, not passthrough
+3. Use `ixland_task` as single execution model
 4. Put FDs only under `task->files`
 5. Test every subsystem with automated tests
 6. Require iOS Simulator/Device validation
@@ -253,7 +253,7 @@ Not "just POSIX"—Linux-oriented userland compatibility like Termux/Cygwin/MSYS
 
 `execve` resolves exactly one of:
 
-1. **Native registered command**: `/bin/ls` → `iox_native_main`
+1. **Native registered command**: `/bin/ls` → `ixland_native_main`
 2. **WASM/WASI module**: `*.wasm` → WAMR runtime
 3. **Script with shebang**: `#!/bin/sh` → interpreter dispatch
 
@@ -263,7 +263,7 @@ No other execution paths allowed.
 
 Virtual process creation:
 
-1. Allocate new `iox_task` with new PID
+1. Allocate new `ixland_task` with new PID
 2. Copy `files`, `fs`, `sighand` (refcounted)
 3. Create host thread for child
 4. Child runs in thread, returns 0
@@ -318,12 +318,12 @@ All changes must pass:
 
 **Next**: Phase 0 - Repository reorganization
 
-**See**: `docs/IOX_ARCHITECTURAL_ANALYSIS.md` for complete migration plan
+**See**: `docs/IXLAND_ARCHITECTURAL_ANALYSIS.md` for complete migration plan
 
 ## Documentation
 
 - `README.md`: User-facing overview
-- `docs/IOX_ARCHITECTURAL_ANALYSIS.md`: Architecture and migration
+- `docs/IXLAND_ARCHITECTURAL_ANALYSIS.md`: Architecture and migration
 - `docs/SYSCALLS.md`: Syscall reference
 - `docs/PORTING.md`: Porting guide
 - `tests/README.md`: Testing guide
@@ -334,4 +334,4 @@ All changes must pass:
 
 **Status**: Architecture defined, ready for Phase 0 implementation
 
-**Primary Rule**: `deps/wamr/` is external, app customers access WAMR only through `iox_wamr_*`, and every subsystem requires executable test evidence.
+**Primary Rule**: `deps/wamr/` is external, app customers access WAMR only through `ixland_wamr_*`, and every subsystem requires executable test evidence.

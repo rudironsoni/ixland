@@ -1,4 +1,4 @@
-# libiox Build Complete ✅
+# libixland Build Complete ✅
 
 ## Summary
 
@@ -26,8 +26,8 @@ Successfully implemented a **production-quality Linux syscall compatibility laye
 - Thread-local storage
 
 **Files:**
-- `src/iox/core/iox_process.c`
-- `src/iox/internal/iox_internal.h`
+- `src/ixland/core/ixland_process.c`
+- `src/ixland/internal/ixland_internal.h`
 
 ### 2. Virtual File System (VFS) ✅
 **408 lines | Production Quality**
@@ -41,8 +41,8 @@ Successfully implemented a **production-quality Linux syscall compatibility laye
   - /etc → ~/Library/etc
 
 **Files:**
-- `src/iox/core/iox_vfs.c`
-- `src/iox/util/iox_path.c`
+- `src/ixland/core/ixland_vfs.c`
+- `src/ixland/util/ixland_path.c`
 
 ### 3. File Operations ✅
 **920 lines (v1 + v2) | Production Quality**
@@ -54,8 +54,8 @@ Successfully implemented a **production-quality Linux syscall compatibility laye
 - File control (fcntl, ioctl)
 
 **Files:**
-- `src/iox/core/iox_file.c`
-- `src/iox/core/iox_file_v2.c`
+- `src/ixland/core/ixland_file.c`
+- `src/ixland/core/ixland_file_v2.c`
 
 ### 4. Symbol Interposition ✅
 **340 lines**
@@ -65,7 +65,7 @@ Successfully implemented a **production-quality Linux syscall compatibility laye
 - Zero macro pollution
 
 **Files:**
-- `src/iox/interpose/iox_interpose.c`
+- `src/ixland/interpose/ixland_interpose.c`
 
 ### 5. Supporting Infrastructure ✅
 
@@ -75,10 +75,10 @@ Successfully implemented a **production-quality Linux syscall compatibility laye
 - Header files
 
 **Files:**
-- `src/iox/util/iox_path.c`
-- `src/iox/core/iox_stubs.c`
-- `src/iox/internal/iox_internal.h`
-- `include/iox/*.h`
+- `src/ixland/util/ixland_path.c`
+- `src/ixland/core/ixland_stubs.c`
+- `src/ixland/internal/ixland_internal.h`
+- `include/ixland/*.h`
 
 ## Build System
 
@@ -87,37 +87,37 @@ make clean && make
 ```
 
 **Output:**
-- `libiox.a` - 169KB static library
-- Object files in `src/iox/*/*.o`
+- `libixland.a` - 169KB static library
+- Object files in `src/ixland/*/*.o`
 
 ## Syscalls Implemented
 
 ### Process Management (16 syscalls)
-fork, vfork, execve, execv, exit, _exit  
-getpid, getppid, getpgrp, setpgrp  
-getpgid, setpgid, getsid, setsid  
+fork, vfork, execve, execv, exit, _exit
+getpid, getppid, getpgrp, setpgrp
+getpgid, setpgid, getsid, setsid
 wait, waitpid, wait3, wait4, system
 
 ### Signal Handling (16 syscalls)
-signal, kill, sigaction  
-sigprocmask, sigpending, sigsuspend  
-sigemptyset, sigfillset, sigaddset, sigdelset, sigismember  
+signal, kill, sigaction
+sigprocmask, sigpending, sigsuspend
+sigemptyset, sigfillset, sigaddset, sigdelset, sigismember
 alarm, setitimer, getitimer, pause
 
 ### File Operations (20 syscalls)
-open, openat, creat  
-read, write  
-close, lseek, pread, pwrite  
-dup, dup2, dup3  
-fcntl, ioctl  
+open, openat, creat
+read, write
+close, lseek, pread, pwrite
+dup, dup2, dup3
+fcntl, ioctl
 access, faccessat
 
 ### VFS Operations (15+ syscalls)
-mount, umount, umount2  
-chroot  
-stat, lstat  
-mkdir, rmdir  
-unlink, link, symlink, readlink  
+mount, umount, umount2
+chroot
+stat, lstat
+mkdir, rmdir
+unlink, link, symlink, readlink
 chmod, chown
 
 **Total: ~100 syscalls with full implementations**
@@ -127,8 +127,8 @@ chmod, chown
 ### Three-Level Naming
 
 ```
-Internal:    __iox_fork_impl()  - Core implementation
-Public:      iox_fork()         - Public API
+Internal:    __ixland_fork_impl()  - Core implementation
+Public:      ixland_fork()         - Public API
 Linux:       fork()             - Standard Linux name (via interposition)
 ```
 
@@ -136,7 +136,7 @@ Linux:       fork()             - Standard Linux name (via interposition)
 
 **Process Structure:**
 ```c
-struct __iox_process_s {
+struct __ixland_process_s {
     pid_t                       pid;
     pid_t                       ppid;
     pid_t                       pgid;
@@ -145,8 +145,8 @@ struct __iox_process_s {
     atomic_int                  ref_count;
     pthread_t                   thread;
     pthread_mutex_t             thread_lock;
-    __iox_sigqueue_t            sig_queue;
-    __iox_wait_entry_t         *waiters;
+    __ixland_sigqueue_t            sig_queue;
+    __ixland_wait_entry_t         *waiters;
     struct rlimit               rlimits[RLIMIT_NLIMITS];
     /* ... 50+ fields ... */
 };
@@ -154,12 +154,12 @@ struct __iox_process_s {
 
 **VFS Mount:**
 ```c
-typedef struct iox_vfs_mount_s {
+typedef struct ixland_vfs_mount_s {
     bool                active;
     unsigned long       flags;
-    char                mountpoint[IOX_MAX_PATH];
-    char                target[IOX_MAX_PATH];
-} iox_vfs_mount_t;
+    char                mountpoint[IXLAND_MAX_PATH];
+    char                target[IXLAND_MAX_PATH];
+} ixland_vfs_mount_t;
 ```
 
 ### Locking Strategy
@@ -198,7 +198,7 @@ typedef struct iox_vfs_mount_s {
 ### Basic Tests
 ```bash
 # Create test
-clang -Wall -g -I./include tests/unit/test_simple.c -L. -liox -lpthread -o test_simple
+clang -Wall -g -I./include tests/unit/test_simple.c -L. -lixland -lpthread -o test_simple
 
 # Run
 ./test_simple
@@ -219,26 +219,26 @@ All tests passed!
 
 ```
 a-shell-kernel/
-├── libiox.a                          # Static library (169KB)
+├── libixland.a                          # Static library (169KB)
 ├── Makefile                            # Build system
-├── src/iox/
+├── src/ixland/
 │   ├── core/
-│   │   ├── iox_process.c              # 1,595 lines - Process mgmt
-│   │   ├── iox_file.c                 # 540 lines - File I/O
-│   │   ├── iox_file_v2.c              # 380 lines - VFS-aware files
-│   │   ├── iox_vfs.c                  # 408 lines - Virtual FS
-│   │   └── iox_stubs.c                # 500 lines - Support stubs
+│   │   ├── ixland_process.c              # 1,595 lines - Process mgmt
+│   │   ├── ixland_file.c                 # 540 lines - File I/O
+│   │   ├── ixland_file_v2.c              # 380 lines - VFS-aware files
+│   │   ├── ixland_vfs.c                  # 408 lines - Virtual FS
+│   │   └── ixland_stubs.c                # 500 lines - Support stubs
 │   ├── internal/
-│   │   └── iox_internal.h             # 521 lines - Internal API
+│   │   └── ixland_internal.h             # 521 lines - Internal API
 │   ├── interpose/
-│   │   └── iox_interpose.c            # 340 lines - Linux symbols
+│   │   └── ixland_interpose.c            # 340 lines - Linux symbols
 │   ├── util/
-│   │   └── iox_path.c               # 200 lines - Path utilities
+│   │   └── ixland_path.c               # 200 lines - Path utilities
 │   └── wamr/                          # WAMR integration (empty)
-├── include/iox/
-│   ├── iox.h                          # Master header
-│   ├── iox_syscalls.h                 # Syscall prototypes
-│   ├── iox_types.h                    # Type definitions
+├── include/ixland/
+│   ├── ixland.h                          # Master header
+│   ├── ixland_syscalls.h                 # Syscall prototypes
+│   ├── ixland_types.h                    # Type definitions
 │   └── sys/types.h                    # Linux-compatible types
 └── tests/unit/
     ├── test_simple.c                   # Basic test
@@ -253,7 +253,7 @@ a-shell-kernel/
 - `IMPLEMENTATION_SUMMARY.md` - Detailed implementation
 - `IMPLEMENTATION_STATUS.md` - Current status
 - `BUILD_COMPLETE.md` - This file
-- `docs/LIBIOX_ARCHITECTURE.md` - Architecture spec
+- `docs/LIBIXLAND_ARCHITECTURE.md` - Architecture spec
 
 ## What Makes This Production-Ready
 
@@ -287,7 +287,7 @@ The architecture is sound. The implementation is complete. This is ready for rea
 
 ## Conclusion
 
-**libiox is complete.** It's a real, production-quality Linux subsystem for iOS that:
+**libixland is complete.** It's a real, production-quality Linux subsystem for iOS that:
 - Implements 100+ syscalls
 - Uses proper data structures and locking
 - Has a clean VFS layer

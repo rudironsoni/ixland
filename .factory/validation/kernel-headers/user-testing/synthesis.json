@@ -30,7 +30,7 @@
   "notes": [
     {
       "assertion": "VAL-HEADERS-012",
-      "note": "Detected protection macros (_LINUX_TIMESPEC_DEFINED, IOX_O_CLOEXEC_DEFINED) are intentional and used to prevent duplicate symbol definitions. These are not include guards but conditional compilation guards."
+      "note": "Detected protection macros (_LINUX_TIMESPEC_DEFINED, IXLAND_O_CLOEXEC_DEFINED) are intentional and used to prevent duplicate symbol definitions. These are not include guards but conditional compilation guards."
     }
   ],
   "appliedUpdates": [

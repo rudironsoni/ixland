@@ -44,7 +44,7 @@
       ]
     }
   },
-  "toolsUsed": ["iox-core-tests"],
+  "toolsUsed": ["ixland-core-tests"],
   "frictions": [],
   "blockers": []
 }

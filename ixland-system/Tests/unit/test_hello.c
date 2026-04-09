@@ -4,7 +4,7 @@
 #include <string.h>
 
 int main() {
-    printf("Hello from libiox!\n");
+    printf("Hello from libixland!\n");
 
     /* Test basic operations */
     char cwd[1024];

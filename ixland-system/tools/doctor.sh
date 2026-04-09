@@ -1,10 +1,10 @@
 #!/bin/bash
-# iox Doctor Script
+# ixland Doctor Script
 # Verify environment
 
 set -e
 
-echo "=== iox Doctor ==="
+echo "=== ixland Doctor ==="
 echo ""
 
 ERRORS=0

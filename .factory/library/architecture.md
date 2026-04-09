@@ -28,10 +28,10 @@ iXland is a Linux-like virtual kernel subsystem for iOS. It simulates Linux sysc
 │                     iXland libc                             │
 │         (Public Headers + Core API Functions)               │
 │  ┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐ │
-│  │linux/*.h     │ │iox/*.h       │ │ Core Functions       │ │
-│  │  unistd.h    │ │  iox.h       │ │  iox_version()       │ │
-│  │  stat.h      │ │  iox_types.h │ │  iox_strerror()      │ │
-│  │  signal.h    │ │  syscalls.h  │ │  iox_perror()        │ │
+│  │linux/*.h     │ │ixland/*.h       │ │ Core Functions       │ │
+│  │  unistd.h    │ │  ixland.h       │ │  ixland_version()       │ │
+│  │  stat.h      │ │  ixland_types.h │ │  ixland_strerror()      │ │
+│  │  signal.h    │ │  syscalls.h  │ │  ixland_perror()        │ │
 │  └──────────────┘ └──────────────┘ └──────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -43,9 +43,9 @@ iXland is a Linux-like virtual kernel subsystem for iOS. It simulates Linux sysc
 **Purpose:** Public ABI boundary - headers and minimal runtime
 
 **Key Files:**
-- `include/iox/iox.h` - Umbrella header
-- `include/iox/iox_types.h` - Type definitions
-- `include/iox/iox_syscalls.h` - Syscall prototypes
+- `include/ixland/ixland.h` - Umbrella header
+- `include/ixland/ixland_types.h` - Type definitions
+- `include/ixland/ixland_syscalls.h` - Syscall prototypes
 - `include/linux/*.h` - Linux-compatible headers
 
 **Targets:**
@@ -72,7 +72,7 @@ iXland is a Linux-like virtual kernel subsystem for iOS. It simulates Linux sysc
 #### File System (`fs/`)
 - **vfs.c** - Virtual filesystem layer
 - **fdtable.c** - File descriptor management
-- **iox_path.c** - Path translation
+- **ixland_path.c** - Path translation
 
 #### Drivers (`drivers/`)
 - **tty/** - TTY/PTY support
@@ -91,11 +91,11 @@ iXland is a Linux-like virtual kernel subsystem for iOS. It simulates Linux sysc
 ### Process Creation Flow
 
 ```
-1. App calls iox_fork()
+1. App calls ixland_fork()
    ↓
-2. Kernel: iox_task_alloc() - allocate task struct
+2. Kernel: ixland_task_alloc() - allocate task struct
    ↓
-3. Kernel: iox_alloc_pid() - assign unique PID
+3. Kernel: ixland_alloc_pid() - assign unique PID
    ↓
 4. Kernel: Link to parent's children list
    ↓
@@ -107,7 +107,7 @@ iXland is a Linux-like virtual kernel subsystem for iOS. It simulates Linux sysc
 ### Signal Delivery Flow
 
 ```
-1. Process calls iox_kill(target_pid, sig)
+1. Process calls ixland_kill(target_pid, sig)
    ↓
 2. Kernel: Lookup target in process table
    ↓
@@ -123,7 +123,7 @@ iXland is a Linux-like virtual kernel subsystem for iOS. It simulates Linux sysc
 ### File Operation Flow
 
 ```
-1. Process calls iox_open(path, flags)
+1. Process calls ixland_open(path, flags)
    ↓
 2. VFS: Translate path (handle cwd, symlinks)
    ↓
@@ -136,10 +136,10 @@ iXland is a Linux-like virtual kernel subsystem for iOS. It simulates Linux sysc
 
 ## Key Data Structures
 
-### iox_task_t (Process)
+### ixland_task_t (Process)
 
 ```c
-struct iox_task {
+struct ixland_task {
     pid_t pid;              // Process ID
     pid_t ppid;             // Parent PID
     pid_t pgid;             // Process group ID
@@ -148,34 +148,34 @@ struct iox_task {
     atomic_int state;       // Task state (RUNNING, ZOMBIE, etc.)
     pthread_t thread;       // Thread handle
 
-    iox_files_t *files;     // File descriptor table
-    iox_fs_t *fs;           // Filesystem context (cwd, root)
-    iox_sighand_t *sighand; // Signal handlers
+    ixland_files_t *files;     // File descriptor table
+    ixland_fs_t *fs;           // Filesystem context (cwd, root)
+    ixland_sighand_t *sighand; // Signal handlers
 
     // Tree links
-    struct iox_task *parent;
-    struct iox_task *children;
-    struct iox_task *next_sibling;
+    struct ixland_task *parent;
+    struct ixland_task *children;
+    struct ixland_task *next_sibling;
 };
 ```
 
 ### Process States
 
-- `IOX_TASK_RUNNING` - Normal execution
-- `IOX_TASK_INTERRUPTIBLE` - Sleeping, can be interrupted
-- `IOX_TASK_UNINTERRUPTIBLE` - Sleeping, cannot be interrupted
-- `IOX_TASK_STOPPED` - Stopped by signal
-- `IOX_TASK_ZOMBIE` - Exited, waiting for parent wait()
-- `IOX_TASK_DEAD` - Being reaped
+- `IXLAND_TASK_RUNNING` - Normal execution
+- `IXLAND_TASK_INTERRUPTIBLE` - Sleeping, can be interrupted
+- `IXLAND_TASK_UNINTERRUPTIBLE` - Sleeping, cannot be interrupted
+- `IXLAND_TASK_STOPPED` - Stopped by signal
+- `IXLAND_TASK_ZOMBIE` - Exited, waiting for parent wait()
+- `IXLAND_TASK_DEAD` - Being reaped
 
 ### FD Table
 
 ```c
-typedef struct iox_files {
-    struct file *fd[IOX_MAX_FD];  // File pointers
+typedef struct ixland_files {
+    struct file *fd[IXLAND_MAX_FD];  // File pointers
     atomic_int count;              // Reference count
     pthread_mutex_t lock;          // Access lock
-} iox_files_t;
+} ixland_files_t;
 ```
 
 ## Threading Model
@@ -190,14 +190,14 @@ Since iOS forbids fork(), iXland uses pthreads:
 ### Thread-Local Current Task
 
 ```c
-_Thread_local iox_task_t *iox_current = NULL;
+_Thread_local ixland_task_t *ixland_current = NULL;
 
-iox_task_t *iox_current_task(void) {
-    return iox_current;
+ixland_task_t *ixland_current_task(void) {
+    return ixland_current;
 }
 
-void iox_set_current_task(iox_task_t *task) {
-    iox_current = task;
+void ixland_set_current_task(ixland_task_t *task) {
+    ixland_current = task;
 }
 ```
 
@@ -208,13 +208,13 @@ void iox_set_current_task(iox_task_t *task) {
 All shared structures use atomic reference counting:
 
 ```c
-void iox_task_ref(iox_task_t *task) {
+void ixland_task_ref(ixland_task_t *task) {
     atomic_fetch_add(&task->refs, 1);
 }
 
-void iox_task_unref(iox_task_t *task) {
+void ixland_task_unref(ixland_task_t *task) {
     if (atomic_fetch_sub(&task->refs, 1) == 1) {
-        iox_task_free(task);
+        ixland_task_free(task);
     }
 }
 ```

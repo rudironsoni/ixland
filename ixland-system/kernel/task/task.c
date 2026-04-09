@@ -8,41 +8,41 @@
 
 #include "../../fs/fdtable.h"
 #include "../../fs/vfs.h"
-#include "../signal/iox_signal.h"
+#include "../signal/ixland_signal.h"
 
-/* Note: IOX_MAX_TASKS defined in task.h for cross-module access */
+/* Note: IXLAND_MAX_TASKS defined in task.h for cross-module access */
 
-static __thread iox_task_t *current_task = NULL;
-iox_task_t *init_task = NULL;
+static __thread ixland_task_t *current_task = NULL;
+ixland_task_t *init_task = NULL;
 
-/* Task table - accessible to signal.c for iox_killpg */
+/* Task table - accessible to signal.c for ixland_killpg */
 pthread_mutex_t task_table_lock = PTHREAD_MUTEX_INITIALIZER;
-iox_task_t *task_table[IOX_MAX_TASKS] = {NULL};
+ixland_task_t *task_table[IXLAND_MAX_TASKS] = {NULL};
 
 int task_hash(pid_t pid) {
-    return (int)(pid % IOX_MAX_TASKS);
+    return (int)(pid % IXLAND_MAX_TASKS);
 }
 
-iox_task_t *iox_current_task(void) {
+ixland_task_t *ixland_current_task(void) {
     return current_task;
 }
 
-void iox_set_current_task(iox_task_t *task) {
+void ixland_set_current_task(ixland_task_t *task) {
     current_task = task;
 }
 
-iox_task_t *iox_task_alloc(void) {
-    iox_task_t *task = calloc(1, sizeof(iox_task_t));
+ixland_task_t *ixland_task_alloc(void) {
+    ixland_task_t *task = calloc(1, sizeof(ixland_task_t));
     if (!task)
         return NULL;
 
-    task->pid = iox_alloc_pid();
+    task->pid = ixland_alloc_pid();
     task->tgid = task->pid;
     task->pgid = task->pid;
     task->sid = task->pid;
     task->vfork_parent = NULL;
 
-    atomic_init(&task->state, IOX_TASK_RUNNING);
+    atomic_init(&task->state, IXLAND_TASK_RUNNING);
     atomic_init(&task->refs, 1);
     atomic_init(&task->exited, false);
     atomic_init(&task->signaled, false);
@@ -62,7 +62,7 @@ iox_task_t *iox_task_alloc(void) {
     return task;
 }
 
-void iox_task_free(iox_task_t *task) {
+void ixland_task_free(ixland_task_t *task) {
     if (!task)
         return;
 
@@ -71,7 +71,7 @@ void iox_task_free(iox_task_t *task) {
 
     int idx = task_hash(task->pid);
     pthread_mutex_lock(&task_table_lock);
-    iox_task_t **pp = &task_table[idx];
+    ixland_task_t **pp = &task_table[idx];
     while (*pp && *pp != task) {
         pp = &(*pp)->hash_next;
     }
@@ -81,7 +81,7 @@ void iox_task_free(iox_task_t *task) {
     pthread_mutex_unlock(&task_table_lock);
 
     if (task->files)
-        iox_files_free(task->files);
+        ixland_files_free(task->files);
     if (task->fs)
         free(task->fs);
     if (task->sighand)
@@ -97,14 +97,14 @@ void iox_task_free(iox_task_t *task) {
     pthread_mutex_destroy(&task->wait_lock);
     pthread_mutex_destroy(&task->lock);
 
-    iox_free_pid(task->pid);
+    ixland_free_pid(task->pid);
     free(task);
 }
 
-iox_task_t *iox_task_lookup(pid_t pid) {
+ixland_task_t *ixland_task_lookup(pid_t pid) {
     int idx = task_hash(pid);
     pthread_mutex_lock(&task_table_lock);
-    iox_task_t *task = task_table[idx];
+    ixland_task_t *task = task_table[idx];
     while (task && task->pid != pid) {
         task = task->hash_next;
     }
@@ -115,34 +115,34 @@ iox_task_t *iox_task_lookup(pid_t pid) {
     return task;
 }
 
-static void iox_task_init_once(void) {
+static void ixland_task_init_once(void) {
     /* Initialize PID allocator first */
-    iox_pid_init();
+    ixland_pid_init();
 
-    init_task = iox_task_alloc();
+    init_task = ixland_task_alloc();
     if (!init_task)
         return;
 
     init_task->ppid = init_task->pid;
     strncpy(init_task->comm, "init", sizeof(init_task->comm));
 
-    init_task->files = iox_files_alloc(IOX_MAX_FD);
+    init_task->files = ixland_files_alloc(IXLAND_MAX_FD);
     if (!init_task->files) {
-        iox_task_free(init_task);
+        ixland_task_free(init_task);
         init_task = NULL;
         return;
     }
 
-    init_task->fs = iox_fs_alloc();
+    init_task->fs = ixland_fs_alloc();
     if (!init_task->fs) {
-        iox_task_free(init_task);
+        ixland_task_free(init_task);
         init_task = NULL;
         return;
     }
 
-    init_task->sighand = iox_sighand_alloc();
+    init_task->sighand = ixland_sighand_alloc();
     if (!init_task->sighand) {
-        iox_task_free(init_task);
+        ixland_task_free(init_task);
         init_task = NULL;
         return;
     }
@@ -150,17 +150,17 @@ static void iox_task_init_once(void) {
     current_task = init_task;
 }
 
-int iox_task_init(void) {
+int ixland_task_init(void) {
     static pthread_once_t once = PTHREAD_ONCE_INIT;
 
-    pthread_once(&once, iox_task_init_once);
+    pthread_once(&once, ixland_task_init_once);
 
     return init_task ? 0 : -1;
 }
 
-void iox_task_deinit(void) {
+void ixland_task_deinit(void) {
     if (init_task) {
-        iox_task_free(init_task);
+        ixland_task_free(init_task);
         init_task = NULL;
     }
 }
@@ -169,23 +169,23 @@ void iox_task_deinit(void) {
  * PID/IDENTITY FUNCTIONS
  * ============================================================================ */
 
-pid_t iox_getpid(void) {
-    iox_task_t *task = iox_current_task();
+pid_t ixland_getpid(void) {
+    ixland_task_t *task = ixland_current_task();
     if (!task) {
         /* Try to initialize if not already done */
-        if (iox_task_init() == 0) {
-            task = iox_current_task();
+        if (ixland_task_init() == 0) {
+            task = ixland_current_task();
         }
     }
     return task ? task->pid : 0;
 }
 
-pid_t iox_getppid(void) {
-    iox_task_t *task = iox_current_task();
+pid_t ixland_getppid(void) {
+    ixland_task_t *task = ixland_current_task();
     if (!task) {
         /* Try to initialize if not already done */
-        if (iox_task_init() == 0) {
-            task = iox_current_task();
+        if (ixland_task_init() == 0) {
+            task = ixland_current_task();
         }
     }
     return task ? task->ppid : 0;
@@ -195,8 +195,8 @@ pid_t iox_getppid(void) {
  * SESSION AND PROCESS GROUP FUNCTIONS
  * ============================================================================ */
 
-pid_t iox_getpgrp(void) {
-    iox_task_t *task = iox_current_task();
+pid_t ixland_getpgrp(void) {
+    ixland_task_t *task = ixland_current_task();
     if (!task) {
         errno = ESRCH;
         return -1;
@@ -204,24 +204,24 @@ pid_t iox_getpgrp(void) {
     return task->pgid;
 }
 
-pid_t iox_getpgid(pid_t pid) {
+pid_t ixland_getpgid(pid_t pid) {
     if (pid == 0) {
-        return iox_getpgrp();
+        return ixland_getpgrp();
     }
 
-    iox_task_t *task = iox_task_lookup(pid);
+    ixland_task_t *task = ixland_task_lookup(pid);
     if (!task) {
         errno = ESRCH;
         return -1;
     }
 
     pid_t pgid = task->pgid;
-    iox_task_free(task);
+    ixland_task_free(task);
     return pgid;
 }
 
-int iox_setpgid(pid_t pid, pid_t pgid) {
-    iox_task_t *current = iox_current_task();
+int ixland_setpgid(pid_t pid, pid_t pgid) {
+    ixland_task_t *current = ixland_current_task();
     if (!current) {
         errno = ESRCH;
         return -1;
@@ -235,7 +235,7 @@ int iox_setpgid(pid_t pid, pid_t pgid) {
         pgid = pid;
     }
 
-    iox_task_t *target = iox_task_lookup(pid);
+    ixland_task_t *target = ixland_task_lookup(pid);
     if (!target) {
         errno = ESRCH;
         return -1;
@@ -243,7 +243,7 @@ int iox_setpgid(pid_t pid, pid_t pgid) {
 
     /* Check permissions: caller must be target or target's parent */
     if (target->ppid != current->pid && target->pid != current->pid) {
-        iox_task_free(target);
+        ixland_task_free(target);
         errno = EPERM;
         return -1;
     }
@@ -253,21 +253,21 @@ int iox_setpgid(pid_t pid, pid_t pgid) {
     /* Check session match - can't move to different session */
     if (target->sid != current->sid) {
         pthread_mutex_unlock(&target->lock);
-        iox_task_free(target);
+        ixland_task_free(target);
         errno = EPERM;
         return -1;
     }
 
     target->pgid = pgid;
     pthread_mutex_unlock(&target->lock);
-    iox_task_free(target);
+    ixland_task_free(target);
 
     return 0;
 }
 
-pid_t iox_getsid(pid_t pid) {
+pid_t ixland_getsid(pid_t pid) {
     if (pid == 0) {
-        iox_task_t *task = iox_current_task();
+        ixland_task_t *task = ixland_current_task();
         if (!task) {
             errno = ESRCH;
             return -1;
@@ -275,19 +275,19 @@ pid_t iox_getsid(pid_t pid) {
         return task->sid;
     }
 
-    iox_task_t *task = iox_task_lookup(pid);
+    ixland_task_t *task = ixland_task_lookup(pid);
     if (!task) {
         errno = ESRCH;
         return -1;
     }
 
     pid_t sid = task->sid;
-    iox_task_free(task);
+    ixland_task_free(task);
     return sid;
 }
 
-pid_t iox_setsid(void) {
-    iox_task_t *task = iox_current_task();
+pid_t ixland_setsid(void) {
+    ixland_task_t *task = ixland_current_task();
     if (!task) {
         errno = ESRCH;
         return -1;

@@ -1,11 +1,11 @@
 /* iXland libc - Linux-compatible unistd.h
  *
  * Process and I/O syscall declarations matching Linux signatures.
- * These are iXland-compatible wrappers with iox_ prefix.
+ * These are iXland-compatible wrappers with ixland_ prefix.
  */
 
-#ifndef IOX_LINUX_UNISTD_H
-#define IOX_LINUX_UNISTD_H
+#ifndef IXLAND_LINUX_UNISTD_H
+#define IXLAND_LINUX_UNISTD_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -30,7 +30,7 @@ extern "C" {
  *
  * @return pid_t Child PID in parent, 0 in child, -1 on error
  */
-pid_t iox_fork(void);
+pid_t ixland_fork(void);
 
 /**
  * @brief Create a new process (vfork)
@@ -40,7 +40,7 @@ pid_t iox_fork(void);
  *
  * @return pid_t Child PID in parent, 0 in child, -1 on error
  */
-pid_t iox_vfork(void);
+pid_t ixland_vfork(void);
 
 /**
  * @brief Execute a program
@@ -52,7 +52,7 @@ pid_t iox_vfork(void);
  * @param envp Environment vector
  * @return int -1 on error, does not return on success
  */
-int iox_execve(const char *pathname, char *const argv[], char *const envp[]);
+int ixland_execve(const char *pathname, char *const argv[], char *const envp[]);
 
 /**
  * @brief Execute a program (environment inherited)
@@ -61,14 +61,14 @@ int iox_execve(const char *pathname, char *const argv[], char *const envp[]);
  * @param argv Argument vector
  * @return int -1 on error, does not return on success
  */
-int iox_execv(const char *pathname, char *const argv[]);
+int ixland_execv(const char *pathname, char *const argv[]);
 
 /**
  * @brief Terminate process with status
  *
  * @param status Exit status code
  */
-void iox_exit(int status) __attribute__((noreturn));
+void ixland_exit(int status) __attribute__((noreturn));
 
 /**
  * @brief Terminate process immediately
@@ -77,28 +77,28 @@ void iox_exit(int status) __attribute__((noreturn));
  *
  * @param status Exit status code
  */
-void iox__exit(int status) __attribute__((noreturn));
+void ixland__exit(int status) __attribute__((noreturn));
 
 /**
  * @brief Get process ID
  *
  * @return pid_t Current process ID
  */
-pid_t iox_getpid(void);
+pid_t ixland_getpid(void);
 
 /**
  * @brief Get parent process ID
  *
  * @return pid_t Parent process ID
  */
-pid_t iox_getppid(void);
+pid_t ixland_getppid(void);
 
 /**
  * @brief Get process group ID
  *
  * @return pid_t Process group ID
  */
-pid_t iox_getpgrp(void);
+pid_t ixland_getpgrp(void);
 
 /**
  * @brief Set process group
@@ -107,7 +107,7 @@ pid_t iox_getpgrp(void);
  *
  * @return int 0 on success, -1 on error
  */
-int iox_setpgrp(void);
+int ixland_setpgrp(void);
 
 /**
  * @brief Get process group ID for specific process
@@ -115,7 +115,7 @@ int iox_setpgrp(void);
  * @param pid Process ID (0 for current)
  * @return pid_t Process group ID, -1 on error
  */
-pid_t iox_getpgid(pid_t pid);
+pid_t ixland_getpgid(pid_t pid);
 
 /**
  * @brief Set process group ID
@@ -124,7 +124,7 @@ pid_t iox_getpgid(pid_t pid);
  * @param pgid Process group ID (0 to use pid)
  * @return int 0 on success, -1 on error
  */
-int iox_setpgid(pid_t pid, pid_t pgid);
+int ixland_setpgid(pid_t pid, pid_t pgid);
 
 /**
  * @brief Get session ID
@@ -132,7 +132,7 @@ int iox_setpgid(pid_t pid, pid_t pgid);
  * @param pid Process ID (0 for current)
  * @return pid_t Session ID, -1 on error
  */
-pid_t iox_getsid(pid_t pid);
+pid_t ixland_getsid(pid_t pid);
 
 /**
  * @brief Create new session
@@ -141,7 +141,7 @@ pid_t iox_getsid(pid_t pid);
  *
  * @return pid_t Session ID on success, -1 on error
  */
-pid_t iox_setsid(void);
+pid_t ixland_setsid(void);
 
 /**
  * @brief Wait for any child process
@@ -149,7 +149,7 @@ pid_t iox_setsid(void);
  * @param stat_loc Pointer to store exit status (can be NULL)
  * @return pid_t Child PID on success, -1 on error
  */
-pid_t iox_wait(int *stat_loc);
+pid_t ixland_wait(int *stat_loc);
 
 /**
  * @brief Wait for specific child process
@@ -159,7 +159,7 @@ pid_t iox_wait(int *stat_loc);
  * @param options Options (WNOHANG, WUNTRACED, etc.)
  * @return pid_t Child PID on success, 0 with WNOHANG, -1 on error
  */
-pid_t iox_waitpid(pid_t pid, int *stat_loc, int options);
+pid_t ixland_waitpid(pid_t pid, int *stat_loc, int options);
 
 /* ============================================================================
  * FILE OPERATIONS
@@ -173,7 +173,7 @@ pid_t iox_waitpid(pid_t pid, int *stat_loc, int options);
  * @param mode File mode for creation (optional)
  * @return int File descriptor on success, -1 on error
  */
-int iox_open(const char *pathname, int flags, ...);
+int ixland_open(const char *pathname, int flags, ...);
 
 /**
  * @brief Open file relative to directory
@@ -184,7 +184,7 @@ int iox_open(const char *pathname, int flags, ...);
  * @param mode File mode (optional)
  * @return int File descriptor on success, -1 on error
  */
-int iox_openat(int dirfd, const char *pathname, int flags, ...);
+int ixland_openat(int dirfd, const char *pathname, int flags, ...);
 
 /**
  * @brief Create a file
@@ -193,7 +193,7 @@ int iox_openat(int dirfd, const char *pathname, int flags, ...);
  * @param mode File mode
  * @return int File descriptor on success, -1 on error
  */
-int iox_creat(const char *pathname, mode_t mode);
+int ixland_creat(const char *pathname, mode_t mode);
 
 /**
  * @brief Read from file descriptor
@@ -203,7 +203,7 @@ int iox_creat(const char *pathname, mode_t mode);
  * @param count Number of bytes to read
  * @return ssize_t Bytes read, 0 at EOF, -1 on error
  */
-ssize_t iox_read(int fd, void *buf, size_t count);
+ssize_t ixland_read(int fd, void *buf, size_t count);
 
 /**
  * @brief Write to file descriptor
@@ -213,7 +213,7 @@ ssize_t iox_read(int fd, void *buf, size_t count);
  * @param count Number of bytes to write
  * @return ssize_t Bytes written, -1 on error
  */
-ssize_t iox_write(int fd, const void *buf, size_t count);
+ssize_t ixland_write(int fd, const void *buf, size_t count);
 
 /**
  * @brief Close file descriptor
@@ -221,7 +221,7 @@ ssize_t iox_write(int fd, const void *buf, size_t count);
  * @param fd File descriptor
  * @return int 0 on success, -1 on error
  */
-int iox_close(int fd);
+int ixland_close(int fd);
 
 /**
  * @brief Change file offset
@@ -231,7 +231,7 @@ int iox_close(int fd);
  * @param whence SEEK_SET, SEEK_CUR, or SEEK_END
  * @return off_t New file offset, -1 on error
  */
-off_t iox_lseek(int fd, off_t offset, int whence);
+off_t ixland_lseek(int fd, off_t offset, int whence);
 
 /**
  * @brief Read from file descriptor at offset
@@ -242,7 +242,7 @@ off_t iox_lseek(int fd, off_t offset, int whence);
  * @param offset Offset in file
  * @return ssize_t Bytes read, -1 on error
  */
-ssize_t iox_pread(int fd, void *buf, size_t count, off_t offset);
+ssize_t ixland_pread(int fd, void *buf, size_t count, off_t offset);
 
 /**
  * @brief Write to file descriptor at offset
@@ -253,7 +253,7 @@ ssize_t iox_pread(int fd, void *buf, size_t count, off_t offset);
  * @param offset Offset in file
  * @return ssize_t Bytes written, -1 on error
  */
-ssize_t iox_pwrite(int fd, const void *buf, size_t count, off_t offset);
+ssize_t ixland_pwrite(int fd, const void *buf, size_t count, off_t offset);
 
 /**
  * @brief Duplicate file descriptor
@@ -261,7 +261,7 @@ ssize_t iox_pwrite(int fd, const void *buf, size_t count, off_t offset);
  * @param oldfd File descriptor to duplicate
  * @return int New file descriptor, -1 on error
  */
-int iox_dup(int oldfd);
+int ixland_dup(int oldfd);
 
 /**
  * @brief Duplicate file descriptor to specific number
@@ -270,7 +270,7 @@ int iox_dup(int oldfd);
  * @param newfd Target file descriptor
  * @return int newfd on success, -1 on error
  */
-int iox_dup2(int oldfd, int newfd);
+int ixland_dup2(int oldfd, int newfd);
 
 /**
  * @brief Duplicate file descriptor to specific number (with flags)
@@ -280,7 +280,7 @@ int iox_dup2(int oldfd, int newfd);
  * @param flags Flags (O_CLOEXEC)
  * @return int newfd on success, -1 on error
  */
-int iox_dup3(int oldfd, int newfd, int flags);
+int ixland_dup3(int oldfd, int newfd, int flags);
 
 /* ============================================================================
  * FILESYSTEM
@@ -292,7 +292,7 @@ int iox_dup3(int oldfd, int newfd, int flags);
  * @param path New working directory
  * @return int 0 on success, -1 on error
  */
-int iox_chdir(const char *path);
+int ixland_chdir(const char *path);
 
 /**
  * @brief Change working directory via file descriptor
@@ -300,7 +300,7 @@ int iox_chdir(const char *path);
  * @param fd File descriptor of directory
  * @return int 0 on success, -1 on error
  */
-int iox_fchdir(int fd);
+int ixland_fchdir(int fd);
 
 /**
  * @brief Get current working directory
@@ -309,7 +309,7 @@ int iox_fchdir(int fd);
  * @param size Buffer size
  * @return char* Pointer to buf on success, NULL on error
  */
-char *iox_getcwd(char *buf, size_t size);
+char *ixland_getcwd(char *buf, size_t size);
 
 /**
  * @brief Create directory
@@ -318,7 +318,7 @@ char *iox_getcwd(char *buf, size_t size);
  * @param mode Directory permissions
  * @return int 0 on success, -1 on error
  */
-int iox_mkdir(const char *pathname, mode_t mode);
+int ixland_mkdir(const char *pathname, mode_t mode);
 
 /**
  * @brief Create directory relative to directory
@@ -328,7 +328,7 @@ int iox_mkdir(const char *pathname, mode_t mode);
  * @param mode Directory permissions
  * @return int 0 on success, -1 on error
  */
-int iox_mkdirat(int dirfd, const char *pathname, mode_t mode);
+int ixland_mkdirat(int dirfd, const char *pathname, mode_t mode);
 
 /**
  * @brief Remove directory
@@ -336,7 +336,7 @@ int iox_mkdirat(int dirfd, const char *pathname, mode_t mode);
  * @param pathname Path to directory
  * @return int 0 on success, -1 on error
  */
-int iox_rmdir(const char *pathname);
+int ixland_rmdir(const char *pathname);
 
 /**
  * @brief Remove file
@@ -344,7 +344,7 @@ int iox_rmdir(const char *pathname);
  * @param pathname Path to file
  * @return int 0 on success, -1 on error
  */
-int iox_unlink(const char *pathname);
+int ixland_unlink(const char *pathname);
 
 /**
  * @brief Remove file relative to directory
@@ -354,7 +354,7 @@ int iox_unlink(const char *pathname);
  * @param flags Flags
  * @return int 0 on success, -1 on error
  */
-int iox_unlinkat(int dirfd, const char *pathname, int flags);
+int ixland_unlinkat(int dirfd, const char *pathname, int flags);
 
 /**
  * @brief Create hard link
@@ -363,7 +363,7 @@ int iox_unlinkat(int dirfd, const char *pathname, int flags);
  * @param newpath New link path
  * @return int 0 on success, -1 on error
  */
-int iox_link(const char *oldpath, const char *newpath);
+int ixland_link(const char *oldpath, const char *newpath);
 
 /**
  * @brief Create hard link relative to directories
@@ -375,7 +375,7 @@ int iox_link(const char *oldpath, const char *newpath);
  * @param flags Flags
  * @return int 0 on success, -1 on error
  */
-int iox_linkat(int olddirfd, const char *oldpath, int newdirfd, const char *newpath, int flags);
+int ixland_linkat(int olddirfd, const char *oldpath, int newdirfd, const char *newpath, int flags);
 
 /**
  * @brief Create symbolic link
@@ -384,7 +384,7 @@ int iox_linkat(int olddirfd, const char *oldpath, int newdirfd, const char *newp
  * @param linkpath Link path
  * @return int 0 on success, -1 on error
  */
-int iox_symlink(const char *target, const char *linkpath);
+int ixland_symlink(const char *target, const char *linkpath);
 
 /**
  * @brief Create symbolic link relative to directory
@@ -394,7 +394,7 @@ int iox_symlink(const char *target, const char *linkpath);
  * @param linkpath Link path
  * @return int 0 on success, -1 on error
  */
-int iox_symlinkat(const char *target, int newdirfd, const char *linkpath);
+int ixland_symlinkat(const char *target, int newdirfd, const char *linkpath);
 
 /**
  * @brief Read symbolic link target
@@ -404,7 +404,7 @@ int iox_symlinkat(const char *target, int newdirfd, const char *linkpath);
  * @param bufsiz Buffer size
  * @return ssize_t Bytes read, -1 on error
  */
-ssize_t iox_readlink(const char *pathname, char *buf, size_t bufsiz);
+ssize_t ixland_readlink(const char *pathname, char *buf, size_t bufsiz);
 
 /**
  * @brief Read symbolic link target relative to directory
@@ -415,7 +415,7 @@ ssize_t iox_readlink(const char *pathname, char *buf, size_t bufsiz);
  * @param bufsiz Buffer size
  * @return ssize_t Bytes read, -1 on error
  */
-ssize_t iox_readlinkat(int dirfd, const char *pathname, char *buf, size_t bufsiz);
+ssize_t ixland_readlinkat(int dirfd, const char *pathname, char *buf, size_t bufsiz);
 
 /**
  * @brief Change root directory
@@ -423,7 +423,7 @@ ssize_t iox_readlinkat(int dirfd, const char *pathname, char *buf, size_t bufsiz
  * @param path New root directory
  * @return int 0 on success, -1 on error
  */
-int iox_chroot(const char *path);
+int ixland_chroot(const char *path);
 
 /* ============================================================================
  * IDENTITY
@@ -434,28 +434,28 @@ int iox_chroot(const char *path);
  *
  * @return uid_t User ID
  */
-uid_t iox_getuid(void);
+uid_t ixland_getuid(void);
 
 /**
  * @brief Get effective user ID
  *
  * @return uid_t Effective user ID
  */
-uid_t iox_geteuid(void);
+uid_t ixland_geteuid(void);
 
 /**
  * @brief Get real group ID
  *
  * @return gid_t Group ID
  */
-gid_t iox_getgid(void);
+gid_t ixland_getgid(void);
 
 /**
  * @brief Get effective group ID
  *
  * @return gid_t Effective group ID
  */
-gid_t iox_getegid(void);
+gid_t ixland_getegid(void);
 
 /**
  * @brief Set real and effective user ID
@@ -463,7 +463,7 @@ gid_t iox_getegid(void);
  * @param uid New user ID
  * @return int 0 on success, -1 on error
  */
-int iox_setuid(uid_t uid);
+int ixland_setuid(uid_t uid);
 
 /**
  * @brief Set effective user ID
@@ -471,7 +471,7 @@ int iox_setuid(uid_t uid);
  * @param euid New effective user ID
  * @return int 0 on success, -1 on error
  */
-int iox_seteuid(uid_t euid);
+int ixland_seteuid(uid_t euid);
 
 /**
  * @brief Set real and effective group ID
@@ -479,7 +479,7 @@ int iox_seteuid(uid_t euid);
  * @param gid New group ID
  * @return int 0 on success, -1 on error
  */
-int iox_setgid(gid_t gid);
+int ixland_setgid(gid_t gid);
 
 /**
  * @brief Set effective group ID
@@ -487,7 +487,7 @@ int iox_setgid(gid_t gid);
  * @param egid New effective group ID
  * @return int 0 on success, -1 on error
  */
-int iox_setegid(gid_t egid);
+int ixland_setegid(gid_t egid);
 
 /**
  * @brief Get supplementary group IDs
@@ -496,7 +496,7 @@ int iox_setegid(gid_t egid);
  * @param list Array to store group IDs
  * @return int Number of groups on success, -1 on error
  */
-int iox_getgroups(int size, gid_t list[]);
+int ixland_getgroups(int size, gid_t list[]);
 
 /**
  * @brief Set supplementary group IDs
@@ -505,7 +505,7 @@ int iox_getgroups(int size, gid_t list[]);
  * @param list Array of group IDs
  * @return int 0 on success, -1 on error
  */
-int iox_setgroups(size_t size, const gid_t *list);
+int ixland_setgroups(size_t size, const gid_t *list);
 
 /* ============================================================================
  * TIME
@@ -517,7 +517,7 @@ int iox_setgroups(size_t size, const gid_t *list);
  * @param seconds Seconds to sleep
  * @return unsigned int Remaining seconds (interrupted) or 0
  */
-unsigned int iox_sleep(unsigned int seconds);
+unsigned int ixland_sleep(unsigned int seconds);
 
 /**
  * @brief Sleep for microseconds
@@ -525,7 +525,7 @@ unsigned int iox_sleep(unsigned int seconds);
  * @param usec Microseconds to sleep
  * @return int 0 on success, -1 on error
  */
-int iox_usleep(useconds_t usec);
+int ixland_usleep(useconds_t usec);
 
 /**
  * @brief Sleep for specified time
@@ -534,7 +534,7 @@ int iox_usleep(useconds_t usec);
  * @param rem Remaining time if interrupted
  * @return int 0 on success, -1 on error
  */
-int iox_nanosleep(const struct timespec *req, struct timespec *rem);
+int ixland_nanosleep(const struct timespec *req, struct timespec *rem);
 
 /**
  * @brief Get current time
@@ -543,7 +543,7 @@ int iox_nanosleep(const struct timespec *req, struct timespec *rem);
  * @param tz Timezone (deprecated, should be NULL)
  * @return int 0 on success, -1 on error
  */
-int iox_gettimeofday(struct timeval *tv, struct timezone *tz);
+int ixland_gettimeofday(struct timeval *tv, struct timezone *tz);
 
 /**
  * @brief Get time
@@ -551,7 +551,7 @@ int iox_gettimeofday(struct timeval *tv, struct timezone *tz);
  * @param tloc Location to store time (can be NULL)
  * @return time_t Current time
  */
-time_t iox_time(time_t *tloc);
+time_t ixland_time(time_t *tloc);
 
 /* ============================================================================
  * MISC
@@ -562,7 +562,7 @@ time_t iox_time(time_t *tloc);
  *
  * @return long Page size in bytes
  */
-long iox_getpagesize(void);
+long ixland_getpagesize(void);
 
 /**
  * @brief Get hostname
@@ -571,7 +571,7 @@ long iox_getpagesize(void);
  * @param namelen Buffer size
  * @return int 0 on success, -1 on error
  */
-int iox_gethostname(char *name, size_t namelen);
+int ixland_gethostname(char *name, size_t namelen);
 
 /**
  * @brief Get configurable system variables
@@ -579,10 +579,10 @@ int iox_gethostname(char *name, size_t namelen);
  * @param name Variable name
  * @return long Variable value, -1 on error
  */
-long iox_sysconf(int name);
+long ixland_sysconf(int name);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* IOX_LINUX_UNISTD_H */
+#endif /* IXLAND_LINUX_UNISTD_H */

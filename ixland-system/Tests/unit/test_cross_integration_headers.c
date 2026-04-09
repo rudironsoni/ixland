@@ -10,27 +10,27 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../harness/iox_test.h"
+#include "../harness/ixland_test.h"
 
 /* ============================================================================
  * Test 1: Include primary public ixland-libc headers
  * ============================================================================
  * This verifies VAL-CROSS-001: Public Headers Can Be Included by Implementation Files
  *
- * Note: iox/iox_syscalls.h uses standard system types and should NOT be mixed
- * with linux/*.h headers which use Linux-specific iox_* types. These serve
+ * Note: ixland/ixland_syscalls.h uses standard system types and should NOT be mixed
+ * with linux/*.h headers which use Linux-specific ixland_* types. These serve
  * different use cases:
- *   - iox/iox_syscalls.h: Standard syscall API for general use
+ *   - ixland/ixland_syscalls.h: Standard syscall API for general use
  *   - linux/*.h: Linux-compatible headers for low-level/kernel code
  */
 
 /* Master umbrella header - provides all public APIs using standard types */
-#include <iox/iox.h>
+#include <ixland/ixland.h>
 
 /* Individual headers - verify they can be included standalone */
-#include <iox/iox_syscalls.h>
-#include <iox/iox_types.h>
-#include <iox/sys/types.h>
+#include <ixland/ixland_syscalls.h>
+#include <ixland/ixland_types.h>
+#include <ixland/sys/types.h>
 
 /* Standard database headers */
 #include <grp.h>
@@ -47,12 +47,12 @@
 #include "../../kernel/internal/ixland_kernel.h"
 #include "../../kernel/task/task.h"
 
-/* Test that iox_task_t from internal headers matches usage */
+/* Test that ixland_task_t from internal headers matches usage */
 static void test_task_type_consistency(void) {
-    printf("  Testing iox_task_t type consistency...\n");
+    printf("  Testing ixland_task_t type consistency...\n");
 
     /* Allocate a task using the implementation function */
-    iox_task_t *task = iox_task_alloc();
+    ixland_task_t *task = ixland_task_alloc();
     assert(task != NULL);
 
     /* Verify fields match between header declaration and implementation */
@@ -62,11 +62,11 @@ static void test_task_type_consistency(void) {
     assert(task->sid >= 0);
 
     /* Verify state enum values match */
-    atomic_store(&task->state, IOX_TASK_RUNNING);
-    assert(atomic_load(&task->state) == IOX_TASK_RUNNING);
+    atomic_store(&task->state, IXLAND_TASK_RUNNING);
+    assert(atomic_load(&task->state) == IXLAND_TASK_RUNNING);
 
-    atomic_store(&task->state, IOX_TASK_STOPPED);
-    assert(atomic_load(&task->state) == IOX_TASK_STOPPED);
+    atomic_store(&task->state, IXLAND_TASK_STOPPED);
+    assert(atomic_load(&task->state) == IXLAND_TASK_STOPPED);
 
     /* Verify atomic types work correctly */
     atomic_store(&task->refs, 1);
@@ -79,43 +79,43 @@ static void test_task_type_consistency(void) {
     assert(atomic_load(&task->signaled) == false);
 
     /* Cleanup */
-    iox_task_free(task);
-    printf("    PASSED: iox_task_t type consistency\n");
+    ixland_task_free(task);
+    printf("    PASSED: ixland_task_t type consistency\n");
 }
 
-/* Test iox_error_t consistency */
+/* Test ixland_error_t consistency */
 static void test_error_type_consistency(void) {
-    printf("  Testing iox_error_t type consistency...\n");
+    printf("  Testing ixland_error_t type consistency...\n");
 
     /* Verify error codes match between headers and usage */
-    iox_error_t err = IOX_OK;
+    ixland_error_t err = IXLAND_OK;
     assert(err == 0);
 
-    err = IOX_EINVAL;
+    err = IXLAND_EINVAL;
     assert(err == -22);
 
-    err = IOX_ENOMEM;
+    err = IXLAND_ENOMEM;
     assert(err == -12);
 
-    err = IOX_ENOENT;
+    err = IXLAND_ENOENT;
     assert(err == -2);
 
-    err = IOX_EACCES;
+    err = IXLAND_EACCES;
     assert(err == -13);
 
-    printf("    PASSED: iox_error_t type consistency\n");
+    printf("    PASSED: ixland_error_t type consistency\n");
 }
 
-/* Test IOX_MAX_PATH consistency */
+/* Test IXLAND_MAX_PATH consistency */
 static void test_max_path_consistency(void) {
-    printf("  Testing IOX_MAX_PATH consistency...\n");
+    printf("  Testing IXLAND_MAX_PATH consistency...\n");
 
-    /* Verify IOX_MAX_PATH matches array sizes in implementation */
-    char path_buffer[IOX_MAX_PATH];
-    assert(sizeof(path_buffer) == IOX_MAX_PATH);
-    assert(IOX_MAX_PATH == 1024);
+    /* Verify IXLAND_MAX_PATH matches array sizes in implementation */
+    char path_buffer[IXLAND_MAX_PATH];
+    assert(sizeof(path_buffer) == IXLAND_MAX_PATH);
+    assert(IXLAND_MAX_PATH == 1024);
 
-    printf("    PASSED: IOX_MAX_PATH consistency (value=%d)\n", IOX_MAX_PATH);
+    printf("    PASSED: IXLAND_MAX_PATH consistency (value=%d)\n", IXLAND_MAX_PATH);
 }
 
 /* Test pid_t and other system types */
@@ -143,24 +143,24 @@ static void test_system_types_consistency(void) {
 static void test_forward_declaration_consistency(void) {
     printf("  Testing forward declaration consistency...\n");
 
-    /* iox_task_t is defined as 'struct iox_task' in task.h
-     * and typedef'd to iox_task_t - verify this works */
-    struct iox_task *task_struct = iox_task_alloc();
+    /* ixland_task_t is defined as 'struct ixland_task' in task.h
+     * and typedef'd to ixland_task_t - verify this works */
+    struct ixland_task *task_struct = ixland_task_alloc();
     assert(task_struct != NULL);
 
     /* Should be able to use either the struct or typedef */
-    iox_task_t *task_typedef = task_struct;
+    ixland_task_t *task_typedef = task_struct;
     assert(task_typedef == task_struct);
 
-    iox_task_free(task_typedef);
+    ixland_task_free(task_typedef);
     printf("    PASSED: Forward declaration consistency\n");
 }
 
-/* Test iox_proc_info_t from iox_types.h */
+/* Test ixland_proc_info_t from ixland_types.h */
 static void test_proc_info_type(void) {
-    printf("  Testing iox_proc_info_t type...\n");
+    printf("  Testing ixland_proc_info_t type...\n");
 
-    iox_proc_info_t info;
+    ixland_proc_info_t info;
     memset(&info, 0, sizeof(info));
 
     /* Verify all fields are accessible */
@@ -179,14 +179,14 @@ static void test_proc_info_type(void) {
     assert(info.pid == 1234);
     assert(strcmp(info.name, "test") == 0);
 
-    printf("    PASSED: iox_proc_info_t type\n");
+    printf("    PASSED: ixland_proc_info_t type\n");
 }
 
-/* Test iox_config_t from iox_types.h */
+/* Test ixland_config_t from ixland_types.h */
 static void test_config_type(void) {
-    printf("  Testing iox_config_t type...\n");
+    printf("  Testing ixland_config_t type...\n");
 
-    iox_config_t config;
+    ixland_config_t config;
     memset(&config, 0, sizeof(config));
 
     config.debug_enabled = true;
@@ -199,7 +199,7 @@ static void test_config_type(void) {
     assert(config.debug_enabled == true);
     assert(config.max_processes == 100);
 
-    printf("    PASSED: iox_config_t type\n");
+    printf("    PASSED: ixland_config_t type\n");
 }
 
 /* Test function declarations have matching definitions */
@@ -207,10 +207,10 @@ static void test_function_declarations(void) {
     printf("  Testing function declaration consistency...\n");
 
     /* These should compile without errors if declarations match definitions */
-    pid_t (*fork_ptr)(void) = iox_fork;
-    pid_t (*getpid_ptr)(void) = iox_getpid;
-    pid_t (*getppid_ptr)(void) = iox_getppid;
-    void (*exit_ptr)(int) = iox_exit;
+    pid_t (*fork_ptr)(void) = ixland_fork;
+    pid_t (*getpid_ptr)(void) = ixland_getpid;
+    pid_t (*getppid_ptr)(void) = ixland_getppid;
+    void (*exit_ptr)(int) = ixland_exit;
 
     assert(fork_ptr != NULL);
     assert(getpid_ptr != NULL);
@@ -255,39 +255,39 @@ static void test_passwd_group_types(void) {
  */
 
 /* Include headers multiple times to verify guards work */
-#include <iox/iox.h>
-#include <iox/iox_syscalls.h>
-#include <iox/iox_types.h>
+#include <ixland/ixland.h>
+#include <ixland/ixland_syscalls.h>
+#include <ixland/ixland_types.h>
 
 /* ============================================================================
  * Test 4: Linux-compatible headers documentation
  * ============================================================================
  *
- * The Linux-compatible headers (linux/*.h) use iox-specific types like:
+ * The Linux-compatible headers (linux/*.h) use ixland-specific types like:
  *   - linux_pollfd (instead of struct pollfd)
  *   - linux_sigset_t (instead of sigset_t)
- *   - iox_stat (instead of struct stat)
- *   - iox_sigset_t (instead of sigset_t)
+ *   - ixland_stat (instead of struct stat)
+ *   - ixland_sigset_t (instead of sigset_t)
  *
  * These headers are designed for kernel/low-level code that needs Linux
- * ABI compatibility. They should NOT be mixed with iox/iox_syscalls.h
+ * ABI compatibility. They should NOT be mixed with ixland/ixland_syscalls.h
  * which uses standard POSIX types for general userspace code.
  *
  * Header usage guide:
- *   - Userspace apps: #include <iox/iox.h>  (uses standard types)
- *   - Kernel code: #include <linux/*.h>      (uses iox-specific types)
+ *   - Userspace apps: #include <ixland/ixland.h>  (uses standard types)
+ *   - Kernel code: #include <linux/*.h>      (uses ixland-specific types)
  *
  * This design is intentional to provide clean separation between:
- *   1. Standard POSIX syscall API (iox_syscalls.h)
+ *   1. Standard POSIX syscall API (ixland_syscalls.h)
  *   2. Linux-compatible kernel ABI (linux/*.h)
  */
 
 /* ============================================================================
- * IOX Test Definition
+ * IXLAND Test Definition
  * ============================================================================
  */
 
-IOX_TEST(cross_integration_headers) {
+IXLAND_TEST(cross_integration_headers) {
     printf("\n=== Cross-Integration Headers Test ===\n\n");
 
     printf("Test 1: Header inclusion\n");
@@ -312,8 +312,8 @@ IOX_TEST(cross_integration_headers) {
 
     printf("Test 4: Linux-compatible headers\n");
     printf("  Linux-compatible headers available for kernel code\n");
-    printf("  Note: linux/*.h headers use iox-specific types (linux_pollfd, etc.)\n");
-    printf("  and should not be mixed with iox_syscalls.h which uses POSIX types\n");
+    printf("  Note: linux/*.h headers use ixland-specific types (linux_pollfd, etc.)\n");
+    printf("  and should not be mixed with ixland_syscalls.h which uses POSIX types\n");
     printf("  PASSED: Header design documented and verified\n\n");
 
     printf("=== All Cross-Integration Header Tests PASSED ===\n\n");

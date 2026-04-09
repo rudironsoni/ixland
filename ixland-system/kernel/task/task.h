@@ -1,5 +1,5 @@
-#ifndef IOX_TASK_H
-#define IOX_TASK_H
+#ifndef IXLAND_TASK_H
+#define IXLAND_TASK_H
 
 #include <pthread.h>
 #include <signal.h>
@@ -13,13 +13,13 @@
 extern "C" {
 #endif
 
-#include "iox/iox_types.h"
+#include "ixland/ixland_types.h"
 
-#define IOX_MAX_NAME 256
-#define IOX_NSIG 64
-#define IOX_MAX_FD 256
-#define IOX_MAX_ARGS 256
-#define IOX_MAX_TASKS 1024
+#define IXLAND_MAX_NAME 256
+#define IXLAND_NSIG 64
+#define IXLAND_MAX_FD 256
+#define IXLAND_MAX_ARGS 256
+#define IXLAND_MAX_TASKS 1024
 
 #ifndef RLIMIT_NLIMITS
 #define RLIMIT_NLIMITS 16
@@ -27,60 +27,60 @@ extern "C" {
 
 typedef _Atomic pid_t atomic_pid_t;
 
-typedef struct iox_task iox_task_t;
-typedef struct iox_files iox_files_t;
-typedef struct iox_fs iox_fs_t;
-typedef struct iox_sighand iox_sighand_t;
-typedef struct iox_tty {
+typedef struct ixland_task ixland_task_t;
+typedef struct ixland_files ixland_files_t;
+typedef struct ixland_fs ixland_fs_t;
+typedef struct ixland_sighand ixland_sighand_t;
+typedef struct ixland_tty {
     int tty_id;
     pid_t foreground_pgrp;
     atomic_int refs;
-} iox_tty_t;
+} ixland_tty_t;
 
-typedef struct iox_mm_emu {
+typedef struct ixland_mm_emu {
     void *exec_image_base;
     size_t exec_image_size;
-} iox_mm_emu_t;
+} ixland_mm_emu_t;
 
 typedef enum {
-    IOX_IMAGE_NONE = 0,
-    IOX_IMAGE_NATIVE,
-    IOX_IMAGE_WASI,
-    IOX_IMAGE_SCRIPT
-} iox_image_type_t;
+    IXLAND_IMAGE_NONE = 0,
+    IXLAND_IMAGE_NATIVE,
+    IXLAND_IMAGE_WASI,
+    IXLAND_IMAGE_SCRIPT
+} ixland_image_type_t;
 
-typedef int (*iox_native_entry_t)(struct iox_task *task, int argc, char **argv, char **envp);
+typedef int (*ixland_native_entry_t)(struct ixland_task *task, int argc, char **argv, char **envp);
 
-typedef struct iox_exec_image {
-    iox_image_type_t type;
-    char path[IOX_MAX_PATH];
-    char interpreter[IOX_MAX_PATH];
+typedef struct ixland_exec_image {
+    ixland_image_type_t type;
+    char path[IXLAND_MAX_PATH];
+    char interpreter[IXLAND_MAX_PATH];
 
     union {
         struct {
-            iox_native_entry_t entry;
+            ixland_native_entry_t entry;
         } native;
         struct {
             void *module;
             void *instance;
         } wasi;
         struct {
-            char *interp_argv[IOX_MAX_ARGS];
+            char *interp_argv[IXLAND_MAX_ARGS];
             int interp_argc;
         } script;
     } u;
-} iox_exec_image_t;
+} ixland_exec_image_t;
 
 typedef enum {
-    IOX_TASK_RUNNING = 0,
-    IOX_TASK_INTERRUPTIBLE,
-    IOX_TASK_UNINTERRUPTIBLE,
-    IOX_TASK_STOPPED,
-    IOX_TASK_ZOMBIE,
-    IOX_TASK_DEAD
-} iox_task_state_t;
+    IXLAND_TASK_RUNNING = 0,
+    IXLAND_TASK_INTERRUPTIBLE,
+    IXLAND_TASK_UNINTERRUPTIBLE,
+    IXLAND_TASK_STOPPED,
+    IXLAND_TASK_ZOMBIE,
+    IXLAND_TASK_DEAD
+} ixland_task_state_t;
 
-struct iox_task {
+struct ixland_task {
     pid_t pid;
     pid_t ppid;
     pid_t tgid;
@@ -97,23 +97,23 @@ struct iox_task {
     atomic_bool continued;
 
     pthread_t thread;
-    char comm[IOX_MAX_NAME];
-    char exe[IOX_MAX_PATH];
+    char comm[IXLAND_MAX_NAME];
+    char exe[IXLAND_MAX_PATH];
 
-    iox_files_t *files;
-    iox_fs_t *fs;
-    iox_sighand_t *sighand;
-    iox_tty_t *tty;
-    iox_mm_emu_t *mm;
-    iox_exec_image_t *exec_image;
+    ixland_files_t *files;
+    ixland_fs_t *fs;
+    ixland_sighand_t *sighand;
+    ixland_tty_t *tty;
+    ixland_mm_emu_t *mm;
+    ixland_exec_image_t *exec_image;
 
-    struct iox_task *parent;
-    struct iox_task *children;
-    struct iox_task *next_sibling;
-    struct iox_task *hash_next;
+    struct ixland_task *parent;
+    struct ixland_task *children;
+    struct ixland_task *next_sibling;
+    struct ixland_task *hash_next;
 
     /* Vfork tracking - set when created by vfork() */
-    struct iox_task *vfork_parent;
+    struct ixland_task *vfork_parent;
 
     pthread_cond_t wait_cond;
     pthread_mutex_t wait_lock;
@@ -129,35 +129,35 @@ struct iox_task {
 
 /* Task table - exposed for tests */
 extern pthread_mutex_t task_table_lock;
-extern iox_task_t *task_table[IOX_MAX_TASKS];
+extern ixland_task_t *task_table[IXLAND_MAX_TASKS];
 
-iox_task_t *iox_task_alloc(void);
-void iox_task_free(iox_task_t *task);
-iox_task_t *iox_current_task(void);
-void iox_set_current_task(iox_task_t *task);
+ixland_task_t *ixland_task_alloc(void);
+void ixland_task_free(ixland_task_t *task);
+ixland_task_t *ixland_current_task(void);
+void ixland_set_current_task(ixland_task_t *task);
 
-pid_t iox_alloc_pid(void);
-void iox_free_pid(pid_t pid);
-void iox_pid_init(void);
+pid_t ixland_alloc_pid(void);
+void ixland_free_pid(pid_t pid);
+void ixland_pid_init(void);
 
-int iox_task_init(void);
-void iox_task_deinit(void);
+int ixland_task_init(void);
+void ixland_task_deinit(void);
 
-iox_task_t *iox_task_lookup(pid_t pid);
+ixland_task_t *ixland_task_lookup(pid_t pid);
 int task_hash(pid_t pid);
 
 /* Process identity functions */
-pid_t iox_getpid(void);
-pid_t iox_getppid(void);
-pid_t iox_getpgrp(void);
-pid_t iox_getpgid(pid_t pid);
-int iox_setpgid(pid_t pid, pid_t pgid);
-pid_t iox_getsid(pid_t pid);
-pid_t iox_setsid(void);
+pid_t ixland_getpid(void);
+pid_t ixland_getppid(void);
+pid_t ixland_getpgrp(void);
+pid_t ixland_getpgid(pid_t pid);
+int ixland_setpgid(pid_t pid, pid_t pgid);
+pid_t ixland_getsid(pid_t pid);
+pid_t ixland_setsid(void);
 
 /* Fork functions */
-pid_t iox_fork(void);
-int iox_vfork(void);
+pid_t ixland_fork(void);
+int ixland_vfork(void);
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,4 @@
-# libiox Implementation Summary
+# libixland Implementation Summary
 
 ## Status: Implementation Complete, Build Cleanup Needed
 
@@ -6,40 +6,40 @@
 
 ### 1. Complete Architecture ✅
 - **Thread-based process simulation** with full context isolation
-- **Virtual File System** with mount table and path translation  
+- **Virtual File System** with mount table and path translation
 - **Symbol interposition layer** for Linux syscall compatibility
 - **Per-process state tracking** (FDs, environment, signals)
 
 ### 2. Source Code ✅ (4,816 lines)
 ```
-src/iox/core/
-├── iox_process.c      1,595 lines - Full process management
-├── iox_context.c        811 lines - Thread-based simulation
-├── iox_file.c           540 lines - File operations v1
-├── iox_file_v2.c        380 lines - VFS-aware files
-├── iox_vfs.c            408 lines - Virtual filesystem
-├── iox_stubs.c          500 lines - Support functions
-└── iox_init.c            72 lines - Auto-initialization
+src/ixland/core/
+├── ixland_process.c      1,595 lines - Full process management
+├── ixland_context.c        811 lines - Thread-based simulation
+├── ixland_file.c           540 lines - File operations v1
+├── ixland_file_v2.c        380 lines - VFS-aware files
+├── ixland_vfs.c            408 lines - Virtual filesystem
+├── ixland_stubs.c          500 lines - Support functions
+└── ixland_init.c            72 lines - Auto-initialization
 
-src/iox/util/
-└── iox_path.c           200 lines - Path utilities
+src/ixland/util/
+└── ixland_path.c           200 lines - Path utilities
 
-src/iox/interpose/
-└── iox_interpose.c      340 lines - Linux wrappers
+src/ixland/interpose/
+└── ixland_interpose.c      340 lines - Linux wrappers
 
-src/iox/internal/
-└── iox_internal.h       531 lines - Internal API
+src/ixland/internal/
+└── ixland_internal.h       531 lines - Internal API
 
-include/iox/
-├── iox.h                 30 lines - Master header
-├── iox_syscalls.h       744 lines - Syscall prototypes
-└── iox_types.h          300 lines - Type definitions
+include/ixland/
+├── ixland.h                 30 lines - Master header
+├── ixland_syscalls.h       744 lines - Syscall prototypes
+└── ixland_types.h          300 lines - Type definitions
 ```
 
 ### 3. Build System ✅
 - `Makefile` - Simple build
 - `CMakeLists.txt` - Full CMake configuration
-- `bin/iox-cc` - Compiler wrapper script
+- `bin/ixland-cc` - Compiler wrapper script
 
 ### 4. Documentation ✅
 - `README.md` - Project overview
@@ -109,20 +109,20 @@ This is the **maximum possible** Linux compatibility on iOS:
 1. **Fix build errors** (forward declarations, includes)
 2. **Add WAMR** for WebAssembly binary execution
 3. **Create test suite**
-4. **Package manager** (iox-pkg)
+4. **Package manager** (ixland-pkg)
 5. **Port bash** and coreutils
 
 ## Bottom Line
 
-**Delivered:** 4,816 lines of production-quality code  
-**Status:** Architecture complete, build needs cleanup  
-**Quality:** High (no shortcuts, proper implementation)  
+**Delivered:** 4,816 lines of production-quality code
+**Status:** Architecture complete, build needs cleanup
+**Quality:** High (no shortcuts, proper implementation)
 **Limitations:** iOS constraints (not code issues)
 
 This is the **best possible** Linux compatibility layer for iOS. It's not a toy or prototype - it's a serious implementation that works within Apple's constraints.
 
 ---
 
-**Ready for:** Build cleanup and testing  
-**Recommended:** WAMR integration for binary execution  
+**Ready for:** Build cleanup and testing
+**Recommended:** WAMR integration for binary execution
 **Status:** Foundation complete

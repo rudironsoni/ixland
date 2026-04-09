@@ -4,18 +4,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-static iox_native_cmd_t *registry_head = NULL;
+static ixland_native_cmd_t *registry_head = NULL;
 static pthread_mutex_t registry_lock = PTHREAD_MUTEX_INITIALIZER;
 
-void iox_native_registry_init(void) {
+void ixland_native_registry_init(void) {
     /* Registry is lazy-initialized on first register call */
 }
 
-void iox_native_registry_clear(void) {
+void ixland_native_registry_clear(void) {
     pthread_mutex_lock(&registry_lock);
-    iox_native_cmd_t *cmd = registry_head;
+    ixland_native_cmd_t *cmd = registry_head;
     while (cmd) {
-        iox_native_cmd_t *next = cmd->next;
+        ixland_native_cmd_t *next = cmd->next;
         free(cmd);
         cmd = next;
     }
@@ -23,12 +23,12 @@ void iox_native_registry_clear(void) {
     pthread_mutex_unlock(&registry_lock);
 }
 
-int iox_native_register(const char *path, iox_native_entry_t entry) {
+int ixland_native_register(const char *path, ixland_native_entry_t entry) {
     if (!path || !entry) {
         return -1;
     }
 
-    iox_native_cmd_t *cmd = malloc(sizeof(iox_native_cmd_t));
+    ixland_native_cmd_t *cmd = malloc(sizeof(ixland_native_cmd_t));
     if (!cmd) {
         return -1;
     }
@@ -44,16 +44,16 @@ int iox_native_register(const char *path, iox_native_entry_t entry) {
     return 0;
 }
 
-iox_native_entry_t iox_native_lookup(const char *path) {
+ixland_native_entry_t ixland_native_lookup(const char *path) {
     if (!path) {
         return NULL;
     }
 
     pthread_mutex_lock(&registry_lock);
-    iox_native_cmd_t *cmd = registry_head;
+    ixland_native_cmd_t *cmd = registry_head;
     while (cmd) {
         if (strcmp(cmd->path, path) == 0) {
-            iox_native_entry_t entry = cmd->entry;
+            ixland_native_entry_t entry = cmd->entry;
             pthread_mutex_unlock(&registry_lock);
             return entry;
         }

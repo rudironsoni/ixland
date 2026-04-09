@@ -20,7 +20,7 @@ The current WebAssembly backend is **WAMR (WebAssembly Micro Runtime)**.
 | Layer | Location | Access |
 |-------|----------|--------|
 | **WAMR SDK headers** | `ixland-system/vendor/wamr/include/` | **Internal only** |
-| **WAMR runtime** | `ixland-system/src/iox/wamr/` | **Internal only** |
+| **WAMR runtime** | `ixland-system/src/ixland/wamr/` | **Internal only** |
 | **Public Wasm contract** | `ixland-wasm/include/ixland/wasm/` | **Public API** |
 
 > **Important:** Code outside `ixland-system` should NOT include WAMR headers directly.

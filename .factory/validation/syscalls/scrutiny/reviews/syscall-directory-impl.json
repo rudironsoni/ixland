@@ -9,30 +9,30 @@
     "summary": "The directory/filesystem syscalls implementation is comprehensive and well-structured. All 8 required syscalls (chdir, fchdir, getcwd, chroot, mkdir, rmdir, unlink, symlink, readlink) are implemented with proper VFS integration, error handling, and thread safety. The implementation includes 46 unit tests covering error cases, edge conditions, and integration scenarios.",
     "issues": [
       {
-        "file": "ixland-system/src/iox/core/iox_directory.c",
+        "file": "ixland-system/src/ixland/core/ixland_directory.c",
         "line": 38,
         "severity": "non_blocking",
-        "description": "The iox_chdir() implementation calls pthread_mutex_lock on proc->thread_lock without checking if proc is still valid. While the function checks proc before locking, there's a potential race condition window between the NULL check and the lock acquisition."
+        "description": "The ixland_chdir() implementation calls pthread_mutex_lock on proc->thread_lock without checking if proc is still valid. While the function checks proc before locking, there's a potential race condition window between the NULL check and the lock acquisition."
       },
       {
-        "file": "ixland-system/src/iox/core/iox_directory.c",
+        "file": "ixland-system/src/ixland/core/ixland_directory.c",
         "line": 207,
         "severity": "non_blocking",
-        "description": "In iox_getcwd(), the comment states 'POSIX allows NULL buf, but we require caller to allocate'. This deviates from POSIX behavior where NULL buffer with automatic allocation is optional. Consider documenting this design decision more clearly."
+        "description": "In ixland_getcwd(), the comment states 'POSIX allows NULL buf, but we require caller to allocate'. This deviates from POSIX behavior where NULL buffer with automatic allocation is optional. Consider documenting this design decision more clearly."
       },
       {
-        "file": "ixland-system/src/iox/core/iox_directory.c",
+        "file": "ixland-system/src/ixland/core/ixland_directory.c",
         "line": 370,
         "severity": "non_blocking",
-        "description": "The iox_mkdirat(), iox_unlinkat(), iox_symlinkat(), and iox_readlinkat() functions return ENOSYS for dirfd-relative operations. This is correct for current scope but should be documented as TODO/Future work."
+        "description": "The ixland_mkdirat(), ixland_unlinkat(), ixland_symlinkat(), and ixland_readlinkat() functions return ENOSYS for dirfd-relative operations. This is correct for current scope but should be documented as TODO/Future work."
       }
     ]
   },
   "sharedStateObservations": [
     {
       "area": "conventions",
-      "observation": "The implementation follows naming conventions correctly (iox_ prefix for functions, IOX_ for macros). However, the internal __iox_*_impl wrapper functions in iox_directory.c duplicate public API names without clear benefit. These wrappers simply call the public functions and add no additional functionality.",
-      "evidence": "ixland-system/src/iox/core/iox_directory.c:750-790 - __iox_chdir_impl, __iox_fchdir_impl, etc. all just delegate to their public counterparts."
+      "observation": "The implementation follows naming conventions correctly (ixland_ prefix for functions, IXLAND_ for macros). However, the internal __ixland_*_impl wrapper functions in ixland_directory.c duplicate public API names without clear benefit. These wrappers simply call the public functions and add no additional functionality.",
+      "evidence": "ixland-system/src/ixland/core/ixland_directory.c:750-790 - __ixland_chdir_impl, __ixland_fchdir_impl, etc. all just delegate to their public counterparts."
     },
     {
       "area": "skills",
@@ -41,13 +41,13 @@
     },
     {
       "area": "knowledge",
-      "observation": "The test file test_directory_syscalls.c uses native system calls (open, close, stat) for test setup rather than iox_* wrappers. This is intentional to avoid circular dependencies in testing, but this pattern should be documented in AGENTS.md under testing conventions.",
-      "evidence": "ixland-system/Tests/unit/test_directory_syscalls.c uses native open(), close(), stat() for setup but tests iox_* functions."
+      "observation": "The test file test_directory_syscalls.c uses native system calls (open, close, stat) for test setup rather than ixland_* wrappers. This is intentional to avoid circular dependencies in testing, but this pattern should be documented in AGENTS.md under testing conventions.",
+      "evidence": "ixland-system/Tests/unit/test_directory_syscalls.c uses native open(), close(), stat() for setup but tests ixland_* functions."
     },
     {
       "area": "knowledge",
       "observation": "The VFS stub (stub_vfs_translate.c) provides passthrough translation for unit tests. This is a good pattern for unit testing syscalls in isolation, but the existence of this test-only VFS implementation should be documented in the architecture or testing guide.",
-      "evidence": "ixland-system/Tests/unit/stub_vfs_translate.c provides simple passthrough implementations of iox_vfs_translate and iox_vfs_reverse_translate."
+      "evidence": "ixland-system/Tests/unit/stub_vfs_translate.c provides simple passthrough implementations of ixland_vfs_translate and ixland_vfs_reverse_translate."
     }
   ],
   "addressesFailureFrom": null,

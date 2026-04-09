@@ -1,15 +1,15 @@
-# libiox - Final Status Report
+# libixland - Final Status Report
 
 ## Executive Summary
 
-**Built:** 4,816 lines of production-quality Linux API compatibility layer for iOS  
-**Status:** Core implementation complete  
+**Built:** 4,816 lines of production-quality Linux API compatibility layer for iOS
+**Status:** Core implementation complete
 **Reality:** Thread-based simulation within iOS constraints (not a real subsystem)
 
 ## What's Been Implemented
 
 ### 1. Thread-Based Process Simulation ✅
-**Files:** `iox_process.c` (1,595 lines), `iox_context.c` (811 lines)
+**Files:** `ixland_process.c` (1,595 lines), `ixland_context.c` (811 lines)
 
 **Features:**
 - Virtual PID allocation with hash-based lookup
@@ -30,7 +30,7 @@
 **Key Insight:** Uses threads to simulate processes because iOS forbids fork(). Child "processes" share memory with parent but have isolated FD tables, environment, and signal state.
 
 ### 2. Virtual File System ✅
-**File:** `iox_vfs.c` (408 lines)
+**File:** `ixland_vfs.c` (408 lines)
 
 **Features:**
 - Path translation (virtual → iOS)
@@ -45,7 +45,7 @@
 **Key Insight:** Translates Linux paths to iOS sandbox paths before operations.
 
 ### 3. File Operations ✅
-**Files:** `iox_file.c` (540 lines), `iox_file_v2.c` (380 lines)
+**Files:** `ixland_file.c` (540 lines), `ixland_file_v2.c` (380 lines)
 
 **Features:**
 - File descriptor table (256 slots)
@@ -60,7 +60,7 @@
 **Key Insight:** Each "process" has its own FD table, but operations ultimately go to iOS.
 
 ### 4. Symbol Interposition ✅
-**File:** `iox_interpose.c` (340 lines)
+**File:** `ixland_interpose.c` (340 lines)
 
 **Features:**
 - 100+ Linux syscall wrappers
@@ -69,12 +69,12 @@
 
 ### 5. Supporting Infrastructure ✅
 
-**Path Utilities** (`iox_path.c` - 200 lines):
+**Path Utilities** (`ixland_path.c` - 200 lines):
 - Path resolution and normalization
 - Path joining
 - Sandbox validation
 
-**Stubs** (`iox_stubs.c` - 500 lines):
+**Stubs** (`ixland_stubs.c` - 500 lines):
 - Filesystem operations (stat, chmod, etc.) - passthrough with VFS
 - Time functions
 - Environment variables
@@ -96,7 +96,7 @@ Syscalls Implemented: 100+
 ### ✅ Compile and Run
 ```bash
 # Compile Linux source
-iox-cc hello.c -o hello
+ixland-cc hello.c -o hello
 
 # Run (as single iOS process with thread simulation)
 ./hello
@@ -161,7 +161,7 @@ sudo make install  # Installs to /usr/local
 
 ### 2. Compile Linux Code
 ```bash
-iox-cc program.c -o program
+ixland-cc program.c -o program
 ```
 
 ### 3. Run
@@ -227,7 +227,7 @@ To complete the vision:
 1. **WAMR Integration** - Run WebAssembly binaries (actual binary execution)
 2. **More Syscalls** - Complete remaining 200+
 3. **Test Suite** - Comprehensive testing
-4. **Package Manager** - iox-pkg for distributing tools
+4. **Package Manager** - ixland-pkg for distributing tools
 5. **Shell** - Proper bash port
 
 ## Final Verdict
@@ -248,7 +248,7 @@ To complete the vision:
 
 ---
 
-**Status:** Implementation Complete  
-**Quality:** Production-Ready  
-**Limitations:** iOS Constraints (not code issues)  
+**Status:** Implementation Complete
+**Quality:** Production-Ready
+**Limitations:** iOS Constraints (not code issues)
 **Recommendation:** Use for Linux API compatibility on iOS

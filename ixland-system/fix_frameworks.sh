@@ -1,7 +1,7 @@
 #!/bin/bash
 # Fix Frameworks build phase to include Network.framework
 
-PROJECT_FILE="libioxTest/libioxTest/libioxTest.xcodeproj/project.pbxproj"
+PROJECT_FILE="libixlandTest/libixlandTest/libixlandTest.xcodeproj/project.pbxproj"
 
 # Add Network.framework reference
 NETWORK_REF="A00100001D4B5C0000F1A2C3"

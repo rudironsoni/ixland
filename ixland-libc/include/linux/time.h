@@ -35,20 +35,20 @@ extern "C" {
 #endif                             /* CLOCK_REALTIME */
 
 /* iXland-specific clock extensions */
-#define CLOCK_IOX_VIRTUAL 128 /* Virtual process time */
-#define CLOCK_IOX_HOST 129    /* Host system time */
+#define CLOCK_IXLAND_VIRTUAL 128 /* Virtual process time */
+#define CLOCK_IXLAND_HOST 129    /* Host system time */
 
 /* Timer types for timer_create */
 #define TIMER_ABSTIME 0x01 /* Absolute time for timer_settime */
 
 /* Time conversion constants */
-#define IOX_NSEC_PER_SEC 1000000000L
-#define IOX_NSEC_PER_MSEC 1000000L
-#define IOX_USEC_PER_SEC 1000000L
-#define IOX_MSEC_PER_SEC 1000L
+#define IXLAND_NSEC_PER_SEC 1000000000L
+#define IXLAND_NSEC_PER_MSEC 1000000L
+#define IXLAND_USEC_PER_SEC 1000000L
+#define IXLAND_MSEC_PER_SEC 1000L
 
 /* Maximum time values */
-#define IOX_TIME_MAX_SEC 9223372036L /* Max seconds before overflow */
+#define IXLAND_TIME_MAX_SEC 9223372036L /* Max seconds before overflow */
 
 /* ============================================================================
  * TIME STRUCTURES
@@ -109,49 +109,50 @@ struct linux_sigevent;
  * ============================================================================ */
 
 /* Convert timespec to milliseconds */
-#define IOX_TIMESPEC_TO_MS(ts) ((ts).tv_sec * IOX_MSEC_PER_SEC + (ts).tv_nsec / IOX_NSEC_PER_MSEC)
+#define IXLAND_TIMESPEC_TO_MS(ts) \
+    ((ts).tv_sec * IXLAND_MSEC_PER_SEC + (ts).tv_nsec / IXLAND_NSEC_PER_MSEC)
 
 /* Convert timespec to microseconds */
-#define IOX_TIMESPEC_TO_US(ts) ((ts).tv_sec * IOX_USEC_PER_SEC + (ts).tv_nsec / 1000)
+#define IXLAND_TIMESPEC_TO_US(ts) ((ts).tv_sec * IXLAND_USEC_PER_SEC + (ts).tv_nsec / 1000)
 
 /* Convert milliseconds to timespec */
-#define IOX_MS_TO_TIMESPEC(ms, ts)                                    \
-    do {                                                              \
-        (ts).tv_sec = (ms) / IOX_MSEC_PER_SEC;                        \
-        (ts).tv_nsec = ((ms) % IOX_MSEC_PER_SEC) * IOX_NSEC_PER_MSEC; \
+#define IXLAND_MS_TO_TIMESPEC(ms, ts)                                       \
+    do {                                                                    \
+        (ts).tv_sec = (ms) / IXLAND_MSEC_PER_SEC;                           \
+        (ts).tv_nsec = ((ms) % IXLAND_MSEC_PER_SEC) * IXLAND_NSEC_PER_MSEC; \
     } while (0)
 
 /* Normalize a timespec structure */
-#define IOX_TIMESPEC_NORMALIZE(ts)                 \
-    do {                                           \
-        while ((ts).tv_nsec >= IOX_NSEC_PER_SEC) { \
-            (ts).tv_sec++;                         \
-            (ts).tv_nsec -= IOX_NSEC_PER_SEC;      \
-        }                                          \
-        while ((ts).tv_nsec < 0) {                 \
-            (ts).tv_sec--;                         \
-            (ts).tv_nsec += IOX_NSEC_PER_SEC;      \
-        }                                          \
+#define IXLAND_TIMESPEC_NORMALIZE(ts)                 \
+    do {                                              \
+        while ((ts).tv_nsec >= IXLAND_NSEC_PER_SEC) { \
+            (ts).tv_sec++;                            \
+            (ts).tv_nsec -= IXLAND_NSEC_PER_SEC;      \
+        }                                             \
+        while ((ts).tv_nsec < 0) {                    \
+            (ts).tv_sec--;                            \
+            (ts).tv_nsec += IXLAND_NSEC_PER_SEC;      \
+        }                                             \
     } while (0)
 
 /* Add two timespec values: result = a + b */
-#define IOX_TIMESPEC_ADD(a, b, result)                \
+#define IXLAND_TIMESPEC_ADD(a, b, result)             \
     do {                                              \
         (result).tv_sec = (a).tv_sec + (b).tv_sec;    \
         (result).tv_nsec = (a).tv_nsec + (b).tv_nsec; \
-        IOX_TIMESPEC_NORMALIZE(result);               \
+        IXLAND_TIMESPEC_NORMALIZE(result);            \
     } while (0)
 
 /* Subtract two timespec values: result = a - b */
-#define IOX_TIMESPEC_SUB(a, b, result)                \
+#define IXLAND_TIMESPEC_SUB(a, b, result)             \
     do {                                              \
         (result).tv_sec = (a).tv_sec - (b).tv_sec;    \
         (result).tv_nsec = (a).tv_nsec - (b).tv_nsec; \
-        IOX_TIMESPEC_NORMALIZE(result);               \
+        IXLAND_TIMESPEC_NORMALIZE(result);            \
     } while (0)
 
 /* Compare two timespec values: -1 if a < b, 0 if equal, 1 if a > b */
-#define IOX_TIMESPEC_CMP(a, b)          \
+#define IXLAND_TIMESPEC_CMP(a, b)       \
     (((a).tv_sec < (b).tv_sec)     ? -1 \
      : ((a).tv_sec > (b).tv_sec)   ? 1  \
      : ((a).tv_nsec < (b).tv_nsec) ? -1 \
@@ -159,7 +160,7 @@ struct linux_sigevent;
                                    : 0)
 
 /* Check if timespec is zero */
-#define IOX_TIMESPEC_IS_ZERO(ts) ((ts).tv_sec == 0 && (ts).tv_nsec == 0)
+#define IXLAND_TIMESPEC_IS_ZERO(ts) ((ts).tv_sec == 0 && (ts).tv_nsec == 0)
 
 /* ============================================================================
  * FUNCTION DECLARATIONS
@@ -172,7 +173,7 @@ struct linux_sigevent;
  * @param tp Where to store the time
  * @return int 0 on success, -1 on error with errno set
  */
-int iox_clock_gettime(linux_clockid_t clockid, struct linux_timespec *tp);
+int ixland_clock_gettime(linux_clockid_t clockid, struct linux_timespec *tp);
 
 /**
  * @brief Set time on specified clock
@@ -181,7 +182,7 @@ int iox_clock_gettime(linux_clockid_t clockid, struct linux_timespec *tp);
  * @param tp New time value
  * @return int 0 on success, -1 on error with errno set
  */
-int iox_clock_settime(linux_clockid_t clockid, const struct linux_timespec *tp);
+int ixland_clock_settime(linux_clockid_t clockid, const struct linux_timespec *tp);
 
 /**
  * @brief Get clock resolution
@@ -190,7 +191,7 @@ int iox_clock_settime(linux_clockid_t clockid, const struct linux_timespec *tp);
  * @param res Where to store the resolution
  * @return int 0 on success, -1 on error with errno set
  */
-int iox_clock_getres(linux_clockid_t clockid, struct linux_timespec *res);
+int ixland_clock_getres(linux_clockid_t clockid, struct linux_timespec *res);
 
 /**
  * @brief Sleep on specified clock with optional flags
@@ -201,8 +202,8 @@ int iox_clock_getres(linux_clockid_t clockid, struct linux_timespec *res);
  * @param remain Remaining time (if interrupted)
  * @return int 0 on success, -1 on error with errno set
  */
-int iox_clock_nanosleep(linux_clockid_t clockid, int flags, const struct linux_timespec *request,
-                        struct linux_timespec *remain);
+int ixland_clock_nanosleep(linux_clockid_t clockid, int flags, const struct linux_timespec *request,
+                           struct linux_timespec *remain);
 
 /**
  * @brief Get current time (legacy)
@@ -211,7 +212,7 @@ int iox_clock_nanosleep(linux_clockid_t clockid, int flags, const struct linux_t
  * @param tz Timezone (should be NULL, obsolete)
  * @return int 0 on success, -1 on error with errno set
  */
-int iox_gettimeofday(struct linux_timeval *tv, struct linux_timezone *tz);
+int ixland_gettimeofday(struct linux_timeval *tv, struct linux_timezone *tz);
 
 /**
  * @brief Set current time (legacy, requires privileges)
@@ -220,7 +221,7 @@ int iox_gettimeofday(struct linux_timeval *tv, struct linux_timezone *tz);
  * @param tz Timezone (should be NULL, obsolete)
  * @return int 0 on success, -1 on error with errno set
  */
-int iox_settimeofday(const struct linux_timeval *tv, const struct linux_timezone *tz);
+int ixland_settimeofday(const struct linux_timeval *tv, const struct linux_timezone *tz);
 
 /**
  * @brief Sleep for specified time
@@ -229,7 +230,7 @@ int iox_settimeofday(const struct linux_timeval *tv, const struct linux_timezone
  * @param rem Remaining time (if interrupted)
  * @return int 0 on success, -1 on error with errno set (EINTR)
  */
-int iox_nanosleep(const struct linux_timespec *req, struct linux_timespec *rem);
+int ixland_nanosleep(const struct linux_timespec *req, struct linux_timespec *rem);
 
 /**
  * @brief Legacy sleep function
@@ -237,7 +238,7 @@ int iox_nanosleep(const struct linux_timespec *req, struct linux_timespec *rem);
  * @param seconds Seconds to sleep
  * @return unsigned int Remaining seconds (if interrupted)
  */
-unsigned int iox_sleep(unsigned int seconds);
+unsigned int ixland_sleep(unsigned int seconds);
 
 /**
  * @brief High-resolution sleep
@@ -246,7 +247,7 @@ unsigned int iox_sleep(unsigned int seconds);
  * @param nanoseconds Nanoseconds to sleep
  * @return int 0 on success, -1 on error
  */
-int iox_usleep(unsigned long usec);
+int ixland_usleep(unsigned long usec);
 
 /**
  * @brief Set an alarm (signal-based timer)
@@ -254,7 +255,7 @@ int iox_usleep(unsigned long usec);
  * @param seconds Seconds until SIGALRM, or 0 to cancel
  * @return unsigned int Previous alarm value
  */
-unsigned int iox_alarm(unsigned int seconds);
+unsigned int ixland_alarm(unsigned int seconds);
 
 /**
  * @brief Set an interval timer
@@ -264,8 +265,8 @@ unsigned int iox_alarm(unsigned int seconds);
  * @param old_value Where to store previous value
  * @return int 0 on success, -1 on error
  */
-int iox_setitimer(int which, const struct linux_itimerval *new_value,
-                  struct linux_itimerval *old_value);
+int ixland_setitimer(int which, const struct linux_itimerval *new_value,
+                     struct linux_itimerval *old_value);
 
 /**
  * @brief Get an interval timer
@@ -274,7 +275,7 @@ int iox_setitimer(int which, const struct linux_itimerval *new_value,
  * @param curr_value Where to store current value
  * @return int 0 on success, -1 on error
  */
-int iox_getitimer(int which, struct linux_itimerval *curr_value);
+int ixland_getitimer(int which, struct linux_itimerval *curr_value);
 
 /* ============================================================================
  * TIMERFD DECLARATIONS
@@ -287,7 +288,7 @@ int iox_getitimer(int which, struct linux_itimerval *curr_value);
  * @param flags TFD_CLOEXEC, TFD_NONBLOCK
  * @return int Timer FD on success, -1 on error
  */
-int iox_timerfd_create(linux_clockid_t clockid, int flags);
+int ixland_timerfd_create(linux_clockid_t clockid, int flags);
 
 /**
  * @brief Set timerfd expiration
@@ -298,8 +299,8 @@ int iox_timerfd_create(linux_clockid_t clockid, int flags);
  * @param old_value Where to store old value (may be NULL)
  * @return int 0 on success, -1 on error
  */
-int iox_timerfd_settime(int fd, int flags, const struct linux_itimerspec *new_value,
-                        struct linux_itimerspec *old_value);
+int ixland_timerfd_settime(int fd, int flags, const struct linux_itimerspec *new_value,
+                           struct linux_itimerspec *old_value);
 
 /**
  * @brief Get timerfd current value
@@ -308,12 +309,12 @@ int iox_timerfd_settime(int fd, int flags, const struct linux_itimerspec *new_va
  * @param curr_value Where to store current value
  * @return int 0 on success, -1 on error
  */
-int iox_timerfd_gettime(int fd, struct linux_itimerspec *curr_value);
+int ixland_timerfd_gettime(int fd, struct linux_itimerspec *curr_value);
 
 /* Timerfd flags */
-#define IOX_TFD_CLOEXEC 02000000  /* Close on exec */
-#define IOX_TFD_NONBLOCK 00004000 /* Non-blocking I/O */
-#define IOX_TFD_TIMER_ABSTIME 1   /* Absolute time */
+#define IXLAND_TFD_CLOEXEC 02000000  /* Close on exec */
+#define IXLAND_TFD_NONBLOCK 00004000 /* Non-blocking I/O */
+#define IXLAND_TFD_TIMER_ABSTIME 1   /* Absolute time */
 
 /* ============================================================================
  * TIME CONVERSION FUNCTIONS
@@ -325,7 +326,7 @@ int iox_timerfd_gettime(int fd, struct linux_itimerspec *curr_value);
  * @param timep Pointer to time_t
  * @return struct tm* Pointer to broken-down time
  */
-struct tm *iox_gmtime(const time_t *timep);
+struct tm *ixland_gmtime(const time_t *timep);
 
 /**
  * @brief Convert time_t to struct tm (local time)
@@ -333,7 +334,7 @@ struct tm *iox_gmtime(const time_t *timep);
  * @param timep Pointer to time_t
  * @return struct tm* Pointer to broken-down time
  */
-struct tm *iox_localtime(const time_t *timep);
+struct tm *ixland_localtime(const time_t *timep);
 
 /**
  * @brief Convert struct tm to time_t
@@ -341,7 +342,7 @@ struct tm *iox_localtime(const time_t *timep);
  * @param tp Pointer to broken-down time
  * @return time_t Calendar time
  */
-time_t iox_mktime(struct tm *tp);
+time_t ixland_mktime(struct tm *tp);
 
 /**
  * @brief Format time as string
@@ -352,7 +353,7 @@ time_t iox_mktime(struct tm *tp);
  * @param tm Time structure
  * @return size_t Number of characters written
  */
-size_t iox_strftime(char *buf, size_t size, const char *format, const struct tm *tm);
+size_t ixland_strftime(char *buf, size_t size, const char *format, const struct tm *tm);
 
 /**
  * @brief Parse time string
@@ -362,30 +363,30 @@ size_t iox_strftime(char *buf, size_t size, const char *format, const struct tm 
  * @param tm Output time structure
  * @return char* Pointer to first character not processed
  */
-char *iox_strptime(const char *buf, const char *format, struct tm *tm);
+char *ixland_strptime(const char *buf, const char *format, struct tm *tm);
 
 /* ============================================================================
  * ADJTIME/ADJTIMEX
  * ============================================================================ */
 
 /* Timex modes for adjtimex */
-#define IOX_ADJ_OFFSET 0x0001            /* Time offset */
-#define IOX_ADJ_FREQUENCY 0x0002         /* Frequency offset */
-#define IOX_ADJ_MAXERROR 0x0004          /* Maximum time error */
-#define IOX_ADJ_ESTERROR 0x0008          /* Estimated time error */
-#define IOX_ADJ_STATUS 0x0010            /* Clock status */
-#define IOX_ADJ_TIMECONST 0x0020         /* PLL time constant */
-#define IOX_ADJ_TICK 0x4000              /* Tick value */
-#define IOX_ADJ_OFFSET_SINGLESHOT 0x8001 /* Old-fashioned adjtime */
+#define IXLAND_ADJ_OFFSET 0x0001            /* Time offset */
+#define IXLAND_ADJ_FREQUENCY 0x0002         /* Frequency offset */
+#define IXLAND_ADJ_MAXERROR 0x0004          /* Maximum time error */
+#define IXLAND_ADJ_ESTERROR 0x0008          /* Estimated time error */
+#define IXLAND_ADJ_STATUS 0x0010            /* Clock status */
+#define IXLAND_ADJ_TIMECONST 0x0020         /* PLL time constant */
+#define IXLAND_ADJ_TICK 0x4000              /* Tick value */
+#define IXLAND_ADJ_OFFSET_SINGLESHOT 0x8001 /* Old-fashioned adjtime */
 
 /* Clock status bits */
-#define IOX_STA_PLL 0x0001     /* Enable PLL updates */
-#define IOX_STA_PPSFREQ 0x0002 /* Enable PPS freq discipline */
-#define IOX_STA_PPSTIME 0x0004 /* Enable PPS time discipline */
-#define IOX_STA_FLL 0x0008     /* Enable FLL mode */
+#define IXLAND_STA_PLL 0x0001     /* Enable PLL updates */
+#define IXLAND_STA_PPSFREQ 0x0002 /* Enable PPS freq discipline */
+#define IXLAND_STA_PPSTIME 0x0004 /* Enable PPS time discipline */
+#define IXLAND_STA_FLL 0x0008     /* Enable FLL mode */
 
 /* Timex structure */
-struct iox_timex {
+struct ixland_timex {
     unsigned int modes;        /* Mode selector */
     long offset;               /* Time offset (usec) */
     long freq;                 /* Frequency offset (scaled ppm) */
@@ -415,7 +416,7 @@ struct iox_timex {
  * @param olddelta Previous adjustment (may be NULL)
  * @return int 0 on success, -1 on error
  */
-int iox_adjtime(const struct linux_timeval *delta, struct linux_timeval *olddelta);
+int ixland_adjtime(const struct linux_timeval *delta, struct linux_timeval *olddelta);
 
 /**
  * @brief Extended clock adjustment (Linux-specific)
@@ -423,7 +424,7 @@ int iox_adjtime(const struct linux_timeval *delta, struct linux_timeval *olddelt
  * @param buf Timex structure
  * @return int Clock state
  */
-int iox_adjtimex(struct iox_timex *buf);
+int ixland_adjtimex(struct ixland_timex *buf);
 
 #ifdef __cplusplus
 }
