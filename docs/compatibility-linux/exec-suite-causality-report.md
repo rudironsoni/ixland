@@ -21,7 +21,7 @@ Tested states via isolated `git worktree` instances, using unique build director
 1. **Pre-tranche parent** (`90321e0ad38193721bcdb2f7bed6e447184acffd`)
    - Worktree path: `/tmp/ixland-replay-90321e0`
    - Build path: `/tmp/ixland-replay-90321e0/ixland-system/build-replay-90321e0`
-   - Command: `cmake -S . -B build-replay-90321e0 -DIOX_BUILD_TESTS=ON && cmake --build build-replay-90321e0 --target iox-core-tests`
+   - Command: `cmake -S . -B build-replay-90321e0 <historical-test-flag> && cmake --build build-replay-90321e0 --target <historical-core-tests-target>`
    - Configure: PASS
    - Build: FAIL
    - Test launch possible: NO
@@ -77,11 +77,30 @@ For the exact intersecting failure-surface files, `87a8cc8` was compared against
 - Do the failing exec tests intersect simulator spawn runner changes?
 - **Yes.** They run under `xcrun simctl spawn booted`, where the simulator filesystem environment lacks executability context for `/bin/testcmd`, causing the `access()` check in `ixland_execve` to return `-1`.
 
-## Phase 6: Causality classification
+## Phase 6: Current-HEAD causality classification and bounded fix
 
-- `test_exec.c:62` (`exec_native_happy_path`): **blocked by historical replay failure**, with exact blocker: `87a8` configure fails (`ixland-libc` headers not yet renamed) and `90321e0` build fails (`ixland/wasm/types.h` missing).
-- `test_exec.c:171` (`exec_cloexec_behavior`): **blocked by historical replay failure**, with same exact blockers.
-- Later full-suite `core-tests` stall/hang behavior: **environment-induced and not yet attributable**.
+- `test_exec.c:62` (`exec_native_happy_path`) failed because `ixland_execve()` rejected registered native command paths on the host filesystem gate before dispatch.
+  - First bad behavior point: `ixland-system/kernel/exec/exec.c:201` (`if (access(pathname, X_OK) < 0) return -1;`).
+  - Under simulator spawn, `xcrun simctl spawn booted test -x /bin/testcmd` returns exit code `2` (`ENOENT`), proving host-path executability for `/bin/testcmd` is absent.
+- `test_exec.c:171` (`exec_cloexec_behavior`) failed through the same mechanism and same branch in `ixland_execve()`.
+- Implemented bounded fix in `ixland-system/kernel/exec/exec.c`:
+  - if `ixland_native_lookup(pathname)` succeeds, classify as `IXLAND_IMAGE_NATIVE` and skip host `access(X_OK)`;
+  - keep `access(X_OK)` gate for non-native paths.
+- During validation, this fix exposed a test lifetime defect in `test_exec.c`:
+  - first bad behavior: borrowed `argv/envp` pointers from stub command were used after `ixland_execve` freed copies (segfault after initial fix).
+  - bounded test-only repair in `ixland-system/Tests/unit/test_exec.c`: capture now duplicates argv/envp with owned storage and frees via reset helper.
+
+## Post-fix reproduction proof
+
+Commands (run twice each):
+
+- `xcrun simctl spawn booted "/Users/rudironsoni/src/github/rudironsoni/ixland/ixland-system/build/ixland-core-tests.app/ixland-core-tests" exec_native_happy_path`
+- `xcrun simctl spawn booted "/Users/rudironsoni/src/github/rudironsoni/ixland/ixland-system/build/ixland-core-tests.app/ixland-core-tests" exec_cloexec_behavior`
+
+Results:
+
+- `exec_native_happy_path`: PASS (run 1), PASS (run 2)
+- `exec_cloexec_behavior`: PASS (run 1), PASS (run 2)
 
 ## Invariant preservation checks
 
@@ -91,6 +110,6 @@ For the exact intersecting failure-surface files, `87a8cc8` was compared against
 
 ## Exact next action
 
-1. Acknowledge that direct `87a8` and `90321e0` replay are impossible without altering historical commits.
-2. Proceed with bounded diagnostics around the simulator `access(pathname, X_OK)` environment behavior on current HEAD to prove whether the failures are pure environment-induced transport issues or semantic regressions.
-3. Keep G3 blocked until that proof is complete.
+1. Keep the native-registry-first `ixland_execve` behavior as the floor contract for virtual native commands on simulator and device.
+2. Keep the test harness argv/envp ownership fix in place to prevent use-after-free regressions in exec tests.
+3. Continue with bounded global-health cleanup outside this tranche while preserving G2 boundary and rename invariants.

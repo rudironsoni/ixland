@@ -194,17 +194,19 @@ int ixland_execve(const char *pathname, char *const argv[], char *const envp[]) 
         return -1;
     }
 
-    /* Check if file exists and is executable */
-    if (access(pathname, X_OK) < 0) {
-        /* access sets errno appropriately */
-        return -1;
-    }
+    ixland_image_type_t type;
+    if (ixland_native_lookup(pathname)) {
+        type = IXLAND_IMAGE_NATIVE;
+    } else {
+        if (access(pathname, X_OK) < 0) {
+            return -1;
+        }
 
-    /* Classify image */
-    ixland_image_type_t type = ixland_exec_classify(pathname);
-    if (type == IXLAND_IMAGE_NONE) {
-        errno = ENOENT;
-        return -1;
+        type = ixland_exec_classify(pathname);
+        if (type == IXLAND_IMAGE_NONE) {
+            errno = ENOENT;
+            return -1;
+        }
     }
 
     /* Copy argv and envp before modifications (POSIX requirement) */

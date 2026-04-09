@@ -11,23 +11,49 @@
 #include "../../runtime/native/registry.h"
 #include "../harness/ixland_test.h"
 
-/* Stub command capture structure */
 typedef struct {
     ixland_task_t *task;
     int argc;
-    char **argv;
-    char **envp;
+    char *argv[IXLAND_MAX_ARGS];
+    char *envp[IXLAND_MAX_ARGS];
     int called;
 } stub_capture_t;
 
 static stub_capture_t g_capture = {0};
 
-/* Test stub native command */
+static void stub_capture_reset(void) {
+    for (int i = 0; i < IXLAND_MAX_ARGS && g_capture.argv[i]; i++) {
+        free(g_capture.argv[i]);
+        g_capture.argv[i] = NULL;
+    }
+
+    for (int i = 0; i < IXLAND_MAX_ARGS && g_capture.envp[i]; i++) {
+        free(g_capture.envp[i]);
+        g_capture.envp[i] = NULL;
+    }
+
+    g_capture.task = NULL;
+    g_capture.argc = 0;
+    g_capture.called = 0;
+}
+
 static int test_stub_cmd(ixland_task_t *task, int argc, char **argv, char **envp) {
+    stub_capture_reset();
     g_capture.task = task;
     g_capture.argc = argc;
-    g_capture.argv = argv;
-    g_capture.envp = envp;
+
+    if (argv) {
+        for (int i = 0; i < IXLAND_MAX_ARGS - 1 && argv[i]; i++) {
+            g_capture.argv[i] = strdup(argv[i]);
+        }
+    }
+
+    if (envp) {
+        for (int i = 0; i < IXLAND_MAX_ARGS - 1 && envp[i]; i++) {
+            g_capture.envp[i] = strdup(envp[i]);
+        }
+    }
+
     g_capture.called = 1;
     return 0;
 }

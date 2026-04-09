@@ -36,7 +36,7 @@
 - compatibility/linux/tests/test_linux_compat_abi.c
 - compatibility/linux/tests/test_linux_host_boundary.c
 - iOS execution path wired in CMake via `xcrun simctl spawn booted` for `linux-compat-tests`
-- `ixland-core-tests` binary builds and runs via simulator spawn; existing core test failures remain (`exec_native_happy_path`, `exec_cloexec_behavior`) and long-running signal suite execution requires follow-up.
+- `ixland-core-tests` binary builds and runs via simulator spawn; bounded current-HEAD exec repairs are now in place and both targeted failures pass (`exec_native_happy_path`, `exec_cloexec_behavior`).
 
 ## Rename gate proof
 
@@ -45,23 +45,35 @@
 - Tracked content legacy hits (non-exception): 0.
 - Naming check `legacy name eradication checks`: pass (with documented exceptions).
 
-## Exec-suite causality addendum (bounded)
+## Exec-suite bounded repair addendum (current HEAD)
 
-- Targeted failures reproduced in current tree:
+- Targeted failures (now fixed on current tree):
   - `ixland-system/Tests/unit/test_exec.c:62` (`exec_native_happy_path`)
   - `ixland-system/Tests/unit/test_exec.c:171` (`exec_cloexec_behavior`)
-- Current strict causality classification: **unknown causality**.
-- See full bounded analysis: `docs/compatibility-linux/exec-suite-causality-report.md`.
+- Proven current-HEAD mechanism before fix:
+  - `ixland_execve` rejected registered native command paths on unconditional `access(pathname, X_OK)` host gate.
+- Implemented bounded repair:
+  - `ixland-system/kernel/exec/exec.c`
+    - native-registry-first branch in `ixland_execve`; skip host `access(X_OK)` only for registered native commands.
+  - `ixland-system/Tests/unit/test_exec.c`
+    - test capture now owns argv/envp copies to avoid use-after-free during post-dispatch assertions.
+- See full evidence: `docs/compatibility-linux/exec-suite-causality-report.md`.
 
-## Touched-file appendix for causality scope
+## Touched-file appendix for this tranche
 
-Files touched during this bounded triage:
+Files touched during bounded exec repair:
+- `ixland-system/kernel/exec/exec.c`
+  - why: make native registered commands independent from host filesystem executability checks
+  - change type: semantic bug fix (bounded)
+- `ixland-system/Tests/unit/test_exec.c`
+  - why: fix test-only argv/envp capture ownership for stable post-exec assertions
+  - change type: test harness correctness fix
 - `docs/compatibility-linux/exec-suite-causality-report.md`
-  - why: add strict reproduction evidence, intersection data, causality classification
-  - change type: diagnostic-only documentation
+  - why: record mechanism, fix, and post-fix pass evidence
+  - change type: evidence update
 - `docs/compatibility-linux/g0-g2-implementation-report.md`
-  - why: record causality addendum and invariant re-check status
-  - change type: diagnostic-only documentation
+  - why: record bounded repair addendum and invariant status
+  - change type: evidence update
 
 Failure surface used for intersection checks:
 - `ixland-system/Tests/unit/test_exec.c`
