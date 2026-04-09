@@ -1,4 +1,4 @@
-# iox - iOS Linux-Like Virtual Subsystem
+# ixland - iOS Linux-Like Virtual Subsystem
 # CMake Build Configuration
 #
 # This file supports both standalone and monorepo-subproject builds.
@@ -9,12 +9,12 @@ cmake_minimum_required(VERSION 3.20)
 
 # Detect standalone vs subproject mode
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    set(IOX_STANDALONE_MODE ON)
+    set(IXLAND_STANDALONE_MODE ON)
 else()
-    set(IOX_STANDALONE_MODE OFF)
+    set(IXLAND_STANDALONE_MODE OFF)
 endif()
 
-if(IOX_STANDALONE_MODE)
+if(IXLAND_STANDALONE_MODE)
     # Standalone: MUST set iOS before project()
     set(CMAKE_SYSTEM_NAME iOS)
     set(CMAKE_OSX_SYSROOT "iphonesimulator" CACHE STRING "SDK")
@@ -23,21 +23,26 @@ if(IOX_STANDALONE_MODE)
 
     # Hard fail on non-iOS in standalone mode
     if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
-        message(FATAL_ERROR "iox only supports iOS builds")
+        message(FATAL_ERROR "ixland only supports iOS builds")
     endif()
 
-    project(iox VERSION 1.0.0 LANGUAGES C OBJCXX)
+    project(ixland VERSION 1.0.0 LANGUAGES C OBJCXX)
 
     # Standalone: find boundary headers by source tree location
     # In subproject mode, the parent adds these via target_link_libraries
-    set(IOX_LIBC_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ixland-libc/include")
-    if(NOT EXISTS "${IOX_LIBC_INCLUDE_DIR}/iox/iox.h")
-        message(FATAL_ERROR "Standalone build requires ixland-libc headers at ${IOX_LIBC_INCLUDE_DIR}")
+    set(IXLAND_LIBC_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ixland-libc/include")
+    if(NOT EXISTS "${IXLAND_LIBC_INCLUDE_DIR}/ixland/ixland.h")
+        message(FATAL_ERROR "Standalone build requires ixland-libc headers at ${IXLAND_LIBC_INCLUDE_DIR}")
+    endif()
+
+    set(IXLAND_WASM_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ixland-wasm/include")
+    if(NOT EXISTS "${IXLAND_WASM_INCLUDE_DIR}/ixland/wasm/types.h")
+        message(FATAL_ERROR "Standalone build requires ixland-wasm headers at ${IXLAND_WASM_INCLUDE_DIR}")
     endif()
 else()
     # Subproject: Use parent project settings
     # iOS settings should already be set by root CMakeLists.txt
-    message(STATUS "iox: Building as monorepo subproject")
+    message(STATUS "ixland: Building as monorepo subproject")
 endif()
 
 set(CMAKE_C_STANDARD 11)
@@ -53,12 +58,12 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -DNDEBUG")
 
 # Options
-option(IOX_BUILD_TESTS "Build tests" ON)
-option(IOX_BUILD_TOOLS "Build tools" ON)
-option(IOX_INSTALL "Enable installation" ON)
+option(IXLAND_BUILD_TESTS "Build tests" ON)
+option(IXLAND_BUILD_TOOLS "Build tools" ON)
+option(IXLAND_INSTALL "Enable installation" ON)
 
 # Core kernel sources
-set(IOX_KERNEL_SOURCES
+set(IXLAND_KERNEL_SOURCES
     kernel/task/task.c
     kernel/task/pid.c
     kernel/task/fork.c
@@ -69,57 +74,98 @@ set(IOX_KERNEL_SOURCES
 )
 
 # Filesystem sources
-set(IOX_FS_SOURCES
+set(IXLAND_FS_SOURCES
     fs/fdtable.c
     fs/vfs.c
-    fs/iox_path.c
-    fs/vfs/iox_vfs.c
+    fs/ixland_path.c
+    fs/vfs/ixland_vfs.c
     Tests/unit/stub_vfs_translate.c
 )
 
 # Runtime sources - native (non-WASI)
-set(IOX_RUNTIME_NATIVE_SOURCES
+set(IXLAND_RUNTIME_NATIVE_SOURCES
     runtime/native/registry.c
 )
 
 # Core syscall sources (VFS-aware implementations)
-set(IOX_SYSCALL_SOURCES
-    src/iox/core/iox_file_v2.c
-    src/iox/core/iox_identity.c
-    src/iox/core/iox_poll.c
+set(IXLAND_SYSCALL_SOURCES
+    src/ixland/core/ixland_file_v2.c
+    src/ixland/core/ixland_identity.c
+    src/ixland/core/ixland_poll.c
+    src/ixland/core/ixland_directory_syscalls.c
 )
 
 # Runtime sources - WASI adapter implementation
 # This is split into a separate internal target to avoid monolithic build
-set(IOX_RUNTIME_WASI_SOURCES
+set(IXLAND_RUNTIME_WASI_SOURCES
     runtime/wasi/wasm_adapter.c
-    src/iox/wamr/iox_wamr.c
-    src/iox/wamr/iox_wamr_simple.c
+    src/ixland/wamr/ixland_wamr_simple.c
+)
+
+# Linux compatibility sources (G0-G2 tranche)
+set(IXLAND_RUNTIME_LINUX_HOST_SOURCES
+    runtime/linux_host/ixland_linux_compatibility_host.c
+)
+
+set(IXLAND_LINUX_COMPAT_ABI_SOURCES
+    compatibility/linux/abi/ixland_linux_abi.c
+)
+
+set(IXLAND_LINUX_COMPAT_LOADER_SOURCES
+    compatibility/linux/loader/ixland_linux_loader.c
+    compatibility/linux/distro/ixland_linux_distro.c
+)
+
+set(IXLAND_LINUX_COMPAT_RUNTIME_SOURCES
+    compatibility/linux/runtime/ixland_linux_runtime.c
+    compatibility/linux/projection/ixland_linux_projection.c
+    compatibility/linux/signal_translation/ixland_linux_signal_translation.c
+    compatibility/linux/fs_translation/ixland_linux_fs_translation.c
+    compatibility/linux/proc_views/ixland_linux_proc_views.c
+    compatibility/linux/dev_views/ixland_linux_dev_views.c
+)
+
+set(IXLAND_LINUX_COMPAT_EMU_AARCH64_SOURCES
+    compatibility/linux/emulation/aarch64/ixland_linux_emu_aarch64.c
+)
+
+set(IXLAND_LINUX_COMPAT_EMU_COMMON_SOURCES
+    compatibility/linux/emulation/common/ixland_linux_emu_common.c
+)
+
+set(IXLAND_LINUX_COMPAT_TCTI_SOURCES
+    compatibility/linux/tcti/ixland_linux_tcti.c
+)
+
+set(IXLAND_LINUX_COMPAT_TEST_SOURCES
+    compatibility/linux/tests/test_linux_compat_main.c
+    compatibility/linux/tests/test_linux_compat_abi.c
+    compatibility/linux/tests/test_linux_host_boundary.c
 )
 
 # Combined core sources (excluding runtime targets - they are separate)
-set(IOX_CORE_SOURCES
-    ${IOX_KERNEL_SOURCES}
-    ${IOX_FS_SOURCES}
-    ${IOX_SYSCALL_SOURCES}
+set(IXLAND_CORE_SOURCES
+    ${IXLAND_KERNEL_SOURCES}
+    ${IXLAND_FS_SOURCES}
+    ${IXLAND_SYSCALL_SOURCES}
 )
 
 # ============================================================================
-# Internal Target: iox-runtime-native
+# Internal Target: ixland-runtime-native
 # ============================================================================
 # This is an internal target within ixland-system for native runtime support.
 # It keeps the native command registry separate from core.
 
-add_library(iox-runtime-native STATIC ${IOX_RUNTIME_NATIVE_SOURCES})
+add_library(ixland-runtime-native STATIC ${IXLAND_RUNTIME_NATIVE_SOURCES})
 
-target_include_directories(iox-runtime-native
+target_include_directories(ixland-runtime-native
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/native>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/kernel/task>
 )
 
-target_compile_options(iox-runtime-native PRIVATE
+target_compile_options(ixland-runtime-native PRIVATE
     -Wall
     -Wextra
     -Werror=implicit-function-declaration
@@ -127,38 +173,40 @@ target_compile_options(iox-runtime-native PRIVATE
 )
 
 # Link to boundary targets if available in monorepo build
-if(NOT IOX_STANDALONE_MODE)
+if(NOT IXLAND_STANDALONE_MODE)
     # Consume public headers from ixland-libc boundary target
     if(TARGET ixland-libc-headers)
-        target_link_libraries(iox-runtime-native PUBLIC ixland-libc-headers)
-        message(STATUS "iox-runtime-native: Linked to ixland-libc-headers")
+        target_link_libraries(ixland-runtime-native PUBLIC ixland-libc-headers)
+        message(STATUS "ixland-runtime-native: Linked to ixland-libc-headers")
     endif()
 else()
     # Standalone: add libc include path directly
-    target_include_directories(iox-runtime-native PUBLIC ${IOX_LIBC_INCLUDE_DIR})
+    target_include_directories(ixland-runtime-native PUBLIC ${IXLAND_LIBC_INCLUDE_DIR})
 endif()
 
-set_target_properties(iox-runtime-native PROPERTIES
-    OUTPUT_NAME "iox-runtime-native"
+set_target_properties(ixland-runtime-native PROPERTIES
+    OUTPUT_NAME "ixland-runtime-native"
 )
 
 # ============================================================================
-# Internal Target: iox-runtime-wasi
+# Internal Target: ixland-runtime-wasi
 # ============================================================================
 # This is an internal target within ixland-system for WASI/runtime support.
 # It keeps the WASI adapter and WAMR implementation separate from core.
 
-add_library(iox-runtime-wasi STATIC ${IOX_RUNTIME_WASI_SOURCES})
+add_library(ixland-runtime-wasi STATIC ${IXLAND_RUNTIME_WASI_SOURCES})
 
-target_include_directories(iox-runtime-wasi
+target_include_directories(ixland-runtime-wasi
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/wasi>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/iox/wamr>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/ixland/wamr>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/native>
+    PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/wamr/include>
 )
 
-target_compile_options(iox-runtime-wasi PRIVATE
+target_compile_options(ixland-runtime-wasi PRIVATE
     -Wall
     -Wextra
     -Werror=implicit-function-declaration
@@ -166,35 +214,157 @@ target_compile_options(iox-runtime-wasi PRIVATE
 )
 
 # Link to boundary targets if available in monorepo build
-if(NOT IOX_STANDALONE_MODE)
+if(NOT IXLAND_STANDALONE_MODE)
     # Consume public headers from ixland-libc boundary target
     if(TARGET ixland-libc-headers)
-        target_link_libraries(iox-runtime-wasi PUBLIC ixland-libc-headers)
-        message(STATUS "iox-runtime-wasi: Linked to ixland-libc-headers")
+        target_link_libraries(ixland-runtime-wasi PUBLIC ixland-libc-headers)
+        message(STATUS "ixland-runtime-wasi: Linked to ixland-libc-headers")
     endif()
 
     # Wasm contract headers - consumed by runtime/wasi implementation
     if(TARGET ixland-wasm-contracts)
-        target_link_libraries(iox-runtime-wasi PUBLIC ixland-wasm-contracts)
-        message(STATUS "iox-runtime-wasi: Linked to ixland-wasm-contracts")
+        target_link_libraries(ixland-runtime-wasi PUBLIC ixland-wasm-contracts)
+        message(STATUS "ixland-runtime-wasi: Linked to ixland-wasm-contracts")
     endif()
 else()
-    # Standalone: add libc include path directly
-    target_include_directories(iox-runtime-wasi PUBLIC ${IOX_LIBC_INCLUDE_DIR})
+    # Standalone: add boundary include paths directly
+    target_include_directories(ixland-runtime-wasi PUBLIC
+        ${IXLAND_LIBC_INCLUDE_DIR}
+        ${IXLAND_WASM_INCLUDE_DIR}
+    )
 endif()
 
-set_target_properties(iox-runtime-wasi PROPERTIES
-    OUTPUT_NAME "iox-runtime-wasi"
+set_target_properties(ixland-runtime-wasi PROPERTIES
+    OUTPUT_NAME "ixland-runtime-wasi"
 )
 
+add_library(ixland_linux_compat_host STATIC ${IXLAND_RUNTIME_LINUX_HOST_SOURCES})
+target_include_directories(ixland_linux_compat_host
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/linux_host>
+)
+target_compile_options(ixland_linux_compat_host PRIVATE
+    -Wall
+    -Wextra
+    -Werror=implicit-function-declaration
+    -fPIC
+)
+
+add_library(ixland_linux_compat_abi STATIC ${IXLAND_LINUX_COMPAT_ABI_SOURCES})
+target_include_directories(ixland_linux_compat_abi
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/compatibility/linux/abi>
+)
+target_compile_options(ixland_linux_compat_abi PRIVATE
+    -Wall
+    -Wextra
+    -Werror=implicit-function-declaration
+    -fPIC
+)
+
+add_library(ixland_linux_compat_loader STATIC ${IXLAND_LINUX_COMPAT_LOADER_SOURCES})
+target_include_directories(ixland_linux_compat_loader
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/compatibility/linux/loader>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/compatibility/linux/distro>
+)
+target_compile_options(ixland_linux_compat_loader PRIVATE
+    -Wall
+    -Wextra
+    -Werror=implicit-function-declaration
+    -fPIC
+)
+target_link_libraries(ixland_linux_compat_loader PUBLIC ixland_linux_compat_abi)
+
+add_library(ixland_linux_compat_emu_common STATIC ${IXLAND_LINUX_COMPAT_EMU_COMMON_SOURCES})
+target_include_directories(ixland_linux_compat_emu_common
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/compatibility/linux/emulation/common>
+)
+target_compile_options(ixland_linux_compat_emu_common PRIVATE
+    -Wall
+    -Wextra
+    -Werror=implicit-function-declaration
+    -fPIC
+)
+
+add_library(ixland_linux_compat_emu_aarch64 STATIC ${IXLAND_LINUX_COMPAT_EMU_AARCH64_SOURCES})
+target_include_directories(ixland_linux_compat_emu_aarch64
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/compatibility/linux/emulation/aarch64>
+)
+target_compile_options(ixland_linux_compat_emu_aarch64 PRIVATE
+    -Wall
+    -Wextra
+    -Werror=implicit-function-declaration
+    -fPIC
+)
+target_link_libraries(ixland_linux_compat_emu_aarch64 PUBLIC ixland_linux_compat_emu_common)
+
+add_library(ixland_linux_compat_tcti STATIC ${IXLAND_LINUX_COMPAT_TCTI_SOURCES})
+target_include_directories(ixland_linux_compat_tcti
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/compatibility/linux/tcti>
+)
+target_compile_options(ixland_linux_compat_tcti PRIVATE
+    -Wall
+    -Wextra
+    -Werror=implicit-function-declaration
+    -fPIC
+)
+
+add_library(ixland_linux_compat_runtime STATIC ${IXLAND_LINUX_COMPAT_RUNTIME_SOURCES})
+target_include_directories(ixland_linux_compat_runtime
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/compatibility/linux/runtime>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/compatibility/linux/projection>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/compatibility/linux/signal_translation>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/compatibility/linux/fs_translation>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/compatibility/linux/proc_views>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/compatibility/linux/dev_views>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/linux_host>
+)
+target_compile_options(ixland_linux_compat_runtime PRIVATE
+    -Wall
+    -Wextra
+    -Werror=implicit-function-declaration
+    -fPIC
+)
+target_link_libraries(ixland_linux_compat_runtime
+    PUBLIC
+        ixland_linux_compat_host
+        ixland_linux_compat_abi
+        ixland_linux_compat_loader
+        ixland_linux_compat_emu_aarch64
+        ixland_linux_compat_emu_common
+        ixland_linux_compat_tcti
+)
+
+if(IXLAND_BUILD_TESTS)
+    add_executable(ixland_linux_compat_tests ${IXLAND_LINUX_COMPAT_TEST_SOURCES})
+    target_link_libraries(ixland_linux_compat_tests
+        PRIVATE
+            ixland_linux_compat_runtime
+            ixland_linux_compat_host
+            ixland_linux_compat_abi
+    )
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        add_test(NAME linux-compat-tests
+            COMMAND xcrun simctl spawn booted $<TARGET_FILE:ixland_linux_compat_tests>)
+    else()
+        add_test(NAME linux-compat-tests COMMAND ixland_linux_compat_tests)
+    endif()
+endif()
+
 # ============================================================================
-# Core Library: iox-core
+# Core Library: ixland-core
 # ============================================================================
 
-add_library(iox-core STATIC ${IOX_CORE_SOURCES})
+add_library(ixland-core STATIC ${IXLAND_CORE_SOURCES})
 
 # Target include directories (NOT global include_directories)
-target_include_directories(iox-core
+target_include_directories(ixland-core
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/kernel/task>
@@ -204,30 +374,30 @@ target_include_directories(iox-core
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fs/vfs>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runtime/native>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/drivers/tty>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/iox/internal>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/ixland/internal>
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/wamr/include>
 )
 
 # Link to boundary targets if available in monorepo build
-if(NOT IOX_STANDALONE_MODE)
+if(NOT IXLAND_STANDALONE_MODE)
     # Consume public headers from ixland-libc boundary target
     if(TARGET ixland-libc-headers)
-        target_link_libraries(iox-core PUBLIC ixland-libc-headers)
-        message(STATUS "iox: Linked to ixland-libc-headers")
+        target_link_libraries(ixland-core PUBLIC ixland-libc-headers)
+        message(STATUS "ixland: Linked to ixland-libc-headers")
     else()
-        message(WARNING "iox: ixland-libc-headers target not found, headers may not be available")
+        message(WARNING "ixland: ixland-libc-headers target not found, headers may not be available")
     endif()
 else()
     # Standalone: add libc include path directly
-    target_include_directories(iox-core PUBLIC ${IOX_LIBC_INCLUDE_DIR})
+    target_include_directories(ixland-core PUBLIC ${IXLAND_LIBC_INCLUDE_DIR})
 endif()
 
 # Link core to runtime targets (core depends on both native and wasi runtimes)
-target_link_libraries(iox-core PUBLIC iox-runtime-native)
-target_link_libraries(iox-core PUBLIC iox-runtime-wasi)
+target_link_libraries(ixland-core PUBLIC ixland-runtime-native)
+target_link_libraries(ixland-core PUBLIC ixland-runtime-wasi)
 
-target_compile_options(iox-core PRIVATE
+target_compile_options(ixland-core PRIVATE
     -Wall
     -Wextra
     -Werror=implicit-function-declaration
@@ -236,7 +406,7 @@ target_compile_options(iox-core PRIVATE
 
 # Apply strict type checking if enabled
 if(IXLAND_STRICT_TYPING)
-    target_compile_options(iox-core PRIVATE
+    target_compile_options(ixland-core PRIVATE
         -Werror
         -Werror=incompatible-pointer-types
         -Werror=int-conversion
@@ -251,37 +421,37 @@ if(IXLAND_STRICT_TYPING)
     )
 endif()
 
-target_link_libraries(iox-core PUBLIC pthread)
+target_link_libraries(ixland-core PUBLIC pthread)
 
-# Link iox-core to the internal runtime targets
-# This creates the dependencies: iox-core → iox-runtime-native, iox-core → iox-runtime-wasi
-message(STATUS "iox: Linked iox-core to internal runtime targets")
+# Link ixland-core to the internal runtime targets
+# This creates the dependencies: ixland-core → ixland-runtime-native, ixland-core → ixland-runtime-wasi
+message(STATUS "ixland: Linked ixland-core to internal runtime targets")
 
 # Set library properties
-set_target_properties(iox-core PROPERTIES
-    OUTPUT_NAME "iox"
+set_target_properties(ixland-core PROPERTIES
+    OUTPUT_NAME "ixland"
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR}
 )
 
 # Installation
-if(IOX_INSTALL)
-    install(TARGETS iox-core iox-runtime-native iox-runtime-wasi
+if(IXLAND_INSTALL)
+    install(TARGETS ixland-core ixland-runtime-native ixland-runtime-wasi
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
     )
 
-    # Note: Public iox headers are installed from ixland-libc
-    install(DIRECTORY kernel/ DESTINATION include/iox/kernel
+    # Note: Public ixland headers are installed from ixland-libc
+    install(DIRECTORY kernel/ DESTINATION include/ixland/kernel
         FILES_MATCHING PATTERN "*.h")
-    install(DIRECTORY fs/ DESTINATION include/iox/fs
+    install(DIRECTORY fs/ DESTINATION include/ixland/fs
         FILES_MATCHING PATTERN "*.h")
-    install(DIRECTORY drivers/ DESTINATION include/iox/drivers
+    install(DIRECTORY drivers/ DESTINATION include/ixland/drivers
         FILES_MATCHING PATTERN "*.h")
 endif()
 
 # Tools
-if(IOX_BUILD_TOOLS)
+if(IXLAND_BUILD_TOOLS)
     # Install scripts
     install(FILES
         tools/bootstrap.sh
@@ -296,11 +466,11 @@ if(IOX_BUILD_TOOLS)
 endif()
 
 # Tests
-if(IOX_BUILD_TESTS)
+if(IXLAND_BUILD_TESTS)
     enable_testing()
 
     # Simple C test executable (not XCTest bundle - avoids framework linking issues)
-    set(IOX_TEST_SOURCES
+    set(IXLAND_TEST_SOURCES
         Tests/harness/harness.c
         Tests/unit/test_pid.c
         Tests/unit/test_exec.c
@@ -328,21 +498,26 @@ if(IOX_BUILD_TESTS)
     )
 
     # Create standalone test executable
-    add_executable(iox-core-tests ${IOX_TEST_SOURCES})
+    add_executable(ixland-core-tests ${IXLAND_TEST_SOURCES})
 
-    # Tests inherit includes from iox-core via target_link_libraries
-    target_link_libraries(iox-core-tests PRIVATE
-        iox-core
+    # Tests inherit includes from ixland-core via target_link_libraries
+    target_link_libraries(ixland-core-tests PRIVATE
+        ixland-core
         pthread
     )
 
-    add_test(NAME core-tests COMMAND iox-core-tests)
+    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        add_test(NAME core-tests
+            COMMAND xcrun simctl spawn booted $<TARGET_FILE:ixland-core-tests>)
+    else()
+        add_test(NAME core-tests COMMAND ixland-core-tests)
+    endif()
 endif()
 
 # Print configuration
 message(STATUS "")
-message(STATUS "iox Configuration:")
-if(IOX_STANDALONE_MODE)
+message(STATUS "ixland Configuration:")
+if(IXLAND_STANDALONE_MODE)
     message(STATUS "  Mode: Standalone")
 else()
     message(STATUS "  Mode: Monorepo subproject")
@@ -353,6 +528,6 @@ message(STATUS "  SDK: ${CMAKE_OSX_SYSROOT}")
 message(STATUS "  Deployment: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 message(STATUS "  Architecture: ${CMAKE_OSX_ARCHITECTURES}")
 message(STATUS "  Install prefix: ${CMAKE_INSTALL_PREFIX}")
-message(STATUS "  Build tests: ${IOX_BUILD_TESTS}")
-message(STATUS "  Build tools: ${IOX_BUILD_TOOLS}")
+message(STATUS "  Build tests: ${IXLAND_BUILD_TESTS}")
+message(STATUS "  Build tools: ${IXLAND_BUILD_TOOLS}")
 message(STATUS "")

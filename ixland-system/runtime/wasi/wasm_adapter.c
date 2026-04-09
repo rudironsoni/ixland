@@ -8,10 +8,11 @@
 
 #include <ixland/wasm/engine.h>
 #include <ixland/wasm/wasi.h>
+
 #include <stdlib.h>
 #include <string.h>
 
-#include "iox_wamr.h"
+#include "ixland_wamr.h"
 
 /* ============================================================================
  * ADAPTER STATE
@@ -50,7 +51,7 @@ int ixland_wasm_adapter_init(void) {
     }
 
     /* Initialize underlying WAMR runtime */
-    if (iox_wamr_init() != 0) {
+    if (ixland_wamr_init() != 0) {
         return -1;
     }
 
@@ -63,7 +64,7 @@ void ixland_wasm_adapter_deinit(void) {
         return;
     }
 
-    iox_wamr_deinit();
+    ixland_wamr_deinit();
     adapter_state.initialized = false;
 }
 
@@ -98,7 +99,7 @@ static ixland_wasm_module_info_t g_module_info = {0};
 
 ixland_wasm_module_t *ixland_wasm_adapter_load_module(const uint8_t *wasm_buf, uint32_t wasm_size) {
     /* For now, delegate to WAMR implementation */
-    if (iox_wamr_load_module(wasm_buf, wasm_size) != 0) {
+    if (ixland_wamr_load_module(wasm_buf, wasm_size) != 0) {
         return NULL;
     }
 
@@ -130,7 +131,7 @@ ixland_wasm_error_t ixland_wasm_adapter_get_module_info(ixland_wasm_module_t *mo
 void ixland_wasm_adapter_unload_module(ixland_wasm_module_t *module) {
     (void)module;
     memset(&g_module_info, 0, sizeof(g_module_info));
-    iox_wamr_unload_module();
+    ixland_wamr_unload_module();
 }
 
 /* ============================================================================
@@ -229,5 +230,5 @@ int ixland_wasm_adapter_call(ixland_wasm_instance_t *instance, const char *func_
         }
     }
 
-    return iox_wamr_call_function(func_name, argc_wamr, argv);
+    return ixland_wamr_call_function(func_name, argc_wamr, argv);
 }
