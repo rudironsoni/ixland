@@ -26,7 +26,7 @@ option(IXLAND_BUILD_WASM "Build ixland-wasm component" ON)
 option(IXLAND_BUILD_PACKAGES "Build ixland-packages component" OFF)
 option(IXLAND_BUILD_TOOLCHAIN "Build ixland-toolchain component" OFF)
 option(IXLAND_BUILD_TESTS "Build tests" ON)
-option(IXLAND_STRICT_TYPING "Enable strict type checking (treat warnings as errors)" OFF)
+option(IXLAND_STRICT_TYPING "Enable strict type checking (treat warnings as errors)" ON)
 
 # Root build directory for all components
 set(IXLAND_BUILD_ROOT ${CMAKE_BINARY_DIR} CACHE PATH "Root build directory")

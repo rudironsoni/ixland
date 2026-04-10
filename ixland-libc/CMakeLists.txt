@@ -88,7 +88,7 @@ if(IXLAND_STRICT_TYPING)
         -Werror=missing-prototypes
         -Werror=implicit-int
         -Werror=pointer-sign
-        -Werror=discarded-qualifiers
+        -Werror=ignored-qualifiers
     )
 endif()
 
@@ -131,7 +131,7 @@ if(IXLAND_STRICT_TYPING)
         -Werror=missing-prototypes
         -Werror=implicit-int
         -Werror=pointer-sign
-        -Werror=discarded-qualifiers
+        -Werror=ignored-qualifiers
     )
 endif()
 

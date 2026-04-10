@@ -86,7 +86,7 @@ jobs:
         echo "Building ixland-libc with strict type checking..."
         cmake -B build-libc -S ixland-libc \
           -DCMAKE_C_COMPILER=clang \
-          -DCMAKE_C_FLAGS="-Wall -Wextra -Werror -Werror=implicit-function-declaration -Werror=incompatible-pointer-types -Werror=int-conversion -Werror=return-type -Werror=uninitialized -Werror=strict-prototypes -Werror=old-style-definition -Werror=missing-prototypes -Werror=implicit-int -Werror=pointer-sign -Werror=discarded-qualifiers" \
+          -DCMAKE_C_FLAGS="-Wall -Wextra -Werror -Werror=implicit-function-declaration -Werror=incompatible-pointer-types -Werror=int-conversion -Werror=return-type -Werror=uninitialized -Werror=strict-prototypes -Werror=old-style-definition -Werror=missing-prototypes -Werror=implicit-int -Werror=pointer-sign -Werror=ignored-qualifiers" \
           -DCMAKE_SYSTEM_NAME=iOS \
           -DCMAKE_OSX_SYSROOT="" \
           -DCMAKE_C_STANDARD=11 \
