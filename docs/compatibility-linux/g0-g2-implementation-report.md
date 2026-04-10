@@ -136,6 +136,27 @@ Commit intersections:
   - full unfiltered `ixland-core-tests` still does not complete within timeout in this environment even after reproducer fix.
   - repo lint/type-check status unchanged outside this tranche (pre-existing SwiftLint debt; missing `clang-tidy` toolchain).
 
+## Repo-health stabilization-3 addendum
+
+- Repo truth verified on current branch:
+  - exec fix commit `ec9b3916d0a38c0fb1fb15810bab0d74deb3206f` present
+  - stabilization-2 commit `c1c855f40b56daefca2d0bf3730045b9ac97d908` present
+- Full-suite position moved materially forward:
+  - no longer stalls at `signal_killpg_basic_delivery`
+  - now reaches and deterministically reports concrete failures in file/poll/directory syscall clusters.
+- Next first bad behavior localized to file syscall wrappers in `ixland-system/src/ixland/core/ixland_file_v2.c`:
+  - `__ixland_stat_impl` and `__ixland_fstat_impl` were too restrictive for current mixed host/VFS test paths.
+- Bounded product fix implemented:
+  - `__ixland_stat_impl`: host `stat()` first, fallback to `ixland_vfs_stat()` on `ENOENT`
+  - `__ixland_fstat_impl`: host `fstat()` first, fallback to ixland fd-table path when needed
+- Post-fix proof:
+  - `file_syscalls_integration` now passes in targeted run
+  - `stat_existing_file_returns_success` and `fstat_open_file_returns_correct_size` now pass in targeted runs
+  - exec regressions remain passing (`exec_native_happy_path`, `exec_cloexec_behavior`)
+  - `linux-compat-tests` remains passing
+- Remaining red state:
+  - full unfiltered suite still reports deterministic failures, but now as explicit assertions (not sequence stall), primarily in poll and directory syscall tests.
+
 ## Pending for G3+
 
 - No canonical semantic ownership uplifts performed.

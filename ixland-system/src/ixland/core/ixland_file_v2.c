@@ -21,14 +21,14 @@
 #define IXLAND_MAX_FD 256
 
 typedef struct {
-    int fd;                  /* Real file descriptor */
-    int flags;               /* Open flags */
-    mode_t mode;             /* File mode */
-    off_t offset;            /* Current offset */
+    int fd;                     /* Real file descriptor */
+    int flags;                  /* Open flags */
+    mode_t mode;                /* File mode */
+    off_t offset;               /* Current offset */
     char path[IXLAND_MAX_PATH]; /* Virtual file path */
-    bool used;               /* Is slot used? */
-    bool is_dir;             /* Is directory? */
-    pthread_mutex_t lock;    /* Per-FD lock */
+    bool used;                  /* Is slot used? */
+    bool is_dir;                /* Is directory? */
+    pthread_mutex_t lock;       /* Per-FD lock */
 } ixland_fd_entry_t;
 
 static ixland_fd_entry_t fd_table[IXLAND_MAX_FD];
@@ -486,6 +486,15 @@ int __ixland_stat_impl(const char *pathname, struct stat *statbuf) {
         errno = EFAULT;
         return -1;
     }
+
+    if (stat(pathname, statbuf) == 0) {
+        return 0;
+    }
+
+    if (errno != ENOENT) {
+        return -1;
+    }
+
     return ixland_vfs_stat(pathname, statbuf);
 }
 
@@ -493,6 +502,10 @@ int __ixland_fstat_impl(int fd, struct stat *statbuf) {
     if (!statbuf) {
         errno = EFAULT;
         return -1;
+    }
+
+    if (fstat(fd, statbuf) == 0) {
+        return 0;
     }
 
     if (fd < 0 || fd >= IXLAND_MAX_FD) {
