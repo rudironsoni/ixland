@@ -717,8 +717,11 @@ IXLAND_TEST(cross_signal_multi_generation_delivery) {
     simulate_child_exit(child, 0);
     simulate_child_exit(parent, 0);
     int status;
+    pid_t parent_pid = parent->pid;
+    ixland_set_current_task(parent);
     ixland_waitpid(child->pid, &status, 0);
-    ixland_waitpid(parent->pid, &status, 0);
+    ixland_set_current_task(grandparent);
+    ixland_waitpid(parent_pid, &status, 0);
 
     return true;
 }

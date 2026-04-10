@@ -104,9 +104,25 @@ Commit intersections:
 - Ownership-boundary regression remains absent in linux lane:
   - duplicate canonical-owner directory matches under `ixland-system/compatibility/linux/**`: 0
 
+## Repo-health stabilization-1 addendum
+
+- Canonical signal termination semantics repaired in `ixland-system/kernel/signal/signal.c`:
+  - terminating signals now also mark tasks exited and zombie for wait/reap visibility.
+- Bounded cross-signal harness defects repaired in `ixland-system/Tests/unit/test_cross_signals.c`:
+  - post-reap PID assertions now preserve child PID before `waitpid`
+  - synthetic group-leader setup now allocates required task subsystems
+  - multi-generation cleanup now reaps child from the correct current task context
+- Proof after repair:
+  - `cross_` filtered suite passes `24/24`
+  - `linux-compat-tests` remains passing
+- Global repo health is still not passing:
+  - repo lint check still fails on pre-existing SwiftLint and debt findings outside this tranche
+  - type-check is toolchain-blocked in this environment because `clang-tidy` is unavailable
+  - full unfiltered `ixland-core-tests` still does not complete within timeout, despite all localized signal/cross-signal clusters now passing in isolation/filter scope
+
 ## Pending for G3+
 
 - No canonical semantic ownership uplifts performed.
 - No session/workspace integration.
 - No shell readiness exposure.
-- G3 remains blocked pending bounded exec-suite causality closure.
+- G3 remains blocked pending broader repo-health stabilization beyond the exec and cross-signal tranche fixes.
