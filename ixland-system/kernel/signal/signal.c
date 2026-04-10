@@ -122,6 +122,8 @@ static void __ixland_apply_signal_to_task(ixland_task_t *task, int sig) {
     if (terminating) {
         atomic_store(&task->signaled, true);
         atomic_store(&task->termsig, sig);
+        atomic_store(&task->exited, true);
+        atomic_store(&task->state, IXLAND_TASK_ZOMBIE);
     }
 
     /* Notify parent if this child state is wait-visible */

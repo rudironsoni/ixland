@@ -129,8 +129,9 @@ IXLAND_TEST(cross_signal_sigterm_terminates_child) {
 
     /* Wait for child - verify signaled exit */
     int status;
-    pid_t result = ixland_waitpid(child->pid, &status, 0);
-    IXLAND_ASSERT_EQ(result, child->pid);
+    pid_t child_pid = child->pid;
+    pid_t result = ixland_waitpid(child_pid, &status, 0);
+    IXLAND_ASSERT_EQ(result, child_pid);
     IXLAND_ASSERT(WIFSIGNALED(status));
     IXLAND_ASSERT_EQ(WTERMSIG(status), SIGTERM);
 
@@ -163,8 +164,9 @@ IXLAND_TEST(cross_signal_sigkill_unconditional_termination) {
     IXLAND_ASSERT_EQ(atomic_load(&child->termsig), SIGKILL);
 
     int status;
-    pid_t result = ixland_waitpid(child->pid, &status, 0);
-    IXLAND_ASSERT_EQ(result, child->pid);
+    pid_t child_pid = child->pid;
+    pid_t result = ixland_waitpid(child_pid, &status, 0);
+    IXLAND_ASSERT_EQ(result, child_pid);
     IXLAND_ASSERT(WIFSIGNALED(status));
     IXLAND_ASSERT_EQ(WTERMSIG(status), SIGKILL);
 
@@ -344,8 +346,9 @@ IXLAND_TEST(cross_signal_parent_notified_on_child_exit) {
 
     /* Parent should be able to collect child */
     int status;
-    pid_t result = ixland_waitpid(child->pid, &status, 0);
-    IXLAND_ASSERT_EQ(result, child->pid);
+    pid_t child_pid = child->pid;
+    pid_t result = ixland_waitpid(child_pid, &status, 0);
+    IXLAND_ASSERT_EQ(result, child_pid);
     IXLAND_ASSERT(WIFEXITED(status));
     IXLAND_ASSERT_EQ(WEXITSTATUS(status), 42);
 
@@ -377,8 +380,9 @@ IXLAND_TEST(cross_signal_sigchld_on_child_exit) {
 
     /* Verify we can wait for child */
     int status;
-    pid_t result = ixland_waitpid(child->pid, &status, 0);
-    IXLAND_ASSERT_EQ(result, child->pid);
+    pid_t child_pid = child->pid;
+    pid_t result = ixland_waitpid(child_pid, &status, 0);
+    IXLAND_ASSERT_EQ(result, child_pid);
 
     return true;
 }
@@ -396,6 +400,9 @@ IXLAND_TEST(cross_signal_group_delivery) {
     ixland_task_t *group_leader = ixland_task_alloc();
     IXLAND_ASSERT_NOT_NULL(group_leader);
     group_leader->pgid = group_leader->pid; /* New group */
+    group_leader->files = ixland_files_alloc(IXLAND_MAX_FD);
+    group_leader->fs = ixland_fs_alloc();
+    group_leader->sighand = ixland_sighand_alloc();
 
     pid_t target_pgid = group_leader->pid;
 
