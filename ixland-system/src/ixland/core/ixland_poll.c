@@ -295,6 +295,25 @@ int ixland_select(int nfds, linux_fd_set_t *readfds, linux_fd_set_t *writefds,
         return 0;
     }
 
+    for (int fd = 0; fd < nfds; fd++) {
+        bool requested = false;
+
+        if (readfds && IXLAND_FD_ISSET(fd, readfds)) {
+            requested = true;
+        }
+        if (writefds && IXLAND_FD_ISSET(fd, writefds)) {
+            requested = true;
+        }
+        if (exceptfds && IXLAND_FD_ISSET(fd, exceptfds)) {
+            requested = true;
+        }
+
+        if (requested && fcntl(fd, F_GETFL) < 0) {
+            errno = EBADF;
+            return -1;
+        }
+    }
+
     /* Create kqueue */
     int kq = kqueue();
     if (kq < 0) {
