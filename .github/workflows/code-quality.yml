@@ -79,20 +79,7 @@ jobs:
     - name: Install Build Tools
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake clang
-
-    - name: Strict Type Check ixland-libc
-      run: |
-        echo "Building ixland-libc with strict type checking..."
-        cmake -B build-libc -S ixland-libc \
-          -DCMAKE_C_COMPILER=clang \
-          -DCMAKE_C_FLAGS="-Wall -Wextra -Werror -Werror=implicit-function-declaration -Werror=incompatible-pointer-types -Werror=int-conversion -Werror=return-type -Werror=uninitialized -Werror=strict-prototypes -Werror=old-style-definition -Werror=missing-prototypes -Werror=implicit-int -Werror=pointer-sign -Werror=ignored-qualifiers" \
-          -DCMAKE_SYSTEM_NAME=iOS \
-          -DCMAKE_OSX_SYSROOT="" \
-          -DCMAKE_C_STANDARD=11 \
-          -DIXLAND_LIBC_BUILD_TESTS=OFF
-        cmake --build build-libc 2>&1 || echo "Strict type check found issues in ixland-libc"
-      continue-on-error: true
+        sudo apt-get install -y clang
 
     - name: Run clang-tidy with Strict Mode
       run: |

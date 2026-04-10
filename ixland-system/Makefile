@@ -27,18 +27,28 @@ WAMR_SCRIPT := ./build_wamr_ios_static.sh
 WAMR_INCLUDE_DIR := ./deps/wamr/core/iwasm/include
 
 IXLAND_SOURCES := \
-	src/ixland/core/ixland_init.c \
-	src/ixland/core/ixland_libc_delegate.c \
-	src/ixland/util/ixland_path.c \
-	src/ixland/core/ixland_vfs.c \
-	src/ixland/core/ixland_process.c \
+	kernel/init.c \
+	kernel/libc_delegate.c \
+	fs/ixland_path.c \
+	fs/vfs/ixland_vfs.c \
+	kernel/sys.c \
 	src/ixland/core/ixland_context.c \
 	src/ixland/core/ixland_file.c \
-	src/ixland/core/ixland_network.c \
+	kernel/net/network.c \
 	src/ixland/interpose/ixland_interpose.c \
-	src/ixland/wamr/ixland_wamr_simple.c
+	src/ixland/wamr/ixland_wamr_simple.c \
+	kernel/time.c \
+	kernel/resource.c \
+	kernel/random.c \
+	kernel/sync.c \
+	kernel/cred.c \
+	fs/exec.c \
+	fs/path.c \
+	fs/mount.c \
+	fs/inode.c \
+	fs/super.c
 
-COMMON_CFLAGS := -Wall -Wextra -g -O0 -I./include -I./src/ixland/internal -I$(WAMR_INCLUDE_DIR)
+COMMON_CFLAGS := -Wall -Wextra -Werror -Werror=implicit-function-declaration -Werror=incompatible-pointer-types -Werror=int-conversion -Werror=return-type -Werror=uninitialized -Werror=strict-prototypes -Werror=old-style-definition -Werror=missing-prototypes -Werror=implicit-int -Werror=pointer-sign -Werror=ignored-qualifiers -g -O0 -I./include -I./src/ixland/internal -I$(WAMR_INCLUDE_DIR)
 SIM_CFLAGS := $(COMMON_CFLAGS) -target $(SIM_TARGET) -isysroot $(SIM_SDK_PATH) -DIXLAND_IOS_BUILD -DIXLAND_SIMULATOR_BUILD
 DEVICE_CFLAGS := $(COMMON_CFLAGS) -target $(IOS_TARGET) -isysroot $(IOS_SDK_PATH) -DIXLAND_IOS_BUILD
 

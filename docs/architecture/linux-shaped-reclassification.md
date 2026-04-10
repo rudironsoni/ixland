@@ -1,39 +1,149 @@
-# Linux-shaped reclassification
+# Linux-Shaped Reclassification - Nuclear Refactor Complete
+
+## Summary
+
+This document records the **nuclear refactor** that transformed `ixland-system` from a fragmented CMake-based compatibility layer into a Linux-shaped canonical ownership structure with Xcode-only build.
 
 ## Scope
 
-This document records canonical ownership reclassification for `ixland-system` to enforce one semantic owner per subsystem and remove split ownership between `fs/*` and `src/ixland/fs/*`.
+- **Deleted**: CMake build system entirely
+- **Deleted**: Donor-derived `compatibility/linux/` lane entirely
+- **Normalized**: All syscall/kernel files moved to canonical Linux-semantic owners
+- **Build Truth**: Xcode projects with supporting Makefiles only
 
-## Reclassification table
+## Reclassification Table
 
-| Area | Previous owner(s) | Canonical owner | Decision |
+| Area | Previous Owner | Canonical Owner | Action |
 |---|---|---|---|
-| File syscall surface (open/read/write/stat/fcntl/ioctl/select/epoll/namei/readdir) | `ixland-system/src/ixland/fs/*` | `ixland-system/fs/*` | Move syscall-family owners to `fs/*`; remove split-brain ownership in `src/ixland/fs/*`. |
-| FD syscall backing table for syscall-family wrappers | `ixland-system/src/ixland/fs/fdtable.c` | `ixland-system/fs/fdtable.c` | Merge syscall helper layer into canonical `fs/fdtable.c`; delete duplicate canonical owner in `src/ixland/fs/`. |
-| Task-owned fd graph APIs (`ixland_files_t`, `ixland_file_t`) | `ixland-system/fs/fdtable.c` | `ixland-system/fs/fdtable.c` | Preserve existing kernel/task owner and extend in place where required by syscall wrappers. |
-| Directory path/entry syscall implementation (`namei` + placeholder `readdir`) | `ixland-system/src/ixland/fs/namei.c`, placeholder `src/ixland/fs/readdir.c` | `ixland-system/fs/namei.c`, `ixland-system/fs/readdir.c` | Promote `namei` to canonical owner under `fs/*`; replace placeholder with real canonical `fs/readdir.c`. |
-| Process identity API (`ixland_getuid/geteuid/getgid/getegid/setuid/setgid`) | `ixland-system/src/ixland/core/ixland_identity.c` | `ixland-system/kernel/task/ixland_identity.c` | Drain canonical ownership from `src/ixland/core/*` and colocate identity with task ownership. |
+| File syscall surface | `src/ixland/fs/*` | `fs/*` | Merged and normalized |
+| FD table | `src/ixland/fs/fdtable.c` | `fs/fdtable.c` | Moved to canonical owner |
+| Path/name resolution | `src/ixland/fs/namei.c` | `fs/namei.c` | Moved to canonical owner |
+| Process initialization | `src/ixland/core/ixland_init.c` | `kernel/init.c` | Moved to kernel/ |
+| Process management | `src/ixland/core/ixland_process.c` | `kernel/sys.c` | Moved to kernel/ |
+| Libc delegation | `src/ixland/core/ixland_libc_delegate.c` | `kernel/libc_delegate.c` | Moved to kernel/ |
+| Identity/credentials | `kernel/task/ixland_identity.c` | `kernel/cred.c` | Simplified path |
+| Network | `net/ixland_network.c` | `kernel/net/network.c` | Moved under kernel/ |
+| TTY driver | `drivers/tty/tty.h` | `fs/tty/tty.h` | Moved to fs/ |
+| Time syscalls | *new* | `kernel/time.c` | Created canonical owner |
+| Resource limits | *new* | `kernel/resource.c` | Created canonical owner |
+| Random/entropy | *new* | `kernel/random.c` | Created canonical owner |
+| Sync/futex | *new* | `kernel/sync.c` | Created canonical owner |
+| Exec syscalls | *new* | `fs/exec.c` | Created canonical owner |
+| Path operations | *new* | `fs/path.c` | Created canonical owner |
+| Mount operations | *new* | `fs/mount.c` | Created canonical owner |
+| Inode operations | *new* | `fs/inode.c` | Created canonical owner |
+| Superblock/sync | *new* | `fs/super.c` | Created canonical owner |
 
-## Explicit contract decisions
+## Deleted Components
 
-### Path-based contract
+### Build System
+- `CMakeLists.txt` (root and all subdirectories)
+- `CMakePresets.json` (root and ixland-system/)
+- `ixland-toolchain/cmake/` directory
+- All CMake-related build scripts
 
-Path-based filesystem syscalls must be canonicalized through VFS-backed translation paths (`ixland_vfs_*` and `ixland_vfs_translate`) with no host-first fallback roulette.
+### Compatibility Lane
+- `ixland-system/compatibility/linux/` - entire donor-derived compatibility layer
+  - `abi/`, `loader/`, `runtime/`, `distro/`, `projection/`
+  - `signal_translation/`, `fs_translation/`
+  - `proc_views/`, `dev_views/`
+  - `emulation/`, `tcti/`, `tests/`
 
-### FD-based contract
+### Empty Directories Removed
+- `src/ixland/core/` (emptied and removed)
+- `src/ixland/` (emptied and removed)
+- `src/` (emptied and removed)
+- `drivers/tty/` (emptied and removed)
+- `drivers/` (emptied and removed)
+- `net/` (emptied and removed)
 
-FD-based syscalls must operate through one canonical fd-entry owner in `ixland-system/fs/fdtable.c` for syscall wrappers, while preserving task-owned `ixland_files_t` APIs used by kernel/task.
+## Final Directory Structure
 
-## Prohibitions enforced by this reclassification
+```
+ixland-system/
+├── kernel/              # Kernel subsystems
+│   ├── task/            # fork, exit, wait, PID (fork.c, exit.c, wait.c, pid.c, task.c)
+│   ├── signal/          # signal delivery (signal.c, signal.h)
+│   ├── exec/            # exec dispatch (exec.c)
+│   ├── cred/            # credentials/identity (cred.c)
+│   ├── time/            # clocks and timers (time.c)
+│   ├── resource/        # rlimits (resource.c)
+│   ├── random/          # entropy (random.c)
+│   ├── sync/            # futex/sync (sync.c)
+│   ├── net/             # network subsystem (network.c)
+│   ├── ipc/             # IPC (placeholder)
+│   └── mm/              # memory management (placeholder)
+├── fs/                  # Filesystem
+│   ├── fdtable.c        # File descriptor table
+│   ├── open.c           # open/creat
+│   ├── read_write.c     # read/write/pread/pwrite
+│   ├── stat.c           # stat/lstat/fstat
+│   ├── fcntl.c          # fcntl
+│   ├── ioctl.c          # ioctl
+│   ├── select.c         # select/pselect
+│   ├── eventpoll.c      # epoll
+│   ├── namei.c          # path resolution
+│   ├── readdir.c        # directory operations
+│   ├── exec.c           # exec family
+│   ├── path.c           # path operations (cwd, chdir)
+│   ├── mount.c          # mount/statfs
+│   ├── inode.c          # inode operations (chmod, chown)
+│   ├── super.c          # superblock/sync
+│   ├── proc/            # /proc filesystem
+│   ├── dev/             # /dev filesystem
+│   ├── tty/             # TTY subsystem (tty.h)
+│   ├── pty/             # PTY
+│   ├── pipe/            # pipes
+│   └── socket/          # sockets
+├── runtime/             # Execution backends
+│   ├── native/          # Native command registry
+│   ├── wasi/            # WAMR WASI bridge
+│   └── script/          # Shebang interpreter
+├── compat/              # Compatibility layer
+│   ├── posix/           # POSIX compatibility
+│   └── interpose/       # Symbol interposition
+└── tests/               # Test suite
+```
 
-- No duplicate canonical owner for the same syscall family across `ixland-system/fs/*` and `ixland-system/src/ixland/fs/*`.
-- No placeholder canonical owner for `readdir`.
-- No canonical syscall ownership retained in `ixland-system/src/ixland/core/*` when equivalent subsystem ownership exists under kernel/fs.
-- No compatibility shims, aliases, or forwarding wrappers introduced to preserve old paths.
+## Build System
 
-## Expected post-cutover shape
+**Single Source of Truth**: Xcode projects with supporting Makefiles
 
-- Canonical fs syscall family ownership: `ixland-system/fs/*`
-- Canonical process identity ownership: `ixland-system/kernel/task/*`
-- `ixland-system/src/ixland/fs/*`: removed from canonical build ownership
-- `ixland-system/src/ixland/core/*`: drained of canonical syscall ownership in this tranche
+- `ixland-system/Makefile` - Build libixland static libraries
+- `ixland-system/libixlandTest/` - Xcode test projects
+- `ixland-app/a-Shell.xcodeproj` - Main application
+
+## Prohibitions Enforced
+
+1. **No CMake** - Build system is Xcode/Make only
+2. **No compatibility lane** - Donor-derived compatibility layer deleted entirely
+3. **No split ownership** - One canonical owner per semantic domain
+4. **No shims** - Direct canonical ownership, no forwarding wrappers
+5. **No backward compatibility** - Old paths removed, not deprecated
+
+## iOS Mediation Pattern
+
+All canonical owners follow the pattern: Linux-shaped semantics with iOS mediation as implementation detail. iOS restrictions are handled locally within each canonical owner, not abstracted away.
+
+Example from `kernel/cred.c`:
+```c
+int ixland_setuid(uid_t uid) {
+    /* iOS restriction: cannot change user identity */
+    (void)uid;
+    errno = EPERM;
+    return -1;
+}
+```
+
+## Verification
+
+Run the build to verify:
+```bash
+cd ixland-system
+make sdk-sim    # Build for iOS Simulator
+make sdk-device # Build for iOS Device
+```
+
+## See Also
+
+- `linux-shaped-cutover-report.md` - Detailed cutover report

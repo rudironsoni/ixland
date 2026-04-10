@@ -141,13 +141,29 @@ if [ "$STRICT_TYPING_MODE" = true ] || [ "$CHECK_MODE" = true ]; then
 
     echo "Checking strict typing configuration..."
 
-    # Check CMakeLists.txt has strict typing enabled
-    if grep -q "option(IXLAND_STRICT_TYPING" CMakeLists.txt; then
-        echo "  CMake IXLAND_STRICT_TYPING option: PRESENT"
+    # Check clang-tidy has WarningsAsErrors enabled
+    if grep -q "WarningsAsErrors: '\*'" .clang-tidy; then
+        echo "  clang-tidy WarningsAsErrors '*': ENABLED"
     else
-        echo "  CMake IXLAND_STRICT_TYPING option: MISSING"
+        echo "  clang-tidy WarningsAsErrors: NOT STRICT"
         EXIT_CODE=1
     fi
+
+    # Check Makefile adds strict flags
+    if grep -q "-Werror" ixland-system/Makefile; then
+        echo "  Strict C flags in Makefile: ENABLED"
+    else
+        echo "  Strict C flags in Makefile: MISSING"
+        EXIT_CODE=1
+    fi
+
+    echo ""
+    echo "Strict type checking configuration verified."
+
+    if [ "$STRICT_TYPING_MODE" = true ]; then
+        exit $EXIT_CODE
+    fi
+fi
 
     # Check clang-tidy has WarningsAsErrors enabled
     if grep -q "WarningsAsErrors: '\\*'" .clang-tidy; then

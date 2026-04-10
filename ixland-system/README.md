@@ -82,49 +82,27 @@ Not literal Linux kernel compatibility—rather, Linux-like userland behavior th
 
 ## Build System
 
-**Single Source of Truth**: CMake with `CMakePresets.json`
-
-### Fresh Clone Setup
-
-```bash
-# Clone the monorepo
-git clone git@github.com:rudironsoni/ixland.git
-cd ixland/ixland-system
-
-# Bootstrap (checks prerequisites, configures)
-tools/bootstrap.sh
-
-# Verify environment
-tools/doctor.sh
-```
+**Single Source of Truth**: Xcode projects with supporting Makefiles
 
 ### Build Commands
 
 ```bash
-# Configure for iOS Simulator
-cmake --preset ios-simulator-debug
+# Build for iOS Simulator
+make sdk-sim
 
-# Build
-cmake --build --preset ios-simulator-debug
+# Build for iOS Device
+make sdk-device
 
-# Configure for iOS Device
-cmake --preset ios-device-debug
-
-# Build
-cmake --build --preset ios-device-debug
+# Build all
+make sdk
 ```
 
 ### Test Commands
 
 ```bash
-# Simulator tests
-tools/test-simulator.sh
-
-# Device tests
-tools/test-device.sh
-
-# With CTest (orchestrates xcodebuild)
-ctest --preset ios-simulator-test
+# Build test app for simulator
+cd libixlandTest/libixlandTest
+xcodebuild -scheme libixlandTest -sdk iphonesimulator
 ```
 
 ## Repository Layout
@@ -230,16 +208,10 @@ A feature is **not** complete without executable evidence.
 ### Test Commands
 
 ```bash
-# Run all tests
-tools/test-simulator.sh
-
-# Run specific test category
-ctest --preset ios-simulator-test -R unit
-ctest --preset ios-simulator-test -R integration
-
-# Run with sanitizer
-cmake --preset ios-simulator-asan
-ctest --preset ios-simulator-test
+# Build and run tests
+make sdk-sim
+cd libixlandTest/libixlandTest
+xcodebuild test -scheme libixlandTest -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 17 Pro"
 ```
 
 ## Constraints
