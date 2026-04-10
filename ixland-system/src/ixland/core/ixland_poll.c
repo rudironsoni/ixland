@@ -112,7 +112,8 @@ static int ixland_poll_kqueue(struct linux_pollfd *fds, unsigned int nfds, int t
         fds[i].revents = 0;
 
         if (fds[i].fd < 0) {
-            /* Negative fd is ignored */
+            /* Negative fd is invalid for poll */
+            fds[i].revents = IXLAND_POLLNVAL;
             continue;
         }
 
@@ -123,7 +124,8 @@ static int ixland_poll_kqueue(struct linux_pollfd *fds, unsigned int nfds, int t
         }
 
         /* Add read filter if requested */
-        if (fds[i].events & (IXLAND_POLLIN | IXLAND_POLLRDNORM | IXLAND_POLLRDBAND | IXLAND_POLLPRI)) {
+        if (fds[i].events &
+            (IXLAND_POLLIN | IXLAND_POLLRDNORM | IXLAND_POLLRDBAND | IXLAND_POLLPRI)) {
             EV_SET(&changelist[nchanges], fds[i].fd, EVFILT_READ, EV_ADD, 0, 0,
                    (void *)(uintptr_t)i);
             nchanges++;
@@ -229,7 +231,7 @@ int ixland_poll(struct linux_pollfd *fds, unsigned int nfds, int timeout) {
  * @return int Number of ready fds on success, -1 on error with errno set
  */
 int ixland_ppoll(struct linux_pollfd *fds, unsigned int nfds, const struct linux_timespec *timeout,
-              const linux_sigset_t *sigmask) {
+                 const linux_sigset_t *sigmask) {
     /* Convert timeout */
     int timeout_ms = -1;
     if (timeout) {
@@ -274,7 +276,7 @@ int ixland_ppoll(struct linux_pollfd *fds, unsigned int nfds, const struct linux
  * @return int Number of ready fds on success, -1 on error with errno set
  */
 int ixland_select(int nfds, linux_fd_set_t *readfds, linux_fd_set_t *writefds,
-               linux_fd_set_t *exceptfds, struct linux_timeval *timeout) {
+                  linux_fd_set_t *exceptfds, struct linux_timeval *timeout) {
     /* Validate nfds */
     if (nfds < 0 || nfds > IXLAND_FD_SETSIZE) {
         errno = EINVAL;
@@ -451,8 +453,8 @@ int ixland_select(int nfds, linux_fd_set_t *readfds, linux_fd_set_t *writefds,
  * @brief Synchronous I/O multiplexing with signal mask
  */
 int ixland_pselect(int nfds, linux_fd_set_t *readfds, linux_fd_set_t *writefds,
-                linux_fd_set_t *exceptfds, const struct linux_timespec *timeout,
-                const linux_sigset_t *sigmask) {
+                   linux_fd_set_t *exceptfds, const struct linux_timespec *timeout,
+                   const linux_sigset_t *sigmask) {
     /* Convert timeout */
     struct linux_timeval tv;
     struct linux_timeval *tvp = NULL;
@@ -499,8 +501,8 @@ typedef struct ixland_epitem {
     uint32_t registered_events; /* Events currently registered with kqueue */
     bool is_registered;         /* Is this item active? */
     bool edge_triggered;        /* EPOLLET mode */
-    struct ixland_epitem *next;    /* Hash table chaining */
-    struct ixland_epitem *prev;    /* Hash table chaining */
+    struct ixland_epitem *next; /* Hash table chaining */
+    struct ixland_epitem *prev; /* Hash table chaining */
 } ixland_epitem_t;
 
 /* Epoll instance structure */
@@ -513,8 +515,8 @@ typedef struct ixland_epoll_instance {
 
     /* Hash table for fast fd lookup (size is power of 2) */
     ixland_epitem_t **items; /* Hash table buckets */
-    int hash_size;        /* Number of buckets */
-    int item_count;       /* Number of registered items */
+    int hash_size;           /* Number of buckets */
+    int item_count;          /* Number of registered items */
 
     /* Stats */
     uint64_t total_events; /* Total events returned */
@@ -581,7 +583,7 @@ static uint32_t ixland_epoll_to_kqueue_flags(uint32_t epoll_events) {
 
 /* Convert epoll events to kqueue filters and build kevent changes */
 static int ixland_epoll_build_kevents(struct kevent *changes, int max_changes, int fd,
-                                   uint32_t epoll_events, void *udata, bool add_mode) {
+                                      uint32_t epoll_events, void *udata, bool add_mode) {
     int n = 0;
     uint32_t kflags = ixland_epoll_to_kqueue_flags(epoll_events);
 
@@ -770,15 +772,15 @@ int ixland_epoll_ctl(int epfd, int op, int fd, struct epoll_event *event) {
         return -1;
     }
 
-    /* Validate fd */
-    if (fd < 0 || fcntl(fd, F_GETFL) < 0) {
-        errno = EBADF;
-        return -1;
-    }
-
     /* epfd and fd cannot be the same */
     if (epfd == fd) {
         errno = EINVAL;
+        return -1;
+    }
+
+    /* Validate fd */
+    if (fd < 0 || fcntl(fd, F_GETFL) < 0) {
+        errno = EBADF;
         return -1;
     }
 
@@ -925,7 +927,7 @@ int ixland_epoll_wait(int epfd, struct epoll_event *events, int maxevents, int t
  * @brief Wait for events with signal mask
  */
 int ixland_epoll_pwait(int epfd, struct epoll_event *events, int maxevents, int timeout,
-                    const struct ixland_sigset *sigmask) {
+                       const struct ixland_sigset *sigmask) {
     /* Validate parameters */
     if (!events || maxevents <= 0) {
         errno = EINVAL;
@@ -988,8 +990,8 @@ int ixland_epoll_pwait(int epfd, struct epoll_event *events, int maxevents, int 
         if (!item)
             continue;
 
-        events[ready_count].events =
-            ixland_kqueue_to_epoll_events(kevents[i].filter, kevents[i].flags, (int)kevents[i].data);
+        events[ready_count].events = ixland_kqueue_to_epoll_events(
+            kevents[i].filter, kevents[i].flags, (int)kevents[i].data);
 
         /* Copy user data from the registered event */
         memcpy(&events[ready_count].data, &item->event.data, sizeof(epoll_data_t));
@@ -998,8 +1000,8 @@ int ixland_epoll_pwait(int epfd, struct epoll_event *events, int maxevents, int 
         if (item->event.events & EPOLLONESHOT) {
             pthread_mutex_lock(&ep->lock);
             struct kevent changes[2];
-            int nchanges =
-                ixland_epoll_build_kevents(changes, 2, item->fd, item->registered_events, item, false);
+            int nchanges = ixland_epoll_build_kevents(changes, 2, item->fd, item->registered_events,
+                                                      item, false);
             if (nchanges > 0) {
                 kevent(ep->kq, changes, nchanges, NULL, 0, NULL);
             }
@@ -1024,12 +1026,14 @@ int ixland_epoll_pwait(int epfd, struct epoll_event *events, int maxevents, int 
  * @brief Wait for events with nanosecond timeout
  */
 int ixland_epoll_pwait2(int epfd, struct epoll_event *events, int maxevents,
-                     const struct ixland_timespec *timeout, const struct ixland_sigset *sigmask) {
+                        const struct ixland_timespec *timeout,
+                        const struct ixland_sigset *sigmask) {
     /* Convert timeout to milliseconds */
     int timeout_ms = -1;
     if (timeout) {
         timeout_ms = (int)(timeout->tv_sec * 1000 + timeout->tv_nsec / 1000000);
     }
 
-    return ixland_epoll_pwait(epfd, events, maxevents, timeout_ms, (const struct ixland_sigset *)sigmask);
+    return ixland_epoll_pwait(epfd, events, maxevents, timeout_ms,
+                              (const struct ixland_sigset *)sigmask);
 }

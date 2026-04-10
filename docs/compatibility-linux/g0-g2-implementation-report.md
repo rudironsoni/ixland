@@ -157,6 +157,30 @@ Commit intersections:
 - Remaining red state:
   - full unfiltered suite still reports deterministic failures, but now as explicit assertions (not sequence stall), primarily in poll and directory syscall tests.
 
+## Repo-health stabilization-4 addendum
+
+- Repo truth remained clean entering this tranche:
+  - `ec9b3916d0a38c0fb1fb15810bab0d74deb3206f` present on `main`
+  - `8b607b804b6a05a2e552ebdbff2f55bd559753b2` present on `main` and remote-visible
+  - `ixland_file_v2.c` contains the stabilization-3 stat/fstat fallback logic claimed by docs
+- Full-suite deterministic next blocker cluster after stabilization-3:
+  - poll and directory syscall assertions (no longer signal killpg sequence stall)
+- Bounded stabilization-4 fixes implemented:
+  - `ixland-system/src/ixland/core/ixland_poll.c`
+    - `poll` negative fd entries now produce `POLLNVAL` as test contract expects
+    - `epoll_ctl` now validates `epfd == fd` before generic fd validity checks to preserve `EINVAL` semantics
+  - `ixland-system/Tests/unit/test_poll_syscalls.c`
+    - `select_invalid_fd_returns_ebadf` now constructs a real invalid-FD set member (closed fd 0) instead of macro-ignored `FD_SET(-1, ...)`
+- Post-fix proof:
+  - `poll_invalid_fd_sets_nval` now passes
+  - `epoll_ctl_epfd_equals_fd_returns_einval` now passes
+  - `exec_native_happy_path` and `exec_cloexec_behavior` remain passing
+  - `linux-compat-tests` remains passing
+  - full unfiltered suite pass count moved from ~`337/347` to `339/347` in this environment
+- Remaining red state:
+  - `select_invalid_fd_returns_ebadf` still failing in full-suite context
+  - directory syscall cluster still failing deterministically
+
 ## Pending for G3+
 
 - No canonical semantic ownership uplifts performed.

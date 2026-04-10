@@ -199,11 +199,14 @@ IXLAND_TEST(select_empty_fds_returns_zero) {
 IXLAND_TEST(select_invalid_fd_returns_ebadf) {
     linux_fd_set_t readfds;
     IXLAND_FD_ZERO(&readfds);
-    IXLAND_FD_SET(-1, &readfds);
+    IXLAND_FD_SET(0, &readfds);
+
+    close(0);
 
     int result = ixland_select(1, &readfds, NULL, NULL, NULL);
     IXLAND_ASSERT_EQ(result, -1);
     IXLAND_ASSERT_EQ(errno, EBADF);
+
     return true;
 }
 
