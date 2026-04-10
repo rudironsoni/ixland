@@ -150,26 +150,6 @@ int __ixland_unlink_impl(const char *pathname) {
     return unlink(translated_path);
 }
 
-int ixland_chdir(const char *path) {
-    return __ixland_chdir_impl(path);
-}
-
-int ixland_fchdir(int fd) {
-    return __ixland_fchdir_impl(fd);
-}
-
-char *ixland_getcwd(char *buf, size_t size) {
-    return __ixland_getcwd_impl(buf, size);
-}
-
-int ixland_mkdir(const char *pathname, mode_t mode) {
-    return __ixland_mkdir_impl(pathname, mode);
-}
-
-int ixland_rmdir(const char *pathname) {
-    return __ixland_rmdir_impl(pathname);
-}
-
 int __ixland_symlink_impl(const char *target, const char *linkpath) {
     if (target == NULL || linkpath == NULL) {
         errno = EFAULT;
@@ -233,6 +213,26 @@ int __ixland_chroot_impl(const char *path) {
     (void)path;
     errno = EPERM;
     return -1;
+}
+
+int ixland_chdir(const char *path) {
+    return __ixland_chdir_impl(path);
+}
+
+int ixland_fchdir(int fd) {
+    return __ixland_fchdir_impl(fd);
+}
+
+char *ixland_getcwd(char *buf, size_t size) {
+    return __ixland_getcwd_impl(buf, size);
+}
+
+int ixland_mkdir(const char *pathname, mode_t mode) {
+    return __ixland_mkdir_impl(pathname, mode);
+}
+
+int ixland_rmdir(const char *pathname) {
+    return __ixland_rmdir_impl(pathname);
 }
 
 int ixland_unlink(const char *pathname) {

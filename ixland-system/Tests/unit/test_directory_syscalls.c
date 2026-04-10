@@ -30,6 +30,7 @@ extern int ixland_unlink(const char *pathname);
 extern int ixland_symlink(const char *target, const char *linkpath);
 extern ssize_t ixland_readlink(const char *pathname, char *buf, size_t bufsiz);
 extern int ixland_chroot(const char *path);
+extern int ixland_vfs_translate(const char *vpath, char *ios_path, size_t ios_path_len);
 
 #define TEST_DIR "/tmp/ixland_dir_test"
 #define TEST_SUBDIR TEST_DIR "/subdir"
@@ -37,20 +38,61 @@ extern int ixland_chroot(const char *path);
 #define TEST_FILE TEST_DIR "/testfile.txt"
 #define TEST_SYMLINK TEST_DIR "/testlink"
 
+static int test_translate_path(const char *vpath, char *ios_path, size_t len) {
+    return ixland_vfs_translate(vpath, ios_path, len);
+}
+
+static void cleanup_path_recursive(const char *path) {
+    struct stat st;
+    if (lstat(path, &st) != 0) {
+        return;
+    }
+
+    if (S_ISDIR(st.st_mode)) {
+        rmdir(path);
+    } else {
+        unlink(path);
+    }
+}
+
 static void setup_test_dir(void) {
-    mkdir(TEST_DIR, 0755);
+    char ios_test_dir[1024];
+    if (test_translate_path(TEST_DIR, ios_test_dir, sizeof(ios_test_dir)) != 0) {
+        return;
+    }
+
+    cleanup_path_recursive(ios_test_dir);
+    mkdir(ios_test_dir, 0755);
 }
 
 static void cleanup_test_dir(void) {
-    /* Remove all test files and directories using ixland_unlink/rmdir */
-    /* Note: ixland_unlink and ixland_rmdir are the syscall wrappers being tested */
-    /* For cleanup, we use the native system calls directly */
-    char cmd[256];
-    snprintf(cmd, sizeof(cmd), "rm -rf %s", TEST_DIR);
-    /* system() unavailable on iOS - use direct system call via libc */
-    (void)cmd;
-    /* Manual cleanup - just try to remove the directory */
-    rmdir(TEST_DIR);
+    char ios_nested[1024];
+    char ios_subdir[1024];
+    char ios_file[1024];
+    char ios_link[1024];
+    char ios_test_dir[1024];
+
+    if (test_translate_path(TEST_NESTED, ios_nested, sizeof(ios_nested)) != 0 ||
+        test_translate_path(TEST_SUBDIR, ios_subdir, sizeof(ios_subdir)) != 0 ||
+        test_translate_path(TEST_FILE, ios_file, sizeof(ios_file)) != 0 ||
+        test_translate_path(TEST_SYMLINK, ios_link, sizeof(ios_link)) != 0 ||
+        test_translate_path(TEST_DIR, ios_test_dir, sizeof(ios_test_dir)) != 0) {
+        return;
+    }
+
+    cleanup_path_recursive(ios_link);
+    cleanup_path_recursive(ios_file);
+
+    char ios_nested_file[1024];
+    char ios_nested_link[1024];
+    snprintf(ios_nested_file, sizeof(ios_nested_file), "%s/test.txt", ios_nested);
+    snprintf(ios_nested_link, sizeof(ios_nested_link), "%s/link.txt", ios_nested);
+    cleanup_path_recursive(ios_nested_link);
+    cleanup_path_recursive(ios_nested_file);
+
+    cleanup_path_recursive(ios_nested);
+    cleanup_path_recursive(ios_subdir);
+    cleanup_path_recursive(ios_test_dir);
 }
 
 /* ============================================================================

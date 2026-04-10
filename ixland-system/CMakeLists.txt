@@ -79,7 +79,6 @@ set(IXLAND_FS_SOURCES
     fs/vfs.c
     fs/ixland_path.c
     fs/vfs/ixland_vfs.c
-    Tests/unit/stub_vfs_translate.c
 )
 
 # Runtime sources - native (non-WASI)
@@ -95,9 +94,11 @@ set(IXLAND_SYSCALL_SOURCES
     src/ixland/fs/stat.c
     src/ixland/fs/fcntl.c
     src/ixland/fs/ioctl.c
+    src/ixland/fs/select.c
+    src/ixland/fs/eventpoll.c
+    src/ixland/fs/namei.c
+    src/ixland/fs/readdir.c
     src/ixland/core/ixland_identity.c
-    src/ixland/core/ixland_poll.c
-    src/ixland/core/ixland_directory_syscalls.c
 )
 
 # Runtime sources - WASI adapter implementation
