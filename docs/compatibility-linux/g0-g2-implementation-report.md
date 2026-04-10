@@ -120,9 +120,25 @@ Commit intersections:
   - type-check is toolchain-blocked in this environment because `clang-tidy` is unavailable
   - full unfiltered `ixland-core-tests` still does not complete within timeout, despite all localized signal/cross-signal clusters now passing in isolation/filter scope
 
+## Repo-health stabilization-2 addendum
+
+- Full-suite blocker narrowed to sequence-sensitive contamination involving `pgrp` ordering before `signal_killpg_basic_delivery`.
+- First bad behavior source localized to `ixland-system/Tests/unit/test_pgrp_session.c` (`setpgid_fails_for_non_child`):
+  - test manually rewired `task_table` for a task already registered by `ixland_task_alloc`, risking table corruption during later suite traversal.
+- Bounded fix implemented:
+  - removed manual `task_table` insertion/removal in `setpgid_fails_for_non_child` and relied on canonical allocator/free ownership.
+- Post-fix proof:
+  - sequence reproducer `pg` passes deterministically (`24/24`) across two runs.
+  - `signal_killpg_basic_delivery` remains passing in isolation.
+  - previously fixed exec tests remain passing.
+  - `linux-compat-tests` remains passing.
+- Remaining red state:
+  - full unfiltered `ixland-core-tests` still does not complete within timeout in this environment even after reproducer fix.
+  - repo lint/type-check status unchanged outside this tranche (pre-existing SwiftLint debt; missing `clang-tidy` toolchain).
+
 ## Pending for G3+
 
 - No canonical semantic ownership uplifts performed.
 - No session/workspace integration.
 - No shell readiness exposure.
-- G3 remains blocked pending broader repo-health stabilization beyond the exec and cross-signal tranche fixes.
+- G3 remains blocked pending broader repo-health stabilization beyond the exec and signal-sequence tranche fixes.

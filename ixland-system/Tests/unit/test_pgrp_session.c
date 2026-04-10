@@ -535,12 +535,7 @@ IXLAND_TEST(setpgid_fails_for_non_child) {
     foreign->fs = ixland_fs_alloc();
     foreign->sighand = ixland_sighand_alloc();
 
-    /* Add to task table but not as our child */
-    int idx = (size_t)(foreign->pid % IXLAND_MAX_TASKS);
-    pthread_mutex_lock(&task_table_lock);
-    foreign->hash_next = task_table[idx];
-    task_table[idx] = foreign;
-    pthread_mutex_unlock(&task_table_lock);
+    /* Task is already registered by ixland_task_alloc; keep it out of our children list */
 
     /* Try to change foreign process's group - should fail */
     int ret = ixland_setpgid(foreign->pid, foreign->pid);
@@ -548,9 +543,6 @@ IXLAND_TEST(setpgid_fails_for_non_child) {
     IXLAND_ASSERT_EQ(errno, EPERM);
 
     /* Cleanup */
-    pthread_mutex_lock(&task_table_lock);
-    task_table[idx] = foreign->hash_next;
-    pthread_mutex_unlock(&task_table_lock);
     ixland_task_free(foreign);
 
     return true;
