@@ -89,7 +89,12 @@ set(IXLAND_RUNTIME_NATIVE_SOURCES
 
 # Core syscall sources (VFS-aware implementations)
 set(IXLAND_SYSCALL_SOURCES
-    src/ixland/core/ixland_file_v2.c
+    src/ixland/fs/fdtable.c
+    src/ixland/fs/open.c
+    src/ixland/fs/read_write.c
+    src/ixland/fs/stat.c
+    src/ixland/fs/fcntl.c
+    src/ixland/fs/ioctl.c
     src/ixland/core/ixland_identity.c
     src/ixland/core/ixland_poll.c
     src/ixland/core/ixland_directory_syscalls.c

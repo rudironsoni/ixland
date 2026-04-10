@@ -476,6 +476,17 @@ int __ixland_creat_impl(const char *pathname, mode_t mode);
 
 /* File descriptor table initialization */
 void __ixland_file_init_impl(void);
+int __ixland_alloc_fd_impl(void);
+void __ixland_free_fd_impl(int fd);
+void *__ixland_get_fd_entry_impl(int fd);
+void __ixland_put_fd_entry_impl(void *entry);
+int __ixland_get_real_fd_impl(void *entry);
+int __ixland_get_fd_flags_impl(void *entry);
+void __ixland_set_fd_flags_impl(void *entry, int flags);
+off_t __ixland_get_fd_offset_impl(void *entry);
+void __ixland_set_fd_offset_impl(void *entry, off_t offset);
+void __ixland_init_fd_entry_impl(int fd, int real_fd, int flags, mode_t mode, const char *path);
+void __ixland_clone_fd_entry_impl(int newfd, int oldfd);
 
 /* ============================================================================
  * FUNCTION DECLARATIONS - Filesystem (Internal)

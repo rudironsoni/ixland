@@ -205,12 +205,12 @@ This project uses automated linting and formatting to maintain code quality:
 
 **Duplicate code detection:**
 ```bash
-./scripts/check-duplicate-code.sh
+jscpd --config .jscpd.json .
 ```
 
 **Technical debt scanner:**
 ```bash
-./scripts/check-tech-debt.sh
+git grep -n -E "TODO|FIXME" -- '*.c' '*.h' '*.swift' '*.sh'
 ```
 
 ### C Code (ixland-system, ixland-libc)
@@ -400,8 +400,8 @@ All C code follows strict naming conventions enforced by clang-tidy:
 
 **Check naming:**
 ```bash
-./scripts/check-naming.sh
-./scripts/check-naming.sh --strict  # Exit with error on violations
+clang-tidy <file> --checks='readability-identifier-naming' -- <includes>
+git ls-files | grep -E '^ixland-system/(src/ixland/(core|fs)|kernel|fs)/.*_v2\.(c|h)$'
 ```
 
 **Exceptions:**

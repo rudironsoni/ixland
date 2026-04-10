@@ -15,7 +15,7 @@
 
 #include "../harness/ixland_test.h"
 
-/* Function declarations from ixland_file_v2.c */
+/* Function declarations from ixland fs modules */
 extern int __ixland_stat_impl(const char *pathname, struct stat *statbuf);
 extern int __ixland_fstat_impl(int fd, struct stat *statbuf);
 extern int __ixland_lstat_impl(const char *pathname, struct stat *statbuf);

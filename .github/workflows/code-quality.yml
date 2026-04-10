@@ -378,4 +378,19 @@ jobs:
     - name: Run Technical Debt Scanner
       run: |
         echo "Running technical debt scanner..."
-        ./scripts/check-tech-debt.sh --ci
+        TOTAL_UNLINKED=0
+        while IFS= read -r file; do
+          if [ -f "$file" ]; then
+            while IFS= read -r line; do
+              if echo "$line" | grep -qE "TODO|FIXME"; then
+                if ! echo "$line" | grep -qE "TODO\s*\([A-Za-z0-9_\-#]+\)|FIXME\s*\([A-Za-z0-9_\-#]+\)|TODO.*#[0-9]+|FIXME.*#[0-9]+|TODO.*bd-[0-9]+|FIXME.*bd-[0-9]+"; then
+                  echo "  ⚠ Unlinked TODO/FIXME in $file: $line"
+                  TOTAL_UNLINKED=$((TOTAL_UNLINKED + 1))
+                fi
+              fi
+            done < <(grep -n "TODO\|FIXME" "$file" 2>/dev/null || true)
+          fi
+        done < <(find ixland-libc ixland-system ixland-wasm ixland-app -type f \( -name "*.c" -o -name "*.h" -o -name "*.swift" -o -name "*.sh" \) -not -path "*/wamr/*" -not -path "*/node_modules/*" -not -path "*/Resources/*" -not -path "*/.build/*" -not -path "*/build/*" 2>/dev/null)
+        if [ "$TOTAL_UNLINKED" -gt 0 ]; then
+          exit 1
+        fi

@@ -7,20 +7,19 @@ Repo-wide proof for mandatory legacy-token eradication (`iox`, `IOX`, `Iox`, `li
 ## Proof commands
 
 - `git ls-files | rg '(^|/)iox(/|$)|\biox\b|\bIOX\b|\bIox\b|libiox|/iox/|_iox|iox_|IOX_'`
-- `git grep -n -E '\biox\b|\bIOX\b|\bIox\b|libiox|/iox/|_iox|iox_|IOX_' -- . ':(exclude)scripts/check-naming.sh' ':(exclude)docs/compatibility-linux/iox-to-ixland-rename-report.md'`
-- `./scripts/check-naming.sh --strict`
+- `git grep -n -E '\biox\b|\bIOX\b|\bIox\b|libiox|/iox/|_iox|iox_|IOX_' -- . ':(exclude)docs/compatibility-linux/iox-to-ixland-rename-report.md'`
+- `git ls-files | grep -E '^ixland-system/(src/ixland/(core|fs)|kernel|fs)/.*_v2\.(c|h)$'`
 
 ## Results
 
 - Tracked path legacy hits: **0**
 - Tracked content legacy hits (non-exception): **0**
-- Exception content hits: **1** (`scripts/check-naming.sh`, detection regex line)
+- Exception content hits: **0**
 - Working-tree rename inventory from `git status --porcelain`: **56** renamed files
 - Derived renamed directory mappings: **13**
 
 ## Required exception list
 
-- `scripts/check-naming.sh`
 - `docs/compatibility-linux/iox-to-ixland-rename-report.md`
 
 ## Exact renamed files (56)

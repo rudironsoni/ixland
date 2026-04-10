@@ -95,7 +95,7 @@ Commit intersections:
   - tracked path legacy token matches: 0
   - tracked source/header legacy token matches: 0
   - tracked build-definition legacy token matches: 0
-  - documented exceptions unchanged (`scripts/check-naming.sh`, rename report)
+  - documented exceptions unchanged (rename report only)
 - G2 boundary gate remains PASS within tranche scope:
   - runtime entry guarded by host-issued handle (`magic`, `active`) in linux runtime/host files
   - `linux-compat-tests` remains passing
@@ -144,11 +144,11 @@ Commit intersections:
 - Full-suite position moved materially forward:
   - no longer stalls at `signal_killpg_basic_delivery`
   - now reaches and deterministically reports concrete failures in file/poll/directory syscall clusters.
-- Next first bad behavior localized to file syscall wrappers in `ixland-system/src/ixland/core/ixland_file_v2.c`:
+- Next first bad behavior localized to file syscall wrappers now owned under `ixland-system/src/ixland/fs/stat.c`:
   - `__ixland_stat_impl` and `__ixland_fstat_impl` were too restrictive for current mixed host/VFS test paths.
 - Bounded product fix implemented:
-  - `__ixland_stat_impl`: host `stat()` first, fallback to `ixland_vfs_stat()` on `ENOENT`
-  - `__ixland_fstat_impl`: host `fstat()` first, fallback to ixland fd-table path when needed
+  - `src/ixland/fs/stat.c::__ixland_stat_impl`: host `stat()` first, fallback to `ixland_vfs_stat()` on `ENOENT`
+  - `src/ixland/fs/stat.c::__ixland_fstat_impl`: host `fstat()` first, fallback to ixland fd-table path when needed
 - Post-fix proof:
   - `file_syscalls_integration` now passes in targeted run
   - `stat_existing_file_returns_success` and `fstat_open_file_returns_correct_size` now pass in targeted runs
@@ -162,7 +162,7 @@ Commit intersections:
 - Repo truth remained clean entering this tranche:
   - `ec9b3916d0a38c0fb1fb15810bab0d74deb3206f` present on `main`
   - `8b607b804b6a05a2e552ebdbff2f55bd559753b2` present on `main` and remote-visible
-  - `ixland_file_v2.c` contains the stabilization-3 stat/fstat fallback logic claimed by docs
+  - `src/ixland/fs/stat.c` contains the stabilization-3 stat/fstat fallback logic claimed by docs
 - Full-suite deterministic next blocker cluster after stabilization-3:
   - poll and directory syscall assertions (no longer signal killpg sequence stall)
 - Bounded stabilization-4 fixes implemented:
@@ -180,6 +180,27 @@ Commit intersections:
 - Remaining red state:
   - `select_invalid_fd_returns_ebadf` still failing in full-suite context
   - directory syscall cluster still failing deterministically
+
+## Fs-structure alignment addendum
+
+- Canonical file syscall ownership no longer lives in `src/ixland/core/ixland_file_v2.c`.
+- The canonical syscall core is now split into Linux-like semantic files under `ixland-system/src/ixland/fs/`:
+  - `fdtable.c`
+  - `open.c`
+  - `read_write.c`
+  - `stat.c`
+  - `fcntl.c`
+  - `ioctl.c`
+- `ixland_file_v2.c` has been removed from canonical build use and deleted.
+- CMake build truth now points `IXLAND_SYSCALL_SOURCES` at the new `src/ixland/fs/*` files.
+- Targeted proof after cutover:
+  - `exec_native_happy_path` PASS
+  - `exec_cloexec_behavior` PASS
+  - `file_syscalls_integration` PASS
+  - `poll_invalid_fd_sets_nval` PASS
+  - `epoll_ctl_epfd_equals_fd_returns_einval` PASS
+  - `mkdir_new_directory_returns_success` PASS
+  - `linux-compat-tests` PASS
 
 ## Pending for G3+
 
