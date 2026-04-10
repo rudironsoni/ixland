@@ -121,48 +121,6 @@ void init_orig_funcs(void) {
  * FILESYSTEM STUBS
  * ============================================================================ */
 
-int __ixland_stat_impl(const char *pathname, struct stat *statbuf) {
-    init_orig_funcs();
-    return libc_stat ? libc_stat(pathname, statbuf) : -1;
-}
-
-int __ixland_fstat_impl(int fd, struct stat *statbuf) {
-    init_orig_funcs();
-    return libc_fstat ? libc_fstat(fd, statbuf) : -1;
-}
-
-int __ixland_lstat_impl(const char *pathname, struct stat *statbuf) {
-    init_orig_funcs();
-    return libc_lstat ? libc_lstat(pathname, statbuf) : -1;
-}
-
-int __ixland_mkdir_impl(const char *pathname, mode_t mode) {
-    init_orig_funcs();
-    return libc_mkdir ? libc_mkdir(pathname, mode) : -1;
-}
-
-int __ixland_rmdir_impl(const char *pathname) {
-    init_orig_funcs();
-    return libc_rmdir ? libc_rmdir(pathname) : -1;
-}
-
-int __ixland_unlink_impl(const char *pathname) {
-    init_orig_funcs();
-    return libc_unlink ? libc_unlink(pathname) : -1;
-}
-
-int __ixland_link_impl(const char *oldpath, const char *newpath) {
-    return link(oldpath, newpath);
-}
-
-int __ixland_symlink_impl(const char *target, const char *linkpath) {
-    return symlink(target, linkpath);
-}
-
-ssize_t __ixland_readlink_impl(const char *pathname, char *buf, size_t bufsiz) {
-    return readlink(pathname, buf, bufsiz);
-}
-
 int __ixland_chmod_impl(const char *pathname, mode_t mode) {
     init_orig_funcs();
     return libc_chmod ? libc_chmod(pathname, mode) : -1;
@@ -186,12 +144,6 @@ int __ixland_fchown_impl(int fd, uid_t owner, gid_t group) {
 int __ixland_lchown_impl(const char *pathname, uid_t owner, gid_t group) {
     init_orig_funcs();
     return libc_lchown ? libc_lchown(pathname, owner, group) : -1;
-}
-
-int __ixland_chroot_impl(const char *path) {
-    (void)path;
-    errno = EPERM;
-    return -1;
 }
 
 /* ============================================================================
@@ -482,33 +434,6 @@ int __ixland_tcsetattr_impl(int fd, int optional_actions, const struct termios *
  * ============================================================================ */
 
 /* Filesystem */
-int ixland_stat(const char *pathname, struct stat *statbuf) {
-    return __ixland_stat_impl(pathname, statbuf);
-}
-int ixland_fstat(int fd, struct stat *statbuf) {
-    return __ixland_fstat_impl(fd, statbuf);
-}
-int ixland_lstat(const char *pathname, struct stat *statbuf) {
-    return __ixland_lstat_impl(pathname, statbuf);
-}
-int ixland_mkdir(const char *pathname, mode_t mode) {
-    return __ixland_mkdir_impl(pathname, mode);
-}
-int ixland_rmdir(const char *pathname) {
-    return __ixland_rmdir_impl(pathname);
-}
-int ixland_unlink(const char *pathname) {
-    return __ixland_unlink_impl(pathname);
-}
-int ixland_link(const char *oldpath, const char *newpath) {
-    return __ixland_link_impl(oldpath, newpath);
-}
-int ixland_symlink(const char *target, const char *linkpath) {
-    return __ixland_symlink_impl(target, linkpath);
-}
-ssize_t ixland_readlink(const char *pathname, char *buf, size_t bufsiz) {
-    return __ixland_readlink_impl(pathname, buf, bufsiz);
-}
 int ixland_chmod(const char *pathname, mode_t mode) {
     return __ixland_chmod_impl(pathname, mode);
 }
@@ -523,9 +448,6 @@ int ixland_fchown(int fd, uid_t owner, gid_t group) {
 }
 int ixland_lchown(const char *pathname, uid_t owner, gid_t group) {
     return __ixland_lchown_impl(pathname, owner, group);
-}
-int ixland_chroot(const char *path) {
-    return __ixland_chroot_impl(path);
 }
 
 /* Signal wrappers - main implementations in ixland_process.c */
@@ -637,47 +559,6 @@ int ixland_tcsetattr(int fd, int optional_actions, const struct termios *termios
 /* ============================================================================
  * DIRECTORY STUBS
  * ============================================================================ */
-
-int __ixland_chdir_impl(const char *path) {
-    init_orig_funcs();
-    if (!libc_chdir) {
-        errno = ENOSYS;
-        return -1;
-    }
-    return libc_chdir(path);
-}
-
-int __ixland_fchdir_impl(int fd) {
-    init_orig_funcs();
-    if (!libc_fchdir) {
-        errno = ENOSYS;
-        return -1;
-    }
-    return libc_fchdir(fd);
-}
-
-char *__ixland_getcwd_impl(char *buf, size_t size) {
-    init_orig_funcs();
-    if (!libc_getcwd) {
-        errno = ENOSYS;
-        return NULL;
-    }
-    return libc_getcwd(buf, size);
-}
-
-/* ============================================================================
- * PUBLIC API - DIRECTORY
- * ============================================================================ */
-
-int ixland_chdir(const char *path) {
-    return __ixland_chdir_impl(path);
-}
-int ixland_fchdir(int fd) {
-    return __ixland_fchdir_impl(fd);
-}
-char *ixland_getcwd(char *buf, size_t size) {
-    return __ixland_getcwd_impl(buf, size);
-}
 
 /* ============================================================================
  * IDENTITY SYSCALLS

@@ -8,7 +8,7 @@
 
 typedef sigset_t ixland_native_sigset_t;
 
-#include "../internal/ixland_internal.h"
+#include "../src/ixland/internal/ixland_internal.h"
 
 typedef struct ixland_epitem {
     int fd;

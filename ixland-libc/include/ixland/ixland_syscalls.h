@@ -312,6 +312,8 @@ int ixland_fchown(int fd, uid_t owner, gid_t group);
 int ixland_lchown(const char *pathname, uid_t owner, gid_t group);
 int ixland_fchownat(int dirfd, const char *pathname, uid_t owner, gid_t group, int flags);
 int ixland_chroot(const char *path);
+ssize_t ixland_getdents64(int fd, void *dirp, size_t count);
+ssize_t ixland_getdents(int fd, void *dirp, size_t count);
 
 /* ============================================================================
  * SIGNAL HANDLING

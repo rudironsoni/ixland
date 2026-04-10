@@ -424,6 +424,8 @@ ssize_t ixland_readlinkat(int dirfd, const char *pathname, char *buf, size_t buf
  * @return int 0 on success, -1 on error
  */
 int ixland_chroot(const char *path);
+ssize_t ixland_getdents64(int fd, void *dirp, size_t count);
+ssize_t ixland_getdents(int fd, void *dirp, size_t count);
 
 /* ============================================================================
  * IDENTITY

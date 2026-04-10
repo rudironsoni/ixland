@@ -507,6 +507,8 @@ int __ixland_chown_impl(const char *pathname, uid_t owner, gid_t group);
 int __ixland_fchown_impl(int fd, uid_t owner, gid_t group);
 int __ixland_lchown_impl(const char *pathname, uid_t owner, gid_t group);
 int __ixland_chroot_impl(const char *path);
+ssize_t __ixland_getdents64_impl(int fd, void *dirp, size_t count);
+ssize_t __ixland_getdents_impl(int fd, void *dirp, size_t count);
 
 /* ============================================================================
  * FUNCTION DECLARATIONS - Signal (Internal)

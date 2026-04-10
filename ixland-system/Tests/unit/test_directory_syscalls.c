@@ -20,7 +20,7 @@
 
 #include "../harness/ixland_test.h"
 
-/* Function declarations from ixland_directory.c */
+/* Function declarations from directory syscall ownership */
 extern int ixland_chdir(const char *path);
 extern int ixland_fchdir(int fd);
 extern char *ixland_getcwd(char *buf, size_t size);

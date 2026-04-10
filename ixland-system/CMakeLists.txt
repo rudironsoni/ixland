@@ -88,17 +88,16 @@ set(IXLAND_RUNTIME_NATIVE_SOURCES
 
 # Core syscall sources (VFS-aware implementations)
 set(IXLAND_SYSCALL_SOURCES
-    src/ixland/fs/fdtable.c
-    src/ixland/fs/open.c
-    src/ixland/fs/read_write.c
-    src/ixland/fs/stat.c
-    src/ixland/fs/fcntl.c
-    src/ixland/fs/ioctl.c
-    src/ixland/fs/select.c
-    src/ixland/fs/eventpoll.c
-    src/ixland/fs/namei.c
-    src/ixland/fs/readdir.c
-    src/ixland/core/ixland_identity.c
+    fs/open.c
+    fs/read_write.c
+    fs/stat.c
+    fs/fcntl.c
+    fs/ioctl.c
+    fs/select.c
+    fs/eventpoll.c
+    fs/namei.c
+    fs/readdir.c
+    kernel/task/ixland_identity.c
 )
 
 # Runtime sources - WASI adapter implementation
@@ -356,8 +355,10 @@ if(IXLAND_BUILD_TESTS)
     )
 
     if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        set(IXLAND_SIMULATOR_UDID "booted" CACHE STRING "Simulator UDID for iOS tests")
+        set(IXLAND_TEST_OUTPUT_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>-${CMAKE_OSX_SYSROOT}")
         add_test(NAME linux-compat-tests
-            COMMAND xcrun simctl spawn booted $<TARGET_FILE:ixland_linux_compat_tests>)
+            COMMAND xcrun simctl spawn "${IXLAND_SIMULATOR_UDID}" "${IXLAND_TEST_OUTPUT_DIR}/ixland_linux_compat_tests.app/ixland_linux_compat_tests")
     else()
         add_test(NAME linux-compat-tests COMMAND ixland_linux_compat_tests)
     endif()
@@ -513,8 +514,10 @@ if(IXLAND_BUILD_TESTS)
     )
 
     if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        set(IXLAND_SIMULATOR_UDID "booted" CACHE STRING "Simulator UDID for iOS tests")
+        set(IXLAND_TEST_OUTPUT_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>-${CMAKE_OSX_SYSROOT}")
         add_test(NAME core-tests
-            COMMAND xcrun simctl spawn booted $<TARGET_FILE:ixland-core-tests>)
+            COMMAND xcrun simctl spawn "${IXLAND_SIMULATOR_UDID}" "${IXLAND_TEST_OUTPUT_DIR}/ixland-core-tests.app/ixland-core-tests")
     else()
         add_test(NAME core-tests COMMAND ixland-core-tests)
     endif()

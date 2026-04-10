@@ -2,7 +2,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "../internal/ixland_internal.h"
+#include "../src/ixland/internal/ixland_internal.h"
 
 int __ixland_stat_impl(const char *pathname, struct stat *statbuf) {
     if (!pathname || !statbuf) {

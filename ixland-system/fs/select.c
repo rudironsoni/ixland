@@ -10,7 +10,7 @@
 
 typedef sigset_t ixland_native_sigset_t;
 
-#include "../internal/ixland_internal.h"
+#include "../src/ixland/internal/ixland_internal.h"
 
 static short ixland_kfilter_to_poll_revents(int16_t filter, uint16_t flags) {
     short revents = 0;

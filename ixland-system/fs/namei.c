@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "../internal/ixland_internal.h"
+#include "../src/ixland/internal/ixland_internal.h"
 
 static int ixland_directory_validate_path(const char *path) {
     if (path == NULL) {
@@ -150,6 +150,45 @@ int __ixland_unlink_impl(const char *pathname) {
     return unlink(translated_path);
 }
 
+int __ixland_link_impl(const char *oldpath, const char *newpath) {
+    if (oldpath == NULL || newpath == NULL) {
+        errno = EFAULT;
+        return -1;
+    }
+
+    if (oldpath[0] == '\0' || newpath[0] == '\0') {
+        errno = ENOENT;
+        return -1;
+    }
+
+    char translated_old[IXLAND_MAX_PATH];
+    char translated_new[IXLAND_MAX_PATH];
+    if (ixland_vfs_translate(oldpath, translated_old, sizeof(translated_old)) != 0) {
+        return -1;
+    }
+
+    if (ixland_vfs_translate(newpath, translated_new, sizeof(translated_new)) != 0) {
+        return -1;
+    }
+
+    struct stat st;
+    if (stat(translated_old, &st) != 0) {
+        return -1;
+    }
+
+    if (S_ISDIR(st.st_mode)) {
+        errno = EPERM;
+        return -1;
+    }
+
+    if (stat(translated_new, &st) == 0) {
+        errno = EEXIST;
+        return -1;
+    }
+
+    return link(translated_old, translated_new);
+}
+
 int __ixland_symlink_impl(const char *target, const char *linkpath) {
     if (target == NULL || linkpath == NULL) {
         errno = EFAULT;
@@ -231,6 +270,22 @@ int ixland_mkdir(const char *pathname, mode_t mode) {
     return __ixland_mkdir_impl(pathname, mode);
 }
 
+int ixland_mkdirat(int dirfd, const char *pathname, mode_t mode) {
+    if (pathname == NULL) {
+        errno = EFAULT;
+        return -1;
+    }
+
+    if (dirfd == AT_FDCWD) {
+        return ixland_mkdir(pathname, mode);
+    }
+
+    (void)dirfd;
+    (void)mode;
+    errno = ENOSYS;
+    return -1;
+}
+
 int ixland_rmdir(const char *pathname) {
     return __ixland_rmdir_impl(pathname);
 }
@@ -239,12 +294,83 @@ int ixland_unlink(const char *pathname) {
     return __ixland_unlink_impl(pathname);
 }
 
+int ixland_unlinkat(int dirfd, const char *pathname, int flags) {
+    if (pathname == NULL) {
+        errno = EFAULT;
+        return -1;
+    }
+
+    if (dirfd == AT_FDCWD) {
+        if ((flags & AT_REMOVEDIR) != 0) {
+            return ixland_rmdir(pathname);
+        }
+        return ixland_unlink(pathname);
+    }
+
+    (void)dirfd;
+    (void)flags;
+    errno = ENOSYS;
+    return -1;
+}
+
+int ixland_link(const char *oldpath, const char *newpath) {
+    return __ixland_link_impl(oldpath, newpath);
+}
+
+int ixland_linkat(int olddirfd, const char *oldpath, int newdirfd, const char *newpath, int flags) {
+    if (oldpath == NULL || newpath == NULL) {
+        errno = EFAULT;
+        return -1;
+    }
+
+    if (olddirfd == AT_FDCWD && newdirfd == AT_FDCWD) {
+        return ixland_link(oldpath, newpath);
+    }
+
+    (void)olddirfd;
+    (void)newdirfd;
+    (void)flags;
+    errno = ENOSYS;
+    return -1;
+}
+
 int ixland_symlink(const char *target, const char *linkpath) {
     return __ixland_symlink_impl(target, linkpath);
 }
 
+int ixland_symlinkat(const char *target, int newdirfd, const char *linkpath) {
+    if (target == NULL || linkpath == NULL) {
+        errno = EFAULT;
+        return -1;
+    }
+
+    if (newdirfd == AT_FDCWD) {
+        return ixland_symlink(target, linkpath);
+    }
+
+    (void)newdirfd;
+    errno = ENOSYS;
+    return -1;
+}
+
 ssize_t ixland_readlink(const char *pathname, char *buf, size_t bufsiz) {
     return __ixland_readlink_impl(pathname, buf, bufsiz);
+}
+
+ssize_t ixland_readlinkat(int dirfd, const char *pathname, char *buf, size_t bufsiz) {
+    if (pathname == NULL || buf == NULL) {
+        errno = EFAULT;
+        return -1;
+    }
+
+    if (dirfd == AT_FDCWD) {
+        return ixland_readlink(pathname, buf, bufsiz);
+    }
+
+    (void)dirfd;
+    (void)bufsiz;
+    errno = ENOSYS;
+    return -1;
 }
 
 int ixland_chroot(const char *path) {

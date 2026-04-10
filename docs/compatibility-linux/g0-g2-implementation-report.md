@@ -144,11 +144,11 @@ Commit intersections:
 - Full-suite position moved materially forward:
   - no longer stalls at `signal_killpg_basic_delivery`
   - now reaches and deterministically reports concrete failures in file/poll/directory syscall clusters.
-- Next first bad behavior localized to file syscall wrappers now owned under `ixland-system/src/ixland/fs/stat.c`:
+- Next first bad behavior localized to file syscall wrappers now owned under `ixland-system/fs/stat.c`:
   - `__ixland_stat_impl` and `__ixland_fstat_impl` were too restrictive for current mixed host/VFS test paths.
 - Bounded product fix implemented:
-  - `src/ixland/fs/stat.c::__ixland_stat_impl`: host `stat()` first, fallback to `ixland_vfs_stat()` on `ENOENT`
-  - `src/ixland/fs/stat.c::__ixland_fstat_impl`: host `fstat()` first, fallback to ixland fd-table path when needed
+  - `fs/stat.c::__ixland_stat_impl`: host `stat()` first, fallback to `ixland_vfs_stat()` on `ENOENT`
+  - `fs/stat.c::__ixland_fstat_impl`: host `fstat()` first, fallback to ixland fd-table path when needed
 - Post-fix proof:
   - `file_syscalls_integration` now passes in targeted run
   - `stat_existing_file_returns_success` and `fstat_open_file_returns_correct_size` now pass in targeted runs
@@ -162,7 +162,7 @@ Commit intersections:
 - Repo truth remained clean entering this tranche:
   - `ec9b3916d0a38c0fb1fb15810bab0d74deb3206f` present on `main`
   - `8b607b804b6a05a2e552ebdbff2f55bd559753b2` present on `main` and remote-visible
-  - `src/ixland/fs/stat.c` contains the stabilization-3 stat/fstat fallback logic claimed by docs
+  - `fs/stat.c` contains the stabilization-3 stat/fstat fallback logic claimed by docs
 - Full-suite deterministic next blocker cluster after stabilization-3:
   - poll and directory syscall assertions (no longer signal killpg sequence stall)
 - Bounded stabilization-4 fixes implemented:
@@ -184,15 +184,20 @@ Commit intersections:
 ## Fs-structure alignment addendum
 
 - Canonical file syscall ownership no longer lives in `src/ixland/core/ixland_file_v2.c`.
-- The canonical syscall core is now split into Linux-like semantic files under `ixland-system/src/ixland/fs/`:
+- The canonical syscall core is now split into Linux-like semantic files under `ixland-system/fs/`:
   - `fdtable.c`
   - `open.c`
   - `read_write.c`
   - `stat.c`
   - `fcntl.c`
   - `ioctl.c`
+  - `select.c`
+  - `eventpoll.c`
+  - `namei.c`
+  - `readdir.c`
 - `ixland_file_v2.c` has been removed from canonical build use and deleted.
-- CMake build truth now points `IXLAND_SYSCALL_SOURCES` at the new `src/ixland/fs/*` files.
+- `ixland-system/src/ixland/fs/*` has been drained and removed from canonical ownership.
+- CMake build truth now points `IXLAND_SYSCALL_SOURCES` at `fs/*` plus `kernel/task/ixland_identity.c`.
 - Targeted proof after cutover:
   - `exec_native_happy_path` PASS
   - `exec_cloexec_behavior` PASS
