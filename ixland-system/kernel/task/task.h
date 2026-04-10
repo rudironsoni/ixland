@@ -159,6 +159,18 @@ pid_t ixland_setsid(void);
 pid_t ixland_fork(void);
 int ixland_vfork(void);
 
+/* Exit/wait functions */
+void ixland_exit(int status);
+void ixland__exit(int status);
+pid_t ixland_wait(int *wstatus);
+pid_t ixland_waitpid(pid_t pid, int *wstatus, int options);
+pid_t ixland_wait3(int *wstatus, int options, struct rusage *rusage);
+pid_t ixland_wait4(pid_t pid, int *wstatus, int options, struct rusage *rusage);
+
+/* Vfork notification helpers */
+void __ixland_vfork_exec_notify(void);
+void __ixland_vfork_exit_notify(void);
+
 #ifdef __cplusplus
 }
 #endif

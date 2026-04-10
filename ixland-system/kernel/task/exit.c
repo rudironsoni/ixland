@@ -4,9 +4,6 @@
 
 #include "task.h"
 
-/* External declaration for vfork notification */
-extern void __ixland_vfork_exit_notify(void);
-
 /* External declaration for init task */
 extern ixland_task_t *init_task;
 

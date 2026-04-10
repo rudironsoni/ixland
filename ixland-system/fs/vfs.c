@@ -5,9 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static ixland_mount_t *mount_table[IXLAND_MAX_MOUNTS];
-static pthread_mutex_t vfs_lock = PTHREAD_MUTEX_INITIALIZER;
-
 ixland_fs_t *ixland_fs_alloc(void) {
     ixland_fs_t *fs = calloc(1, sizeof(ixland_fs_t));
     if (!fs)

@@ -90,7 +90,6 @@ void ixland_perror(const char *s) {
      * Avoids FILE* dependency while providing useful error output
      */
     extern ssize_t write(int fd, const void *buf, size_t count);
-    extern int errno;
     const char *msg = ixland_strerror(errno);
     const char *sep = ": ";
     const char *nl = "\n";

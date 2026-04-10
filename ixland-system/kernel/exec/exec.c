@@ -11,9 +11,6 @@
 #include "../signal/ixland_signal.h"
 #include "ixland/ixland_types.h"
 
-/* External declaration for vfork notification */
-extern void __ixland_vfork_exec_notify(void);
-
 ixland_image_type_t ixland_exec_classify(const char *path) {
     /* First check native registry - registered commands take precedence */
     if (ixland_native_lookup(path)) {
