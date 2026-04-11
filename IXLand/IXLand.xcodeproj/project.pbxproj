@@ -10,7 +10,6 @@
 		090775F4DCD3AAA54E46E7BE /* select.c in Sources */ = {isa = PBXBuildFile; fileRef = CEE97E640F36E486E936D662 /* select.c */; };
 		0D0A28026608287F91953C1D /* ixland_kernel.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = EA13B15CCD8B971FF43A0B0A /* ixland_kernel.h */; };
 		0D84EAF38DA6A8E508BE0C49 /* init.c in Sources */ = {isa = PBXBuildFile; fileRef = 39D0E7EB0399137B3B50D873 /* init.c */; };
-		0DE151E3292721447C1C75D3 /* IXLandSystemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DAB8C39AAFFF4F8C3BFA11 /* IXLandSystemTests.swift */; };
 		0DF0ACBEEAE47B59A530901E /* namei.c in Sources */ = {isa = PBXBuildFile; fileRef = B812082344F5AACC45E3177E /* namei.c */; };
 		153BA180C44AF246B7A09531 /* vfs.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 102271590B924315DBFD9F36 /* vfs.h */; };
 		1839CD7C5177EF28A50F50A4 /* sys.c in Sources */ = {isa = PBXBuildFile; fileRef = 44556F4C5BECBDBE6377E352 /* sys.c */; };
@@ -55,6 +54,7 @@
 		E39AB4FFE36A9CAFF5DA04FA /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4C7D75B4693F6F2E143FC87 /* RootViewController.swift */; };
 		EB701981DB22BEB97071AEFD /* exec.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BC2252789FD58321138BAB2E /* exec.h */; };
 		ED636B3B410014A1370DC65D /* ioctl.c in Sources */ = {isa = PBXBuildFile; fileRef = 1537160035CAFE6A05C895D5 /* ioctl.c */; };
+		EFADC2997D1FC8D5B484FD5F /* IXLandSystemTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B85D2EA7EB5A447B6D4FD289 /* IXLandSystemTests.m */; };
 		F097392AC198F4771EC53541 /* wait.c in Sources */ = {isa = PBXBuildFile; fileRef = A21109DC0D2ACB704553302F /* wait.c */; };
 		F90A80A0AC506E1B24C45B83 /* libIXLandSystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F3878271ED051204AE43E2AB /* libIXLandSystem.a */; };
 		FA92FC4384E89E1FF129F3B1 /* IXLandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 542202CB9503CD5EC3593755 /* IXLandTests.swift */; };
@@ -134,7 +134,6 @@
 		2ACFD3BD2FD3D333DD4D1B83 /* readdir.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = readdir.c; sourceTree = "<group>"; };
 		2EB5C296DC3F9D5389F15A09 /* open.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = open.c; sourceTree = "<group>"; };
 		32D4FFC8983DA0D6A8C9628A /* task.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = task.h; sourceTree = "<group>"; };
-		37DAB8C39AAFFF4F8C3BFA11 /* IXLandSystemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IXLandSystemTests.swift; sourceTree = "<group>"; };
 		39A11F96348F62208030EEF3 /* task.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = task.c; sourceTree = "<group>"; };
 		39D0E7EB0399137B3B50D873 /* init.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = init.c; sourceTree = "<group>"; };
 		44556F4C5BECBDBE6377E352 /* sys.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = sys.c; sourceTree = "<group>"; };
@@ -160,6 +159,7 @@
 		B55345CABBD955F9E9E4E2C2 /* exec.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = exec.c; sourceTree = "<group>"; };
 		B73E7640C9F9C4BDD5A9F7B5 /* signal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = signal.c; sourceTree = "<group>"; };
 		B812082344F5AACC45E3177E /* namei.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = namei.c; sourceTree = "<group>"; };
+		B85D2EA7EB5A447B6D4FD289 /* IXLandSystemTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IXLandSystemTests.m; sourceTree = "<group>"; };
 		B8E065BBD339A95A93E9205B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B9C479332C5F8D7836C1968A /* inode.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = inode.c; sourceTree = "<group>"; };
 		BC2252789FD58321138BAB2E /* exec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = exec.h; sourceTree = "<group>"; };
@@ -379,7 +379,7 @@
 		B2C4AD072186D55044879AAF /* IXLandSystemTests */ = {
 			isa = PBXGroup;
 			children = (
-				37DAB8C39AAFFF4F8C3BFA11 /* IXLandSystemTests.swift */,
+				B85D2EA7EB5A447B6D4FD289 /* IXLandSystemTests.m */,
 			);
 			path = IXLandSystemTests;
 			sourceTree = "<group>";
@@ -554,7 +554,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0DE151E3292721447C1C75D3 /* IXLandSystemTests.swift in Sources */,
+				EFADC2997D1FC8D5B484FD5F /* IXLandSystemTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
