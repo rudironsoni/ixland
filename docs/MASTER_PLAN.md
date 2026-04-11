@@ -1,8 +1,10 @@
-# a-Shell Next: Master Implementation Plan
+# HISTORICAL: a-Shell Next Master Implementation Plan
 
-**Version**: 1.0  
-**Last Updated**: 2026-03-19  
-**Status**: In Progress
+**Version**: 1.0
+**Last Updated**: 2026-03-19
+**Status**: HISTORICAL - Pre-Coherence Architecture Document
+
+> **WARNING**: This document describes the pre-coherence architecture using deprecated naming (`a-Shell`, `ixland-system`, `a-shell-distro`). The current architecture uses `IXLand*`-prefixed component roots and Xcode-only build. See `docs/architecture/linux-shaped-cutover-report.md` for current truth.
 
 ---
 
@@ -10,7 +12,7 @@
 
 a-Shell Next brings a complete Linux-like environment to iOS through:
 - **ixland-system**: Thread-based process simulation (no real fork/exec on iOS)
-- **a-shell-distro**: Session management and command dispatch  
+- **a-shell-distro**: Session management and command dispatch
 - **ixland-packages**: Termux-style package build system
 - **WAMR**: WebAssembly runtime for downloadable packages
 - **Python-Apple-Support**: Native Python with custom pip index for iOS wheels
@@ -63,11 +65,11 @@ a-shell-next/
 ## Phase 1: Foundation (Week 1-2)
 
 ### 1.1 Archive Old Documentation
-**Status**: ✅ Complete  
+**Status**: ✅ Complete
 **Action**: Move old plan docs to `docs/archive/`
 
 ### 1.2 Remove Swift apt
-**Status**: ✅ Complete  
+**Status**: ✅ Complete
 **Action**: Delete Swift-based apt implementation
 ```
 Deleted:
@@ -77,7 +79,7 @@ Deleted:
 ```
 
 ### 1.3 Rename ios_system → a-shell-kernel
-**Status**: ✅ Complete  
+**Status**: ✅ Complete
 **Action**: Rename directory and core files
 ```
 ios_system/ → a-shell-kernel/
@@ -87,7 +89,7 @@ ios_system/ → a_shell_kernel/
 ```
 
 ### 1.4 Create a_shell_system.h
-**Status**: ✅ Complete  
+**Status**: ✅ Complete
 **Location**: `a-shell-kernel/a_shell_system.h`
 
 Provides compile-time macro redirects:
@@ -101,7 +103,7 @@ Provides compile-time macro redirects:
 Used via `-include` flag in package builds (not manual inclusion).
 
 ### 1.5 Integrate WAMR
-**Status**: Migrated to monorepo  
+**Status**: Migrated to monorepo
 **Note**: The repository structure has changed. WAMR integration is now handled within the `ixland-system` component as part of the monorepo. See root `README.md` for current setup instructions.
 
 **Historical Note**: This section previously described adding WAMR as a submodule. Submodules are no longer used in this project.
@@ -111,7 +113,7 @@ Used via `-include` flag in package builds (not manual inclusion).
 ## Phase 2: Core Systems (Week 3-4)
 
 ### 2.1 Extend Process Table
-**Priority**: High  
+**Priority**: High
 **Target**: Robust virtual process management
 
 ```c
@@ -136,7 +138,7 @@ typedef struct {
 - Signal emulation (setjmp/longjmp)
 
 ### 2.2 apt 3.1.16
-**Priority**: High  
+**Priority**: High
 **Location**: `a-shell-packages/core-packages/apt/`
 
 ```bash
@@ -152,7 +154,7 @@ export CFLAGS="$CFLAGS -include $ASHELL_PREFIX/include/a_shell_system.h"
 Patches use macros automatically - no code modifications needed.
 
 ### 2.3 Python-Apple-Support
-**Priority**: High  
+**Priority**: High
 **Location**: `a-shell-packages/core-packages/python/`
 
 Based on: https://github.com/beeware/Python-Apple-support

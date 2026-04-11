@@ -1,52 +1,36 @@
-# ixland
+# IXLand
 
-This repository is the monorepo for iXland, a Linux-like environment for iOS.
+IXLand is an iOS-first monorepo with Xcode as the only build truth.
 
 ## Repository Structure
 
-This monorepo contains:
-- `ixland-app/` - iOS terminal application
-- `ixland-system/` - Core kernel/system layer with the current implementation
-- `ixland-packages/` - Package build system and distribution
-- `ixland-libc/` - C library boundary (emerging; contains public headers and ABI-facing material as they are extracted)
-- `ixland-wasm/` - WebAssembly boundaries (neutral container)
-  - `ixland-wasm-engine/` - Engine abstraction layer
-  - `ixland-wasm-host/` - Host contract between guest runtimes and iXland
-  - `ixland-wasm-wasi/` - WASI guest ABI policy and conformance
-- `ixland-toolchain/` - Toolchain integration boundary
+- `IXLand/` - brand-new iOS app at repo root
+- `IXLandSystem/` - canonical syscall-facing and kernel-facing implementation
+- `IXLandLibC/` - libc and ABI-facing boundaries
+- `IXLandWasm/` - WebAssembly-facing boundaries
+- `IXLandPackages/` - package metadata and package tooling
+- `IXLandToolchain/` - Xcode-oriented toolchain assets and metadata
+- `docs/` - architecture and cutover documentation
+- `scripts/` - repository maintenance scripts
 
-## Setup
+## Build Truth
 
-Submodules are no longer used. Use the monorepo root for checkout and build.
+Xcode is the only build truth.
 
-```bash
-git clone git@github.com:rudironsoni/ixland.git
-cd ixland
-# No submodule initialization required
-```
-
-## Build
-
-Build orchestration flows through CMake with presets. See `CMakePresets.json` for available configurations.
+Use `xcodebuild` against `IXLand/IXLand.xcodeproj`.
 
 ```bash
-# iOS Simulator (primary development)
-cmake --preset ios-simulator
-cmake --build --preset ios-simulator
-
-# Local development (non-iOS: documentation, validation)
-cmake --preset local-dev
-cmake --build --preset local-dev
+xcodebuild -project IXLand/IXLand.xcodeproj -list
+xcodebuild -project IXLand/IXLand.xcodeproj -scheme IXLand -sdk iphonesimulator build
 ```
 
-See `docs/LOCAL_BUILD_MATRIX.md` for detailed build paths and `docs/BUILD_GRAPH.md` for component dependencies.
+CMake, CTest, and Make are not part of the active build graph.
 
-## CI
+## Current Architecture
 
-CI configuration lives in `.github/workflows/`.
+Canonical syscall-facing and kernel-facing ownership lives under:
 
-## Current Reality
+- `IXLandSystem/fs/*`
+- `IXLandSystem/kernel/*`
 
-Most implementation still lives under `ixland-system`. The `ixland-libc` and `ixland-wasm` boundaries are currently forming areas for future extraction, not yet full extracted implementations.
-
-See `docs/ARCHITECTURE.md` for the canonical architecture documentation and `docs/BOUNDARIES.md` for boundary definitions.
+Historical migration material may mention old names or deleted layouts, but active architecture and active build truth use only the `IXLand*` roots.

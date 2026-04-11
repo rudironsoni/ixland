@@ -1,12 +1,16 @@
-# iXland Build Graph
+# HISTORICAL: iXland Build Graph (Pre-Coherence)
+
+**Status**: HISTORICAL DOCUMENT - Describes pre-coherence CMake-based build system
+
+> **WARNING**: This document describes a historical CMake-based build system that is no longer active. The current build truth is `IXLand/IXLand.xcodeproj` with Xcode-only builds. See `AGENTS.md` for current build instructions.
 
 ## Purpose
 
-This document describes the actual monorepo build graph, including how components depend on each other and how boundary targets are consumed.
+This document describes the historical monorepo build graph using CMake, including how components depended on each other and how boundary targets were consumed. This is preserved for historical reference only.
 
-## Current Root Build
+## Historical Root Build
 
-The root `CMakeLists.txt` is the monorepo entry point.
+The root `CMakeLists.txt` was the monorepo entry point (now removed).
 
 ### Optional Components
 

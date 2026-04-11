@@ -1,15 +1,15 @@
-# Patch Template Guide for a-Shell Packages
+# Patch Template Guide for IXLand Packages
 
 This guide provides templates and examples for creating iOS compatibility patches.
 
 ## API Reference
 
-When patching packages for iOS, you'll need to use the a-Shell kernel APIs. Include the kernel header and use the `a_shell_*` prefixed functions:
+When patching packages for iOS, you'll need to use the IXLand kernel APIs. Include the kernel header and use the `ixland_*` prefixed functions:
 
 ```c
-// Include the a-Shell kernel header
+// Include the IXLand kernel header
 extern "C" {
-    #include "a_shell_system.h"  // or <a_shell_system.h> if installed
+    #include "ixland_system.h"  // or <ixland_system.h> if installed
 }
 ```
 
@@ -17,64 +17,64 @@ extern "C" {
 
 ```c
 // Process management
-pid_t a_shell_fork(void);
-void a_shell_waitpid(pid_t pid);
-pid_t a_shell_full_waitpid(pid_t pid, int *stat_loc, int options);
-int a_shell_execv(const char *path, char* const argv[]);
-int a_shell_execve(const char *path, char* const argv[], char** envlist);
-void a_shell_exit(int errorCode);
+pid_t ixland_fork(void);
+void ixland_waitpid(pid_t pid);
+pid_t ixland_full_waitpid(pid_t pid, int *stat_loc, int options);
+int ixland_execv(const char *path, char* const argv[]);
+int ixland_execve(const char *path, char* const argv[], char** envlist);
+void ixland_exit(int errorCode);
 
 // Signal handling
-sig_t a_shell_signal(int signal, sig_t function);
-int a_shell_killpid(pid_t pid, int sig);
+sig_t ixland_signal(int signal, sig_t function);
+int ixland_killpid(pid_t pid, int sig);
 ```
 
 ### I/O Functions
 
 ```c
 // Stream operations
-FILE *a_shell_popen(const char *command, const char *type);
-FILE* a_shell_stdin(void);
-FILE* a_shell_stdout(void);
-FILE* a_shell_stderr(void);
+FILE *ixland_popen(const char *command, const char *type);
+FILE* ixland_stdin(void);
+FILE* ixland_stdout(void);
+FILE* ixland_stderr(void);
 
 // I/O redirection
-int a_shell_dup2(int fd1, int fd2);
-int a_shell_isatty(int fd);
-int a_shell_getstdin(void);
-int a_shell_gettty(void);
-int a_shell_opentty(void);
-void a_shell_closetty(void);
+int ixland_dup2(int fd1, int fd2);
+int ixland_isatty(int fd);
+int ixland_getstdin(void);
+int ixland_gettty(void);
+int ixland_opentty(void);
+void ixland_closetty(void);
 
 // I/O functions (for #defines)
-ssize_t a_shell_write(int fildes, const void *buf, size_t nbyte);
-size_t a_shell_fwrite(const void *ptr, size_t size, size_t nitems, FILE *stream);
-int a_shell_puts(const char *s);
-int a_shell_fputs(const char* s, FILE *stream);
-int a_shell_fputc(int c, FILE *stream);
-int a_shell_fflush(FILE *stream);
+ssize_t ixland_write(int fildes, const void *buf, size_t nbyte);
+size_t ixland_fwrite(const void *ptr, size_t size, size_t nitems, FILE *stream);
+int ixland_puts(const char *s);
+int ixland_fputs(const char* s, FILE *stream);
+int ixland_fputc(int c, FILE *stream);
+int ixland_fflush(FILE *stream);
 ```
 
 ### Environment
 
 ```c
-char *a_shell_getenv(const char *name);
-int a_shell_setenv(const char* variableName, const char* value, int overwrite);
-int a_shell_unsetenv(const char* variableName);
-int a_shell_putenv(char *string);
-int a_shell_fchdir(const int fd);
+char *ixland_getenv(const char *name);
+int ixland_setenv(const char* variableName, const char* value, int overwrite);
+int ixland_unsetenv(const char* variableName);
+int ixland_putenv(char *string);
+int ixland_fchdir(const int fd);
 ```
 
 ### Session Management
 
 ```c
-void a_shell_switchSession(const void* sessionid);
-void a_shell_closeSession(const void* sessionid);
-void a_shell_setStreams(FILE* _stdin, FILE* _stdout, FILE* _stderr);
-void a_shell_setContext(const void *context);
-const void* a_shell_getContext(void);
-const char* a_shell_progname(void);
-int a_shell_getCommandStatus(void);
+void ixland_switchSession(const void* sessionid);
+void ixland_closeSession(const void* sessionid);
+void ixland_setStreams(FILE* _stdin, FILE* _stdout, FILE* _stderr);
+void ixland_setContext(const void *context);
+const void* ixland_getContext(void);
+const char* ixland_progname(void);
+int ixland_getCommandStatus(void);
 ```
 
 ## Patch File Format
@@ -124,7 +124,7 @@ patches/XX-ios-<category>.patch
 @@ -195,7 +195,12 @@ get_random_number (max)
    if (max == 0)
      return 0;
- 
+
 +#if defined(__APPLE__) && defined(__MACH__)
 +  /* iOS doesn't have getentropy, use arc4random */
 +  ret = (unsigned long)arc4random();
@@ -142,7 +142,7 @@ patches/XX-ios-<category>.patch
 @@ -195,7 +195,12 @@ get_random_number (max)
    if (max == 0)
      return 0;
- 
+
 +#if defined(__APPLE__) && defined(__MACH__)
 +  /* iOS doesn't have getentropy, use arc4random */
 +  ret = (unsigned long)arc4random();
@@ -184,7 +184,7 @@ patches/XX-ios-<category>.patch
 +++ b/src/config.c
 @@ -30,7 +30,11 @@
  #define CONFIG_FILE "/etc/myconfig.conf"
- 
+
  const char *get_config_path(void) {
 +#if defined(__APPLE__) && defined(__MACH__)
 +    return "@A_SHELL_PREFIX@/etc/myconfig.conf";
@@ -204,7 +204,7 @@ patches/XX-ios-<category>.patch
 --- a/src/platform.c
 +++ b/src/platform.c
 @@ -25,7 +25,7 @@
- 
+
  void platform_init(void) {
 -#ifdef __linux__
 +#if defined(__linux__) || defined(__APPLE__)
@@ -222,15 +222,15 @@ patches/XX-ios-<category>.patch
 ```diff
 --- a/build.sh
 +++ b/build.sh
-@@ -10,6 +10,12 @@ a_shell_pkg_configure() {
+@@ -10,6 +10,12 @@ ixland_pkg_configure() {
      export ac_cv_func_<function_name>=no
      export ac_cv_lib_<library_name>=no
-     
+
 +    # iOS-specific settings
 +    export ac_cv_func_clock_settime=no
 +    export ac_cv_func_getentropy=no
 +    export gl_cv_func_getentropy=no
-+    
++
      ./configure \
          --prefix="$A_SHELL_PREFIX" \
          --host="arm-apple-darwin"
@@ -248,7 +248,7 @@ patches/XX-ios-<category>.patch
 @@ -100,10 +100,15 @@ AC_CHECK_PROG([HAS_MAKE], [make], [yes], [no])
  # Check for required libraries
  PKG_CHECK_MODULES([OPENSSL], [openssl >= 1.0.0])
- 
+
 -# Check for package manager (REMOVE FOR iOS)
 -AC_PATH_PROG([DPKG], [dpkg])
 -AC_PATH_PROG([APT_GET], [apt-get])
@@ -262,7 +262,7 @@ patches/XX-ios-<category>.patch
 +DPKG=""
 +APT_GET=""
 +AM_CONDITIONAL([HAVE_DPKG], [false])
- 
+
  AC_CONFIG_FILES([
      Makefile
 ```
@@ -273,7 +273,7 @@ patches/XX-ios-<category>.patch
 --- a/src/paths.c
 +++ b/src/paths.c
 @@ -30,9 +30,15 @@
- 
+
  /* Default paths */
  #ifndef DEFAULT_ETC_DIR
 +#if defined(__APPLE__) && defined(__MACH__)
@@ -286,7 +286,7 @@ patches/XX-ios-<category>.patch
  #define DEFAULT_CACHE_DIR "/var/cache"
  #endif
 +#endif
- 
+
  const char *get_etc_dir(void) {
      return DEFAULT_ETC_DIR;
 ```
@@ -319,7 +319,7 @@ patches/XX-ios-<category>.patch
 +++ b/src/config.c
 @@ -20,7 +20,11 @@
  #include "config.h"
- 
+
  #ifndef CONFIG_DIR
 +#if defined(__APPLE__) && defined(__MACH__)
 +#define CONFIG_DIR "@A_SHELL_PREFIX@/etc"
@@ -327,7 +327,7 @@ patches/XX-ios-<category>.patch
  #define CONFIG_DIR "/etc"
 +#endif
  #endif
- 
+
  int load_config(void) {
 ```
 
@@ -337,7 +337,7 @@ patches/XX-ios-<category>.patch
 --- a/src/os.c
 +++ b/src/os.c
 @@ -30,7 +30,7 @@
- 
+
  int get_os_type(void) {
 -    #ifdef __linux__
 +    #if defined(__linux__) || defined(__APPLE__)
@@ -351,18 +351,18 @@ patches/XX-ios-<category>.patch
 Instead of patching source, use configure cache variables in build.sh:
 
 ```bash
-a_shell_pkg_configure() {
+ixland_pkg_configure() {
     # Disable features iOS doesn't support
     export ac_cv_func_getentropy=no
     export ac_cv_func_clock_settime=no
     export ac_cv_func_fanotify_init=no
     export ac_cv_func_inotify_init=no
-    
+
     # Disable Debian tools
     export ac_cv_path_DPKG=/bin/false
     export ac_cv_path_APTGET=/bin/false
     export ac_cv_path_DPKG_DEB=/bin/false
-    
+
     ./configure \
         --prefix="$A_SHELL_PREFIX" \
         --host="arm-apple-darwin"

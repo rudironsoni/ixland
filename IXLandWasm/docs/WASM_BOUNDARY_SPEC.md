@@ -6,7 +6,7 @@ This document specifies the WebAssembly boundary architecture for iXland. It def
 
 ## Current State
 
-The current implementation uses WAMR (WebAssembly Micro Runtime) as the backend. All WAMR-specific code lives in `ixland-system`. The boundaries defined here (`ixland-wasm-engine`, `ixland-wasm-host`, `ixland-wasm-wasi`) are future extraction targets.
+The current implementation uses WAMR (WebAssembly Micro Runtime) as the backend. All WAMR-specific code lives in `IXLandSystem`. The boundaries defined here (`IXLandWasmEngine`, `IXLandWasmHost`, `IXLandWasmWASI`) are future extraction targets.
 
 ## Architecture
 
@@ -17,28 +17,28 @@ The current implementation uses WAMR (WebAssembly Micro Runtime) as the backend.
 └──────────────────────────┬──────────────────────────────────┘
                            │ WASI ABI calls
 ┌──────────────────────────▼──────────────────────────────────┐
-│                  ixland-wasm-wasi                           │
+│                  IXLandWasmWASI                           │
 │          WASI syscall mapping to iXland semantics           │
 └──────────────────────────┬──────────────────────────────────┘
                            │ Host service calls
 ┌──────────────────────────▼──────────────────────────────────┐
-│                  ixland-wasm-host                           │
+│                  IXLandWasmHost                           │
 │     Host contract: fd, path, clock, random, socket          │
 └──────────────────────────┬──────────────────────────────────┘
                            │ Engine-neutral calls
 ┌──────────────────────────▼──────────────────────────────────┐
-│                  ixland-wasm-engine                         │
+│                  IXLandWasmEngine                         │
 │          Engine-neutral runtime interface                   │
 │    (WAMR, Wasmtime, etc. implement this interface)          │
 └──────────────────────────┬──────────────────────────────────┘
                            │ Engine-specific calls
 ┌──────────────────────────▼──────────────────────────────────┐
-│                     ixland kernel                              │
-│           (current implementation in ixland-system)         │
+│                     iXland kernel                              │
+│           (current implementation in IXLandSystem)         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## ixland-wasm-engine (Engine Contract)
+## IXLandWasmEngine (Engine Contract)
 
 ### Purpose
 
@@ -73,11 +73,11 @@ uint32_t ixland_wasm_memory_size(ixland_wasm_instance_t *instance);
 
 ### Implementation Notes
 
-- WAMR implements this interface in `ixland-system/runtime/wasi/` currently
+- WAMR implements this interface in `IXLandSystem/runtime/wasi/` currently
 - Future: Move WAMR-specific implementation to a plugin/module
 - Future: Wasmtime could implement same interface
 
-## ixland-wasm-host (Host Services)
+## IXLandWasmHost (Host Services)
 
 ### Purpose
 
@@ -185,7 +185,7 @@ int ixland_host_proc_kill(pid_t pid, int sig);
 2. **Consistent with native**: Native and WASM guests see same behavior
 3. **Virtualization preserved**: Virtual PIDs, process groups work in WASM too
 
-## ixland-wasm-wasi (WASI Policy)
+## IXLandWasmWASI (WASI Policy)
 
 ### Purpose
 
@@ -228,7 +228,7 @@ WASI preopen "/tmp" → ixland temp directory
 
 - Document intended boundaries
 - Define interface contracts
-- Keep implementation in `ixland-system`
+- Keep implementation in `IXLandSystem`
 
 ### Phase 2: Header Extraction
 
@@ -236,13 +236,13 @@ WASI preopen "/tmp" → ixland temp directory
 - `ixland-wasm-engine/include/ixland/wasm_engine.h`
 - `ixland-wasm-host/include/ixland/wasm_host.h`
 - `ixland-wasm-wasi/include/ixland/wasm_wasi.h`
-- Use symlinks in `ixland-system` during transition
+- Use symlinks in `IXLandSystem` during transition
 
 ### Phase 3: Code Extraction
 
 - Extract host service implementations to `ixland-wasm-host/`
 - Extract WASI mapping to `ixland-wasm-wasi/`
-- Keep engine-specific code in `ixland-system/runtime/wasi/`
+- Keep engine-specific code in `IXLandSystem/runtime/wasi/`
 
 ### Phase 4: Engine Abstraction
 
@@ -260,5 +260,5 @@ WASI preopen "/tmp" → ixland temp directory
 ## Future Considerations
 
 - **Multiple engines**: Support both WAMR (small) and Wasmtime (fast) via engine interface
-- **AOT artifacts**: Pre-compiled WASM modules as `ixland-packages` artifacts
+- **AOT artifacts**: Pre-compiled WASM modules as `IXLandPackages` artifacts
 - **Component Model**: WASI Component Model support when stabilized

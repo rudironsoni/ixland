@@ -87,9 +87,10 @@ Swift code follows standard Swift guidelines:
 
 | Type | Pattern | Example |
 |------|---------|---------|
-| **Component directories** | `ixland-{name}` | `ixland-system`, `ixland-libc` |
-| **Package directories** | `ixland-packages` | - |
-| **Toolchain directories** | `ixland-toolchain` | - |
+| **Component directories** | `IXLand{Name}` | `IXLandSystem`, `IXLandLibC`, `IXLandWasm`, `IXLandPackages`, `IXLandToolchain` |
+| **Sub-component directories** | `ixland-{name}` | `ixland-wasm-engine` (legacy), `ixland-packages-validate` |
+| **Package directories** | `IXLandPackages/` | - |
+| **Toolchain directories** | `IXLandToolchain/` | - |
 | **Build scripts** | `build.sh`, `clean.sh` | - |
 | **Script libraries** | `ixland_*.sh` | `ixland_package.sh` |
 

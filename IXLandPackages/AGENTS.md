@@ -1,8 +1,8 @@
-# Agent Guide: a-shell-packages
+# Agent Guide: IXLandPackages
 
 ## Overview
 
-**a-shell-packages** is the iOS package build system. It compiles open-source Linux tools (bash, vim, git, python, etc.) for iOS native execution using the a-shell-kernel syscall layer.
+**IXLandPackages** is the iOS package build system. It compiles open-source Linux tools (bash, vim, git, python, etc.) for iOS native execution using the IXLandSystem syscall layer.
 
 ## Key Principle: No Debian Infrastructure
 
@@ -13,13 +13,13 @@
 - ❌ DEBIAN/ directories
 - ❌ Debian package management
 
-**Instead:** We build native iOS binaries that link against a-shell-kernel, producing static libraries and executables for direct inclusion in the iOS app bundle.
+**Instead:** We build native iOS binaries that link against IXLandSystem, producing static libraries and executables for direct inclusion in the iOS app bundle.
 
 ## Quick Start
 
 ```bash
 # Build the reference libz package
-cd a-shell-packages
+cd IXLandPackages
 ./scripts/build-package.sh libz
 
 # List available packages
@@ -40,7 +40,7 @@ ls packages/core/
    - Compile bash, coreutils, vim, git, python for iOS arm64
    - Target: iOS device and Simulator (universal binaries)
    - Output: Static libraries and binaries in staging directories
-   - Link against a-shell-kernel XCFramework
+   - Link against IXLandSystem XCFramework
 
 2. **Build System Libraries**
    - libz (compression)
@@ -57,14 +57,14 @@ ls packages/core/
 
 - ❌ NOT create .deb packages (we're iOS, not Debian)
 - ❌ NOT use dpkg or apt (removed from all packages)
-- ❌ NOT a syscall layer (that's a-shell-kernel/)
-- ❌ NOT a terminal emulator (that's a-shell/)
-- ❌ NOT the iOS app (that's a-shell/)
+- ❌ NOT a syscall layer (that's IXLandSystem/)
+- ❌ NOT a terminal emulator (that's IXLand/)
+- ❌ NOT the iOS app (that's IXLand/)
 
 ## Architecture
 
 ```
-a-shell-packages/
+IXLandPackages/
 ├── packages/core/          # Core iOS tools (in app bundle)
 │   ├── libz/              # Compression library
 │   ├── libssl/            # Cryptography
@@ -81,7 +81,7 @@ a-shell-packages/
 │   └── ...                # See WASM documentation
 │
 ├── scripts/                # Build scripts
-│   ├── a_shell_package.sh # Main build library
+│   ├── ixland_package.sh  # Main build library
 │   ├── build-package.sh   # Single package builder
 │   └── build-all.sh       # Build all packages
 │
@@ -138,7 +138,7 @@ xcrun --show-sdk-path
 ### Building Packages
 
 ```bash
-cd a-shell-packages/
+cd IXLandPackages/
 
 # Build single package (universal is default)
 ./scripts/build-package.sh libz
@@ -168,14 +168,14 @@ Linux packages assume:
 
 ### What Kernel Handles (NO PATCHES NEEDED)
 
-**The a-shell-kernel provides syscall wrappers via compile-time macros:**
+**The IXLandSystem provides syscall wrappers via compile-time macros:**
 
 ```c
 // In your code:
 pid_t pid = fork();
 
 // Kernel header automatically converts to:
-pid_t pid = a_shell_fork();
+pid_t pid = ixland_fork();
 ```
 
 **No patches needed for:**
@@ -187,7 +187,7 @@ pid_t pid = a_shell_fork();
 
 **Just include kernel headers:**
 ```bash
-export CPPFLAGS="-I../../a-shell-kernel/include"
+export CPPFLAGS="-I../../IXLandSystem/include"
 ```
 
 ### What Needs Patches
@@ -218,15 +218,15 @@ Unix paths that need sandbox locations:
 
 | Hardcoded Path | iOS Location | Patch Type |
 |----------------|--------------|------------|
-| `/etc/` | `@A_SHELL_PREFIX@/etc/` | configure-time substitution |
+| `/etc/` | `@IXLAND_PREFIX@/etc/` | configure-time substitution |
 | `/tmp/` | `$TMPDIR` or app temp | Environment variable |
 | `/var/` | `~/Library/Caches/` | Runtime detection |
-| `/usr/share/` | `@A_SHELL_PREFIX@/share/` | configure-time substitution |
+| `/usr/share/` | `@IXLAND_PREFIX@/share/` | configure-time substitution |
 
 **Patch pattern (configure.ac):**
 ```autoconf
 - sysconfdir=/etc
-+ sysconfdir=@A_SHELL_PREFIX@/etc
++ sysconfdir=@IXLAND_PREFIX@/etc
 ```
 
 #### 3. Platform Detection
@@ -246,24 +246,24 @@ When adding a new package, follow this workflow:
 
 **Step 1: Create initial build.sh**
 ```bash
-A_SHELL_PKG_NAME="mypackage"
-A_SHELL_PKG_VERSION="1.0.0"
-A_SHELL_PKG_SRCURL="https://..."
-A_SHELL_PKG_DEPENDS="libz"
+IXLAND_PKG_NAME="mypackage"
+IXLAND_PKG_VERSION="1.0.0"
+IXLAND_PKG_SRCURL="https://..."
+IXLAND_PKG_DEPENDS="libz"
 
-a_shell_pkg_configure() {
+ixland_pkg_configure() {
     ./configure \
-        --prefix="$A_SHELL_PREFIX" \
+        --prefix="$IXLAND_PREFIX" \
         --host="arm-apple-darwin" \
         || ixland_error "Configure failed"
 }
 
-a_shell_pkg_make() {
+ixland_pkg_make() {
     make -j$(sysctl -n hw.ncpu)
 }
 
-a_shell_pkg_install() {
-    make DESTDIR="$A_SHELL_PKG_STAGING" install
+ixland_pkg_install() {
+    make DESTDIR="$IXLAND_PKG_STAGING" install
 }
 ```
 
@@ -279,7 +279,7 @@ a_shell_pkg_install() {
 | Error | Category | Solution |
 |-------|----------|----------|
 | `implicit declaration of function 'getentropy'` | Missing Function | Patch to use arc4random() |
-| `error: '/etc' is not writable` | Hardcoded Path | Patch path to use @A_SHELL_PREFIX@ |
+| `error: '/etc' is not writable` | Hardcoded Path | Patch path to use @IXLAND_PREFIX@ |
 | `undefined reference to fork` | Include Missing | Check CPPFLAGS includes kernel headers |
 | `__linux__ not defined` | Platform Detection | Add __APPLE__ to #ifdef |
 
@@ -322,7 +322,7 @@ packages/core/<package>/
    ```bash
    # BAD - Debian-specific
    ./configure --with-dpkg ...
-   
+
    # GOOD - iOS-compatible
    ./configure --without-dpkg --without-apt ...
    ```
@@ -330,7 +330,7 @@ packages/core/<package>/
 2. **Create patches to remove Debian code:**
    - Comment out dpkg feature checks
    - Remove apt dependency initialization
-   - Replace deb-specific paths with @A_SHELL_PREFIX@
+   - Replace deb-specific paths with @IXLAND_PREFIX@
 
 3. **Use cache variables to skip detection:**
    ```bash
@@ -346,7 +346,7 @@ packages/core/<package>/
 +++ b/configure.ac
 @@ -50,7 +50,10 @@
  AC_CHECK_FUNCS([getentropy])
- 
+
  # Check for dpkg (DEBIAN-SPECIFIC - REMOVE FOR iOS)
 -AC_PATH_PROG([DPKG], [dpkg], [no])
 +# iOS: No dpkg, skip this check
@@ -386,22 +386,22 @@ packages/core/<package>/
 #!/bin/bash
 # packages/core/<name>/build.sh
 
-A_SHELL_PKG_NAME="<name>"
-A_SHELL_PKG_VERSION="<version>"
-A_SHELL_PKG_SRCURL="<url>"
-A_SHELL_PKG_SHA256="<checksum>"
-A_SHELL_PKG_DEPENDS="libz"
+IXLAND_PKG_NAME="<name>"
+IXLAND_PKG_VERSION="<version>"
+IXLAND_PKG_SRCURL="<url>"
+IXLAND_PKG_SHA256="<checksum>"
+IXLAND_PKG_DEPENDS="libz"
 
-a_shell_pkg_configure() {
+ixland_pkg_configure() {
     # iOS-specific cache variables
     export ac_cv_func_<missing_func>=no
-    
+
     # Remove any Debian dependencies
     export ac_cv_path_DPKG=/bin/false
     export ac_cv_path_APTGET=/bin/false
-    
+
     ./configure \
-        --prefix="$A_SHELL_PREFIX" \
+        --prefix="$IXLAND_PREFIX" \
         --host="arm-apple-darwin" \
         --disable-shared \
         --enable-static \
@@ -410,12 +410,12 @@ a_shell_pkg_configure() {
         || ixland_error "Configure failed"
 }
 
-a_shell_pkg_make() {
+ixland_pkg_make() {
     make -j$(sysctl -n hw.ncpu) || ixland_error "Build failed"
 }
 
-a_shell_pkg_install() {
-    make DESTDIR="$A_SHELL_PKG_STAGING" install \
+ixland_pkg_install() {
+    make DESTDIR="$IXLAND_PKG_STAGING" install \
         || ixland_error "Install failed"
 }
 ```
@@ -454,7 +454,7 @@ file .build/simulator/staging/usr/local/lib/libz.a
 2. Write `build.sh` following template
 3. **Remove any Debian dependencies**
 4. Download source, verify checksum
-5. Add dependencies to A_SHELL_PKG_DEPENDS
+5. Add dependencies to IXLAND_PKG_DEPENDS
 6. Attempt build, identify errors
 7. Create patches in `patches/` directory
 8. Test with `./scripts/build-package.sh <name> --target universal`
@@ -476,13 +476,13 @@ file .build/simulator/staging/usr/local/lib/libz.a
 
 ## Integration Points
 
-### a-shell-kernel/ (Kernel)
+### IXLandSystem/ (Kernel)
 - Provides syscall headers with automatic redirection
-- Include with: `CPPFLAGS="-I../../a-shell-kernel/include"`
+- Include with: `CPPFLAGS="-I../../IXLandSystem/include"`
 - No patches needed for standard syscalls
 - Kernel macros handle: fork, exec, wait, signals, file I/O
 
-### a-shell/ (App)
+### IXLand/ (App)
 - Uses built binaries from staging directories
 - Links against kernel XCFramework
 - Packages linked during Xcode build
@@ -507,7 +507,7 @@ file .build/simulator/staging/usr/local/lib/libz.a
 ## Documentation
 
 - **Build scripts**: `packages/core/*/build.sh`
-- **Build library**: `scripts/a_shell_package.sh`
+- **Build library**: `scripts/ixland_package.sh`
 - **Package builder**: `scripts/build-package.sh`
 - **Test framework**: `ios-test-framework/`
 - **Patch template**: `PATCH_TEMPLATE.md`
@@ -525,218 +525,6 @@ file .build/simulator/staging/usr/local/lib/libz.a
 
 ---
 
-**Last Updated**: 2026-03-21
+**Last Updated**: 2026-04-11
 **Status**: iOS-native build system (no Debian)
 **Next Steps**: Create missing package build.sh files, add patches as needed
-
-## Testing Strategy
-
-### Overview
-
-Tests are executed **inside the a-shell iOS app** rather than on iOS Simulator directly. This provides the strongest validation that packages work in the actual iOS environment.
-
-### Test Architecture
-
-```
-Build System                    a-Shell App                    Results
-     │                               │                            │
-     ├─→ Build test binaries ─────→│                            │
-     │   (example, minigzip)       │                            │
-     │                               │                            │
-     ├─→ Copy to a-shell/ ─────────→│                            │
-     │   project resources/          │                            │
-     │                               │                            │
-     │                          ┌────┴────────────────┐           │
-     │                          │ TestRunner.swift   │           │
-     │                          │ - Spawns test      │           │
-     │                          │ - Captures stdout  │           │
-     │                          │ - Writes JSON      │           │
-     │                          │   results          │           │
-     │                          └────┬────────────────┘           │
-     │                               │                            │
-     │                          ┌────┴────────────────┐           │
-     │                          │ Documents/test/    │◄───────────┤
-     │                          │ results/           │  Read JSON │
-     │                          └────────────────────┘            │
-     │                               │                            │
-```
-
-### Why This Approach?
-
-**iOS Simulator Limitations:**
-- ❌ Cannot spawn raw command-line binaries
-- ❌ Requires app bundles for execution
-- ❌ Complex app packaging for each test
-
-**a-Shell Testing Advantages:**
-- ✅ Runs in actual iOS environment
-- ✅ Uses kernel syscall layer
-- ✅ Real sandbox constraints
-- ✅ Simple file I/O for results
-- ✅ Validates complete integration
-
-### Implementation Plan
-
-#### Phase 1: Test Binary Integration
-
-**Add to a-shell Xcode project:**
-```
-a-shell/
-└── Resources/
-    └── Tests/
-        ├── libz/
-        │   ├── example
-        │   ├── minigzip
-        │   └── manifest.json
-        ├── libssl/
-        │   └── ...
-        └── ...
-```
-
-**manifest.json format:**
-```json
-{
-  "package": "libz",
-  "version": "1.3.2",
-  "tests": [
-    {
-      "name": "example",
-      "binary": "example",
-      "args": ["/tmp/testfile"]
-    },
-    {
-      "name": "minigzip",
-      "binary": "minigzip",
-      "args": ["-h"]
-    }
-  ]
-}
-```
-
-#### Phase 2: Test Runner (Swift)
-
-**TestRunner.swift:**
-```swift
-import Foundation
-
-class TestRunner {
-    func runTest(_ test: TestConfig) -> TestResult {
-        // Spawn test process via kernel
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: test.binaryPath)
-        process.arguments = test.args
-        
-        // Capture output
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = pipe
-        
-        // Run with timeout
-        process.launch()
-        process.waitUntilExit()
-        
-        // Parse result
-        return TestResult(
-            name: test.name,
-            status: process.terminationStatus == 0 ? .passed : .failed,
-            output: String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-        )
-    }
-}
-```
-
-#### Phase 3: Result Export
-
-**Write to Documents:**
-```swift
-let resultsDir = FileManager.default
-    .urls(for: .documentDirectory, in: .userDomainMask)[0]
-    .appendingPathComponent("test-results")
-
-let resultFile = resultsDir.appendingPathComponent("\(package)-\(timestamp).json")
-// Write JSON results
-```
-
-**JSON Format:**
-```json
-{
-  "package": "libz",
-  "timestamp": "2026-03-21T15:00:00Z",
-  "target": "ios",
-  "results": {
-    "total": 2,
-    "passed": 2,
-    "failed": 0
-  },
-  "tests": [
-    {
-      "name": "example",
-      "status": "passed",
-      "duration_ms": 150,
-      "stdout": "zlib version 1.3.2..."
-    }
-  ]
-}
-```
-
-#### Phase 4: Build System Integration
-
-**scripts/run-tests-in-app.sh:**
-```bash
-#!/bin/bash
-# Build a-shell with tests
-# Launch in Simulator
-# Wait for results
-# Copy results back
-```
-
-**Build Phase:**
-1. Build test binaries for iOS
-2. Copy to a-shell/Resources/Tests/
-3. Build a-shell
-4. Install to Simulator
-5. Launch test runner
-6. Wait for completion
-7. Pull results from Documents
-8. Validate JSON output
-
-### Testing Workflow
-
-**Development:**
-```bash
-# Build tests
-./scripts/build-package.sh libz --target ios
-
-# Copy to a-shell
-./scripts/install-tests-in-app.sh libz
-
-# Build and test
-./scripts/run-tests-in-app.sh libz
-
-# View results
-cat .build/test-results/libz-*.json
-```
-
-**CI/CD:**
-```bash
-# Build and test all packages
-./scripts/run-all-tests-in-app.sh
-
-# Generate report
-./scripts/generate-test-report.sh
-```
-
-### Security
-
-- Tests run in a-shell sandbox
-- Cannot escape app container
-- No special entitlements needed
-- Standard iOS file system access
-
-### Next Steps
-
-1. Create TestRunner.swift in a-shell
-2. Add "Run Tests" menu item
-3. Create result export functionality
-4. Integrate with build system scripts
-

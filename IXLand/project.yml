@@ -1,0 +1,31 @@
+name: IXLand
+targets:
+  IXLand:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - App
+      - Workspace
+      - SessionUI
+      - Terminal
+      - FileAccess
+      - Credentials
+      - Remote
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.ixland.app
+      INFOPLIST_FILE: App/Info.plist
+  IXLandTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - IXLandTests
+    dependencies:
+      - target: IXLand
+  IXLandUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - IXLandUITests
+    dependencies:
+      - target: IXLand

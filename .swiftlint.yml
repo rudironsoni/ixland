@@ -7,14 +7,14 @@
 
 # Included paths
 included:
-  - ixland-app
+  - IXLand
 
 # Excluded paths
 excluded:
-  - ixland-app/Resources
-  - ixland-app/Resources_mini
-  - ixland-app/.build
-  - ixland-app/Resources/node_modules
+  - IXLand/Resources
+  - IXLand/Resources_mini
+  - IXLand/.build
+  - IXLand/Resources/node_modules
 
 # Enabled rules
 disabled_rules:
@@ -155,14 +155,6 @@ nesting:
 type_body_length:
   warning: 300
   error: 400
-
-type_name:
-  min_length:
-    warning: 3
-    error: 2
-  max_length:
-    warning: 40
-    error: 50
 
 # Reporter type
 reporter: "xcode"

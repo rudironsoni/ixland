@@ -1,16 +1,16 @@
-# ixland-wasm
+# IXLandWasm
 
-WebAssembly contract boundary for iXland.
+WebAssembly contract boundary for IXLand.
 
 ## Purpose
 
-This component defines the public contract for WebAssembly support in iXland.
+This component defines the public contract for WebAssembly support in IXLand.
 
 ## Structure
 
-- `ixland-wasm-engine/` - Engine-neutral backend contract
-- `ixland-wasm-host/` - Host-service contract for guests
-- `ixland-wasm-wasi/` - WASI guest ABI policy
+- `IXLandWasmEngine/` - Engine-neutral backend contract
+- `IXLandWasmHost/` - Host-service contract for guests
+- `IXLandWasmWASI/` - WASI guest ABI policy
 - `include/ixland/wasm/` - Public contract headers
 - `docs/` - Boundary specifications
 
@@ -27,12 +27,11 @@ This component defines the public contract for WebAssembly support in iXland.
 
 - Contract headers are defined and build-visible
 - `docs/WASM_BOUNDARY_SPEC.md` documents the boundary
-- Implementation remains in `ixland-system` (WAMR backend)
+- Implementation remains in `IXLandSystem` (WAMR backend)
 
 ## Build Integration
 
-This component provides:
-- `ixland-wasm-contracts` - INTERFACE target for contract headers
+This component provides contract headers for use by the IXLand app.
 
 ## Documentation
 
@@ -40,7 +39,7 @@ This component provides:
 
 ## Compiled Artifacts
 
-Compiled Wasm artifacts are a concern of `ixland-packages`.
+Compiled Wasm artifacts are a concern of `IXLandPackages`.
 
 ## Future Direction
 
