@@ -15,7 +15,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "../internal/ixland_internal.h"
+#include "../src/ixland/internal/ixland_internal.h"
 
 /* WAMR includes (from submodule) */
 #include "../../../deps/wamr/core/iwasm/include/wasm_export.h"

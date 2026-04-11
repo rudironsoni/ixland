@@ -1,5 +1,44 @@
 name: IXLand
 targets:
+  IXLandSystem:
+    type: library.static
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: ../IXLandSystem/fs
+        excludes:
+          - "dev"
+          - "pipe"
+          - "proc"
+          - "pty"
+          - "socket"
+          - "tty"
+          - "vfs/ixland_vfs.c"
+      - path: ../IXLandSystem/kernel
+        excludes:
+          - "ipc"
+          - "mm"
+          - "net"
+      - path: ../IXLandSystem/src
+    settings:
+      PRODUCT_NAME: IXLandSystem
+      HEADER_SEARCH_PATHS:
+        - "$(SRCROOT)/../IXLandSystem/include"
+        - "$(SRCROOT)/../IXLandSystem"
+      OTHER_CFLAGS: "-std=gnu11"
+  IXLandSystemTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - IXLandSystemTests
+    dependencies:
+      - target: IXLandSystem
+    settings:
+      PRODUCT_NAME: IXLandSystemTests
+      HEADER_SEARCH_PATHS:
+        - "$(SRCROOT)/../IXLandSystem/include"
+        - "$(SRCROOT)/../IXLandSystem"
   IXLand:
     type: application
     platform: iOS
@@ -12,20 +51,39 @@ targets:
       - FileAccess
       - Credentials
       - Remote
+    dependencies:
+      - target: IXLandSystem
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.ixland.app
       INFOPLIST_FILE: App/Info.plist
+      HEADER_SEARCH_PATHS:
+        - "$(SRCROOT)/../IXLandSystem/include"
   IXLandTests:
     type: bundle.unit-test
     platform: iOS
+    deploymentTarget: "16.0"
     sources:
       - IXLandTests
     dependencies:
       - target: IXLand
+      - target: IXLandSystem
   IXLandUITests:
     type: bundle.ui-testing
     platform: iOS
+    deploymentTarget: "16.0"
     sources:
       - IXLandUITests
     dependencies:
       - target: IXLand
+schemes:
+  IXLandSystem:
+    build:
+      targets:
+        IXLandSystem: all
+  IXLandSystemTests:
+    build:
+      targets:
+        IXLandSystemTests: all
+    test:
+      targets:
+        - IXLandSystemTests

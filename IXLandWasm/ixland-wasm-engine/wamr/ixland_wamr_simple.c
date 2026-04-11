@@ -12,7 +12,7 @@
 #include <string.h>
 
 /* WAMR includes */
-#include <wasm_export.h>
+#include "../../../vendor/wamr/include/wasm_export.h"
 
 /* ixland includes */
 #include "ixland_wamr.h"
