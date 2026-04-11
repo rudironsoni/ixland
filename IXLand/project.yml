@@ -6,19 +6,7 @@ targets:
     deploymentTarget: "16.0"
     sources:
       - path: ../IXLandSystem/fs
-        excludes:
-          - "dev"
-          - "pipe"
-          - "proc"
-          - "pty"
-          - "socket"
-          - "tty"
-          - "vfs/ixland_vfs.c"
       - path: ../IXLandSystem/kernel
-        excludes:
-          - "ipc"
-          - "mm"
-          - "net"
       - path: ../IXLandSystem/internal
     settings:
       PRODUCT_NAME: IXLandSystem
@@ -36,6 +24,8 @@ targets:
       - target: IXLandSystem
     settings:
       PRODUCT_NAME: IXLandSystemTests
+      GENERATE_INFOPLIST_FILE: YES
+      PRODUCT_BUNDLE_IDENTIFIER: com.ixland.systemtests
       HEADER_SEARCH_PATHS:
         - "$(SRCROOT)/../IXLandSystem/include"
         - "$(SRCROOT)/../IXLandSystem"
