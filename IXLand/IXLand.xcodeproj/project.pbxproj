@@ -16,7 +16,6 @@
 		1839CD7C5177EF28A50F50A4 /* sys.c in Sources */ = {isa = PBXBuildFile; fileRef = 44556F4C5BECBDBE6377E352 /* sys.c */; };
 		1C1BD491A46C871CF63395E6 /* pid.c in Sources */ = {isa = PBXBuildFile; fileRef = B28331F9DABC4C1CEEDE7D32 /* pid.c */; };
 		2300306990BB3FE9FD35CCEF /* signal.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27FE7FE4E71ACFF1E760A547 /* signal.h */; };
-		2B7D79DC0A366B7914EEBD7F /* ixland_internal.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5D3C7618D94498FAF99D473D /* ixland_internal.h */; };
 		34D09CEB0D46870E1B0A6136 /* inode.c in Sources */ = {isa = PBXBuildFile; fileRef = B9C479332C5F8D7836C1968A /* inode.c */; };
 		396E8CA278EB8E9972EF7803 /* task.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 32D4FFC8983DA0D6A8C9628A /* task.h */; };
 		39F6EA92D3700C5C96EED02C /* super.c in Sources */ = {isa = PBXBuildFile; fileRef = 59F9BFEF6F420778F2F23D78 /* super.c */; };
@@ -28,6 +27,8 @@
 		519E6CA4DC32E21EADE702C2 /* readdir.c in Sources */ = {isa = PBXBuildFile; fileRef = 2ACFD3BD2FD3D333DD4D1B83 /* readdir.c */; };
 		56BC1DE2626D5BFA4A803570 /* stat.c in Sources */ = {isa = PBXBuildFile; fileRef = A68A62288C88DB2973C4939F /* stat.c */; };
 		5926C46A71AD192DAA2C05B4 /* eventpoll.c in Sources */ = {isa = PBXBuildFile; fileRef = DEF1C0E5F008D90BE5CD94C2 /* eventpoll.c */; };
+		5AF0532B84DD68E9CB303DD4 /* ixland_internal.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 04D2D8461F125F1F5F355ACA /* ixland_internal.h */; };
+		5D353D53EC3F295504D96678 /* select_internal.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 113DEB509126159A9495EFEF /* select_internal.h */; };
 		5D96F1E42DF816F6C49071F1 /* path.c in Sources */ = {isa = PBXBuildFile; fileRef = D7324725B0824BC6D78E2B3E /* path.c */; };
 		6312B4B91B6BB7FE4EE36C0C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50845BFC309AA35286E5AFCC /* AppDelegate.swift */; };
 		68CFEE0D8D1FF3EF68544671 /* IXLandUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A18BFE58A92DF337FC7994B /* IXLandUITests.swift */; };
@@ -44,6 +45,7 @@
 		BE5D9794D3389CE4D54C8336 /* mount.c in Sources */ = {isa = PBXBuildFile; fileRef = 5B9784F614F1A70DBC46E153 /* mount.c */; };
 		C6E39EDC909BAD6DDD0F05C3 /* signal.c in Sources */ = {isa = PBXBuildFile; fileRef = B73E7640C9F9C4BDD5A9F7B5 /* signal.c */; };
 		C788321BE4478074F58A6F48 /* libc_delegate.c in Sources */ = {isa = PBXBuildFile; fileRef = FAE672AB89F9191739B0CBF0 /* libc_delegate.c */; };
+		D0C9F86A643C8BF438537162 /* epoll_internal.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1685887BEDA66A2B04959DFA /* epoll_internal.h */; };
 		D40D6291E31A1A12A7FD5180 /* ixland_path.c in Sources */ = {isa = PBXBuildFile; fileRef = DC279442DA2B20116511EE9F /* ixland_path.c */; };
 		D7B85905284740894C84295B /* fdtable.c in Sources */ = {isa = PBXBuildFile; fileRef = EA11EF3181F70B2C2CFB12A5 /* fdtable.c */; };
 		DE52DC66FD87C416FF794321 /* time.c in Sources */ = {isa = PBXBuildFile; fileRef = B1F213ACC372226515603E3E /* time.c */; };
@@ -102,10 +104,12 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
+				D0C9F86A643C8BF438537162 /* epoll_internal.h in CopyFiles */,
 				EB701981DB22BEB97071AEFD /* exec.h in CopyFiles */,
 				9424D08ABD063E8A018C1446 /* fdtable.h in CopyFiles */,
-				2B7D79DC0A366B7914EEBD7F /* ixland_internal.h in CopyFiles */,
+				5AF0532B84DD68E9CB303DD4 /* ixland_internal.h in CopyFiles */,
 				0D0A28026608287F91953C1D /* ixland_kernel.h in CopyFiles */,
+				5D353D53EC3F295504D96678 /* select_internal.h in CopyFiles */,
 				2300306990BB3FE9FD35CCEF /* signal.h in CopyFiles */,
 				396E8CA278EB8E9972EF7803 /* task.h in CopyFiles */,
 				153BA180C44AF246B7A09531 /* vfs.h in CopyFiles */,
@@ -116,9 +120,12 @@
 
 /* Begin PBXFileReference section */
 		031FF2447718B52F38C30384 /* IXLand.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = IXLand.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		04D2D8461F125F1F5F355ACA /* ixland_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ixland_internal.h; sourceTree = "<group>"; };
 		0A18BFE58A92DF337FC7994B /* IXLandUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IXLandUITests.swift; sourceTree = "<group>"; };
 		102271590B924315DBFD9F36 /* vfs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vfs.h; sourceTree = "<group>"; };
+		113DEB509126159A9495EFEF /* select_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = select_internal.h; sourceTree = "<group>"; };
 		1537160035CAFE6A05C895D5 /* ioctl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ioctl.c; sourceTree = "<group>"; };
+		1685887BEDA66A2B04959DFA /* epoll_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = epoll_internal.h; sourceTree = "<group>"; };
 		232BFD5BD38B632B9C5DA0C0 /* IXLandTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = IXLandTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		27FE7FE4E71ACFF1E760A547 /* signal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = signal.h; sourceTree = "<group>"; };
 		2ACFD3BD2FD3D333DD4D1B83 /* readdir.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = readdir.c; sourceTree = "<group>"; };
@@ -133,7 +140,6 @@
 		542202CB9503CD5EC3593755 /* IXLandTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IXLandTests.swift; sourceTree = "<group>"; };
 		59F9BFEF6F420778F2F23D78 /* super.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = super.c; sourceTree = "<group>"; };
 		5B9784F614F1A70DBC46E153 /* mount.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mount.c; sourceTree = "<group>"; };
-		5D3C7618D94498FAF99D473D /* ixland_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ixland_internal.h; path = ../IXLandSystem/internal/ixland_internal.h; sourceTree = SOURCE_ROOT; };
 		66371195BB3D8E0FDAE0DE51 /* fdtable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fdtable.h; sourceTree = "<group>"; };
 		6CA497179BBFF3856EFDDFE8 /* fcntl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = fcntl.c; sourceTree = "<group>"; };
 		8486810F6A348DA0F1BC4E91 /* fork.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = fork.c; sourceTree = "<group>"; };
@@ -217,13 +223,13 @@
 				121BEE1235B5C71D287F4C93 /* Credentials */,
 				556196D43F91E17D4D625EBA /* FileAccess */,
 				68BD244B71752FD57850AFF2 /* fs */,
+				3F72E253B432B46948A1E37A /* internal */,
 				B2C4AD072186D55044879AAF /* IXLandSystemTests */,
 				E7419E5331C26EB4962A5AED /* IXLandTests */,
 				4108B08634D6331DED911C6A /* IXLandUITests */,
 				64DD9F582F7A5E78CAFEB9B9 /* kernel */,
 				FD813EAADD683B7AF03E8A1F /* Remote */,
 				99A63B7883A03908A27B3392 /* SessionUI */,
-				4CB9AA0BA27D77C8481E3C9B /* src */,
 				33A759A9460839278AC3AA12 /* Terminal */,
 				0144B58E7D73B2648B383873 /* Workspace */,
 				51CE820AFCA9C135C0C9ADBE /* Products */,
@@ -256,21 +262,21 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		3F72E253B432B46948A1E37A /* internal */ = {
+			isa = PBXGroup;
+			children = (
+				04D2D8461F125F1F5F355ACA /* ixland_internal.h */,
+			);
+			name = internal;
+			path = ../IXLandSystem/internal;
+			sourceTree = "<group>";
+		};
 		4108B08634D6331DED911C6A /* IXLandUITests */ = {
 			isa = PBXGroup;
 			children = (
 				0A18BFE58A92DF337FC7994B /* IXLandUITests.swift */,
 			);
 			path = IXLandUITests;
-			sourceTree = "<group>";
-		};
-		4CB9AA0BA27D77C8481E3C9B /* src */ = {
-			isa = PBXGroup;
-			children = (
-				A51623DC05857FD19E0D1784 /* ixland */,
-			);
-			name = src;
-			path = ../IXLandSystem/src;
 			sourceTree = "<group>";
 		};
 		51CE820AFCA9C135C0C9ADBE /* Products */ = {
@@ -321,6 +327,7 @@
 		68BD244B71752FD57850AFF2 /* fs */ = {
 			isa = PBXGroup;
 			children = (
+				1685887BEDA66A2B04959DFA /* epoll_internal.h */,
 				DEF1C0E5F008D90BE5CD94C2 /* eventpoll.c */,
 				B55345CABBD955F9E9E4E2C2 /* exec.c */,
 				BC2252789FD58321138BAB2E /* exec.h */,
@@ -336,6 +343,7 @@
 				D7324725B0824BC6D78E2B3E /* path.c */,
 				9F911920AC546E1C220120D0 /* read_write.c */,
 				2ACFD3BD2FD3D333DD4D1B83 /* readdir.c */,
+				113DEB509126159A9495EFEF /* select_internal.h */,
 				CEE97E640F36E486E936D662 /* select.c */,
 				A68A62288C88DB2973C4939F /* stat.c */,
 				59F9BFEF6F420778F2F23D78 /* super.c */,
@@ -351,22 +359,6 @@
 			children = (
 			);
 			path = SessionUI;
-			sourceTree = "<group>";
-		};
-		A51623DC05857FD19E0D1784 /* ixland */ = {
-			isa = PBXGroup;
-			children = (
-				B05CEFDC732A9E8CA74772C7 /* internal */,
-			);
-			path = ixland;
-			sourceTree = "<group>";
-		};
-		B05CEFDC732A9E8CA74772C7 /* internal */ = {
-			isa = PBXGroup;
-			children = (
-				5D3C7618D94498FAF99D473D /* ixland_internal.h */,
-			);
-			path = internal;
 			sourceTree = "<group>";
 		};
 		B2C4AD072186D55044879AAF /* IXLandSystemTests */ = {
@@ -679,12 +671,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ixland.uitests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = IXLand;
@@ -719,6 +713,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -729,6 +724,7 @@
 					"$(inherited)",
 					"-ObjC",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ixland.tests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IXLand.app/IXLand";
@@ -814,6 +810,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -824,6 +821,7 @@
 					"$(inherited)",
 					"-ObjC",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ixland.tests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IXLand.app/IXLand";
@@ -858,12 +856,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ixland.uitests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = IXLand;

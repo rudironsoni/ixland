@@ -19,7 +19,7 @@ targets:
           - "ipc"
           - "mm"
           - "net"
-      - path: ../IXLandSystem/src
+      - path: ../IXLandSystem/internal
     settings:
       PRODUCT_NAME: IXLandSystem
       HEADER_SEARCH_PATHS:
@@ -67,6 +67,9 @@ targets:
     dependencies:
       - target: IXLand
       - target: IXLandSystem
+    settings:
+      GENERATE_INFOPLIST_FILE: YES
+      PRODUCT_BUNDLE_IDENTIFIER: com.ixland.tests
   IXLandUITests:
     type: bundle.ui-testing
     platform: iOS
@@ -75,6 +78,9 @@ targets:
       - IXLandUITests
     dependencies:
       - target: IXLand
+    settings:
+      GENERATE_INFOPLIST_FILE: YES
+      PRODUCT_BUNDLE_IDENTIFIER: com.ixland.uitests
 schemes:
   IXLandSystem:
     build:
