@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-#include "../task/task.h"
+#include "task.h"
 
 #ifdef __cplusplus
 extern "C" {

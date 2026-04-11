@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#include "../../kernel/task/task.h"
+#include "../../kernel/task.h"
 
 #ifdef __cplusplus
 extern "C" {

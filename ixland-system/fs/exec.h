@@ -1,9 +1,15 @@
+/* iXland - File Execution Header
+ *
+ * Canonical owner for exec syscalls
+ */
+
 #ifndef IXLAND_EXEC_H
 #define IXLAND_EXEC_H
 
+#include <signal.h>
 #include <stdbool.h>
 
-#include "../task/task.h"
+#include "../kernel/task.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,6 +23,9 @@ ixland_image_type_t ixland_exec_classify(const char *path);
 
 /* Exec implementations */
 int ixland_execve(const char *pathname, char *const argv[], char *const envp[]);
+int ixland_execv(const char *pathname, char *const argv[]);
+int ixland_execvp(const char *file, char *const argv[]);
+int ixland_fexecve(int fd, char *const argv[], char *const envp[]);
 int ixland_exec_native(ixland_task_t *task, const char *path, int argc, char **argv, char **envp);
 int ixland_exec_wasi(ixland_task_t *task, const char *path, int argc, char **argv, char **envp);
 int ixland_exec_script(ixland_task_t *task, const char *path, int argc, char **argv, char **envp);

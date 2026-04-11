@@ -9,14 +9,13 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "../internal/ixland_internal.h"
+#include "../fs/vfs.h"
+#include "../runtime/native/registry.h"
+#include "task.h"
 
 /* Global initialization flag */
 static atomic_int ixland_initialized = 0;
 static pthread_mutex_t ixland_init_lock = PTHREAD_MUTEX_INITIALIZER;
-
-/* Global state */
-ixland_context_t *ixland_global_context = NULL;
 
 /* ============================================================================
  * INITIALIZATION
@@ -46,24 +45,15 @@ void ixland_library_init(void) {
         /* This allows the library to work even if HOME is not set */
     }
 
-    /* Initialize process simulation state before exposing process APIs */
-    int proc_result = __ixland_init();
-    if (proc_result != 0) {
+    /* Initialize task system - creates init task */
+    int task_result = ixland_task_init();
+    if (task_result != 0) {
         pthread_mutex_unlock(&ixland_init_lock);
         return;
     }
 
-    /* Initialize context system */
-    int ctx_result = ixland_context_init();
-    if (ctx_result != 0) {
-        /* Context init failed - mark as failed but don't crash */
-        pthread_mutex_unlock(&ixland_init_lock);
-        return;
-    }
-
-    /* Initialize file descriptor table */
-    extern void __ixland_file_init_impl(void);
-    __ixland_file_init_impl();
+    /* Initialize native command registry */
+    ixland_native_registry_init();
 
     /* Set initialized flag */
     atomic_store(&ixland_initialized, 1);
@@ -76,7 +66,7 @@ void ixland_library_deinit(void) {
         return;
     }
 
-    ixland_context_deinit();
+    ixland_task_deinit();
     ixland_vfs_deinit();
 
     atomic_store(&ixland_initialized, 0);

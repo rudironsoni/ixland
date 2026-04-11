@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../fs/fdtable.h"
-#include "../../fs/vfs.h"
-#include "../signal/ixland_signal.h"
+#include "../fs/fdtable.h"
+#include "../fs/vfs.h"
+#include "signal.h"
 #include "task.h"
 
 /* PTHREAD_STACK_MIN may not be defined on all systems */

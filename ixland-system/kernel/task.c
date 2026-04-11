@@ -6,9 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../fs/fdtable.h"
-#include "../../fs/vfs.h"
-#include "../signal/ixland_signal.h"
+#include "../fs/fdtable.h"
+#include "../fs/vfs.h"
+#include "signal.h"
 
 /* Note: IXLAND_MAX_TASKS defined in task.h for cross-module access */
 

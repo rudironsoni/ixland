@@ -1,149 +1,151 @@
-# Linux-Shaped Reclassification - Nuclear Refactor Complete
+# IXLand Linux-Shaped Canonical Reclassification
 
-## Summary
+**Control Plane for Big-Bang Nuclear Refactor**
+**Date**: 2026-04-11
+**Phase**: Cutover Execution
 
-This document records the **nuclear refactor** that transformed `ixland-system` from a fragmented CMake-based compatibility layer into a Linux-shaped canonical ownership structure with Xcode-only build.
+## Repository Truth (Phase 0 Complete)
 
-## Scope
+- **HEAD**: 28001832ea2438b821a473665693dbab0cd0623c
+- **Branch**: main
+- **Branch Status**: main...origin/main (ahead of remote)
+- **Xcode Projects**:
+  - `ixland-system/build-strict-sim/ixland.xcodeproj` (CMake-generated)
+  - `ixland-system/build/ixland.xcodeproj` (CMake-generated)
+  - `ixland-app/a-Shell.xcodeproj` (True Xcode project)
 
-- **Deleted**: CMake build system entirely
-- **Deleted**: Donor-derived `compatibility/linux/` lane entirely
-- **Normalized**: All syscall/kernel files moved to canonical Linux-semantic owners
-- **Build Truth**: Xcode projects with supporting Makefiles only
+## Reclassification Matrix
 
-## Reclassification Table
+### Filesystem Domain (Canonical Linux-shaped)
 
-| Area | Previous Owner | Canonical Owner | Action |
-|---|---|---|---|
-| File syscall surface | `src/ixland/fs/*` | `fs/*` | Merged and normalized |
-| FD table | `src/ixland/fs/fdtable.c` | `fs/fdtable.c` | Moved to canonical owner |
-| Path/name resolution | `src/ixland/fs/namei.c` | `fs/namei.c` | Moved to canonical owner |
-| Process initialization | `src/ixland/core/ixland_init.c` | `kernel/init.c` | Moved to kernel/ |
-| Process management | `src/ixland/core/ixland_process.c` | `kernel/sys.c` | Moved to kernel/ |
-| Libc delegation | `src/ixland/core/ixland_libc_delegate.c` | `kernel/libc_delegate.c` | Moved to kernel/ |
-| Identity/credentials | `kernel/task/ixland_identity.c` | `kernel/cred.c` | Simplified path |
-| Network | `net/ixland_network.c` | `kernel/net/network.c` | Moved under kernel/ |
-| TTY driver | `drivers/tty/tty.h` | `fs/tty/tty.h` | Moved to fs/ |
-| Time syscalls | *new* | `kernel/time.c` | Created canonical owner |
-| Resource limits | *new* | `kernel/resource.c` | Created canonical owner |
-| Random/entropy | *new* | `kernel/random.c` | Created canonical owner |
-| Sync/futex | *new* | `kernel/sync.c` | Created canonical owner |
-| Exec syscalls | *new* | `fs/exec.c` | Created canonical owner |
-| Path operations | *new* | `fs/path.c` | Created canonical owner |
-| Mount operations | *new* | `fs/mount.c` | Created canonical owner |
-| Inode operations | *new* | `fs/inode.c` | Created canonical owner |
-| Superblock/sync | *new* | `fs/super.c` | Created canonical owner |
+| Current Path | Current Role | Bucket | Final Target | Action | Reason |
+|-------------|--------------|--------|--------------|--------|--------|
+| `fs/fdtable.c` | FD table implementation | Canonical | `fs/fdtable.c` | Keep | Canonical FD owner |
+| `fs/open.c` | File open syscalls | Canonical | `fs/open.c` | Keep | Canonical open owner |
+| `fs/read_write.c` | Read/write syscalls | Canonical | `fs/read_write.c` | Keep | Canonical RW owner |
+| `fs/stat.c` | Stat syscalls | Canonical | `fs/stat.c` | Keep | Canonical stat owner |
+| `fs/fcntl.c` | Fcntl syscalls | Canonical | `fs/fcntl.c` | Keep | Canonical fcntl owner |
+| `fs/ioctl.c` | Ioctl syscalls | Canonical | `fs/ioctl.c` | Keep | Canonical ioctl owner |
+| `fs/namei.c` | Pathname lookup | Canonical | `fs/namei.c` | Keep | Canonical namei owner |
+| `fs/readdir.c` | Directory enumeration | Canonical | `fs/readdir.c` | Keep | Canonical readdir owner |
+| `fs/select.c` | Poll/select family | Canonical | `fs/select.c` | Keep | Canonical select owner |
+| `fs/eventpoll.c` | Epoll family | Canonical | `fs/eventpoll.c` | Keep | Canonical epoll owner |
+| `fs/exec.c` | Exec implementation | Canonical | `fs/exec.c` | Keep | Canonical exec owner |
+| `fs/path.c` | Path utilities | Canonical | `fs/path.c` | Keep | Canonical path owner |
+| `fs/mount.c` | Mount operations | Canonical | `fs/mount.c` | Keep | Canonical mount owner |
+| `fs/inode.c` | Inode operations | Canonical | `fs/inode.c` | Keep | Canonical inode owner |
+| `fs/super.c` | Superblock operations | Canonical | `fs/super.c` | Keep | Canonical super owner |
+| `fs/vfs.c` | VFS layer | Canonical | `fs/vfs.c` | Keep | Canonical VFS owner |
+| `fs/ixland_path.c` | Path resolution | Canonical | `fs/ixland_path.c` | Keep | Canonical ixland path |
+| `fs/proc/` | /proc filesystem | Canonical | `fs/proc/` | Keep | Canonical procfs |
+| `fs/dev/` | /dev filesystem | Canonical | `fs/dev/` | Keep | Canonical devfs |
+| `fs/tty/` | TTY layer | Canonical | `fs/tty/` | Keep | Canonical TTY |
+| `fs/pty/` | PTY layer | Canonical | `fs/pty/` | Keep | Canonical PTY |
+| `fs/pipe/` | Pipe implementation | Canonical | `fs/pipe/` | Keep | Canonical pipe |
+| `fs/socket/` | Socket layer | Canonical | `fs/socket/` | Keep | Canonical socket |
+| `src/ixland/fs/*` | Legacy fs wrappers | Delete | - | Delete | Superseded by canonical owners |
 
-## Deleted Components
+### Kernel Domain (Canonical Linux-shaped)
 
-### Build System
-- `CMakeLists.txt` (root and all subdirectories)
-- `CMakePresets.json` (root and ixland-system/)
-- `ixland-toolchain/cmake/` directory
-- All CMake-related build scripts
+| Current Path | Current Role | Bucket | Final Target | Action | Reason |
+|-------------|--------------|--------|--------------|--------|--------|
+| `kernel/task.c` | Task core | Canonical | `kernel/task.c` | Keep | Canonical task owner |
+| `kernel/task.h` | Task definitions | Canonical | `kernel/task.h` | Keep | Canonical task header |
+| `kernel/fork.c` | Fork/vfork | Canonical | `kernel/fork.c` | Keep | Canonical fork owner |
+| `kernel/exit.c` | Exit/_exit | Canonical | `kernel/exit.c` | Keep | Canonical exit owner |
+| `kernel/wait.c` | Wait family | Canonical | `kernel/wait.c` | Keep | Canonical wait owner |
+| `kernel/pid.c` | PID allocator | Canonical | `kernel/pid.c` | Keep | Canonical PID owner |
+| `kernel/cred.c` | Identity/credentials | Canonical | `kernel/cred.c` | Keep | Canonical cred owner |
+| `kernel/sys.c` | Misc syscalls | Canonical | `kernel/sys.c` | Keep | Canonical sys owner |
+| `kernel/signal.c` | Signal handling | Canonical | `kernel/signal.c` | Keep | Canonical signal owner |
+| `kernel/signal.h` | Signal definitions | Canonical | `kernel/signal.h` | Keep | Canonical signal header |
+| `kernel/time.c` | Time syscalls | Canonical | `kernel/time.c` | Keep | Canonical time owner |
+| `kernel/resource.c` | Resource limits | Canonical | `kernel/resource.c` | Keep | Canonical rlimit owner |
+| `kernel/random.c` | Random syscalls | Canonical | `kernel/random.c` | Keep | Canonical random owner |
+| `kernel/sync.c` | Sync primitives | Canonical | `kernel/sync.c` | Keep | Canonical sync owner |
+| `kernel/init.c` | Library init | Canonical | `kernel/init.c` | Keep | Canonical init owner |
+| `kernel/net/network.c` | Network syscalls | Canonical | `kernel/net/network.c` | Keep | Canonical net owner |
+| `kernel/internal/ixland_kernel.h` | Internal kernel header | Canonical | `kernel/internal/ixland_kernel.h` | Keep | Internal kernel header |
+| `kernel/task/` (dir) | Old task directory | Delete | - | Delete | Flattened to `kernel/` |
+| `kernel/signal/` (dir) | Old signal directory | Delete | - | Delete | Flattened to `kernel/` |
+| `kernel/exec/` (dir) | Old exec directory | Delete | - | Delete | Merged into `fs/exec.c` |
 
-### Compatibility Lane
-- `ixland-system/compatibility/linux/` - entire donor-derived compatibility layer
-  - `abi/`, `loader/`, `runtime/`, `distro/`, `projection/`
-  - `signal_translation/`, `fs_translation/`
-  - `proc_views/`, `dev_views/`
-  - `emulation/`, `tcti/`, `tests/`
+### Legacy/Core Domain (To Be Eliminated)
 
-### Empty Directories Removed
-- `src/ixland/core/` (emptied and removed)
-- `src/ixland/` (emptied and removed)
-- `src/` (emptied and removed)
-- `drivers/tty/` (emptied and removed)
-- `drivers/` (emptied and removed)
-- `net/` (emptied and removed)
+| Current Path | Current Role | Bucket | Final Target | Action | Reason |
+|-------------|--------------|--------|--------------|--------|--------|
+| `src/ixland/core/ixland_context.c` | Legacy context | Delete | - | Delete | Superseded by task.c |
+| `src/ixland/core/ixland_file.c` | Legacy file table | Delete | - | Delete | Superseded by fdtable.c |
+| `src/ixland/core/ixland_identity.c` | Identity stubs | Delete | - | Delete | Superseded by cred.c |
+| `src/ixland/core/ixland_process.c` | Legacy process | Delete | - | Delete | Superseded by task.c |
+| `src/ixland/core/ixland_init.c` | Legacy init | Delete | - | Delete | Superseded by init.c |
+| `src/ixland/core/ixland_minimal.c` | Minimal stubs | Delete | - | Delete | Superseded by canonical owners |
+| `src/ixland/core/ixland_libc_delegate.c` | Legacy delegate | Delete/Move | `kernel/libc_delegate.c` | Keep | iOS mediation stays |
+| `src/ixland/core/` (dir) | Legacy core | Delete | - | Delete | Empty after cleanup |
+| `src/ixland/fs/` (dir) | Legacy fs | Delete | - | Delete | Already empty |
+| `src/ixland/internal/ixland_internal.h` | Legacy internal header | Delete | - | Delete | Superseded by kernel/internal |
 
-## Final Directory Structure
+### Compatibility Domain (To Be Obliterated)
 
-```
-ixland-system/
-├── kernel/              # Kernel subsystems
-│   ├── task/            # fork, exit, wait, PID (fork.c, exit.c, wait.c, pid.c, task.c)
-│   ├── signal/          # signal delivery (signal.c, signal.h)
-│   ├── exec/            # exec dispatch (exec.c)
-│   ├── cred/            # credentials/identity (cred.c)
-│   ├── time/            # clocks and timers (time.c)
-│   ├── resource/        # rlimits (resource.c)
-│   ├── random/          # entropy (random.c)
-│   ├── sync/            # futex/sync (sync.c)
-│   ├── net/             # network subsystem (network.c)
-│   ├── ipc/             # IPC (placeholder)
-│   └── mm/              # memory management (placeholder)
-├── fs/                  # Filesystem
-│   ├── fdtable.c        # File descriptor table
-│   ├── open.c           # open/creat
-│   ├── read_write.c     # read/write/pread/pwrite
-│   ├── stat.c           # stat/lstat/fstat
-│   ├── fcntl.c          # fcntl
-│   ├── ioctl.c          # ioctl
-│   ├── select.c         # select/pselect
-│   ├── eventpoll.c      # epoll
-│   ├── namei.c          # path resolution
-│   ├── readdir.c        # directory operations
-│   ├── exec.c           # exec family
-│   ├── path.c           # path operations (cwd, chdir)
-│   ├── mount.c          # mount/statfs
-│   ├── inode.c          # inode operations (chmod, chown)
-│   ├── super.c          # superblock/sync
-│   ├── proc/            # /proc filesystem
-│   ├── dev/             # /dev filesystem
-│   ├── tty/             # TTY subsystem (tty.h)
-│   ├── pty/             # PTY
-│   ├── pipe/            # pipes
-│   └── socket/          # sockets
-├── runtime/             # Execution backends
-│   ├── native/          # Native command registry
-│   ├── wasi/            # WAMR WASI bridge
-│   └── script/          # Shebang interpreter
-├── compat/              # Compatibility layer
-│   ├── posix/           # POSIX compatibility
-│   └── interpose/       # Symbol interposition
-└── tests/               # Test suite
-```
+| Current Path | Current Role | Bucket | Final Target | Action | Reason |
+|-------------|--------------|--------|--------------|--------|--------|
+| `compatibility/linux/*` | Donor-derived code | Delete | - | Delete | Already empty |
+| `runtime/linux_host/*` | Host compat layer | Delete | - | Delete | Already deleted |
 
-## Build System
+### Build System (To Be Obliterated)
 
-**Single Source of Truth**: Xcode projects with supporting Makefiles
+| Current Path | Current Role | Bucket | Final Target | Action | Reason |
+|-------------|--------------|--------|--------------|--------|--------|
+| `Makefile` | Make build | Delete | - | Delete | Xcode only |
+| `CMakeLists.txt` | CMake config | Delete | - | Delete | Xcode only |
+| `*.cmake` | CMake modules | Delete | - | Delete | Xcode only |
+| `CMakePresets.json` | CMake presets | Delete | - | Delete | Xcode only |
+| `build*/` dirs | CMake artifacts | Delete | - | Delete | Xcode only |
+| `scripts/` (CMake refs) | Build scripts | Update | - | Update | Remove CMake refs |
+| `.github/` (CMake CI) | CI config | Update | - | Update | Remove CMake refs |
 
-- `ixland-system/Makefile` - Build libixland static libraries
-- `ixland-system/libixlandTest/` - Xcode test projects
-- `ixland-app/a-Shell.xcodeproj` - Main application
+### Product-Native Domain (Keep)
 
-## Prohibitions Enforced
+| Current Path | Current Role | Bucket | Final Target | Action | Reason |
+|-------------|--------------|--------|--------------|--------|--------|
+| `ixland-app/*` | iOS app | Product-native | `ixland-app/*` | Keep | Product-native |
+| `ixland-wasm/*` | WASM runtime | Product-native | `ixland-wasm/*` | Keep | Product-native |
+| `ixland-libc/*` | C library | Product-native | `ixland-libc/*` | Keep | Product-native |
+| `docs/*` | Documentation | Product-native | `docs/*` | Keep | Product-native |
+| `scripts/*` (updated) | Utility scripts | Product-native | `scripts/*` | Update | Remove CMake refs |
 
-1. **No CMake** - Build system is Xcode/Make only
-2. **No compatibility lane** - Donor-derived compatibility layer deleted entirely
-3. **No split ownership** - One canonical owner per semantic domain
-4. **No shims** - Direct canonical ownership, no forwarding wrappers
-5. **No backward compatibility** - Old paths removed, not deprecated
+## Semantic Contract Decisions
 
-## iOS Mediation Pattern
+### Path-based Syscalls
+- **Owner**: `fs/namei.c`
+- **Contract**: Linux-style pathname resolution with IXLand virtual filesystem
+- **iOS Adaptation**: Sandbox-aware path translation subordinate to canonical owner
 
-All canonical owners follow the pattern: Linux-shaped semantics with iOS mediation as implementation detail. iOS restrictions are handled locally within each canonical owner, not abstracted away.
+### FD-based Syscalls
+- **Owner**: `fs/fdtable.c` + `fs/open.c` + `fs/read_write.c`
+- **Contract**: Linux-style file descriptor table with per-task ownership
+- **iOS Adaptation**: Host FD mediation subordinate to canonical owner
 
-Example from `kernel/cred.c`:
-```c
-int ixland_setuid(uid_t uid) {
-    /* iOS restriction: cannot change user identity */
-    (void)uid;
-    errno = EPERM;
-    return -1;
-}
-```
+### Process Lifecycle
+- **Owner**: `kernel/task.c` + `kernel/fork.c` + `kernel/exit.c`
+- **Contract**: Linux-style virtual process model (no host fork/exec)
+- **iOS Adaptation**: Thread-based virtual process implementation
 
-## Verification
+### Signal Handling
+- **Owner**: `kernel/signal.c`
+- **Contract**: Linux-style signal delivery to tasks
+- **iOS Adaptation**: Host signal interception and redelivery
 
-Run the build to verify:
-```bash
-cd ixland-system
-make sdk-sim    # Build for iOS Simulator
-make sdk-device # Build for iOS Device
-```
+## Execution Status
 
-## See Also
-
-- `linux-shaped-cutover-report.md` - Detailed cutover report
+- [x] Phase 0: Repository truth complete
+- [ ] Phase 1: Reclassification control document (IN PROGRESS)
+- [ ] Phase 2: Obliterate build-system garbage
+- [ ] Phase 3: Delete donor-derived compatibility
+- [ ] Phase 4: Kill split-brain fs ownership
+- [ ] Phase 5: Kill src/ixland/core/* bucket
+- [ ] Phase 6: Normalize fs domains
+- [ ] Phase 7: Normalize kernel domains
+- [ ] Phase 8: Header and ABI alignment
+- [ ] Phase 9: Xcode-only proof
+- [ ] Phase 10: Cutover report

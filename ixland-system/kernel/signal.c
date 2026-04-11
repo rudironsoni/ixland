@@ -1,11 +1,11 @@
+#include "signal.h"
+
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-#include "ixland_signal.h"
 
 ixland_sighand_t *ixland_sighand_alloc(void) {
     ixland_sighand_t *sighand = calloc(1, sizeof(ixland_sighand_t));
