@@ -27,7 +27,6 @@
 		54BCF82BC6644D4A1CC40596 /* tty.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E91A0D78AAE93C3CDBF431F2 /* tty.h */; };
 		56BC1DE2626D5BFA4A803570 /* stat.c in Sources */ = {isa = PBXBuildFile; fileRef = A68A62288C88DB2973C4939F /* stat.c */; };
 		5926C46A71AD192DAA2C05B4 /* eventpoll.c in Sources */ = {isa = PBXBuildFile; fileRef = DEF1C0E5F008D90BE5CD94C2 /* eventpoll.c */; };
-		5AF0532B84DD68E9CB303DD4 /* ixland_internal.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 04D2D8461F125F1F5F355ACA /* ixland_internal.h */; };
 		5D353D53EC3F295504D96678 /* select_internal.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 113DEB509126159A9495EFEF /* select_internal.h */; };
 		5D96F1E42DF816F6C49071F1 /* path.c in Sources */ = {isa = PBXBuildFile; fileRef = D7324725B0824BC6D78E2B3E /* path.c */; };
 		6312B4B91B6BB7FE4EE36C0C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50845BFC309AA35286E5AFCC /* AppDelegate.swift */; };
@@ -38,15 +37,14 @@
 		8277C470714016ADD4114C05 /* libIXLandSystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F3878271ED051204AE43E2AB /* libIXLandSystem.a */; };
 		8F406B9AC063F66042B54C7B /* exit.c in Sources */ = {isa = PBXBuildFile; fileRef = 919ADCC86D2828A38148EA72 /* exit.c */; };
 		9424D08ABD063E8A018C1446 /* fdtable.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 66371195BB3D8E0FDAE0DE51 /* fdtable.h */; };
+		973AD70EEC47A7BEC0C24532 /* dirent.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1EAC7ACB98EB727176C5B538 /* dirent.h */; };
 		99B5DCE348B38295B3379F78 /* vfs.c in Sources */ = {isa = PBXBuildFile; fileRef = 45E11DC838F5A64391D07781 /* vfs.c */; };
 		A04723CF686AF9E479684D08 /* sync.c in Sources */ = {isa = PBXBuildFile; fileRef = 96C02E30F44F3A72E72229AB /* sync.c */; };
-		A526AE64C70D90BA413BCD26 /* signal_mask.c in Sources */ = {isa = PBXBuildFile; fileRef = A37B43CCC6F578718FAF8BB9 /* signal_mask.c */; };
 		BDDB93AFDF312ED9D892C7F0 /* exec.c in Sources */ = {isa = PBXBuildFile; fileRef = B55345CABBD955F9E9E4E2C2 /* exec.c */; };
 		BE5D9794D3389CE4D54C8336 /* mount.c in Sources */ = {isa = PBXBuildFile; fileRef = 5B9784F614F1A70DBC46E153 /* mount.c */; };
 		C6E39EDC909BAD6DDD0F05C3 /* signal.c in Sources */ = {isa = PBXBuildFile; fileRef = B73E7640C9F9C4BDD5A9F7B5 /* signal.c */; };
-		C788321BE4478074F58A6F48 /* libc_delegate.c in Sources */ = {isa = PBXBuildFile; fileRef = FAE672AB89F9191739B0CBF0 /* libc_delegate.c */; };
+		C732D5E3ED3A33ECEA463041 /* path.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 93F7CB114D71FDD13A0471E6 /* path.h */; };
 		D0C9F86A643C8BF438537162 /* epoll_internal.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1685887BEDA66A2B04959DFA /* epoll_internal.h */; };
-		D40D6291E31A1A12A7FD5180 /* ixland_path.c in Sources */ = {isa = PBXBuildFile; fileRef = DC279442DA2B20116511EE9F /* ixland_path.c */; };
 		D7B85905284740894C84295B /* fdtable.c in Sources */ = {isa = PBXBuildFile; fileRef = EA11EF3181F70B2C2CFB12A5 /* fdtable.c */; };
 		DE52DC66FD87C416FF794321 /* time.c in Sources */ = {isa = PBXBuildFile; fileRef = B1F213ACC372226515603E3E /* time.c */; };
 		E02BB24CA6E26C0A393E1E24 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CD6536CF3896DD0F384346 /* SceneDelegate.swift */; };
@@ -106,11 +104,12 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
+				973AD70EEC47A7BEC0C24532 /* dirent.h in CopyFiles */,
 				D0C9F86A643C8BF438537162 /* epoll_internal.h in CopyFiles */,
 				EB701981DB22BEB97071AEFD /* exec.h in CopyFiles */,
 				9424D08ABD063E8A018C1446 /* fdtable.h in CopyFiles */,
-				5AF0532B84DD68E9CB303DD4 /* ixland_internal.h in CopyFiles */,
 				0D0A28026608287F91953C1D /* ixland_kernel.h in CopyFiles */,
+				C732D5E3ED3A33ECEA463041 /* path.h in CopyFiles */,
 				5D353D53EC3F295504D96678 /* select_internal.h in CopyFiles */,
 				2300306990BB3FE9FD35CCEF /* signal.h in CopyFiles */,
 				396E8CA278EB8E9972EF7803 /* task.h in CopyFiles */,
@@ -123,12 +122,12 @@
 
 /* Begin PBXFileReference section */
 		031FF2447718B52F38C30384 /* IXLand.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = IXLand.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		04D2D8461F125F1F5F355ACA /* ixland_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ixland_internal.h; sourceTree = "<group>"; };
 		0A18BFE58A92DF337FC7994B /* IXLandUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IXLandUITests.swift; sourceTree = "<group>"; };
 		102271590B924315DBFD9F36 /* vfs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vfs.h; sourceTree = "<group>"; };
 		113DEB509126159A9495EFEF /* select_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = select_internal.h; sourceTree = "<group>"; };
 		1537160035CAFE6A05C895D5 /* ioctl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ioctl.c; sourceTree = "<group>"; };
 		1685887BEDA66A2B04959DFA /* epoll_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = epoll_internal.h; sourceTree = "<group>"; };
+		1EAC7ACB98EB727176C5B538 /* dirent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dirent.h; sourceTree = "<group>"; };
 		232BFD5BD38B632B9C5DA0C0 /* IXLandTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = IXLandTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		27FE7FE4E71ACFF1E760A547 /* signal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = signal.h; sourceTree = "<group>"; };
 		2ACFD3BD2FD3D333DD4D1B83 /* readdir.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = readdir.c; sourceTree = "<group>"; };
@@ -147,11 +146,11 @@
 		6CA497179BBFF3856EFDDFE8 /* fcntl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = fcntl.c; sourceTree = "<group>"; };
 		8486810F6A348DA0F1BC4E91 /* fork.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = fork.c; sourceTree = "<group>"; };
 		919ADCC86D2828A38148EA72 /* exit.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = exit.c; sourceTree = "<group>"; };
+		93F7CB114D71FDD13A0471E6 /* path.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = path.h; sourceTree = "<group>"; };
 		962A12C1A45FCF0C02E23CA4 /* random.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = random.c; sourceTree = "<group>"; };
 		96C02E30F44F3A72E72229AB /* sync.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = sync.c; sourceTree = "<group>"; };
 		9F911920AC546E1C220120D0 /* read_write.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = read_write.c; sourceTree = "<group>"; };
 		A21109DC0D2ACB704553302F /* wait.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wait.c; sourceTree = "<group>"; };
-		A37B43CCC6F578718FAF8BB9 /* signal_mask.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = signal_mask.c; sourceTree = "<group>"; };
 		A4CD6536CF3896DD0F384346 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		A68A62288C88DB2973C4939F /* stat.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = stat.c; sourceTree = "<group>"; };
 		B1F213ACC372226515603E3E /* time.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = time.c; sourceTree = "<group>"; };
@@ -167,7 +166,6 @@
 		BEDEE61E8FB1427E701C2708 /* IXLandSystemTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = IXLandSystemTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE97E640F36E486E936D662 /* select.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = select.c; sourceTree = "<group>"; };
 		D7324725B0824BC6D78E2B3E /* path.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = path.c; sourceTree = "<group>"; };
-		DC279442DA2B20116511EE9F /* ixland_path.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ixland_path.c; sourceTree = "<group>"; };
 		DEF1C0E5F008D90BE5CD94C2 /* eventpoll.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = eventpoll.c; sourceTree = "<group>"; };
 		E4C7D75B4693F6F2E143FC87 /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
 		E91A0D78AAE93C3CDBF431F2 /* tty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tty.h; sourceTree = "<group>"; };
@@ -175,7 +173,6 @@
 		EA13B15CCD8B971FF43A0B0A /* ixland_kernel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ixland_kernel.h; sourceTree = "<group>"; };
 		F2536B690FDF4FD842DE8CCB /* resource.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = resource.c; sourceTree = "<group>"; };
 		F3878271ED051204AE43E2AB /* libIXLandSystem.a */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = archive.ar; path = libIXLandSystem.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		FAE672AB89F9191739B0CBF0 /* libc_delegate.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = libc_delegate.c; sourceTree = "<group>"; };
 		FCE77BC34E9927EE0457902C /* IXLandUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = IXLandUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -228,7 +225,6 @@
 				121BEE1235B5C71D287F4C93 /* Credentials */,
 				556196D43F91E17D4D625EBA /* FileAccess */,
 				68BD244B71752FD57850AFF2 /* fs */,
-				3F72E253B432B46948A1E37A /* internal */,
 				B2C4AD072186D55044879AAF /* IXLandSystemTests */,
 				E7419E5331C26EB4962A5AED /* IXLandTests */,
 				4108B08634D6331DED911C6A /* IXLandUITests */,
@@ -267,15 +263,6 @@
 			path = App;
 			sourceTree = "<group>";
 		};
-		3F72E253B432B46948A1E37A /* internal */ = {
-			isa = PBXGroup;
-			children = (
-				04D2D8461F125F1F5F355ACA /* ixland_internal.h */,
-			);
-			name = internal;
-			path = ../IXLandSystem/internal;
-			sourceTree = "<group>";
-		};
 		4108B08634D6331DED911C6A /* IXLandUITests */ = {
 			isa = PBXGroup;
 			children = (
@@ -310,11 +297,9 @@
 				919ADCC86D2828A38148EA72 /* exit.c */,
 				8486810F6A348DA0F1BC4E91 /* fork.c */,
 				39D0E7EB0399137B3B50D873 /* init.c */,
-				FAE672AB89F9191739B0CBF0 /* libc_delegate.c */,
 				B28331F9DABC4C1CEEDE7D32 /* pid.c */,
 				962A12C1A45FCF0C02E23CA4 /* random.c */,
 				F2536B690FDF4FD842DE8CCB /* resource.c */,
-				A37B43CCC6F578718FAF8BB9 /* signal_mask.c */,
 				B73E7640C9F9C4BDD5A9F7B5 /* signal.c */,
 				27FE7FE4E71ACFF1E760A547 /* signal.h */,
 				96C02E30F44F3A72E72229AB /* sync.c */,
@@ -333,6 +318,7 @@
 		68BD244B71752FD57850AFF2 /* fs */ = {
 			isa = PBXGroup;
 			children = (
+				1EAC7ACB98EB727176C5B538 /* dirent.h */,
 				1685887BEDA66A2B04959DFA /* epoll_internal.h */,
 				DEF1C0E5F008D90BE5CD94C2 /* eventpoll.c */,
 				B55345CABBD955F9E9E4E2C2 /* exec.c */,
@@ -342,11 +328,11 @@
 				66371195BB3D8E0FDAE0DE51 /* fdtable.h */,
 				B9C479332C5F8D7836C1968A /* inode.c */,
 				1537160035CAFE6A05C895D5 /* ioctl.c */,
-				DC279442DA2B20116511EE9F /* ixland_path.c */,
 				5B9784F614F1A70DBC46E153 /* mount.c */,
 				B812082344F5AACC45E3177E /* namei.c */,
 				2EB5C296DC3F9D5389F15A09 /* open.c */,
 				D7324725B0824BC6D78E2B3E /* path.c */,
+				93F7CB114D71FDD13A0471E6 /* path.h */,
 				9F911920AC546E1C220120D0 /* read_write.c */,
 				2ACFD3BD2FD3D333DD4D1B83 /* readdir.c */,
 				113DEB509126159A9495EFEF /* select_internal.h */,
@@ -582,8 +568,6 @@
 				0D84EAF38DA6A8E508BE0C49 /* init.c in Sources */,
 				34D09CEB0D46870E1B0A6136 /* inode.c in Sources */,
 				ED636B3B410014A1370DC65D /* ioctl.c in Sources */,
-				D40D6291E31A1A12A7FD5180 /* ixland_path.c in Sources */,
-				C788321BE4478074F58A6F48 /* libc_delegate.c in Sources */,
 				BE5D9794D3389CE4D54C8336 /* mount.c in Sources */,
 				0DF0ACBEEAE47B59A530901E /* namei.c in Sources */,
 				E1F7FC96D83F4051871FDAE6 /* network.c in Sources */,
@@ -596,7 +580,6 @@
 				444BA07490D7B717AD16E273 /* resource.c in Sources */,
 				090775F4DCD3AAA54E46E7BE /* select.c in Sources */,
 				C6E39EDC909BAD6DDD0F05C3 /* signal.c in Sources */,
-				A526AE64C70D90BA413BCD26 /* signal_mask.c in Sources */,
 				56BC1DE2626D5BFA4A803570 /* stat.c in Sources */,
 				39F6EA92D3700C5C96EED02C /* super.c in Sources */,
 				A04723CF686AF9E479684D08 /* sync.c in Sources */,

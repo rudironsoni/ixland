@@ -7,7 +7,6 @@ targets:
     sources:
       - path: ../IXLandSystem/fs
       - path: ../IXLandSystem/kernel
-      - path: ../IXLandSystem/internal
     settings:
       PRODUCT_NAME: IXLandSystem
       HEADER_SEARCH_PATHS:
